@@ -8,16 +8,16 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "node": "22.x"
+      "image": "sdk-56"
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "node": "22.x"
+      "image": "sdk-56"
     },
     "production": {
       "channel": "production",
-      "node": "22.x"
+      "image": "sdk-56"
     }
   },
   "submit": {
