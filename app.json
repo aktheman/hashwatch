@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hashwatch.app",
@@ -27,9 +22,6 @@
       },
       "package": "com.hashwatch.app",
       "permissions": [
-        "ACCESS_WIFI_STATE",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
         "ACCESS_WIFI_STATE",
         "INTERNET",
         "ACCESS_NETWORK_STATE"
