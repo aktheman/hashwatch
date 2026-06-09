@@ -7,17 +7,14 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
-      "image": "sdk-56"
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
-      "image": "sdk-56"
+      "channel": "preview"
     },
     "production": {
-      "channel": "production",
-      "image": "sdk-56"
+      "channel": "production"
     }
   },
   "submit": {
