@@ -7,8 +7,8 @@ import Purchases, {
 import { Platform } from 'react-native';
 
 const API_KEYS = {
-  ios: 'appl_...', // Replace with your RevenueCat iOS key
-  android: 'goog_...', // Replace with your RevenueCat Android key
+  ios: 'test_uvhzLlUwGqGFEfESgirwkQsFuzO',
+  android: 'test_uvhzLlUwGqGFEfESgirwkQsFuzO',
 };
 
 const PRO_MONTHLY_ID = 'hashwatch_pro_monthly';
