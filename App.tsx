@@ -5,6 +5,7 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
+import { theme } from './src/theme';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -22,7 +23,7 @@ export default function App() {
   if (!ready) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -47,7 +48,7 @@ export default function App() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
     justifyContent: 'center',
     alignItems: 'center',
   },

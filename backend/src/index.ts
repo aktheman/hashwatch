@@ -5,6 +5,7 @@ import { WebSocketServer } from 'ws';
 import { authRouter } from './routes/auth';
 import { minersRouter } from './routes/miners';
 import { statsRouter } from './routes/stats';
+import { proxyRouter } from './routes/proxy';
 
 const app = express();
 const server = createServer(app);
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/miners', minersRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/proxy', proxyRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });

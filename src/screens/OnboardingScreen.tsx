@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, FlatList,
 } from 'react-native';
 import { setSetting } from '../db/database';
+import { theme } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -64,6 +65,11 @@ export function OnboardingScreen({ onComplete }: Props) {
 
   const isLast = currentIndex === slides.length - 1;
 
+  const dotOpacity = scrollX.interpolate({
+    inputRange: slides.map((_, i) => i * width),
+    outputRange: slides.map((_, i) => (i === currentIndex ? 1 : 0.3)),
+  });
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.skipBtn} onPress={handleSkip}>
@@ -81,7 +87,9 @@ export function OnboardingScreen({ onComplete }: Props) {
         onMomentumScrollEnd={onMomentumEnd}
         renderItem={({ item }) => (
           <View style={styles.slide}>
-            <Text style={styles.icon}>{item.icon}</Text>
+            <View style={styles.iconWrap}>
+              <Text style={styles.icon}>{item.icon}</Text>
+            </View>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.subtitle}>{item.subtitle}</Text>
           </View>
@@ -95,14 +103,16 @@ export function OnboardingScreen({ onComplete }: Props) {
               key={i}
               style={[
                 styles.dot,
-                { opacity: i === currentIndex ? 1 : 0.3 },
+                { opacity: i === currentIndex ? 1 : 0.25 },
               ]}
             />
           ))}
         </View>
 
         <TouchableOpacity style={styles.btn} onPress={handleNext}>
-          <Text style={styles.btnText}>{isLast ? 'Get Started' : 'Next'}</Text>
+          <Text style={styles.btnText}>
+            {isLast ? 'Get Started' : 'Next'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -112,19 +122,24 @@ export function OnboardingScreen({ onComplete }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
   },
   skipBtn: {
     position: 'absolute',
     top: 60,
     right: 20,
     zIndex: 10,
-    padding: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: theme.surface,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   skipText: {
-    color: '#6B7280',
-    fontSize: 15,
-    fontWeight: '500',
+    color: theme.textDim,
+    fontSize: 13,
+    fontWeight: '600',
   },
   slide: {
     width,
@@ -133,22 +148,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
+  iconWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: theme.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
   icon: {
-    fontSize: 64,
-    marginBottom: 24,
+    fontSize: 40,
   },
   title: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '800',
     textAlign: 'center',
     marginBottom: 12,
+    letterSpacing: -0.3,
   },
   subtitle: {
-    color: '#9CA3AF',
+    color: theme.textDim,
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    maxWidth: 300,
   },
   bottom: {
     paddingHorizontal: 40,
@@ -164,19 +191,19 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.primary,
   },
   btn: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.primary,
     paddingHorizontal: 48,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     width: '100%',
     alignItems: 'center',
   },
   btnText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

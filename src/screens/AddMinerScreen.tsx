@@ -4,8 +4,8 @@ import {
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
-import { SubscriptionGate } from '../components/SubscriptionGate';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
+import { theme } from '../theme';
 
 interface AddMinerScreenProps {
   navigation: any;
@@ -45,7 +45,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
     setScanning(true);
     setError('');
     try {
-      const found = await scanNetwork();
+      const found = await scanNetwork((f, s, t) => {});
       setFoundMiners(found);
     } catch (e: any) {
       setError(e.message || 'Scan failed');
@@ -73,59 +73,57 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <SubscriptionGate feature="Add miners by IP">
-        <Text style={styles.sectionTitle}>Add by IP Address</Text>
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="192.168.1.100"
-            placeholderTextColor="#6B7280"
-            value={ip}
-            onChangeText={setIp}
-            keyboardType="numeric"
-            autoCapitalize="none"
-          />
-        </View>
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Add by IP</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="192.168.1.100"
+          placeholderTextColor={theme.textMuted}
+          value={ip}
+          onChangeText={setIp}
+          keyboardType="numeric"
+          autoCapitalize="none"
+        />
         <TextInput
           style={styles.input}
           placeholder="Name (optional)"
-          placeholderTextColor="#6B7280"
+          placeholderTextColor={theme.textMuted}
           value={name}
           onChangeText={setName}
         />
         <TouchableOpacity
-          style={[styles.addBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
+          style={[styles.primaryBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
           onPress={handleAddByIP}
           disabled={connecting || !ip.trim()}
         >
           {connecting ? (
             <ActivityIndicator size="small" color="#FFF" />
           ) : (
-            <Text style={styles.addBtnText}>Add Miner</Text>
+            <Text style={styles.primaryBtnText}>Add Miner</Text>
           )}
         </TouchableOpacity>
-      </SubscriptionGate>
+      </View>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
+        <Text style={styles.dividerText}>or</Text>
         <View style={styles.dividerLine} />
       </View>
 
-      <SubscriptionGate feature="Network scanning">
-        <Text style={styles.sectionTitle}>Scan Local Network</Text>
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Scan Network</Text>
         <TouchableOpacity
-          style={[styles.scanBtn, scanning && styles.btnDisabled]}
+          style={[styles.secondaryBtn, scanning && styles.btnDisabled]}
           onPress={handleScan}
           disabled={scanning}
         >
           {scanning ? (
-            <ActivityIndicator size="small" color="#FFF" />
+            <ActivityIndicator size="small" color={theme.primary} />
           ) : (
-            <Text style={styles.scanBtnText}>Scan Network</Text>
+            <Text style={styles.secondaryBtnText}>Find Miners</Text>
           )}
         </TouchableOpacity>
-      </SubscriptionGate>
+      </View>
 
       {foundMiners.length > 0 && (
         <View style={styles.foundSection}>
@@ -138,8 +136,13 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
               style={styles.foundItem}
               onPress={() => handleAddDiscovered(m)}
             >
-              <Text style={styles.foundIP}>{m.ip}</Text>
-              <Text style={styles.foundAdd}>Add +</Text>
+              <View style={styles.foundLeft}>
+                <Text style={styles.foundIcon}>⬡</Text>
+                <Text style={styles.foundIP}>{m.ip}</Text>
+              </View>
+              <View style={styles.foundAddBadge}>
+                <Text style={styles.foundAdd}>Add</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -147,7 +150,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
 
       {error && (
         <View style={styles.errorBox}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>⚠ {error}</Text>
         </View>
       )}
     </ScrollView>
@@ -157,111 +160,141 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
     padding: 16,
   },
   scrollContent: {
     paddingBottom: 40,
   },
-  sectionTitle: {
-    color: '#F9FAFB',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    marginTop: 8,
+  card: {
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
-  inputRow: {
-    flexDirection: 'row',
-    gap: 8,
+  sectionTitle: {
+    color: theme.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 12,
   },
   input: {
-    flex: 1,
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.surfaceLight,
     borderRadius: 10,
     padding: 14,
-    color: '#F9FAFB',
-    fontSize: 16,
+    color: theme.text,
+    fontSize: 15,
     fontFamily: 'monospace',
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
-  addBtn: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 10,
+  primaryBtn: {
+    backgroundColor: theme.primary,
+    borderRadius: 12,
     padding: 14,
     alignItems: 'center',
     marginTop: 4,
   },
-  addBtnText: {
+  primaryBtnText: {
     color: '#FFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  secondaryBtn: {
+    backgroundColor: theme.surfaceLight,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  secondaryBtnText: {
+    color: theme.text,
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 15,
   },
   btnDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#374151',
+    backgroundColor: theme.border,
   },
   dividerText: {
-    color: '#6B7280',
+    color: theme.textMuted,
     marginHorizontal: 12,
-    fontSize: 13,
-  },
-  scanBtn: {
-    backgroundColor: '#374151',
-    borderRadius: 10,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#4B5563',
-  },
-  scanBtnText: {
-    color: '#F9FAFB',
+    fontSize: 12,
     fontWeight: '600',
-    fontSize: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   foundSection: {
-    marginTop: 20,
+    marginTop: 8,
   },
   foundTitle: {
-    color: '#22C55E',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    color: theme.success,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   foundItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.surface,
     padding: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 6,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  foundLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  foundIcon: {
+    fontSize: 14,
+    color: theme.primary,
   },
   foundIP: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontFamily: 'monospace',
     fontSize: 15,
+    fontWeight: '500',
+  },
+  foundAddBadge: {
+    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
   foundAdd: {
-    color: '#3B82F6',
-    fontWeight: '600',
+    color: theme.primaryLight,
+    fontWeight: '700',
+    fontSize: 13,
   },
   errorBox: {
-    backgroundColor: '#7F1D1D',
-    borderRadius: 10,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderRadius: 12,
     padding: 12,
     marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
   },
   errorText: {
-    color: '#FCA5A5',
-    fontSize: 14,
+    color: theme.danger,
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

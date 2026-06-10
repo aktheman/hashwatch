@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
+import { theme } from '../theme';
 
 interface HashrateChartProps {
   snapshots: MinerSnapshot[];
@@ -11,6 +12,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   if (snapshots.length < 2) {
     return (
       <View style={styles.empty}>
+        <Text style={styles.emptyIcon}>📊</Text>
         <Text style={styles.emptyText}>Not enough data for chart</Text>
       </View>
     );
@@ -19,7 +21,9 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const sorted = [...snapshots].sort((a, b) => a.timestamp - b.timestamp);
   const labels = sorted.map((s) => {
     const d = new Date(s.timestamp);
-    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    const h = d.getHours().toString().padStart(2, '0');
+    const m = d.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
   });
   const values = sorted.map((s) => {
     const v = s.hashRate;
@@ -30,35 +34,57 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
     return v;
   });
 
-  const screenWidth = Dimensions.get('window').width - 32;
-
-  const step = Math.max(1, Math.floor(labels.length / 5));
+  const screenWidth = Dimensions.get('window').width - 64;
+  const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
+
+  const formatValue = (v: string) => {
+    const n = parseFloat(v);
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}T`;
+    if (n >= 1) return n.toFixed(1);
+    return n.toFixed(1);
+  };
 
   return (
     <View style={styles.container}>
       {title && <Text style={styles.title}>{title}</Text>}
-      <LineChart
-        data={{
-          labels: filteredLabels,
-          datasets: [{ data: values, color: () => '#3B82F6' }],
-        }}
-        width={screenWidth}
-        height={200}
-        yAxisSuffix=""
-        chartConfig={{
-          backgroundColor: '#1F2937',
-          backgroundGradientFrom: '#1F2937',
-          backgroundGradientTo: '#111827',
-          decimalPlaces: 1,
-          color: () => '#9CA3AF',
-          labelColor: () => '#6B7280',
-          propsForDots: { r: '3', strokeWidth: '1', stroke: '#3B82F6' },
-          propsForBackgroundLines: { strokeDasharray: '3', stroke: '#374151' },
-        }}
-        bezier
-        style={styles.chart}
-      />
+      <View style={styles.chartWrapper}>
+        <LineChart
+          data={{
+            labels: filteredLabels,
+            datasets: [{ data: values, color: () => theme.primary }],
+          }}
+          width={screenWidth}
+          height={200}
+          yAxisSuffix=""
+          fromZero={false}
+          chartConfig={{
+            backgroundColor: theme.surface,
+            backgroundGradientFrom: theme.surface,
+            backgroundGradientTo: '#0D0D24',
+            decimalPlaces: 1,
+            color: () => theme.textMuted,
+            labelColor: () => theme.textMuted,
+            propsForDots: {
+              r: '3',
+              strokeWidth: '2',
+              stroke: theme.primary,
+              fill: theme.surface,
+            },
+            propsForBackgroundLines: {
+              strokeDasharray: '4',
+              stroke: theme.border,
+              strokeWidth: 1,
+            },
+            propsForLabels: {
+              fontSize: 10,
+            },
+          }}
+          bezier
+          style={styles.chart}
+          formatYLabel={formatValue}
+        />
+      </View>
     </View>
   );
 }
@@ -68,24 +94,37 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   title: {
-    color: '#F9FAFB',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    color: theme.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 12,
     marginLeft: 4,
+  },
+  chartWrapper: {
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   chart: {
     borderRadius: 12,
   },
   empty: {
-    backgroundColor: '#1F2937',
-    borderRadius: 12,
-    padding: 24,
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 28,
     alignItems: 'center',
     marginVertical: 8,
+    gap: 8,
+  },
+  emptyIcon: {
+    fontSize: 32,
   },
   emptyText: {
-    color: '#6B7280',
+    color: theme.textDim,
     fontSize: 14,
   },
 });

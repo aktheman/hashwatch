@@ -3,9 +3,9 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshContr
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
-import { SubscriptionGate } from '../components/SubscriptionGate';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Miner } from '../types';
+import { theme } from '../theme';
 
 interface DashboardScreenProps {
   navigation: any;
@@ -16,6 +16,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const loading = useMinerStore((s) => s.loading);
   const initialized = useMinerStore((s) => s.initialized);
   const scanning = useMinerStore((s) => s.scanning);
+  const scanProgress = useMinerStore((s) => s.scanProgress);
   const error = useMinerStore((s) => s.error);
   const loadMiners = useMinerStore((s) => s.loadMiners);
   const startPolling = useMinerStore((s) => s.startPolling);
@@ -37,8 +38,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, [navigation]);
 
   const handleAddMiner = useCallback(() => {
+    if (!canAddMiner(miners.length)) {
+      navigation.navigate('Subscription');
+      return;
+    }
     navigation.navigate('AddMiner');
-  }, [navigation]);
+  }, [navigation, miners.length, canAddMiner]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -56,26 +61,57 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   const canAdd = canAddMiner(miners.length);
 
+  const formatTotal = (v: number) => {
+    if (v >= 1e12) return `${(v / 1e12).toFixed(1)}T`;
+    if (v >= 1e9) return `${(v / 1e9).toFixed(1)}G`;
+    if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
+    return v.toFixed(0);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.summary}>
-        <View style={styles.summaryItem}>
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitle}>HashWatch</Text>
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Text style={styles.settingsIcon}>⚙</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>⬡</Text>
           <Text style={styles.summaryValue}>{miners.length}</Text>
           <Text style={styles.summaryLabel}>Miners</Text>
         </View>
-        <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: '#22C55E' }]}>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>🟢</Text>
+          <Text style={[styles.summaryValue, { color: theme.success }]}>
             {onlineCount}
           </Text>
           <Text style={styles.summaryLabel}>Online</Text>
         </View>
-        <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: '#3B82F6' }]}>
-            {totalHashrate.toFixed(0)}
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>⚡</Text>
+          <Text style={[styles.summaryValue, { color: theme.primary }]}>
+            {formatTotal(totalHashrate)}
           </Text>
-          <Text style={styles.summaryLabel}>Total GH/s</Text>
+          <Text style={styles.summaryLabel}>Total Hash</Text>
         </View>
       </View>
+
+      {!canAdd && miners.length > 0 && (
+        <TouchableOpacity
+          style={styles.upgradeBanner}
+          onPress={() => navigation.navigate('Subscription')}
+        >
+          <Text style={styles.upgradeBannerText}>
+            🔒 Upgrade to Pro for unlimited miners
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <ErrorBanner
         message={error}
@@ -85,27 +121,33 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {scanning && (
         <View style={styles.scanningBanner}>
-          <ActivityIndicator size="small" color="#3B82F6" />
-          <Text style={styles.scanningText}>Scanning network...</Text>
+          <ActivityIndicator size="small" color={theme.primary} />
+          <Text style={styles.scanningText}>
+            Scanning {scanProgress?.scanned || 0}/{scanProgress?.total || 254}...
+          </Text>
         </View>
       )}
 
       {!initialized || (loading && miners.length === 0) ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#3B82F6" />
+          <ActivityIndicator size="large" color={theme.primary} />
           <Text style={styles.loadingText}>Loading miners...</Text>
         </View>
       ) : miners.length === 0 ? (
         <View style={styles.center}>
+          <Text style={styles.emptyIcon}>⬡</Text>
           <Text style={styles.emptyTitle}>No Miners Yet</Text>
           <Text style={styles.emptyText}>
-            Add a miner by IP or scan your network
+            Add a miner or scan your local network
           </Text>
-          <SubscriptionGate feature="Network scanning">
-            <TouchableOpacity style={styles.scanBtn} onPress={scanNetwork}>
-              <Text style={styles.scanBtnText}>Scan Network</Text>
+          <View style={styles.emptyActions}>
+            <TouchableOpacity style={styles.primaryBtn} onPress={handleAddMiner}>
+              <Text style={styles.primaryBtnText}>Add Miner</Text>
             </TouchableOpacity>
-          </SubscriptionGate>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={scanNetwork}>
+              <Text style={styles.secondaryBtnText}>Scan Network</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <FlatList
@@ -122,23 +164,21 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#3B82F6"
-              colors={['#3B82F6']}
-              progressBackgroundColor="#1F2937"
+              tintColor={theme.primary}
+              colors={[theme.primary]}
+              progressBackgroundColor={theme.surface}
             />
           }
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
       <TouchableOpacity
         style={[styles.fab, !canAdd && styles.fabDisabled]}
-        onPress={canAdd ? handleAddMiner : () => navigation.navigate('Subscription')}
+        onPress={handleAddMiner}
       >
         <Text style={styles.fabText}>+</Text>
-        {!canAdd && (
-          <Text style={styles.fabSubtext}>Max {maxMiners}</Text>
-        )}
       </TouchableOpacity>
     </View>
   );
@@ -147,43 +187,99 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
   },
-  summary: {
+  headerBar: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
-  summaryItem: {
+  headerTitle: {
+    color: theme.text,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  settingsBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: theme.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  settingsIcon: {
+    fontSize: 16,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  summaryCard: {
     flex: 1,
-    backgroundColor: '#1F2937',
-    borderRadius: 12,
+    backgroundColor: theme.surface,
+    borderRadius: 14,
     padding: 14,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  summaryIcon: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   summaryValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#F9FAFB',
+    fontSize: 22,
+    fontWeight: '800',
+    color: theme.text,
   },
   summaryLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: 11,
+    color: theme.textDim,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginTop: 2,
+  },
+  upgradeBanner: {
+    backgroundColor: 'rgba(108, 99, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: theme.primary,
+    borderRadius: 10,
+    padding: 10,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  upgradeBannerText: {
+    color: theme.primaryLight,
+    fontSize: 13,
+    fontWeight: '600',
   },
   scanningBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1E3A5F',
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
     padding: 8,
     marginHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 10,
     gap: 8,
+    marginBottom: 8,
   },
   scanningText: {
-    color: '#93C5FD',
+    color: theme.primaryLight,
     fontSize: 13,
+    fontWeight: '500',
   },
   center: {
     flex: 1,
@@ -192,64 +288,80 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   loadingText: {
-    color: '#9CA3AF',
+    color: theme.textDim,
     marginTop: 12,
     fontSize: 14,
+    fontWeight: '500',
+  },
+  emptyIcon: {
+    fontSize: 48,
+    color: theme.textMuted,
+    marginBottom: 16,
   },
   emptyTitle: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 8,
   },
   emptyText: {
-    color: '#6B7280',
+    color: theme.textDim,
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    lineHeight: 20,
   },
-  scanBtn: {
-    backgroundColor: '#3B82F6',
+  emptyActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  primaryBtn: {
+    backgroundColor: theme.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 12,
   },
-  scanBtnText: {
+  primaryBtnText: {
     color: '#FFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  secondaryBtn: {
+    backgroundColor: theme.surface,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  secondaryBtnText: {
+    color: theme.text,
     fontWeight: '600',
     fontSize: 15,
   },
   list: {
+    paddingTop: 4,
     paddingBottom: 100,
   },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 20,
+    bottom: 24,
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: '#3B82F6',
+    borderRadius: 16,
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    boxShadow: `0 4px 16px ${theme.glow}`,
   },
   fabDisabled: {
-    backgroundColor: '#4B5563',
+    backgroundColor: theme.textMuted,
   },
   fabText: {
     color: '#FFF',
     fontSize: 28,
-    fontWeight: '300',
+    fontWeight: '400',
     lineHeight: 30,
-  },
-  fabSubtext: {
-    color: '#FFF',
-    fontSize: 8,
-    marginTop: -2,
   },
 });

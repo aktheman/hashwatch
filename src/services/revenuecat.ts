@@ -20,12 +20,18 @@ export async function configureRevenueCat(): Promise<void> {
     Purchases.setLogLevel(LOG_LEVEL.INFO);
   }
 
+  if (Platform.OS === 'web') return;
+
   const apiKey = Platform.OS === 'ios' ? API_KEYS.ios : API_KEYS.android;
 
-  await Purchases.configure({
-    apiKey,
-    appUserID: null,
-  });
+  try {
+    await Purchases.configure({
+      apiKey,
+      appUserID: null,
+    });
+  } catch {
+    // RevenueCat not available on this platform
+  }
 }
 
 export async function getOfferings(): Promise<PurchasesOfferings | null> {

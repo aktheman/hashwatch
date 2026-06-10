@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { theme } from '../theme';
 
 interface ErrorBannerProps {
   message: string | null;
@@ -11,16 +12,17 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
 
   return (
     <View style={styles.banner}>
-      <Text style={styles.text}>{message}</Text>
+      <Text style={styles.icon}>⚠</Text>
+      <Text style={styles.text} numberOfLines={2}>{message}</Text>
       <View style={styles.actions}>
         {onRetry && (
-          <TouchableOpacity onPress={onRetry}>
-            <Text style={styles.retry}>Retry</Text>
+          <TouchableOpacity onPress={onRetry} style={styles.btn}>
+            <Text style={styles.btnText}>Retry</Text>
           </TouchableOpacity>
         )}
         {onDismiss && (
           <TouchableOpacity onPress={onDismiss}>
-            <Text style={styles.dismiss}>Dismiss</Text>
+            <Text style={styles.dismiss}>✕</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -30,33 +32,46 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: '#7F1D1D',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     marginHorizontal: 16,
-    borderRadius: 10,
-    marginTop: 8,
+    borderRadius: 12,
+    marginBottom: 8,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  icon: {
+    fontSize: 14,
   },
   text: {
-    color: '#FCA5A5',
+    color: theme.danger,
     fontSize: 13,
     flex: 1,
+    fontWeight: '500',
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
-    marginLeft: 12,
+    alignItems: 'center',
+    gap: 8,
   },
-  retry: {
-    color: '#FCA5A5',
-    fontSize: 13,
-    fontWeight: '600',
+  btn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  btnText: {
+    color: theme.danger,
+    fontSize: 12,
+    fontWeight: '700',
   },
   dismiss: {
-    color: '#6B7280',
-    fontSize: 13,
+    color: theme.textMuted,
+    fontSize: 14,
+    fontWeight: '300',
   },
 });

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../theme';
 
 interface StatWidgetProps {
   label: string;
@@ -7,7 +8,7 @@ interface StatWidgetProps {
   color?: string;
 }
 
-export function StatWidget({ label, value, color = '#3B82F6' }: StatWidgetProps) {
+export function StatWidget({ label, value, color = theme.primary }: StatWidgetProps) {
   return (
     <View style={[styles.container, { borderLeftColor: color }]}>
       <Text style={styles.label}>{label}</Text>
@@ -20,20 +21,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: '#1F2937',
-    borderRadius: 12,
+    backgroundColor: theme.surface,
+    borderRadius: 14,
     padding: 14,
     borderLeftWidth: 3,
     margin: 4,
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderLeftColor: undefined as any,
   },
   label: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    fontWeight: '500',
+    color: theme.textDim,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 4,
   },
   value: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });

@@ -8,6 +8,7 @@ import { MinerDetailScreen } from '../screens/MinerDetailScreen';
 import { AddMinerScreen } from '../screens/AddMinerScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
+import { theme } from '../theme';
 
 type RootStackParamList = {
   MainTabs: undefined;
@@ -45,26 +46,20 @@ function MainTabs() {
         tabBarIcon: ({ focused }) => (
           <TabIcon label={route.name} focused={focused} />
         ),
-        tabBarActiveTintColor: '#3B82F6',
-        tabBarInactiveTintColor: '#6B7280',
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
-          backgroundColor: '#0F172A',
-          borderTopColor: '#1F2937',
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
           borderTopWidth: 1,
-          paddingBottom: 8,
+          paddingBottom: 10,
           paddingTop: 8,
-          height: 60,
+          height: 62,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600',
-        },
-        headerStyle: {
-          backgroundColor: '#0F172A',
-        },
-        headerTintColor: '#F9FAFB',
-        headerTitleStyle: {
-          fontWeight: '600',
+          fontWeight: '700',
+          letterSpacing: 0.3,
         },
       })}
     >
@@ -88,11 +83,11 @@ const tabStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    fontSize: 22,
-    color: '#6B7280',
+    fontSize: 20,
+    color: theme.textMuted,
   },
   iconFocused: {
-    color: '#3B82F6',
+    color: theme.primary,
   },
 });
 
@@ -101,10 +96,11 @@ export function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: '#0F172A' },
-          headerTintColor: '#F9FAFB',
-          headerTitleStyle: { fontWeight: '600' },
-          contentStyle: { backgroundColor: '#0F172A' },
+          headerStyle: { backgroundColor: theme.bg },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+          contentStyle: { backgroundColor: theme.bg },
+          headerShadowVisible: false,
         }}
       >
         <Stack.Screen

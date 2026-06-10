@@ -12,6 +12,7 @@ import {
   formatUptime,
   formatNumber,
 } from '../utils/formatters';
+import { theme } from '../theme';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
@@ -40,10 +41,27 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     }
   }, [minerId]);
 
-  if (!miner || !miner.status) {
+  if (!miner) {
     return (
       <View style={styles.center}>
+        <Text style={styles.offlineIcon}>⬡</Text>
+        <Text style={styles.offlineText}>Miner Not Found</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.retryBtnText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!miner.status) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.offlineIcon}>📡</Text>
         <Text style={styles.offlineText}>Miner Offline</Text>
+        <Text style={styles.offlineSubtext}>Unable to reach {miner.ip}</Text>
         <TouchableOpacity
           style={styles.retryBtn}
           onPress={() => refreshMiner(minerId)}
@@ -62,16 +80,18 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <View style={styles.nameRow}>
-          <View
-            style={[
-              styles.dot,
-              { backgroundColor: miner.isOnline ? '#22C55E' : '#EF4444' },
-            ]}
-          />
-          <Text style={styles.name}>{miner.name}</Text>
+        <View style={styles.headerTop}>
+          <View style={styles.nameRow}>
+            <View style={[styles.dot, { backgroundColor: miner.isOnline ? theme.success : theme.danger }]} />
+            <Text style={styles.name}>{miner.name}</Text>
+          </View>
+          <View style={[styles.badge, { backgroundColor: miner.isOnline ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)' }]}>
+            <Text style={[styles.badgeText, { color: miner.isOnline ? theme.success : theme.danger }]}>
+              {miner.isOnline ? 'LIVE' : 'OFFLINE'}
+            </Text>
+          </View>
         </View>
         <Text style={styles.ip}>{miner.ip}</Text>
         {miner.info?.hostname && (
@@ -80,71 +100,86 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mining</Text>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>⚡</Text> Mining
+        </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             label="Hashrate"
             value={formatHashrate(s.hashRate, s.hashRateUnit)}
-            color="#3B82F6"
+            color={theme.primary}
           />
           <StatWidget label="Frequency" value={`${s.frequency} MHz`} color="#8B5CF6" />
-          <StatWidget label="Best Diff" value={s.bestDiff} color="#F59E0B" />
-          <StatWidget label="Best Session" value={s.bestSessionDiff} color="#F59E0B" />
+          <StatWidget label="Best Diff" value={s.bestDiff} color={theme.warning} />
+          <StatWidget label="Best Session" value={s.bestSessionDiff} color={theme.warning} />
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Hardware</Text>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>🔧</Text> Hardware
+        </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             label="Temperature"
             value={formatTemperature(s.temperature)}
-            color={s.temperature > 70 ? '#EF4444' : '#22C55E'}
+            color={s.temperature > 70 ? theme.danger : theme.success}
           />
-          <StatWidget label="Voltage" value={formatVoltage(s.voltage)} color="#3B82F6" />
+          <StatWidget label="Voltage" value={formatVoltage(s.voltage)} color={theme.primary} />
           <StatWidget label="Current" value={`${s.current} mA`} color="#EC4899" />
-          <StatWidget label="Power" value={formatPower(s.power)} color="#F59E0B" />
+          <StatWidget label="Power" value={formatPower(s.power)} color={theme.warning} />
           <StatWidget label="Core Voltage" value={`${s.coreVoltage} mV`} color="#8B5CF6" />
           <StatWidget label="Fan Speed" value={`${s.fanSpeed}%`} color="#06B6D4" />
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Shares</Text>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>📦</Text> Shares
+        </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             label="Accepted"
             value={formatNumber(s.sharesAccepted)}
-            color="#22C55E"
+            color={theme.success}
           />
           <StatWidget
             label="Rejected"
             value={formatNumber(s.sharesRejected)}
-            color="#EF4444"
+            color={theme.danger}
           />
-          <StatWidget label="Uptime" value={formatUptime(s.uptimeSeconds)} color="#3B82F6" />
+          <StatWidget label="Uptime" value={formatUptime(s.uptimeSeconds)} color={theme.primary} />
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Pool</Text>
-        <View style={styles.poolInfo}>
-          <Text style={styles.poolLabel}>URL</Text>
-          <Text style={styles.poolValue}>{s.pool || 'N/A'}</Text>
-          <Text style={styles.poolLabel}>User</Text>
-          <Text style={styles.poolValue} selectable>
-            {s.poolUser || 'N/A'}
-          </Text>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>🌊</Text> Pool
+        </Text>
+        <View style={styles.poolCard}>
+          <View style={styles.poolRow}>
+            <Text style={styles.poolLabel}>URL</Text>
+            <Text style={styles.poolValue}>{s.pool || 'N/A'}</Text>
+          </View>
+          <View style={styles.poolDivider} />
+          <View style={styles.poolRow}>
+            <Text style={styles.poolLabel}>User</Text>
+            <Text style={styles.poolValue} selectable>{s.poolUser || 'N/A'}</Text>
+          </View>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Hashrate History</Text>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>📈</Text> Hashrate History
+        </Text>
         <HashrateChart snapshots={snapshots} />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Danger Zone</Text>
+        <Text style={[styles.sectionTitle, { color: theme.danger }]}>
+          <Text style={styles.sectionIcon}>⚠</Text> Danger Zone
+        </Text>
         <TouchableOpacity
           style={styles.deleteBtn}
           onPress={() => setShowConfirm(!showConfirm)}
@@ -154,7 +189,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         {showConfirm && (
           <View style={styles.confirmBox}>
             <Text style={styles.confirmText}>
-              Are you sure? This deletes all history for this miner.
+              This permanently deletes {miner.name} and all its history.
             </Text>
             <TouchableOpacity style={styles.confirmBtn} onPress={handleDelete}>
               <Text style={styles.confirmBtnText}>Yes, Remove</Text>
@@ -169,28 +204,39 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
   },
   content: {
     paddingBottom: 40,
   },
   center: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 32,
+  },
+  offlineIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+    color: theme.textMuted,
   },
   offlineText: {
-    color: '#EF4444',
+    color: theme.danger,
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  offlineSubtext: {
+    color: theme.textDim,
+    fontSize: 14,
+    marginBottom: 20,
   },
   retryBtn: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.primary,
     paddingHorizontal: 24,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   retryBtnText: {
     color: '#FFF',
@@ -198,34 +244,52 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.surface,
     margin: 16,
-    borderRadius: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    flex: 1,
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     marginRight: 8,
   },
   name: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 20,
     fontWeight: '700',
   },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   ip: {
-    color: '#6B7280',
+    color: theme.textMuted,
     fontSize: 13,
     fontFamily: 'monospace',
     marginTop: 4,
   },
   hostname: {
-    color: '#9CA3AF',
+    color: theme.textDim,
     fontSize: 12,
     marginTop: 2,
   },
@@ -234,61 +298,83 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   sectionTitle: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  sectionIcon: {
+    fontSize: 14,
+    marginRight: 4,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  poolInfo: {
-    backgroundColor: '#1F2937',
-    borderRadius: 12,
+  poolCard: {
+    backgroundColor: theme.surface,
+    borderRadius: 14,
     padding: 14,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  poolRow: {
+    paddingVertical: 4,
+  },
+  poolDivider: {
+    height: 1,
+    backgroundColor: theme.border,
+    marginVertical: 6,
   },
   poolLabel: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 6,
+    color: theme.textDim,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   poolValue: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 14,
     fontFamily: 'monospace',
-    marginTop: 2,
   },
   deleteBtn: {
-    backgroundColor: '#7F1D1D',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     padding: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   deleteBtnText: {
-    color: '#FCA5A5',
-    fontWeight: '600',
+    color: theme.danger,
+    fontWeight: '700',
+    fontSize: 15,
   },
   confirmBox: {
-    backgroundColor: '#1F2937',
-    borderRadius: 10,
+    backgroundColor: theme.surface,
+    borderRadius: 12,
     padding: 14,
     marginTop: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   confirmText: {
-    color: '#FCA5A5',
+    color: theme.textDim,
     fontSize: 13,
     marginBottom: 10,
+    lineHeight: 18,
   },
   confirmBtn: {
-    backgroundColor: '#DC2626',
+    backgroundColor: theme.danger,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
   },
   confirmBtnText: {
     color: '#FFF',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

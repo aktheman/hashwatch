@@ -1,0 +1,16 @@
+export const theme = {
+  bg: '#0A0A1A',
+  surface: '#13132B',
+  surfaceLight: '#1A1A3E',
+  border: '#1E1E42',
+  primary: '#6C63FF',
+  primaryLight: '#8B85FF',
+  accent: '#3B82F6',
+  success: '#10B981',
+  danger: '#EF4444',
+  warning: '#F59E0B',
+  text: '#FFFFFF',
+  textDim: '#8B8FA3',
+  textMuted: '#5C5F7A',
+  glow: 'rgba(108, 99, 255, 0.3)',
+};

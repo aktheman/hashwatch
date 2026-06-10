@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as DB from '../db/database';
 import * as API from '../api/client';
+import { configureClient } from '../api/client';
 
 interface AuthState {
   token: string | null;
@@ -60,3 +61,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+configureClient({
+  getToken: () => useAuthStore.getState().token,
+  onUnauthorized: () => useAuthStore.getState().logout(),
+});

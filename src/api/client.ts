@@ -1,7 +1,17 @@
 import axios, { AxiosInstance } from 'axios';
-import { useAuthStore } from '../store/auth';
 
-const BASE_URL = 'http://localhost:4000';
+let _getToken: () => string | null = () => null;
+let _onUnauthorized: () => void = () => {};
+
+export function configureClient(opts: {
+  getToken: () => string | null;
+  onUnauthorized: () => void;
+}) {
+  _getToken = opts.getToken;
+  _onUnauthorized = opts.onUnauthorized;
+}
+
+export const BASE_URL = 'http://localhost:4000';
 
 const client: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -10,7 +20,7 @@ const client: AxiosInstance = axios.create({
 });
 
 client.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+  const token = _getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,7 +31,7 @@ client.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      useAuthStore.getState().logout();
+      _onUnauthorized();
     }
     return Promise.reject(err);
   }

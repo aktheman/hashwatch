@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
+import { Platform } from 'react-native';
 import { MinerInfo, MinerStatus } from '../types';
+import * as API from './client';
 
 const TIMEOUT = 5000;
+const isWeb = Platform.OS === 'web';
 
 export class BitAxeClient {
   private ip: string;
@@ -18,9 +21,28 @@ export class BitAxeClient {
     });
   }
 
+  private async proxyGet(path: string): Promise<any> {
+    const { data } = await axios.post(
+      `${API.BASE_URL}/api/proxy`,
+      {
+        url: `http://${this.ip}:${this.port}${path}`,
+        method: 'GET',
+      },
+      { timeout: TIMEOUT + 3000 }
+    );
+    return data;
+  }
+
+  private async get(path: string): Promise<any> {
+    if (isWeb) {
+      return this.proxyGet(path);
+    }
+    const res = await this.client.get(path);
+    return res.data;
+  }
+
   async getSystemInfo(): Promise<MinerInfo> {
-    const res = await this.client.get('/api/system/info');
-    const d = res.data;
+    const d = await this.get('/api/system/info');
     return {
       version: d.version,
       chipType: d.chipType,
@@ -34,8 +56,7 @@ export class BitAxeClient {
   }
 
   async getMinerStatus(): Promise<MinerStatus> {
-    const res = await this.client.get('/api/system/status');
-    const d = res.data;
+    const d = await this.get('/api/system/status');
     return {
       hashRate: d.hashRate ?? 0,
       hashRateUnit: d.hashRateUnit || 'MH/s',
@@ -65,6 +86,18 @@ export class BitAxeClient {
   }
 
   static async probe(ip: string, port: number = 80): Promise<boolean> {
+    if (isWeb) {
+      try {
+        const { data } = await axios.post(
+          `${API.BASE_URL}/api/proxy`,
+          { url: `http://${ip}:${port}/api/system/info`, method: 'GET' },
+          { timeout: TIMEOUT }
+        );
+        return !!data?.hostname || !!data?.macAddr;
+      } catch {
+        return false;
+      }
+    }
     try {
       const client = new BitAxeClient(ip, port);
       await client.getSystemInfo();

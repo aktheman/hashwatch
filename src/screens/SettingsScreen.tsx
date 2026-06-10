@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore } from '../store/auth';
+import { theme } from '../theme';
 
 export function SettingsScreen({ navigation }: any) {
   const miners = useMinerStore((s) => s.miners);
@@ -10,7 +11,7 @@ export function SettingsScreen({ navigation }: any) {
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const scanning = useMinerStore((s) => s.scanning);
   const { isPro, tier } = useSubscriptionStore();
-  const { token, email, syncing, synced, login, register, logout, restoreSession } = useAuthStore();
+  const { token, email, login, register, logout, restoreSession } = useAuthStore();
 
   const [showAuth, setShowAuth] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -36,12 +37,8 @@ export function SettingsScreen({ navigation }: any) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-  };
-
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Settings</Text>
 
       <View style={styles.section}>
@@ -52,13 +49,8 @@ export function SettingsScreen({ navigation }: any) {
         >
           <Text style={styles.rowLabel}>Plan</Text>
           <View style={styles.rowRight}>
-            <View
-              style={[
-                styles.badge,
-                { backgroundColor: isPro ? '#065F46' : '#374151' },
-              ]}
-            >
-              <Text style={styles.badgeText}>
+            <View style={[styles.badge, { backgroundColor: isPro ? 'rgba(16,185,129,0.15)' : theme.surfaceLight }]}>
+              <Text style={[styles.badgeText, { color: isPro ? theme.success : theme.textDim }]}>
                 {isPro ? 'Pro' : 'Free'}
               </Text>
             </View>
@@ -66,13 +58,10 @@ export function SettingsScreen({ navigation }: any) {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => setShowAuth(!showAuth)}
-        >
+        <TouchableOpacity style={styles.row} onPress={() => setShowAuth(!showAuth)}>
           <Text style={styles.rowLabel}>Remote Sync</Text>
           <View style={styles.rowRight}>
-            <Text style={[styles.rowValue, token ? { color: '#22C55E' } : undefined]}>
+            <Text style={[styles.rowValue, token && { color: theme.success }]}>
               {token ? email || 'Connected' : 'Off'}
             </Text>
             <Text style={styles.chevron}>{showAuth ? 'v' : '›'}</Text>
@@ -82,7 +71,7 @@ export function SettingsScreen({ navigation }: any) {
         {showAuth && (
           <View style={styles.authBox}>
             {token ? (
-              <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
                 <Text style={styles.logoutBtnText}>Disconnect</Text>
               </TouchableOpacity>
             ) : (
@@ -90,7 +79,7 @@ export function SettingsScreen({ navigation }: any) {
                 <TextInput
                   style={styles.authInput}
                   placeholder="Email"
-                  placeholderTextColor="#6B7280"
+                  placeholderTextColor={theme.textMuted}
                   value={authEmail}
                   onChangeText={setAuthEmail}
                   autoCapitalize="none"
@@ -99,14 +88,12 @@ export function SettingsScreen({ navigation }: any) {
                 <TextInput
                   style={styles.authInput}
                   placeholder="Password (min 8 chars)"
-                  placeholderTextColor="#6B7280"
+                  placeholderTextColor={theme.textMuted}
                   value={authPassword}
                   onChangeText={setAuthPassword}
                   secureTextEntry
                 />
-                {authError && (
-                  <Text style={styles.authError}>{authError}</Text>
-                )}
+                {authError && <Text style={styles.authError}>{authError}</Text>}
                 <TouchableOpacity style={styles.authBtn} onPress={handleAuth}>
                   <Text style={styles.authBtnText}>
                     {isRegister ? 'Create Account' : 'Sign In'}
@@ -133,7 +120,7 @@ export function SettingsScreen({ navigation }: any) {
         </View>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>Online</Text>
-          <Text style={[styles.rowValue, { color: '#22C55E' }]}>
+          <Text style={[styles.rowValue, { color: theme.success }]}>
             {miners.filter((m) => m.isOnline).length}
           </Text>
         </View>
@@ -141,11 +128,7 @@ export function SettingsScreen({ navigation }: any) {
           <Text style={styles.rowLabel}>Refresh All</Text>
           <Text style={styles.actionText}>Refresh</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.row}
-          onPress={scanNetwork}
-          disabled={scanning}
-        >
+        <TouchableOpacity style={styles.row} onPress={scanNetwork} disabled={scanning}>
           <Text style={styles.rowLabel}>Scan Network</Text>
           <Text style={styles.actionText}>
             {scanning ? 'Scanning...' : 'Scan'}
@@ -164,31 +147,33 @@ export function SettingsScreen({ navigation }: any) {
           <Text style={styles.rowValue}>BitAxe Miners</Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: theme.bg,
     padding: 16,
   },
   title: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '800',
     marginBottom: 20,
     marginTop: 8,
+    letterSpacing: -0.5,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    fontWeight: '600',
+    color: theme.textDim,
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
     marginBottom: 8,
     marginLeft: 4,
   },
@@ -196,17 +181,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.surface,
     padding: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 2,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   rowLabel: {
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 15,
+    fontWeight: '500',
   },
   rowValue: {
-    color: '#6B7280',
+    color: theme.textDim,
     fontSize: 15,
   },
   rowRight: {
@@ -220,61 +208,68 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgeText: {
-    color: '#FFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   chevron: {
-    color: '#6B7280',
+    color: theme.textMuted,
     fontSize: 20,
+    fontWeight: '300',
   },
   actionText: {
-    color: '#3B82F6',
+    color: theme.primary,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   authBox: {
-    backgroundColor: '#111827',
-    borderRadius: 10,
+    backgroundColor: theme.surfaceLight,
+    borderRadius: 12,
     padding: 14,
     marginTop: 2,
     gap: 10,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   authInput: {
-    backgroundColor: '#1F2937',
-    borderRadius: 8,
+    backgroundColor: theme.surface,
+    borderRadius: 10,
     padding: 12,
-    color: '#F9FAFB',
+    color: theme.text,
     fontSize: 15,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   authError: {
-    color: '#FCA5A5',
+    color: theme.danger,
     fontSize: 13,
   },
   authBtn: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
+    backgroundColor: theme.primary,
+    borderRadius: 10,
     padding: 12,
     alignItems: 'center',
   },
   authBtnText: {
     color: '#FFF',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 15,
   },
   authToggle: {
-    color: '#3B82F6',
+    color: theme.primary,
     fontSize: 13,
     textAlign: 'center',
+    fontWeight: '500',
   },
   logoutBtn: {
-    backgroundColor: '#7F1D1D',
-    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderRadius: 10,
     padding: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   logoutBtnText: {
-    color: '#FCA5A5',
-    fontWeight: '600',
+    color: theme.danger,
+    fontWeight: '700',
   },
 });
