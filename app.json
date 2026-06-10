@@ -27,6 +27,7 @@
       },
       "package": "com.hashwatch.app",
       "versionCode": 1,
+      "usesCleartextTraffic": true,
       "permissions": [
         "ACCESS_WIFI_STATE",
         "INTERNET",

@@ -20,7 +20,7 @@ function deriveStatusPath(infoPath: string): string {
   return infoPath.replace(/\/info$/, '/status');
 }
 
-async function fetchUrl(url: string, timeout = 3000): Promise<any> {
+async function fetchUrl(url: string, timeout = 2000): Promise<any> {
   try {
     const { data } = isWeb
       ? await axios.post(`${API.BASE_URL}/api/proxy`, { url, method: 'GET' }, { timeout, validateStatus: () => true })
@@ -31,34 +31,28 @@ async function fetchUrl(url: string, timeout = 3000): Promise<any> {
   }
 }
 
-interface FoundPaths {
+export interface FoundPaths {
   infoPath: string | null;
   statusPath: string | null;
 }
 
 async function findPaths(ip: string, port: number): Promise<FoundPaths> {
-  let infoPath: string | null = null;
-  let statusPath: string | null = null;
+  const urls = INFO_PATHS.map(path => `http://${ip}:${port}${path}`);
+  const results = await Promise.all(urls.map(url => fetchUrl(url)));
 
-  for (const path of INFO_PATHS) {
-    const url = `http://${ip}:${port}${path}`;
-    const data = await fetchUrl(url);
-    if (data && isBitAxeResponse(data)) {
-      infoPath = path;
-      break;
+  for (let i = 0; i < results.length; i++) {
+    if (results[i] && isBitAxeResponse(results[i])) {
+      const infoPath = INFO_PATHS[i];
+      const derived = deriveStatusPath(infoPath);
+      const data = await fetchUrl(`http://${ip}:${port}${derived}`);
+      return {
+        infoPath,
+        statusPath: (data && (data.hashRate !== undefined || data.sharesAccepted !== undefined)) ? derived : null,
+      };
     }
   }
 
-  if (infoPath) {
-    const derived = deriveStatusPath(infoPath);
-    const statusUrl = `http://${ip}:${port}${derived}`;
-    const data = await fetchUrl(statusUrl);
-    if (data && (data.hashRate !== undefined || data.sharesAccepted !== undefined)) {
-      statusPath = derived;
-    }
-  }
-
-  return { infoPath, statusPath };
+  return { infoPath: null, statusPath: null };
 }
 
 export class BitAxeClient {
@@ -161,4 +155,4 @@ export class BitAxeClient {
   }
 }
 
-export type { FoundPaths };
+

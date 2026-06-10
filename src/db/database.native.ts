@@ -1,5 +1,5 @@
 import { Miner, MinerSnapshot } from '../types';
-import type { SQLiteDatabase } from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite';
 
 interface MinerRow {
   id: string; name: string; ip: string; port: number;
@@ -7,17 +7,27 @@ interface MinerRow {
   apiPath?: string; statusPath?: string;
 }
 
-let db: SQLiteDatabase | null = null;
+let db: any = null;
+let dbInit: Promise<void> | null = null;
 
-async function getDb(): Promise<SQLiteDatabase> {
+async function getDb() {
   if (db) return db;
-  const SQLite = await import('expo-sqlite');
-  db = await SQLite.openDatabaseAsync('hashwatch.db');
-  if (db) await initTables(db);
+  if (!dbInit) {
+    dbInit = (async () => {
+      try {
+        db = await SQLite.openDatabaseAsync('hashwatch.db');
+        await initTables(db);
+      } catch (e) {
+        dbInit = null;
+        throw e;
+      }
+    })();
+  }
+  await dbInit;
   return db;
 }
 
-async function initTables(d: SQLiteDatabase): Promise<void> {
+async function initTables(d: any): Promise<void> {
   await d.execAsync(`
     CREATE TABLE IF NOT EXISTS miners (
       id TEXT PRIMARY KEY NOT NULL,
@@ -61,7 +71,7 @@ async function initTables(d: SQLiteDatabase): Promise<void> {
 
 export async function getSetting(key: string): Promise<string | null> {
   const d = await getDb();
-  const row = await d.getFirstAsync<{ value: string }>(
+  const row: any = await d.getFirstAsync(
     'SELECT value FROM settings WHERE key = ?', [key]
   );
   return row?.value ?? null;
@@ -77,7 +87,7 @@ export async function setSetting(key: string, value: string): Promise<void> {
 
 export async function loadMiners(): Promise<Miner[]> {
   const d = await getDb();
-  const rows = await d.getAllAsync<MinerRow>('SELECT * FROM miners');
+  const rows: MinerRow[] = await d.getAllAsync('SELECT * FROM miners');
   return rows.map(r => ({
     id: r.id,
     name: r.name,
@@ -125,13 +135,14 @@ export async function getSnapshots(
   limit: number = 100
 ): Promise<MinerSnapshot[]> {
   const d = await getDb();
-  return await d.getAllAsync<MinerSnapshot>(
+  const snapshots: MinerSnapshot[] = await d.getAllAsync(
     `SELECT * FROM miner_snapshots
      WHERE minerId = ?
      ORDER BY timestamp DESC
      LIMIT ?`,
     [minerId, limit]
   );
+  return snapshots;
 }
 
 export async function cleanupOldSnapshots(
