@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet,
+  View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
+import { SubscriptionGate } from '../components/SubscriptionGate';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
 
 interface AddMinerScreenProps {
@@ -71,37 +72,39 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Add by IP Address</Text>
-      <View style={styles.inputRow}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <SubscriptionGate feature="Add miners by IP">
+        <Text style={styles.sectionTitle}>Add by IP Address</Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="192.168.1.100"
+            placeholderTextColor="#6B7280"
+            value={ip}
+            onChangeText={setIp}
+            keyboardType="numeric"
+            autoCapitalize="none"
+          />
+        </View>
         <TextInput
           style={styles.input}
-          placeholder="192.168.1.100"
+          placeholder="Name (optional)"
           placeholderTextColor="#6B7280"
-          value={ip}
-          onChangeText={setIp}
-          keyboardType="numeric"
-          autoCapitalize="none"
+          value={name}
+          onChangeText={setName}
         />
-      </View>
-      <TextInput
-        style={styles.input}
-        placeholder="Name (optional)"
-        placeholderTextColor="#6B7280"
-        value={name}
-        onChangeText={setName}
-      />
-      <TouchableOpacity
-        style={[styles.addBtn, connecting && styles.btnDisabled]}
-        onPress={handleAddByIP}
-        disabled={connecting || !ip.trim()}
-      >
-        {connecting ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : (
-          <Text style={styles.addBtnText}>Add Miner</Text>
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.addBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
+          onPress={handleAddByIP}
+          disabled={connecting || !ip.trim()}
+        >
+          {connecting ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.addBtnText}>Add Miner</Text>
+          )}
+        </TouchableOpacity>
+      </SubscriptionGate>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
@@ -109,18 +112,20 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         <View style={styles.dividerLine} />
       </View>
 
-      <Text style={styles.sectionTitle}>Scan Local Network</Text>
-      <TouchableOpacity
-        style={[styles.scanBtn, scanning && styles.btnDisabled]}
-        onPress={handleScan}
-        disabled={scanning}
-      >
-        {scanning ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : (
-          <Text style={styles.scanBtnText}>Scan Network</Text>
-        )}
-      </TouchableOpacity>
+      <SubscriptionGate feature="Network scanning">
+        <Text style={styles.sectionTitle}>Scan Local Network</Text>
+        <TouchableOpacity
+          style={[styles.scanBtn, scanning && styles.btnDisabled]}
+          onPress={handleScan}
+          disabled={scanning}
+        >
+          {scanning ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.scanBtnText}>Scan Network</Text>
+          )}
+        </TouchableOpacity>
+      </SubscriptionGate>
 
       {foundMiners.length > 0 && (
         <View style={styles.foundSection}>
@@ -145,7 +150,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -154,6 +159,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0F172A',
     padding: 16,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   sectionTitle: {
     color: '#F9FAFB',

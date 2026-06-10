@@ -37,7 +37,7 @@ export function SubscriptionScreen() {
           <Text style={styles.featureItem}>✓ Historical charts (30 days)</Text>
           <Text style={styles.featureItem}>✓ Push notifications</Text>
           <Text style={styles.featureItem}>✓ Cloud backup</Text>
-          <Text style={styles.featureItem}>✓ Remote monitoring (Phase 2)</Text>
+          <Text style={styles.featureItem}>✓ Remote monitoring</Text>
           <Text style={styles.featureItem}>✓ Multi-wallet tracking</Text>
         </View>
         {isPro ? (

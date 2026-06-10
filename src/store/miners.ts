@@ -11,6 +11,7 @@ function generateId(): string {
 interface MinersState {
   miners: Miner[];
   loading: boolean;
+  initialized: boolean;
   scanning: boolean;
   scanProgress: { found: number; scanned: number; total: number } | null;
   error: string | null;
@@ -22,12 +23,14 @@ interface MinersState {
   refreshAll: () => Promise<void>;
   startPolling: (intervalMs?: number) => () => void;
   scanNetwork: () => Promise<void>;
+  clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
 }
 
 export const useMinerStore = create<MinersState>((set, get) => ({
   miners: [],
   loading: false,
+  initialized: false,
   scanning: false,
   scanProgress: null,
   error: null,
@@ -36,10 +39,10 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const miners = await DB.loadMiners();
-      set({ miners, loading: false });
+      set({ miners, loading: false, initialized: true });
       get().refreshAll();
     } catch (e: any) {
-      set({ error: e.message, loading: false });
+      set({ error: e.message, loading: false, initialized: true });
     }
   },
 
@@ -144,18 +147,29 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   scanNetwork: async () => {
-    set({ scanning: true, scanProgress: { found: 0, scanned: 0, total: 254 } });
+    set({ scanning: true, scanProgress: { found: 0, scanned: 0, total: 254 }, error: null });
     try {
       const { scanNetwork } = await import('../discovery/localNetwork');
       const found = await scanNetwork((found, scanned, total) => {
         set({ scanProgress: { found, scanned, total } });
       });
+      const existingIPs = new Set(get().miners.map((m) => m.ip));
+      for (const d of found) {
+        if (!existingIPs.has(d.ip)) {
+          try {
+            await get().addMiner(d.ip, d.port);
+          } catch {
+            // skip miners that fail to add
+          }
+        }
+      }
       set({ scanning: false, scanProgress: null });
-      return;
     } catch (e: any) {
       set({ scanning: false, scanProgress: null, error: e.message });
     }
   },
+
+  clearError: () => set({ error: null }),
 
   getSnapshots: async (minerId: string, limit: number = 100) => {
     return await DB.getSnapshots(minerId, limit);

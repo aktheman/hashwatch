@@ -3,6 +3,8 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshContr
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
+import { SubscriptionGate } from '../components/SubscriptionGate';
+import { ErrorBanner } from '../components/ErrorBanner';
 import { Miner } from '../types';
 
 interface DashboardScreenProps {
@@ -12,10 +14,13 @@ interface DashboardScreenProps {
 export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const miners = useMinerStore((s) => s.miners);
   const loading = useMinerStore((s) => s.loading);
+  const initialized = useMinerStore((s) => s.initialized);
   const scanning = useMinerStore((s) => s.scanning);
+  const error = useMinerStore((s) => s.error);
   const loadMiners = useMinerStore((s) => s.loadMiners);
   const startPolling = useMinerStore((s) => s.startPolling);
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
+  const clearError = useMinerStore((s) => s.clearError);
   const canAddMiner = useSubscriptionStore((s) => s.canAddMiner);
   const maxMiners = useSubscriptionStore((s) => s.maxMiners);
   const initSubscription = useSubscriptionStore((s) => s.initialize);
@@ -72,6 +77,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       </View>
 
+      <ErrorBanner
+        message={error}
+        onDismiss={clearError}
+        onRetry={loadMiners}
+      />
+
       {scanning && (
         <View style={styles.scanningBanner}>
           <ActivityIndicator size="small" color="#3B82F6" />
@@ -79,7 +90,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
-      {loading && miners.length === 0 ? (
+      {!initialized || (loading && miners.length === 0) ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#3B82F6" />
           <Text style={styles.loadingText}>Loading miners...</Text>
@@ -90,9 +101,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={styles.emptyText}>
             Add a miner by IP or scan your network
           </Text>
-          <TouchableOpacity style={styles.scanBtn} onPress={scanNetwork}>
-            <Text style={styles.scanBtnText}>Scan Network</Text>
-          </TouchableOpacity>
+          <SubscriptionGate feature="Network scanning">
+            <TouchableOpacity style={styles.scanBtn} onPress={scanNetwork}>
+              <Text style={styles.scanBtnText}>Scan Network</Text>
+            </TouchableOpacity>
+          </SubscriptionGate>
         </View>
       ) : (
         <FlatList
@@ -120,8 +133,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       <TouchableOpacity
         style={[styles.fab, !canAdd && styles.fabDisabled]}
-        onPress={handleAddMiner}
-        disabled={!canAdd}
+        onPress={canAdd ? handleAddMiner : () => navigation.navigate('Subscription')}
       >
         <Text style={styles.fabText}>+</Text>
         {!canAdd && (
