@@ -1,21 +1,43 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Miner } from '../types';
 import { formatHashrate, formatTemperature, formatUptime } from '../utils/formatters';
 
 interface MinerCardProps {
   miner: Miner;
   onPress: (miner: Miner) => void;
+  onDelete?: (miner: Miner) => void;
 }
 
-export function MinerCard({ miner, onPress }: MinerCardProps) {
+export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
   const { status, isOnline } = miner;
   const hashrate = status
     ? formatHashrate(status.hashRate, status.hashRateUnit)
     : '---';
   const temp = status ? formatTemperature(status.temperature) : '---';
 
+  const handleLongPress = () => {
+    if (!onDelete) return;
+    Alert.alert(
+      'Remove Miner',
+      `Remove ${miner.name}? All history will be deleted.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => onDelete(miner),
+        },
+      ]
+    );
+  };
+
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPress(miner)}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(miner)}
+      onLongPress={handleLongPress}
+      delayLongPress={600}
+    >
       <View style={styles.header}>
         <View style={styles.nameRow}>
           <View style={[styles.dot, { backgroundColor: isOnline ? '#22C55E' : '#EF4444' }]} />

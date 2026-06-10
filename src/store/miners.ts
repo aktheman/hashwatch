@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Miner, MinerSnapshot } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
+import { checkMinerAlerts } from '../services/notifications';
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -125,8 +126,13 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   refreshAll: async () => {
+    const prev = get().miners;
     const miners = get().miners;
     await Promise.allSettled(miners.map((m) => get().refreshMiner(m.id)));
+    const current = get().miners;
+    if (current.length > 0) {
+      checkMinerAlerts(prev, current);
+    }
   },
 
   startPolling: (intervalMs: number = 30000) => {

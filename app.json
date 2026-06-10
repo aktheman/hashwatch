@@ -10,7 +10,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.hashwatch.app",
       "infoPlist": {
-        "NSLocalNetworkUsageDescription": "HashWatch needs local network access to discover and monitor BitAxe miners on your network."
+        "NSLocalNetworkUsageDescription": "HashWatch needs local network access to discover and monitor BitAxe miners on your network.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

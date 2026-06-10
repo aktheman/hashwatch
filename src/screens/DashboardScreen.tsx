@@ -1,5 +1,5 @@
-import { useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useEffect, useCallback, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
@@ -34,6 +34,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const handleAddMiner = useCallback(() => {
     navigation.navigate('AddMiner');
   }, [navigation]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await useMinerStore.getState().refreshAll();
+    setRefreshing(false);
+  }, []);
 
   const onlineCount = miners.filter((m) => m.isOnline).length;
   const totalHashrate = miners.reduce(
@@ -91,8 +99,21 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           data={miners}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <MinerCard miner={item} onPress={handleMinerPress} />
+            <MinerCard
+              miner={item}
+              onPress={handleMinerPress}
+              onDelete={() => useMinerStore.getState().removeMiner(item.id)}
+            />
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#3B82F6"
+              colors={['#3B82F6']}
+              progressBackgroundColor="#1F2937"
+            />
+          }
           contentContainerStyle={styles.list}
         />
       )}

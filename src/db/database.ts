@@ -44,7 +44,27 @@ async function initTables(): Promise<void> {
     );
     CREATE INDEX IF NOT EXISTS idx_snapshots_minerid
       ON miner_snapshots(minerId, timestamp);
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
   `);
+}
+
+export async function getSetting(key: string): Promise<string | null> {
+  const d = await getDb();
+  const row = await d.getFirstAsync<{ value: string }>(
+    'SELECT value FROM settings WHERE key = ?', [key]
+  );
+  return row?.value ?? null;
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const d = await getDb();
+  await d.runAsync(
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+    [key, value]
+  );
 }
 
 export async function loadMiners(): Promise<Miner[]> {
