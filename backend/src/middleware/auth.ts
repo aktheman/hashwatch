@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'hashwatch-dev-secret-change-in-prod';
+const raw = process.env.JWT_SECRET;
+if (!raw) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+const JWT_SECRET: string = raw;
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -18,7 +22,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   }
   try {
     const token = header.slice(7);
-    const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const payload = jwt.verify(token, JWT_SECRET) as unknown as { userId: string };
     req.userId = payload.userId;
     next();
   } catch {

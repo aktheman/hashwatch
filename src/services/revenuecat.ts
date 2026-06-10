@@ -7,14 +7,18 @@ import Purchases, {
 import { Platform } from 'react-native';
 
 const API_KEYS = {
-  ios: 'test_uvhzLlUwGqGFEfESgirwkQsFuzO',
-  android: 'test_uvhzLlUwGqGFEfESgirwkQsFuzO',
+  ios: 'YOUR_REVENUECAT_IOS_KEY',
+  android: 'YOUR_REVENUECAT_ANDROID_KEY',
 };
 
 const PRO_MONTHLY_ID = 'hashwatch_pro_monthly';
 
 export async function configureRevenueCat(): Promise<void> {
-  Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  if (__DEV__) {
+    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  } else {
+    Purchases.setLogLevel(LOG_LEVEL.INFO);
+  }
 
   const apiKey = Platform.OS === 'ios' ? API_KEYS.ios : API_KEYS.android;
 
