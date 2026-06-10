@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
 
 export function SubscriptionScreen() {
-  const { isPro, tier, setPro, setFree } = useSubscriptionStore();
+  const { isPro, tier, loading, purchase, restore } = useSubscriptionStore();
 
   return (
     <View style={styles.container}>
@@ -45,14 +45,30 @@ export function SubscriptionScreen() {
             <Text style={styles.currentBadgeText}>Active</Text>
           </View>
         ) : (
-          <TouchableOpacity style={styles.upgradeBtn} onPress={setPro}>
-            <Text style={styles.upgradeBtnText}>Upgrade to Pro</Text>
+          <TouchableOpacity
+            style={[styles.upgradeBtn, loading && styles.btnDisabled]}
+            onPress={purchase}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFF" />
+            ) : (
+              <Text style={styles.upgradeBtnText}>Upgrade to Pro</Text>
+            )}
           </TouchableOpacity>
         )}
       </View>
 
-      <TouchableOpacity style={styles.restoreBtn}>
-        <Text style={styles.restoreBtnText}>Restore Purchases</Text>
+      <TouchableOpacity
+        style={[styles.restoreBtn, loading && styles.btnDisabled]}
+        onPress={restore}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#3B82F6" />
+        ) : (
+          <Text style={styles.restoreBtnText}>Restore Purchases</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -145,6 +161,9 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '700',
     fontSize: 16,
+  },
+  btnDisabled: {
+    opacity: 0.6,
   },
   restoreBtn: {
     padding: 14,

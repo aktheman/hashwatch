@@ -18,8 +18,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const canAddMiner = useSubscriptionStore((s) => s.canAddMiner);
   const maxMiners = useSubscriptionStore((s) => s.maxMiners);
+  const initSubscription = useSubscriptionStore((s) => s.initialize);
 
   useEffect(() => {
+    initSubscription();
     loadMiners();
     const stop = startPolling(30000);
     return stop;
