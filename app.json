@@ -3,12 +3,16 @@
     "name": "HashWatch",
     "slug": "hashwatch",
     "version": "1.0.0",
+    "description": "Real-time BitAxe miner monitoring — track hashrate, temperature, pool stats, and more.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A1A",
+    "primaryColor": "#6C63FF",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hashwatch.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSLocalNetworkUsageDescription": "HashWatch needs local network access to discover and monitor BitAxe miners on your network.",
         "ITSAppUsesNonExemptEncryption": false
@@ -16,12 +20,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0F172A",
+        "backgroundColor": "#0A0A1A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.hashwatch.app",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_WIFI_STATE",
         "INTERNET",

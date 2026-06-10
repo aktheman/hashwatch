@@ -13,6 +13,7 @@ export interface MinerStatus {
   hashRate: number;
   hashRateUnit: string;
   temperature: number;
+  vrTemp: number;
   voltage: number;
   current: number;
   power: number;
@@ -24,8 +25,11 @@ export interface MinerStatus {
   coreVoltage: number;
   frequency: number;
   fanSpeed: number;
+  fanRpm: number;
   pool: string;
+  poolPort: number;
   poolUser: string;
+  poolResponseTime: number;
 }
 
 export interface Miner {
@@ -33,6 +37,8 @@ export interface Miner {
   name: string;
   ip: string;
   port: number;
+  apiPath?: string;
+  statusPath?: string;
   info: MinerInfo | null;
   status: MinerStatus | null;
   lastSeen: number;

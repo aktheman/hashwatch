@@ -11,6 +11,8 @@ import {
   formatPower,
   formatUptime,
   formatNumber,
+  formatWTHs,
+  formatDifficulty,
 } from '../utils/formatters';
 import { theme } from '../theme';
 
@@ -104,14 +106,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <Text style={styles.sectionIcon}>⚡</Text> Mining
         </Text>
         <View style={styles.statsGrid}>
-          <StatWidget
-            label="Hashrate"
-            value={formatHashrate(s.hashRate, s.hashRateUnit)}
-            color={theme.primary}
-          />
-          <StatWidget label="Frequency" value={`${s.frequency} MHz`} color="#8B5CF6" />
-          <StatWidget label="Best Diff" value={s.bestDiff} color={theme.warning} />
-          <StatWidget label="Best Session" value={s.bestSessionDiff} color={theme.warning} />
+          <StatWidget icon="⚡" label="Hashrate" value={formatHashrate(s.hashRate, s.hashRateUnit)} color={theme.primary} />
+          <StatWidget icon="〰" label="Frequency" value={`${s.frequency} MHz`} color="#8B5CF6" />
+          <StatWidget icon="🎯" label="Best Diff" value={formatDifficulty(s.bestDiff)} color={theme.warning} />
+          <StatWidget icon="🏆" label="Best Session" value={formatDifficulty(s.bestSessionDiff)} color={theme.warning} />
         </View>
       </View>
 
@@ -120,16 +118,22 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <Text style={styles.sectionIcon}>🔧</Text> Hardware
         </Text>
         <View style={styles.statsGrid}>
-          <StatWidget
-            label="Temperature"
+          <StatWidget icon="🌡" label="Board Temp"
             value={formatTemperature(s.temperature)}
             color={s.temperature > 70 ? theme.danger : theme.success}
           />
-          <StatWidget label="Voltage" value={formatVoltage(s.voltage)} color={theme.primary} />
-          <StatWidget label="Current" value={`${s.current} mA`} color="#EC4899" />
-          <StatWidget label="Power" value={formatPower(s.power)} color={theme.warning} />
-          <StatWidget label="Core Voltage" value={`${s.coreVoltage} mV`} color="#8B5CF6" />
-          <StatWidget label="Fan Speed" value={`${s.fanSpeed}%`} color="#06B6D4" />
+          {s.vrTemp > 0 && (
+            <StatWidget icon="🔌" label="VR Temp" value={formatTemperature(s.vrTemp)} color="#F97316" />
+          )}
+          <StatWidget icon="⚡" label="Voltage" value={formatVoltage(s.voltage)} color={theme.primary} />
+          <StatWidget icon="🔀" label="Current" value={`${s.current} mA`} color="#EC4899" />
+          <StatWidget icon="🔋" label="Power" value={formatPower(s.power)} color={theme.warning} />
+          <StatWidget icon="📊" label="Efficiency" value={formatWTHs(s.power, s.hashRate, s.hashRateUnit)} color="#10B981" />
+          <StatWidget icon="🔬" label="Core V" value={`${s.coreVoltage} mV`} color="#8B5CF6" />
+          <StatWidget icon="🌀" label="Fan"
+            value={s.fanRpm > 0 ? `${s.fanRpm} RPM (${s.fanSpeed}%)` : `${s.fanSpeed}%`}
+            color="#06B6D4"
+          />
         </View>
       </View>
 
@@ -139,16 +143,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </Text>
         <View style={styles.statsGrid}>
           <StatWidget
-            label="Accepted"
-            value={formatNumber(s.sharesAccepted)}
-            color={theme.success}
+            icon="✓" label="Accepted" value={formatNumber(s.sharesAccepted)} color={theme.success}
           />
-          <StatWidget
-            label="Rejected"
-            value={formatNumber(s.sharesRejected)}
-            color={theme.danger}
-          />
-          <StatWidget label="Uptime" value={formatUptime(s.uptimeSeconds)} color={theme.primary} />
+          <StatWidget icon="✗" label="Rejected" value={formatNumber(s.sharesRejected)} color={theme.danger} />
+          <StatWidget icon="⏱" label="Uptime" value={formatUptime(s.uptimeSeconds)} color={theme.primary} />
         </View>
       </View>
 
@@ -159,12 +157,21 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <View style={styles.poolCard}>
           <View style={styles.poolRow}>
             <Text style={styles.poolLabel}>URL</Text>
-            <Text style={styles.poolValue}>{s.pool || 'N/A'}</Text>
+            <Text style={styles.poolValue}>
+              {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || 'N/A'}
+            </Text>
           </View>
           <View style={styles.poolDivider} />
           <View style={styles.poolRow}>
             <Text style={styles.poolLabel}>User</Text>
             <Text style={styles.poolValue} selectable>{s.poolUser || 'N/A'}</Text>
+          </View>
+          <View style={styles.poolDivider} />
+          <View style={styles.poolRow}>
+            <Text style={styles.poolLabel}>Response Time</Text>
+            <Text style={styles.poolValue}>
+              {s.poolResponseTime > 0 ? `${s.poolResponseTime.toFixed(0)} ms` : 'N/A'}
+            </Text>
           </View>
         </View>
       </View>
@@ -246,15 +253,16 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: theme.surface,
     margin: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: theme.border,
+    boxShadow: `0 4px 20px rgba(0,0,0,0.3)`,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   nameRow: {
     flexDirection: 'row',
@@ -262,36 +270,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 10,
   },
   name: {
     color: theme.text,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 8,
   },
   badgeText: {
     fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   ip: {
     color: theme.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'monospace',
     marginTop: 4,
+    marginLeft: 22,
   },
   hostname: {
     color: theme.textDim,
     fontSize: 12,
     marginTop: 2,
+    marginLeft: 22,
   },
   section: {
     marginHorizontal: 16,

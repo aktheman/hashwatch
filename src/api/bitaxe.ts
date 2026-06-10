@@ -6,14 +6,74 @@ import * as API from './client';
 const TIMEOUT = 5000;
 const isWeb = Platform.OS === 'web';
 
+const INFO_PATHS = [
+  '/api/system/info',
+  '/api/info',
+  '/system/info',
+];
+
+function isBitAxeResponse(data: any): boolean {
+  return !!(data?.hostname || data?.macAddr || data?.chipType || data?.hashRate !== undefined);
+}
+
+function deriveStatusPath(infoPath: string): string {
+  return infoPath.replace(/\/info$/, '/status');
+}
+
+async function fetchUrl(url: string, timeout = 3000): Promise<any> {
+  try {
+    const { data } = isWeb
+      ? await axios.post(`${API.BASE_URL}/api/proxy`, { url, method: 'GET' }, { timeout, validateStatus: () => true })
+      : await axios.get(url, { timeout, validateStatus: () => true });
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+interface FoundPaths {
+  infoPath: string | null;
+  statusPath: string | null;
+}
+
+async function findPaths(ip: string, port: number): Promise<FoundPaths> {
+  let infoPath: string | null = null;
+  let statusPath: string | null = null;
+
+  for (const path of INFO_PATHS) {
+    const url = `http://${ip}:${port}${path}`;
+    const data = await fetchUrl(url);
+    if (data && isBitAxeResponse(data)) {
+      infoPath = path;
+      break;
+    }
+  }
+
+  if (infoPath) {
+    const derived = deriveStatusPath(infoPath);
+    const statusUrl = `http://${ip}:${port}${derived}`;
+    const data = await fetchUrl(statusUrl);
+    if (data && (data.hashRate !== undefined || data.sharesAccepted !== undefined)) {
+      statusPath = derived;
+    }
+  }
+
+  return { infoPath, statusPath };
+}
+
 export class BitAxeClient {
   private ip: string;
   private port: number;
   private client: AxiosInstance;
 
-  constructor(ip: string, port: number = 80) {
+  private apiPath: string;
+  private statusPath: string;
+
+  constructor(ip: string, port: number = 80, apiPath?: string, statusPath?: string) {
     this.ip = ip;
     this.port = port;
+    this.apiPath = apiPath || '/api/system/info';
+    this.statusPath = statusPath || this.apiPath;
     this.client = axios.create({
       baseURL: `http://${ip}:${port}`,
       timeout: TIMEOUT,
@@ -22,15 +82,20 @@ export class BitAxeClient {
   }
 
   private async proxyGet(path: string): Promise<any> {
-    const { data } = await axios.post(
-      `${API.BASE_URL}/api/proxy`,
-      {
-        url: `http://${this.ip}:${this.port}${path}`,
-        method: 'GET',
-      },
-      { timeout: TIMEOUT + 3000 }
-    );
-    return data;
+    try {
+      const { data } = await axios.post(
+        `${API.BASE_URL}/api/proxy`,
+        {
+          url: `http://${this.ip}:${this.port}${path}`,
+          method: 'GET',
+        },
+        { timeout: TIMEOUT + 3000 }
+      );
+      return data;
+    } catch (e: any) {
+      const msg = e.response?.data?.message || e.message || 'Connection failed';
+      throw new Error(msg);
+    }
   }
 
   private async get(path: string): Promise<any> {
@@ -42,7 +107,7 @@ export class BitAxeClient {
   }
 
   async getSystemInfo(): Promise<MinerInfo> {
-    const d = await this.get('/api/system/info');
+    const d = await this.get(this.apiPath);
     return {
       version: d.version,
       chipType: d.chipType,
@@ -56,11 +121,12 @@ export class BitAxeClient {
   }
 
   async getMinerStatus(): Promise<MinerStatus> {
-    const d = await this.get('/api/system/status');
+    const d = await this.get(this.statusPath);
     return {
       hashRate: d.hashRate ?? 0,
-      hashRateUnit: d.hashRateUnit || 'MH/s',
-      temperature: d.temperature ?? 0,
+      hashRateUnit: d.hashRateUnit || 'GH/s',
+      temperature: d.temperature ?? d.temp ?? 0,
+      vrTemp: d.vrTemp ?? 0,
       voltage: d.voltage ?? 0,
       current: d.current ?? 0,
       power: d.power ?? 0,
@@ -69,11 +135,14 @@ export class BitAxeClient {
       bestDiff: d.bestDiff || '0',
       bestSessionDiff: d.bestSessionDiff || '0',
       uptimeSeconds: d.uptimeSeconds ?? 0,
-      coreVoltage: d.coreVoltage ?? 0,
-      frequency: d.frequency ?? 0,
-      fanSpeed: d.fanSpeed ?? 0,
-      pool: d.pool || '',
-      poolUser: d.poolUser || '',
+      coreVoltage: d.coreVoltage ?? d.coreVoltageActual ?? 0,
+      frequency: d.frequency ?? d.actualFrequency ?? 0,
+      fanSpeed: d.fanSpeed ?? d.fanspeed ?? 0,
+      fanRpm: d.fanRpm ?? d.fanrpm ?? 0,
+      pool: d.pool || d.stratumURL || '',
+      poolPort: d.poolPort ?? d.stratumPort ?? 0,
+      poolUser: d.poolUser || d.stratumUser || '',
+      poolResponseTime: d.poolResponseTime ?? d.responseTime ?? 0,
     };
   }
 
@@ -85,25 +154,11 @@ export class BitAxeClient {
     return { info, status };
   }
 
-  static async probe(ip: string, port: number = 80): Promise<boolean> {
-    if (isWeb) {
-      try {
-        const { data } = await axios.post(
-          `${API.BASE_URL}/api/proxy`,
-          { url: `http://${ip}:${port}/api/system/info`, method: 'GET' },
-          { timeout: TIMEOUT }
-        );
-        return !!data?.hostname || !!data?.macAddr;
-      } catch {
-        return false;
-      }
-    }
-    try {
-      const client = new BitAxeClient(ip, port);
-      await client.getSystemInfo();
-      return true;
-    } catch {
-      return false;
-    }
+  static async probe(ip: string, port: number = 80): Promise<FoundPaths | null> {
+    const paths = await findPaths(ip, port);
+    if (!paths.infoPath) return null;
+    return paths;
   }
 }
+
+export type { FoundPaths };

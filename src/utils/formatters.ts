@@ -43,3 +43,26 @@ export function formatUptime(seconds: number): string {
 export function formatNumber(n: number): string {
   return n.toLocaleString();
 }
+
+export function formatDifficulty(diff: string | number): string {
+  const n = typeof diff === 'string' ? parseFloat(diff) : diff;
+  if (isNaN(n) || n === 0) return '0';
+  const units = ['', 'K', 'M', 'G', 'T', 'P'];
+  let val = n;
+  let i = 0;
+  while (val >= 1000 && i < units.length - 1) {
+    val /= 1000;
+    i++;
+  }
+  return `${val.toFixed(1)}${units[i]}`;
+}
+
+export function formatWTHs(power: number, hashRate: number, hashRateUnit: string): string {
+  const th = hashRateUnit === 'TH/s' ? hashRate
+    : hashRateUnit === 'GH/s' ? hashRate / 1000
+    : hashRateUnit === 'MH/s' ? hashRate / 1_000_000
+    : hashRateUnit === 'KH/s' ? hashRate / 1_000_000_000
+    : 0;
+  if (th === 0) return '—';
+  return `${(power / th).toFixed(1)} W/THs`;
+}

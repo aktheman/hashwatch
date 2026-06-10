@@ -8,11 +8,16 @@ interface StatWidgetProps {
   color?: string;
 }
 
-export function StatWidget({ label, value, color = theme.primary }: StatWidgetProps) {
+export function StatWidget({ label, value, icon, color = theme.primary }: StatWidgetProps) {
   return (
-    <View style={[styles.container, { borderLeftColor: color }]}>
-      <Text style={styles.label}>{label}</Text>
+    <View style={[styles.container, { borderColor: color + '20' }]}>
+      {icon && (
+        <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
+          <Text style={[styles.iconText, { color }]}>{icon}</Text>
+        </View>
+      )}
       <Text style={[styles.value, { color }]}>{value}</Text>
+      <Text style={styles.label}>{label}</Text>
     </View>
   );
 }
@@ -22,24 +27,33 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     backgroundColor: theme.surface,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
-    borderLeftWidth: 3,
-    margin: 4,
+    margin: 5,
     borderWidth: 1,
-    borderColor: theme.border,
-    borderLeftColor: undefined as any,
+    gap: 2,
+  },
+  iconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  iconText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   label: {
     color: theme.textDim,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 4,
   },
   value: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
   },
 });

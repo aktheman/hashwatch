@@ -38,17 +38,19 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
-  const formatValue = (v: string) => {
-    const n = parseFloat(v);
-    if (n >= 1000) return `${(n / 1000).toFixed(1)}T`;
-    if (n >= 1) return n.toFixed(1);
-    return n.toFixed(1);
-  };
+  const formatValue = (v: string) => parseFloat(v).toFixed(1);
+
+  const unit = sorted[sorted.length - 1]?.hashRate >= 1e12 ? 'TH/s'
+    : sorted[sorted.length - 1]?.hashRate >= 1e9 ? 'GH/s'
+    : sorted[sorted.length - 1]?.hashRate >= 1e6 ? 'MH/s'
+    : sorted[sorted.length - 1]?.hashRate >= 1e3 ? 'KH/s'
+    : 'H/s';
 
   return (
     <View style={styles.container}>
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartWrapper}>
+        <Text style={styles.yLabel}>{unit}</Text>
         <LineChart
           data={{
             labels: filteredLabels,
@@ -99,6 +101,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
     marginLeft: 4,
+  },
+  yLabel: {
+    position: 'absolute',
+    top: 12,
+    right: 14,
+    color: theme.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
+    zIndex: 10,
   },
   chartWrapper: {
     backgroundColor: theme.surface,

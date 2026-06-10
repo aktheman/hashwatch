@@ -49,7 +49,13 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   addMiner: async (ip: string, port: number = 80, name?: string) => {
     set({ error: null });
     try {
-      const client = new BitAxeClient(ip, port);
+      const found = await BitAxeClient.probe(ip, port);
+      if (!found) {
+        set({ error: `No BitAxe miner found at ${ip}` });
+        throw new Error(`No BitAxe miner found at ${ip}`);
+      }
+      const { infoPath: apiPath, statusPath } = found;
+      const client = new BitAxeClient(ip, port, apiPath!, statusPath || undefined);
       const info = await client.getSystemInfo();
       const status = await client.getMinerStatus();
       const miner: Miner = {
@@ -57,6 +63,8 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         name: name || info.hostname || `BitAxe (${ip})`,
         ip,
         port,
+        apiPath: apiPath || undefined,
+        statusPath: statusPath || undefined,
         info,
         status,
         lastSeen: Date.now(),
@@ -93,7 +101,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === id);
     if (!miner) return;
     try {
-      const client = new BitAxeClient(miner.ip, miner.port);
+      const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath, miner.statusPath);
       const { info, status } = await client.fetchAll();
       const updated: Miner = {
         ...miner,
@@ -120,6 +128,19 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         miners: s.miners.map((m) => (m.id === id ? updated : m)),
       }));
     } catch {
+      const current = get().miners.find((m) => m.id === id);
+      if (!current) return;
+      if (!current.apiPath) {
+        const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
+        if (found?.infoPath) {
+          await DB.saveMiner({ ...current, apiPath: found.infoPath || undefined, statusPath: found.statusPath || undefined });
+          set((s) => ({
+            miners: s.miners.map((m) =>
+              m.id === id ? { ...m, apiPath: found.infoPath || undefined, statusPath: found.statusPath || undefined } : m
+            ),
+          }));
+        }
+      }
       set((s) => ({
         miners: s.miners.map((m) =>
           m.id === id ? { ...m, isOnline: false } : m
@@ -130,8 +151,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   refreshAll: async () => {
     const prev = get().miners;
-    const miners = get().miners;
-    await Promise.allSettled(miners.map((m) => get().refreshMiner(m.id)));
+    await Promise.allSettled(prev.map((m) => get().refreshMiner(m.id)));
     const current = get().miners;
     if (current.length > 0) {
       checkMinerAlerts(prev, current);

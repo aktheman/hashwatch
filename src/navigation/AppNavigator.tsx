@@ -52,14 +52,14 @@ function MainTabs() {
           backgroundColor: theme.surface,
           borderTopColor: theme.border,
           borderTopWidth: 1,
-          paddingBottom: 10,
-          paddingTop: 8,
-          height: 62,
+          paddingBottom: 12,
+          paddingTop: 10,
+          height: 64,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '700',
-          letterSpacing: 0.3,
+          letterSpacing: 0.5,
         },
       })}
     >
@@ -83,7 +83,7 @@ const tabStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    fontSize: 20,
+    fontSize: 22,
     color: theme.textMuted,
   },
   iconFocused: {
@@ -100,7 +100,6 @@ export function AppNavigator() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700', fontSize: 17 },
           contentStyle: { backgroundColor: theme.bg },
-          headerShadowVisible: false,
         }}
       >
         <Stack.Screen

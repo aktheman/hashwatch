@@ -7,6 +7,7 @@ const isWeb = Platform.OS === 'web';
 interface MinerRow {
   id: string; name: string; ip: string; port: number;
   addedAt: number; lastSeen: number;
+  apiPath?: string; statusPath?: string;
 }
 
 let db: SQLiteDatabase | null = null;
@@ -33,7 +34,9 @@ async function initTables(d: any): Promise<void> {
       ip TEXT NOT NULL,
       port INTEGER NOT NULL DEFAULT 80,
       addedAt INTEGER NOT NULL,
-      lastSeen INTEGER NOT NULL DEFAULT 0
+      lastSeen INTEGER NOT NULL DEFAULT 0,
+      apiPath TEXT DEFAULT NULL,
+      statusPath TEXT DEFAULT NULL
     );
     CREATE TABLE IF NOT EXISTS miner_snapshots (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +60,12 @@ async function initTables(d: any): Promise<void> {
       value TEXT NOT NULL
     );
   `);
+  try {
+    await d.execAsync(`ALTER TABLE miners ADD COLUMN apiPath TEXT DEFAULT NULL`);
+  } catch { /* column already exists */ }
+  try {
+    await d.execAsync(`ALTER TABLE miners ADD COLUMN statusPath TEXT DEFAULT NULL`);
+  } catch { /* column already exists */ }
 }
 
 function createWebDb() {
@@ -134,6 +143,8 @@ export async function loadMiners(): Promise<Miner[]> {
     port: r.port,
     addedAt: r.addedAt,
     lastSeen: r.lastSeen,
+    apiPath: r.apiPath || undefined,
+    statusPath: r.statusPath || undefined,
     info: null,
     status: null,
     isOnline: false,
@@ -152,9 +163,9 @@ export async function saveMiner(m: Miner): Promise<void> {
     return;
   }
   await (d as SQLiteDatabase).runAsync(
-    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [m.id, m.name, m.ip, m.port, m.addedAt, m.lastSeen]
+    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, apiPath, statusPath)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [m.id, m.name, m.ip, m.port, m.addedAt, m.lastSeen, m.apiPath || null, m.statusPath || null]
   );
 }
 

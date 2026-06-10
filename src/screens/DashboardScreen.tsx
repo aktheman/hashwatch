@@ -5,6 +5,7 @@ import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Miner } from '../types';
+import { formatWTHs } from '../utils/formatters';
 import { theme } from '../theme';
 
 interface DashboardScreenProps {
@@ -58,6 +59,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     (sum, m) => sum + (m.status?.hashRate ?? 0),
     0
   );
+  const totalPower = miners.reduce(
+    (sum, m) => sum + (m.status?.power ?? 0),
+    0
+  );
+  const avgTemp = miners.filter((m) => m.status?.temperature)
+    .reduce((sum, m, _, arr) => sum + (m.status?.temperature ?? 0) / arr.length, 0);
 
   const canAdd = canAddMiner(miners.length);
 
@@ -71,7 +78,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>HashWatch</Text>
+        <View>
+          <Text style={styles.headerTitle}>HashWatch</Text>
+          <Text style={styles.headerSub}>
+            <Text style={styles.liveDot}>●</Text> Live Monitor
+          </Text>
+        </View>
         <TouchableOpacity
           style={styles.settingsBtn}
           onPress={() => navigation.navigate('Settings')}
@@ -98,7 +110,30 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={[styles.summaryValue, { color: theme.primary }]}>
             {formatTotal(totalHashrate)}
           </Text>
-          <Text style={styles.summaryLabel}>Total Hash</Text>
+          <Text style={styles.summaryLabel}>Hashrate</Text>
+        </View>
+      </View>
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>🔌</Text>
+          <Text style={[styles.summaryValue, { color: theme.warning }]}>
+            {totalPower.toFixed(1)}
+          </Text>
+          <Text style={styles.summaryLabel}>Power (W)</Text>
+        </View>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>🌡</Text>
+          <Text style={[styles.summaryValue, { color: avgTemp > 70 ? theme.danger : theme.success }]}>
+            {avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°
+          </Text>
+          <Text style={styles.summaryLabel}>Avg Temp</Text>
+        </View>
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryIcon}>📊</Text>
+          <Text style={[styles.summaryValue, { color: theme.accent }]}>
+            {formatWTHs(totalPower, totalHashrate, 'GH/s')}
+          </Text>
+          <Text style={styles.summaryLabel}>Efficiency</Text>
         </View>
       </View>
 
@@ -138,8 +173,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={styles.emptyIcon}>⬡</Text>
           <Text style={styles.emptyTitle}>No Miners Yet</Text>
           <Text style={styles.emptyText}>
-            Add a miner or scan your local network
+            Add your first BitAxe miner to start monitoring
           </Text>
+          <View style={styles.emptySteps}>
+            <Text style={styles.stepText}>1. Know your miner's IP address</Text>
+            <Text style={styles.stepText}>2. Tap the + button below</Text>
+            <Text style={styles.stepText}>3. Enter the IP and a name</Text>
+          </View>
           <View style={styles.emptyActions}>
             <TouchableOpacity style={styles.primaryBtn} onPress={handleAddMiner}>
               <Text style={styles.primaryBtnText}>Add Miner</Text>
@@ -203,10 +243,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.5,
   },
+  headerSub: {
+    color: theme.textDim,
+    fontSize: 12,
+    marginTop: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  liveDot: {
+    color: theme.success,
+    fontSize: 8,
+    marginRight: 4,
+  },
   settingsBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     backgroundColor: theme.surface,
     justifyContent: 'center',
     alignItems: 'center',
@@ -219,13 +271,13 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 10,
+    paddingVertical: 6,
+    gap: 8,
   },
   summaryCard: {
     flex: 1,
     backgroundColor: theme.surface,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
@@ -241,7 +293,7 @@ const styles = StyleSheet.create({
     color: theme.text,
   },
   summaryLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: theme.textDim,
     fontWeight: '600',
     textTransform: 'uppercase',
@@ -308,8 +360,17 @@ const styles = StyleSheet.create({
     color: theme.textDim,
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     lineHeight: 20,
+  },
+  emptySteps: {
+    marginBottom: 24,
+    gap: 6,
+  },
+  stepText: {
+    color: theme.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
   },
   emptyActions: {
     flexDirection: 'row',
@@ -347,13 +408,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 60,
+    height: 60,
+    borderRadius: 18,
     backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: `0 4px 16px ${theme.glow}`,
+    boxShadow: `0 4px 20px ${theme.glow}`,
+    borderWidth: 1,
+    borderColor: theme.primaryLight + '40',
   },
   fabDisabled: {
     backgroundColor: theme.textMuted,
