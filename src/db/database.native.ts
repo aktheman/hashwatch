@@ -64,16 +64,14 @@ async function initTables(d: any): Promise<void> {
       value TEXT NOT NULL
     );
   `);
-  for (const col of ['apiPath', 'statusPath', 'info', 'status']) {
-  for (const col of ['apiPath', 'statusPath', 'info', 'status']) {
+  const cols = ['apiPath', 'statusPath', 'info', 'status'];
+  for (const col of cols) {
     try {
       await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
     } catch { }
   }
-  // clean snapshots older than 30 days
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   await d.runAsync('DELETE FROM miner_snapshots WHERE timestamp < ?', [cutoff]);
-}
 }
 
 export async function getSetting(key: string): Promise<string | null> {
@@ -104,8 +102,8 @@ export async function loadMiners(): Promise<Miner[]> {
     lastSeen: r.lastSeen,
     apiPath: r.apiPath || undefined,
     statusPath: r.statusPath || undefined,
-    info: r.info ? JSON.parse(r.info) : null,
-    status: r.status ? JSON.parse(r.status) : null,
+    info: r.info && r.info !== 'null' && r.info !== '' ? JSON.parse(r.info) : null,
+    status: r.status && r.status !== 'null' && r.status !== '' ? JSON.parse(r.status) : null,
     isOnline: false,
   }));
 }
