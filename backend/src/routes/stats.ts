@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { broadcast } from '../index';
+import { broadcast } from '../ws';
 
 export const statsRouter = Router();
 statsRouter.use(authMiddleware);
