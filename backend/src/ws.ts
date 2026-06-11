@@ -2,7 +2,11 @@ import { WebSocketServer, WebSocket } from 'ws';
 import jwt from 'jsonwebtoken';
 import { createServer } from 'http';
 
-const JWT_SECRET: string = process.env.JWT_SECRET || 'dev-secret-do-not-use-in-prod';
+const raw = process.env.JWT_SECRET;
+if (!raw) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+const JWT_SECRET: string = raw;
 
 interface AuthWebSocket extends WebSocket {
   userId?: string;
