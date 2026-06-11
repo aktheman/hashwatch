@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { getExtra } from '../constants';
 
 let _getToken: () => string | null = () => null;
 let _onUnauthorized: () => void = () => {};
@@ -11,7 +12,7 @@ export function configureClient(opts: {
   _onUnauthorized = opts.onUnauthorized;
 }
 
-export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
+export const BASE_URL = getExtra().apiUrl;
 
 const client: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -34,7 +35,7 @@ client.interceptors.response.use(
       _onUnauthorized();
     }
     return Promise.reject(err);
-  }
+  },
 );
 
 export interface AuthResponse {
