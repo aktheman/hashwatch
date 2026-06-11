@@ -76,3 +76,31 @@ export async function pushStats(minerId: string, stats: any) {
   const res = await client.post(`/api/stats/${minerId}`, stats);
   return res.data;
 }
+
+export async function updateMinerAPI(
+  id: string,
+  data: { name?: string; ip?: string; port?: number },
+) {
+  const res = await client.put(`/api/miners/${id}`, data);
+  return res.data;
+}
+
+export async function getSettings() {
+  const res = await client.get('/api/settings');
+  return res.data;
+}
+
+export async function putSetting(key: string, value: string) {
+  const res = await client.put('/api/settings', { key, value });
+  return res.data;
+}
+
+export async function deleteSetting(key: string) {
+  const res = await client.delete(`/api/settings/${key}`);
+  return res.data;
+}
+
+export async function validateReceipt(receipt: string, productId: string) {
+  const res = await client.post('/api/receipt/validate', { receipt, productId });
+  return res.data;
+}
