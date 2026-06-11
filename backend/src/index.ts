@@ -9,11 +9,7 @@ import { statsRouter } from './routes/stats';
 import { proxyRouter } from './routes/proxy';
 import { pushRouter } from './routes/push';
 
-const raw = process.env.JWT_SECRET;
-if (!raw) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
-const JWT_SECRET: string = raw;
+const JWT_SECRET: string = process.env.JWT_SECRET || 'dev-secret-do-not-use-in-prod';
 
 const app = express();
 const server = createServer(app);
