@@ -9,6 +9,7 @@ import { MinerDetailScreen } from '../screens/MinerDetailScreen';
 import { AddMinerScreen } from '../screens/AddMinerScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
+import { PoolsScreen } from '../screens/PoolsScreen';
 import { useTheme } from '../theme';
 
 type RootStackParamList = {
@@ -20,6 +21,7 @@ type RootStackParamList = {
 
 type TabParamList = {
   Dashboard: undefined;
+  Pools: undefined;
   Settings: undefined;
 };
 
@@ -30,6 +32,7 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const theme = useTheme();
   const icons: Record<string, string> = {
     Dashboard: '⬡',
+    Pools: '🌊',
     Settings: '⚙',
   };
   return (
@@ -46,9 +49,7 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused }) => (
-          <TabIcon label={route.name} focused={focused} />
-        ),
+        tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
@@ -66,16 +67,9 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ headerShown: false }}
-      />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Pools" component={PoolsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }
@@ -92,21 +86,13 @@ export function AppNavigator() {
           contentStyle: { backgroundColor: theme.bg },
         }}
       >
-        <Stack.Screen
-          name="MainTabs"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
         <Stack.Screen
           name="MinerDetail"
           component={MinerDetailScreen}
           options={{ title: 'Miner Details' }}
         />
-        <Stack.Screen
-          name="AddMiner"
-          component={AddMinerScreen}
-          options={{ title: 'Add Miner' }}
-        />
+        <Stack.Screen name="AddMiner" component={AddMinerScreen} options={{ title: 'Add Miner' }} />
         <Stack.Screen
           name="Subscription"
           component={SubscriptionScreen}
