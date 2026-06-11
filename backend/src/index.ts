@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { authRouter } from './routes/auth';
 import { minersRouter } from './routes/miners';
@@ -17,6 +18,24 @@ createWebSocketServer(server, '/ws');
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many requests' },
+});
+app.use('/api/', limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many auth attempts' },
+});
+app.use('/api/auth', authLimiter);
 
 app.use('/api/auth', authRouter);
 app.use('/api/miners', minersRouter);
