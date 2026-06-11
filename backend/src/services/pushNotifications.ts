@@ -1,7 +1,4 @@
-import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import { query } from '../db';
-
-const expo = new Expo();
 
 async function getPushTokensForUser(userId: string): Promise<string[]> {
   const result = await query('SELECT token FROM push_tokens WHERE userId = $1', [userId]);
@@ -17,11 +14,14 @@ export async function sendPushNotification(
   const tokens = await getPushTokensForUser(userId);
   if (tokens.length === 0) return;
 
-  const messages: ExpoPushMessage[] = tokens
-    .filter((token) => Expo.isExpoPushToken(token))
-    .map((token) => ({
+  const ExpoModule: any = await import('expo-server-sdk');
+  const expo = new ExpoModule.Expo();
+
+  const messages = tokens
+    .filter((token: string) => ExpoModule.Expo.isExpoPushToken(token))
+    .map((token: string) => ({
       to: token,
-      sound: 'default',
+      sound: 'default' as const,
       title,
       body,
       data: data || {},
