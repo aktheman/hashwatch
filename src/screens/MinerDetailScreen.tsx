@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { Miner, MinerSnapshot } from '../types';
@@ -14,7 +14,7 @@ import {
   formatWTHs,
   formatDifficulty,
 } from '../utils/formatters';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
@@ -22,6 +22,188 @@ interface MinerDetailScreenProps {
 }
 
 export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+    },
+    content: {
+      paddingBottom: 40,
+    },
+    center: {
+      flex: 1,
+      backgroundColor: theme.bg,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 32,
+    },
+    offlineIcon: {
+      fontSize: 48,
+      marginBottom: 16,
+      color: theme.textMuted,
+    },
+    offlineText: {
+      color: theme.danger,
+      fontSize: 18,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    offlineSubtext: {
+      color: theme.textDim,
+      fontSize: 14,
+      marginBottom: 20,
+    },
+    retryBtn: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 10,
+      borderRadius: 12,
+    },
+    retryBtnText: {
+      color: '#FFF',
+      fontWeight: '600',
+    },
+    header: {
+      padding: 16,
+      backgroundColor: theme.surface,
+      margin: 16,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.border,
+      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+    },
+    headerTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    dot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      marginRight: 10,
+    },
+    name: {
+      color: theme.text,
+      fontSize: 22,
+      fontWeight: '800',
+      letterSpacing: -0.3,
+    },
+    badge: {
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 8,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 0.8,
+    },
+    ip: {
+      color: theme.textMuted,
+      fontSize: 12,
+      fontFamily: 'monospace',
+      marginTop: 4,
+      marginLeft: 22,
+    },
+    hostname: {
+      color: theme.textDim,
+      fontSize: 12,
+      marginTop: 2,
+      marginLeft: 22,
+    },
+    section: {
+      marginHorizontal: 16,
+      marginTop: 16,
+    },
+    sectionTitle: {
+      color: theme.text,
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    sectionIcon: {
+      fontSize: 14,
+      marginRight: 4,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    poolCard: {
+      backgroundColor: theme.surface,
+      borderRadius: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    poolRow: {
+      paddingVertical: 4,
+    },
+    poolDivider: {
+      height: 1,
+      backgroundColor: theme.border,
+      marginVertical: 6,
+    },
+    poolLabel: {
+      color: theme.textDim,
+      fontSize: 11,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 2,
+    },
+    poolValue: {
+      color: theme.text,
+      fontSize: 14,
+      fontFamily: 'monospace',
+    },
+    deleteBtn: {
+      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(239, 68, 68, 0.3)',
+    },
+    deleteBtnText: {
+      color: theme.danger,
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    confirmBox: {
+      backgroundColor: theme.surface,
+      borderRadius: 12,
+      padding: 14,
+      marginTop: 8,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    confirmText: {
+      color: theme.textDim,
+      fontSize: 13,
+      marginBottom: 10,
+      lineHeight: 18,
+    },
+    confirmBtn: {
+      backgroundColor: theme.danger,
+      padding: 10,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    confirmBtnText: {
+      color: '#FFF',
+      fontWeight: '700',
+      fontSize: 14,
+    },
+  }), [theme]);
   const { minerId } = route.params;
   const miners = useMinerStore((s) => s.miners);
   const refreshMiner = useMinerStore((s) => s.refreshMiner);
@@ -208,184 +390,3 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-  },
-  content: {
-    paddingBottom: 40,
-  },
-  center: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  offlineIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-    color: theme.textMuted,
-  },
-  offlineText: {
-    color: theme.danger,
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  offlineSubtext: {
-    color: theme.textDim,
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  retryBtn: {
-    backgroundColor: theme.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  retryBtnText: {
-    color: '#FFF',
-    fontWeight: '600',
-  },
-  header: {
-    padding: 16,
-    backgroundColor: theme.surface,
-    margin: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: theme.border,
-    boxShadow: `0 4px 20px rgba(0,0,0,0.3)`,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 10,
-  },
-  name: {
-    color: theme.text,
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  ip: {
-    color: theme.textMuted,
-    fontSize: 12,
-    fontFamily: 'monospace',
-    marginTop: 4,
-    marginLeft: 22,
-  },
-  hostname: {
-    color: theme.textDim,
-    fontSize: 12,
-    marginTop: 2,
-    marginLeft: 22,
-  },
-  section: {
-    marginHorizontal: 16,
-    marginTop: 16,
-  },
-  sectionTitle: {
-    color: theme.text,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  sectionIcon: {
-    fontSize: 14,
-    marginRight: 4,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  poolCard: {
-    backgroundColor: theme.surface,
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  poolRow: {
-    paddingVertical: 4,
-  },
-  poolDivider: {
-    height: 1,
-    backgroundColor: theme.border,
-    marginVertical: 6,
-  },
-  poolLabel: {
-    color: theme.textDim,
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  poolValue: {
-    color: theme.text,
-    fontSize: 14,
-    fontFamily: 'monospace',
-  },
-  deleteBtn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-  },
-  deleteBtnText: {
-    color: theme.danger,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  confirmBox: {
-    backgroundColor: theme.surface,
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  confirmText: {
-    color: theme.textDim,
-    fontSize: 13,
-    marginBottom: 10,
-    lineHeight: 18,
-  },
-  confirmBtn: {
-    backgroundColor: theme.danger,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  confirmBtnText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-});

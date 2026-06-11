@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '../theme';
+import { useMemo } from 'react';
+import { useTheme } from '../theme';
 
 interface StatWidgetProps {
   label: string;
@@ -8,7 +9,45 @@ interface StatWidgetProps {
   color?: string;
 }
 
-export function StatWidget({ label, value, icon, color = theme.primary }: StatWidgetProps) {
+export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetProps) {
+  const theme = useTheme();
+  const color = colorProp ?? theme.primary;
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      minWidth: '45%',
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      padding: 14,
+      margin: 5,
+      borderWidth: 1,
+      gap: 2,
+    },
+    iconCircle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    iconText: {
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    label: {
+      color: theme.textDim,
+      fontSize: 10,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    value: {
+      fontSize: 20,
+      fontWeight: '800',
+    },
+  }), [theme]);
+
   return (
     <View style={[styles.container, { borderColor: color + '20' }]}>
       {icon && (
@@ -21,39 +60,3 @@ export function StatWidget({ label, value, icon, color = theme.primary }: StatWi
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    padding: 14,
-    margin: 5,
-    borderWidth: 1,
-    gap: 2,
-  },
-  iconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  iconText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  label: {
-    color: theme.textDim,
-    fontSize: 10,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  value: {
-    fontSize: 20,
-    fontWeight: '800',
-  },
-});

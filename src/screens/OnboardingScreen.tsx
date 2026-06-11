@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, FlatList,
 } from 'react-native';
 import { setSetting } from '../db/database';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -35,6 +35,7 @@ interface Props {
 }
 
 export function OnboardingScreen({ onComplete }: Props) {
+  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -69,6 +70,97 @@ export function OnboardingScreen({ onComplete }: Props) {
     inputRange: slides.map((_, i) => i * width),
     outputRange: slides.map((_, i) => (i === currentIndex ? 1 : 0.3)),
   });
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+    },
+    skipBtn: {
+      position: 'absolute',
+      top: 60,
+      right: 20,
+      zIndex: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      backgroundColor: theme.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    skipText: {
+      color: theme.textDim,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    slide: {
+      width,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    iconWrap: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: theme.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 28,
+      borderWidth: 1,
+      borderColor: theme.border,
+      boxShadow: `0 0 30px ${theme.glow}`,
+    },
+    icon: {
+      fontSize: 42,
+    },
+    title: {
+      color: theme.text,
+      fontSize: 24,
+      fontWeight: '800',
+      textAlign: 'center',
+      marginBottom: 12,
+      letterSpacing: -0.3,
+    },
+    subtitle: {
+      color: theme.textDim,
+      fontSize: 15,
+      textAlign: 'center',
+      lineHeight: 22,
+      maxWidth: 300,
+    },
+    bottom: {
+      paddingHorizontal: 40,
+      paddingBottom: 50,
+      alignItems: 'center',
+    },
+    dots: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 36,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: theme.primary,
+    },
+    btn: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: 48,
+      paddingVertical: 16,
+      borderRadius: 16,
+      width: '100%',
+      alignItems: 'center',
+      boxShadow: `0 4px 20px ${theme.glow}`,
+    },
+    btnText: {
+      color: '#FFF',
+      fontSize: 17,
+      fontWeight: '700',
+    },
+  }), [theme]);
 
   return (
     <View style={styles.container}>
@@ -118,94 +210,3 @@ export function OnboardingScreen({ onComplete }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-  },
-  skipBtn: {
-    position: 'absolute',
-    top: 60,
-    right: 20,
-    zIndex: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: theme.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  skipText: {
-    color: theme.textDim,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  slide: {
-    width,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  iconWrap: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: theme.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 28,
-    borderWidth: 1,
-    borderColor: theme.border,
-    boxShadow: `0 0 30px ${theme.glow}`,
-  },
-  icon: {
-    fontSize: 42,
-  },
-  title: {
-    color: theme.text,
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginBottom: 12,
-    letterSpacing: -0.3,
-  },
-  subtitle: {
-    color: theme.textDim,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 300,
-  },
-  bottom: {
-    paddingHorizontal: 40,
-    paddingBottom: 50,
-    alignItems: 'center',
-  },
-  dots: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 36,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: theme.primary,
-  },
-  btn: {
-    backgroundColor: theme.primary,
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 16,
-    width: '100%',
-    alignItems: 'center',
-    boxShadow: `0 4px 20px ${theme.glow}`,
-  },
-  btnText: {
-    color: '#FFF',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-});

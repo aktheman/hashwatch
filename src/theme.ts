@@ -1,4 +1,8 @@
-export const theme = {
+import { useSyncExternalStore } from 'react';
+
+export type Theme = typeof darkTheme;
+
+export const darkTheme = {
   bg: '#0A0A1A',
   surface: '#13132B',
   surfaceLight: '#1A1A3E',
@@ -22,3 +26,59 @@ export const theme = {
   glowDanger: 'rgba(239, 68, 68, 0.3)',
   glowWarning: 'rgba(245, 158, 11, 0.3)',
 };
+
+export const lightTheme: Theme = {
+  bg: '#F8F9FC',
+  surface: '#FFFFFF',
+  surfaceLight: '#F0F1F7',
+  border: '#DEE0EC',
+  primary: '#5B52E6',
+  primaryLight: '#7C75FF',
+  primaryDark: '#4F46E5',
+  accent: '#2563EB',
+  success: '#059669',
+  successLight: '#34D399',
+  danger: '#DC2626',
+  dangerLight: '#F87171',
+  warning: '#D97706',
+  warningLight: '#FBBF24',
+  info: '#0891B2',
+  text: '#16162E',
+  textDim: '#6D6D89',
+  textMuted: '#9898B2',
+  glow: 'rgba(91, 82, 230, 0.12)',
+  glowSuccess: 'rgba(5, 150, 105, 0.12)',
+  glowDanger: 'rgba(220, 38, 38, 0.12)',
+  glowWarning: 'rgba(217, 119, 6, 0.12)',
+};
+
+let _current: Theme = darkTheme;
+const listeners = new Set<() => void>();
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+function getSnapshot() {
+  return _current;
+}
+
+export function setTheme(t: Theme) {
+  _current = t;
+  listeners.forEach((cb) => cb());
+}
+
+export function getTheme() {
+  return _current;
+}
+
+export function useTheme(): Theme {
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
+
+export const theme = new Proxy({} as Theme, {
+  get(_target, prop) {
+    return (_current as any)[prop];
+  },
+});

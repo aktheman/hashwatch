@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
@@ -6,13 +6,14 @@ import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Miner } from '../types';
 import { formatWTHs } from '../utils/formatters';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 interface DashboardScreenProps {
   navigation: any;
 }
 
 export function DashboardScreen({ navigation }: DashboardScreenProps) {
+  const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const loading = useMinerStore((s) => s.loading);
   const initialized = useMinerStore((s) => s.initialized);
@@ -74,6 +75,211 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
     return v.toFixed(0);
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+    },
+    headerBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 8,
+    },
+    headerTitle: {
+      color: theme.text,
+      fontSize: 26,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+    },
+    headerSub: {
+      color: theme.textDim,
+      fontSize: 12,
+      marginTop: 2,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    liveDot: {
+      color: theme.success,
+      fontSize: 8,
+      marginRight: 4,
+    },
+    settingsBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: theme.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    settingsIcon: {
+      fontSize: 16,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+      gap: 8,
+    },
+    summaryCard: {
+      flex: 1,
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      padding: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    summaryIcon: {
+      fontSize: 16,
+      marginBottom: 4,
+    },
+    summaryValue: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: theme.text,
+    },
+    summaryLabel: {
+      fontSize: 10,
+      color: theme.textDim,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginTop: 2,
+    },
+    upgradeBanner: {
+      backgroundColor: 'rgba(108, 99, 255, 0.1)',
+      borderWidth: 1,
+      borderColor: theme.primary,
+      borderRadius: 10,
+      padding: 10,
+      marginHorizontal: 16,
+      marginBottom: 8,
+      alignItems: 'center',
+    },
+    upgradeBannerText: {
+      color: theme.primaryLight,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    scanningBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: 8,
+      marginHorizontal: 16,
+      borderRadius: 10,
+      gap: 8,
+      marginBottom: 8,
+    },
+    scanningText: {
+      color: theme.primaryLight,
+      fontSize: 13,
+      fontWeight: '500',
+    },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 32,
+    },
+    loadingText: {
+      color: theme.textDim,
+      marginTop: 12,
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    emptyIcon: {
+      fontSize: 48,
+      color: theme.textMuted,
+      marginBottom: 16,
+    },
+    emptyTitle: {
+      color: theme.text,
+      fontSize: 20,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    emptyText: {
+      color: theme.textDim,
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 16,
+      lineHeight: 20,
+    },
+    emptySteps: {
+      marginBottom: 24,
+      gap: 6,
+    },
+    stepText: {
+      color: theme.textMuted,
+      fontSize: 13,
+      textAlign: 'center',
+    },
+    emptyActions: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    primaryBtn: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 12,
+    },
+    primaryBtnText: {
+      color: '#FFF',
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    secondaryBtn: {
+      backgroundColor: theme.surface,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    secondaryBtnText: {
+      color: theme.text,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    list: {
+      paddingTop: 4,
+      paddingBottom: 100,
+    },
+    fab: {
+      position: 'absolute',
+      right: 20,
+      bottom: 24,
+      width: 60,
+      height: 60,
+      borderRadius: 18,
+      backgroundColor: theme.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      boxShadow: `0 4px 20px ${theme.glow}`,
+      borderWidth: 1,
+      borderColor: theme.primaryLight + '40',
+    },
+    fabDisabled: {
+      backgroundColor: theme.textMuted,
+    },
+    fabText: {
+      color: '#FFF',
+      fontSize: 28,
+      fontWeight: '400',
+      lineHeight: 30,
+    },
+  }), [theme]);
 
   return (
     <View style={styles.container}>
@@ -223,208 +429,3 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-  },
-  headerBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  headerTitle: {
-    color: theme.text,
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  headerSub: {
-    color: theme.textDim,
-    fontSize: 12,
-    marginTop: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  liveDot: {
-    color: theme.success,
-    fontSize: 8,
-    marginRight: 4,
-  },
-  settingsBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: theme.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  settingsIcon: {
-    fontSize: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    gap: 8,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  summaryIcon: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  summaryValue: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: theme.text,
-  },
-  summaryLabel: {
-    fontSize: 10,
-    color: theme.textDim,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 2,
-  },
-  upgradeBanner: {
-    backgroundColor: 'rgba(108, 99, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: theme.primary,
-    borderRadius: 10,
-    padding: 10,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  upgradeBannerText: {
-    color: theme.primaryLight,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  scanningBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.surface,
-    borderWidth: 1,
-    borderColor: theme.border,
-    padding: 8,
-    marginHorizontal: 16,
-    borderRadius: 10,
-    gap: 8,
-    marginBottom: 8,
-  },
-  scanningText: {
-    color: theme.primaryLight,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  loadingText: {
-    color: theme.textDim,
-    marginTop: 12,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  emptyIcon: {
-    fontSize: 48,
-    color: theme.textMuted,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    color: theme.text,
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  emptyText: {
-    color: theme.textDim,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  emptySteps: {
-    marginBottom: 24,
-    gap: 6,
-  },
-  stepText: {
-    color: theme.textMuted,
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  emptyActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  primaryBtn: {
-    backgroundColor: theme.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  primaryBtnText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  secondaryBtn: {
-    backgroundColor: theme.surface,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  secondaryBtnText: {
-    color: theme.text,
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  list: {
-    paddingTop: 4,
-    paddingBottom: 100,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 18,
-    backgroundColor: theme.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: `0 4px 20px ${theme.glow}`,
-    borderWidth: 1,
-    borderColor: theme.primaryLight + '40',
-  },
-  fabDisabled: {
-    backgroundColor: theme.textMuted,
-  },
-  fabText: {
-    color: '#FFF',
-    fontSize: 28,
-    fontWeight: '400',
-    lineHeight: 30,
-  },
-});

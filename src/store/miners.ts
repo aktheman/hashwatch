@@ -3,6 +3,8 @@ import { Miner, MinerSnapshot } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
+import { pushStats } from '../api/client';
+import { useAuthStore } from './auth';
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -111,7 +113,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         isOnline: true,
       };
       await DB.saveMiner(updated);
-      await DB.saveSnapshot({
+      const snapshot = {
         minerId: id,
         timestamp: Date.now(),
         hashRate: status.hashRate,
@@ -123,7 +125,12 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         sharesRejected: status.sharesRejected,
         uptimeSeconds: status.uptimeSeconds,
         frequency: status.frequency,
-      });
+      };
+      await DB.saveSnapshot(snapshot);
+      const token = useAuthStore.getState().token;
+      if (token) {
+        pushStats(id, snapshot).catch(() => {});
+      }
       set((s) => ({
         miners: s.miners.map((m) => (m.id === id ? updated : m)),
       }));

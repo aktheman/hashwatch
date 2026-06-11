@@ -32,5 +32,11 @@ CREATE TABLE IF NOT EXISTS miner_snapshots (
   frequency REAL NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS push_tokens (
+  token TEXT PRIMARY KEY NOT NULL,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);
 CREATE INDEX IF NOT EXISTS idx_snapshots_minerId ON miner_snapshots(minerId, timestamp);

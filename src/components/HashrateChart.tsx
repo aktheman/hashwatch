@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { useMemo } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 interface HashrateChartProps {
   snapshots: MinerSnapshot[];
@@ -9,6 +10,56 @@ interface HashrateChartProps {
 }
 
 export function HashrateChart({ snapshots, title }: HashrateChartProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginVertical: 8,
+    },
+    title: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: '700',
+      marginBottom: 12,
+      marginLeft: 4,
+    },
+    yLabel: {
+      position: 'absolute',
+      top: 12,
+      right: 14,
+      color: theme.textMuted,
+      fontSize: 10,
+      fontWeight: '600',
+      zIndex: 10,
+    },
+    chartWrapper: {
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    chart: {
+      borderRadius: 12,
+    },
+    empty: {
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: 28,
+      alignItems: 'center',
+      marginVertical: 8,
+      gap: 8,
+    },
+    emptyIcon: {
+      fontSize: 32,
+    },
+    emptyText: {
+      color: theme.textDim,
+      fontSize: 14,
+    },
+  }), [theme]);
+
   if (snapshots.length < 2) {
     return (
       <View style={styles.empty}>
@@ -90,52 +141,3 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-  },
-  title: {
-    color: theme.text,
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  yLabel: {
-    position: 'absolute',
-    top: 12,
-    right: 14,
-    color: theme.textMuted,
-    fontSize: 10,
-    fontWeight: '600',
-    zIndex: 10,
-  },
-  chartWrapper: {
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  chart: {
-    borderRadius: 12,
-  },
-  empty: {
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: theme.border,
-    padding: 28,
-    alignItems: 'center',
-    marginVertical: 8,
-    gap: 8,
-  },
-  emptyIcon: {
-    fontSize: 32,
-  },
-  emptyText: {
-    color: theme.textDim,
-    fontSize: 14,
-  },
-});

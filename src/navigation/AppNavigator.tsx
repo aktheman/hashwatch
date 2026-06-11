@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,7 +9,7 @@ import { MinerDetailScreen } from '../screens/MinerDetailScreen';
 import { AddMinerScreen } from '../screens/AddMinerScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 type RootStackParamList = {
   MainTabs: undefined;
@@ -26,13 +27,14 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
+  const theme = useTheme();
   const icons: Record<string, string> = {
     Dashboard: '⬡',
     Settings: '⚙',
   };
   return (
-    <View style={tabStyles.iconContainer}>
-      <Text style={[tabStyles.icon, focused && tabStyles.iconFocused]}>
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ fontSize: 22, color: focused ? theme.primary : theme.textMuted }}>
         {icons[label] || '•'}
       </Text>
     </View>
@@ -40,6 +42,7 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 }
 
 function MainTabs() {
+  const theme = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -77,21 +80,8 @@ function MainTabs() {
   );
 }
 
-const tabStyles = StyleSheet.create({
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 22,
-    color: theme.textMuted,
-  },
-  iconFocused: {
-    color: theme.primary,
-  },
-});
-
 export function AppNavigator() {
+  const theme = useTheme();
   return (
     <NavigationContainer>
       <Stack.Navigator

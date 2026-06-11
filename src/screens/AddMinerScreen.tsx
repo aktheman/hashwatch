@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, StyleSheet,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 interface AddMinerScreenProps {
   navigation: any;
 }
 
 export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
+  const theme = useTheme();
   const [ip, setIp] = useState('');
   const [name, setName] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -70,6 +71,148 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       setConnecting(false);
     }
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+      padding: 16,
+    },
+    scrollContent: {
+      paddingBottom: 40,
+    },
+    card: {
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    sectionTitle: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    input: {
+      backgroundColor: theme.surfaceLight,
+      borderRadius: 10,
+      padding: 14,
+      color: theme.text,
+      fontSize: 15,
+      fontFamily: 'monospace',
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    primaryBtn: {
+      backgroundColor: theme.primary,
+      borderRadius: 12,
+      padding: 14,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    primaryBtnText: {
+      color: '#FFF',
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    secondaryBtn: {
+      backgroundColor: theme.surfaceLight,
+      borderRadius: 12,
+      padding: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    secondaryBtnText: {
+      color: theme.text,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    btnDisabled: {
+      opacity: 0.5,
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: theme.border,
+    },
+    dividerText: {
+      color: theme.textMuted,
+      marginHorizontal: 12,
+      fontSize: 12,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    foundSection: {
+      marginTop: 8,
+    },
+    foundTitle: {
+      color: theme.success,
+      fontSize: 13,
+      fontWeight: '700',
+      marginBottom: 10,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    foundItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.surface,
+      padding: 14,
+      borderRadius: 12,
+      marginBottom: 6,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    foundLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    foundIcon: {
+      fontSize: 14,
+      color: theme.primary,
+    },
+    foundIP: {
+      color: theme.text,
+      fontFamily: 'monospace',
+      fontSize: 15,
+      fontWeight: '500',
+    },
+    foundAddBadge: {
+      backgroundColor: 'rgba(108, 99, 255, 0.15)',
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 8,
+    },
+    foundAdd: {
+      color: theme.primaryLight,
+      fontWeight: '700',
+      fontSize: 13,
+    },
+    errorBox: {
+      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+      borderRadius: 12,
+      padding: 12,
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(239, 68, 68, 0.2)',
+    },
+    errorText: {
+      color: theme.danger,
+      fontSize: 13,
+      fontWeight: '500',
+    },
+  }), [theme]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
@@ -156,145 +299,3 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    padding: 16,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  card: {
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  sectionTitle: {
-    color: theme.text,
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  input: {
-    backgroundColor: theme.surfaceLight,
-    borderRadius: 10,
-    padding: 14,
-    color: theme.text,
-    fontSize: 15,
-    fontFamily: 'monospace',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  primaryBtn: {
-    backgroundColor: theme.primary,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  primaryBtnText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  secondaryBtn: {
-    backgroundColor: theme.surfaceLight,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  secondaryBtnText: {
-    color: theme.text,
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  btnDisabled: {
-    opacity: 0.5,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: theme.border,
-  },
-  dividerText: {
-    color: theme.textMuted,
-    marginHorizontal: 12,
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  foundSection: {
-    marginTop: 8,
-  },
-  foundTitle: {
-    color: theme.success,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  foundItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.surface,
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  foundLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  foundIcon: {
-    fontSize: 14,
-    color: theme.primary,
-  },
-  foundIP: {
-    color: theme.text,
-    fontFamily: 'monospace',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  foundAddBadge: {
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  foundAdd: {
-    color: theme.primaryLight,
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  errorBox: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.2)',
-  },
-  errorText: {
-    color: theme.danger,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-});

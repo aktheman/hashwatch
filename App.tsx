@@ -1,24 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
-import { theme } from './src/theme';
+import { darkTheme, lightTheme, useTheme, setTheme } from './src/theme';
 
 export default function App() {
+  const theme = useTheme();
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     (async () => {
       requestNotificationPermissions();
+      const saved = await getSetting('theme_mode');
+      setTheme(saved === 'light' ? lightTheme : darkTheme);
       const done = await getSetting('onboarding_complete');
       setShowOnboarding(done !== 'true');
       setReady(true);
     })();
   }, []);
+
+  const styles = useMemo(() => StyleSheet.create({
+    loading: {
+      flex: 1,
+      backgroundColor: theme.bg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  }), [theme]);
 
   if (!ready) {
     return (
@@ -31,7 +43,7 @@ export default function App() {
   if (showOnboarding) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
         <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
       </>
     );
@@ -39,17 +51,8 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
       <AppNavigator />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

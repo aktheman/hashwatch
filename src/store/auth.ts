@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import * as DB from '../db/database';
 import * as API from '../api/client';
 import { configureClient } from '../api/client';
+import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
+import { registerPushToken } from '../services/pushRegistration';
 
 interface AuthState {
   token: string | null;
@@ -29,6 +31,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ token: res.token, userId: res.userId, email });
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
+      connectWebSocket(res.token);
+      registerPushToken();
       return true;
     } catch {
       return false;
@@ -41,6 +45,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ token: res.token, userId: res.userId, email });
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
+      connectWebSocket(res.token);
+      registerPushToken();
       return true;
     } catch {
       return false;
@@ -48,6 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
+    disconnectWebSocket();
     set({ token: null, userId: null, email: null, synced: false });
     DB.setSetting('auth_token', '');
     DB.setSetting('auth_email', '');
@@ -58,6 +65,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const email = await DB.getSetting('auth_email');
     if (token) {
       set({ token, email, userId: null });
+      connectWebSocket(token);
+      registerPushToken();
     }
   },
 }));

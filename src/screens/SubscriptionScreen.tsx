@@ -1,9 +1,151 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 export function SubscriptionScreen() {
+  const theme = useTheme();
   const { isPro, tier, loading, purchase, restore } = useSubscriptionStore();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+      padding: 16,
+    },
+    hero: {
+      alignItems: 'center',
+      marginTop: 12,
+      marginBottom: 28,
+    },
+    heroIcon: {
+      fontSize: 40,
+      marginBottom: 12,
+    },
+    heroTitle: {
+      color: theme.text,
+      fontSize: 28,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+    },
+    heroSub: {
+      color: theme.textDim,
+      fontSize: 14,
+      marginTop: 6,
+      textAlign: 'center',
+    },
+    planCard: {
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    planCardActive: {
+      borderColor: theme.textMuted,
+    },
+    proCard: {
+      borderColor: theme.primary,
+      position: 'relative',
+    },
+    proBadge: {
+      position: 'absolute',
+      top: -10,
+      right: 20,
+      backgroundColor: theme.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 10,
+    },
+    proBadgeText: {
+      color: '#FFF',
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+    },
+    planHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
+    planName: {
+      color: theme.text,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    priceRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: 2,
+    },
+    planPrice: {
+      color: theme.text,
+      fontSize: 32,
+      fontWeight: '800',
+    },
+    planPeriod: {
+      color: theme.textDim,
+      fontSize: 14,
+    },
+    featureList: {
+      marginTop: 16,
+      gap: 8,
+    },
+    featureItem: {
+      color: theme.textDim,
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    featureCheck: {
+      color: theme.success,
+      fontWeight: '700',
+      marginRight: 4,
+    },
+    currentBadge: {
+      backgroundColor: theme.surfaceLight,
+      borderRadius: 8,
+      padding: 10,
+      alignItems: 'center',
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    activeBadge: {
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      borderColor: 'rgba(16, 185, 129, 0.3)',
+    },
+    currentBadgeText: {
+      color: theme.textMuted,
+      fontWeight: '700',
+      fontSize: 13,
+    },
+    upgradeBtn: {
+      backgroundColor: theme.primary,
+      borderRadius: 12,
+      padding: 14,
+      alignItems: 'center',
+      marginTop: 16,
+    },
+    upgradeBtnText: {
+      color: '#FFF',
+      fontWeight: '800',
+      fontSize: 16,
+    },
+    btnDisabled: {
+      opacity: 0.5,
+    },
+    restoreBtn: {
+      padding: 14,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    restoreBtnText: {
+      color: theme.textDim,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  }), [theme]);
 
   return (
     <View style={styles.container}>
@@ -85,143 +227,3 @@ export function SubscriptionScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    padding: 16,
-  },
-  hero: {
-    alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 28,
-  },
-  heroIcon: {
-    fontSize: 40,
-    marginBottom: 12,
-  },
-  heroTitle: {
-    color: theme.text,
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  heroSub: {
-    color: theme.textDim,
-    fontSize: 14,
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  planCard: {
-    backgroundColor: theme.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  planCardActive: {
-    borderColor: theme.textMuted,
-  },
-  proCard: {
-    borderColor: theme.primary,
-    position: 'relative',
-  },
-  proBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 20,
-    backgroundColor: theme.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  proBadgeText: {
-    color: '#FFF',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  planName: {
-    color: theme.text,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 2,
-  },
-  planPrice: {
-    color: theme.text,
-    fontSize: 32,
-    fontWeight: '800',
-  },
-  planPeriod: {
-    color: theme.textDim,
-    fontSize: 14,
-  },
-  featureList: {
-    marginTop: 16,
-    gap: 8,
-  },
-  featureItem: {
-    color: theme.textDim,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  featureCheck: {
-    color: theme.success,
-    fontWeight: '700',
-    marginRight: 4,
-  },
-  currentBadge: {
-    backgroundColor: theme.surfaceLight,
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  activeBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderColor: 'rgba(16, 185, 129, 0.3)',
-  },
-  currentBadgeText: {
-    color: theme.textMuted,
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  upgradeBtn: {
-    backgroundColor: theme.primary,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  upgradeBtnText: {
-    color: '#FFF',
-    fontWeight: '800',
-    fontSize: 16,
-  },
-  btnDisabled: {
-    opacity: 0.5,
-  },
-  restoreBtn: {
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  restoreBtnText: {
-    color: theme.textDim,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});

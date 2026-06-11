@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { broadcast } from '../index';
 
 export const statsRouter = Router();
 statsRouter.use(authMiddleware);
@@ -29,5 +30,6 @@ statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
      RETURNING *`,
     [req.params.minerId, Date.now(), hashRate, temperature, voltage, current, power, sharesAccepted, sharesRejected, uptimeSeconds, frequency]
   );
+  broadcast(req.userId as string, { type: 'snapshot', snapshot: result.rows[0] });
   res.status(201).json(result.rows[0]);
 });

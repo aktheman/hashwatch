@@ -5,6 +5,7 @@ interface MinerRow {
   id: string; name: string; ip: string; port: number;
   addedAt: number; lastSeen: number;
   apiPath?: string; statusPath?: string;
+  info?: string; status?: string;
 }
 
 let db: any = null;
@@ -37,7 +38,9 @@ async function initTables(d: any): Promise<void> {
       addedAt INTEGER NOT NULL,
       lastSeen INTEGER NOT NULL DEFAULT 0,
       apiPath TEXT DEFAULT NULL,
-      statusPath TEXT DEFAULT NULL
+      statusPath TEXT DEFAULT NULL,
+      info TEXT DEFAULT NULL,
+      status TEXT DEFAULT NULL
     );
     CREATE TABLE IF NOT EXISTS miner_snapshots (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,12 +64,16 @@ async function initTables(d: any): Promise<void> {
       value TEXT NOT NULL
     );
   `);
-  try {
-    await d.execAsync(`ALTER TABLE miners ADD COLUMN apiPath TEXT DEFAULT NULL`);
-  } catch { }
-  try {
-    await d.execAsync(`ALTER TABLE miners ADD COLUMN statusPath TEXT DEFAULT NULL`);
-  } catch { }
+  for (const col of ['apiPath', 'statusPath', 'info', 'status']) {
+  for (const col of ['apiPath', 'statusPath', 'info', 'status']) {
+    try {
+      await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
+    } catch { }
+  }
+  // clean snapshots older than 30 days
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  await d.runAsync('DELETE FROM miner_snapshots WHERE timestamp < ?', [cutoff]);
+}
 }
 
 export async function getSetting(key: string): Promise<string | null> {
@@ -97,8 +104,8 @@ export async function loadMiners(): Promise<Miner[]> {
     lastSeen: r.lastSeen,
     apiPath: r.apiPath || undefined,
     statusPath: r.statusPath || undefined,
-    info: null,
-    status: null,
+    info: r.info ? JSON.parse(r.info) : null,
+    status: r.status ? JSON.parse(r.status) : null,
     isOnline: false,
   }));
 }
@@ -106,9 +113,14 @@ export async function loadMiners(): Promise<Miner[]> {
 export async function saveMiner(m: Miner): Promise<void> {
   const d = await getDb();
   await d.runAsync(
-    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, apiPath, statusPath)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [m.id, m.name, m.ip, m.port, m.addedAt, m.lastSeen, m.apiPath || null, m.statusPath || null]
+    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, apiPath, statusPath, info, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      m.id, m.name, m.ip, m.port, m.addedAt, m.lastSeen,
+      m.apiPath || null, m.statusPath || null,
+      m.info ? JSON.stringify(m.info) : null,
+      m.status ? JSON.stringify(m.status) : null,
+    ]
   );
 }
 
