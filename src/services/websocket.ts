@@ -1,5 +1,6 @@
 import { useMinerStore } from '../store/miners';
 import { MinerSnapshot } from '../types';
+import { getExtra } from '../constants';
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -7,7 +8,7 @@ let url: string | null = null;
 let token: string | null = null;
 
 function getBaseUrl(): string {
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
+  const apiUrl = getExtra().apiUrl;
   return apiUrl.replace(/^http/, 'ws') + '/ws';
 }
 
@@ -30,7 +31,7 @@ function doConnect() {
       try {
         const msg = JSON.parse(event.data);
         handleMessage(msg);
-      } catch { }
+      } catch {}
     };
     ws.onclose = () => {
       ws = null;

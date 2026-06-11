@@ -5,10 +5,11 @@ import Purchases, {
   PurchasesPackage,
 } from 'react-native-purchases';
 import { Platform } from 'react-native';
+import { getExtra } from '../constants';
 
 const API_KEYS = {
-  ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '',
-  android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '',
+  ios: getExtra().revenuecatIosKey,
+  android: getExtra().revenuecatAndroidKey,
 };
 
 const PRO_MONTHLY_ID = 'hashwatch_pro_monthly';
@@ -81,9 +82,7 @@ export async function checkProStatus(): Promise<boolean> {
   }
 }
 
-export function listenForProChanges(
-  callback: (isPro: boolean) => void
-): () => void {
+export function listenForProChanges(callback: (isPro: boolean) => void): () => void {
   const listener = (customerInfo: CustomerInfo) => {
     callback(isPro(customerInfo));
   };
