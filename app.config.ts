@@ -20,6 +20,34 @@ export default {
         ITSAppUsesNonExemptEncryption: false,
       },
     },
+    web: {
+      favicon: './assets/favicon.png',
+    },
+    plugins: [
+      'expo-sqlite',
+      [
+        'expo-notifications',
+        {
+          icon: './assets/icon.png',
+          color: '#6C63FF',
+        },
+      ],
+      'expo-updates',
+      [
+        'expo-build-properties',
+        {
+          android: {
+            compileSdkVersion: 35,
+            targetSdkVersion: 35,
+            buildToolsVersion: '35.0.0',
+            kotlinVersion: '2.0.21',
+          },
+          ios: {
+            deploymentTarget: '15.1',
+          },
+        },
+      ],
+    ],
     android: {
       adaptiveIcon: {
         backgroundColor: '#0A0A1A',
@@ -30,12 +58,14 @@ export default {
       package: 'com.hashwatch.app',
       versionCode: 1,
       usesCleartextTraffic: true,
-      permissions: ['ACCESS_WIFI_STATE', 'INTERNET', 'ACCESS_NETWORK_STATE'],
+      permissions: [
+        'ACCESS_WIFI_STATE',
+        'INTERNET',
+        'ACCESS_NETWORK_STATE',
+        'ACCESS_FINE_LOCATION',
+        'ACCESS_COARSE_LOCATION',
+      ],
     },
-    web: {
-      favicon: './assets/favicon.png',
-    },
-    plugins: ['expo-sqlite'],
     extra: {
       eas: {
         projectId: '7e9a5883-0170-44fc-be43-ccba1e11db30',

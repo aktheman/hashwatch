@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { darkTheme, lightTheme, useTheme, setTheme } from './src/theme';
@@ -23,14 +24,18 @@ export default function App() {
     })();
   }, []);
 
-  const styles = useMemo(() => StyleSheet.create({
-    loading: {
-      flex: 1,
-      backgroundColor: theme.bg,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  }), [theme]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        loading: {
+          flex: 1,
+          backgroundColor: theme.bg,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+      }),
+    [theme],
+  );
 
   if (!ready) {
     return (
@@ -50,9 +55,9 @@ export default function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
       <AppNavigator />
-    </>
+    </ErrorBoundary>
   );
 }
