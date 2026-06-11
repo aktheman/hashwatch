@@ -9,6 +9,8 @@ jest.mock('expo-server-sdk', () => {
   }));
   (mockExpo as any).isExpoPushToken = jest.fn().mockReturnValue(true);
   return {
+    __esModule: true,
+    default: { Expo: mockExpo },
     Expo: mockExpo,
     ExpoPushMessage: {},
     ExpoPushTicket: {},
