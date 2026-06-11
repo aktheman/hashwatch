@@ -4,23 +4,46 @@ import { MinerInfo, MinerStatus } from '../types';
 import * as API from './client';
 
 const TIMEOUT = 5000;
+const PROBE_TIMEOUT = 3000;
 const isWeb = Platform.OS === 'web';
 
 const INFO_PATHS = [
   '/api/system/info',
   '/api/info',
   '/system/info',
+  '/api/miner/getall',
+];
+
+const STATUS_PATHS = [
+  '/api/system/status',
+  '/api/status',
+  '/system/status',
+  '/api/miner/getall',
 ];
 
 function isBitAxeResponse(data: any): boolean {
-  return !!(data?.hostname || data?.macAddr || data?.chipType || data?.hashRate !== undefined);
+  if (!data) return false;
+  return !!(
+    data?.hostname ||
+    data?.macAddr ||
+    data?.chipType ||
+    data?.hashRate !== undefined ||
+    data?.hashrate !== undefined
+  );
 }
 
-function deriveStatusPath(infoPath: string): string {
-  return infoPath.replace(/\/info$/, '/status');
+function isStatusResponse(data: any): boolean {
+  if (!data) return false;
+  return (
+    data?.hashRate !== undefined ||
+    data?.hashrate !== undefined ||
+    data?.sharesAccepted !== undefined ||
+    data?.sharesRejected !== undefined ||
+    data?.temperature !== undefined
+  );
 }
 
-async function fetchUrl(url: string, timeout = 2000): Promise<any> {
+async function fetchUrl(url: string, timeout = PROBE_TIMEOUT): Promise<any> {
   try {
     const { data } = isWeb
       ? await axios.post(`${API.BASE_URL}/api/proxy`, { url, method: 'GET' }, { timeout, validateStatus: () => true })
@@ -37,18 +60,30 @@ export interface FoundPaths {
 }
 
 async function findPaths(ip: string, port: number): Promise<FoundPaths> {
-  const urls = INFO_PATHS.map(path => `http://${ip}:${port}${path}`);
-  const results = await Promise.all(urls.map(url => fetchUrl(url)));
+  const infoUrls = INFO_PATHS.map(path => `http://${ip}:${port}${path}`);
+  const infoResults = await Promise.all(infoUrls.map(url => fetchUrl(url)));
 
-  for (let i = 0; i < results.length; i++) {
-    if (results[i] && isBitAxeResponse(results[i])) {
+  for (let i = 0; i < infoResults.length; i++) {
+    if (infoResults[i] && isBitAxeResponse(infoResults[i])) {
       const infoPath = INFO_PATHS[i];
-      const derived = deriveStatusPath(infoPath);
-      const data = await fetchUrl(`http://${ip}:${port}${derived}`);
-      return {
-        infoPath,
-        statusPath: (data && (data.hashRate !== undefined || data.sharesAccepted !== undefined)) ? derived : null,
-      };
+
+      const derived = infoPath.replace(/\/info$/, '/status');
+      const data = derived !== infoPath
+        ? await fetchUrl(`http://${ip}:${port}${derived}`)
+        : null;
+      if (data && isStatusResponse(data)) {
+        return { infoPath, statusPath: derived };
+      }
+
+      const statusUrls = STATUS_PATHS.map(p => `http://${ip}:${port}${p}`);
+      const statusResults = await Promise.all(statusUrls.map(url => fetchUrl(url)));
+      for (let j = 0; j < statusResults.length; j++) {
+        if (isStatusResponse(statusResults[j])) {
+          return { infoPath, statusPath: STATUS_PATHS[j] };
+        }
+      }
+
+      return { infoPath, statusPath: null };
     }
   }
 
@@ -71,7 +106,6 @@ export class BitAxeClient {
     this.client = axios.create({
       baseURL: `http://${ip}:${port}`,
       timeout: TIMEOUT,
-      headers: { 'Connection': 'close' },
     });
   }
 
