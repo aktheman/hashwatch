@@ -61,10 +61,3 @@ export interface MinerSnapshot {
 }
 
 export type SubscriptionTier = 'free' | 'pro';
-
-export interface SubscriptionState {
-  tier: SubscriptionTier;
-  isActive: boolean;
-  expiresAt: number | null;
-  maxMiners: number;
-}

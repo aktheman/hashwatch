@@ -6,6 +6,8 @@ import { minersRouter } from './routes/miners';
 import { statsRouter } from './routes/stats';
 import { proxyRouter } from './routes/proxy';
 import { pushRouter } from './routes/push';
+import { settingsRouter } from './routes/settings';
+import { receiptRouter } from './routes/receipt';
 import { createWebSocketServer } from './ws';
 import { query } from './db';
 
@@ -14,13 +16,15 @@ const server = createServer(app);
 createWebSocketServer(server, '/ws');
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 app.use('/api/auth', authRouter);
 app.use('/api/miners', minersRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/proxy', proxyRouter);
 app.use('/api/push', pushRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/receipt', receiptRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -61,6 +65,19 @@ async function initSchema() {
       CREATE TABLE IF NOT EXISTS push_tokens (
         token TEXT PRIMARY KEY NOT NULL,
         userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        createdAt TIMESTAMP DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS user_settings (
+        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        key TEXT NOT NULL,
+        value TEXT NOT NULL DEFAULT '',
+        PRIMARY KEY (userId, key)
+      );
+      CREATE TABLE IF NOT EXISTS user_subscriptions (
+        userId UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        platform TEXT NOT NULL,
+        productId TEXT NOT NULL,
+        expiresAt TIMESTAMP NOT NULL,
         createdAt TIMESTAMP DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);

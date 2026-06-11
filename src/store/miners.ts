@@ -42,6 +42,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     try {
       const miners = await DB.loadMiners();
       set({ miners, loading: false, initialized: true });
+      DB.cleanupOldSnapshots();
       get().refreshAll();
     } catch (e: any) {
       set({ error: e.message, loading: false, initialized: true });
@@ -140,18 +141,26 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       if (!current.apiPath) {
         const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
         if (found?.infoPath) {
-          await DB.saveMiner({ ...current, apiPath: found.infoPath || undefined, statusPath: found.statusPath || undefined });
+          await DB.saveMiner({
+            ...current,
+            apiPath: found.infoPath || undefined,
+            statusPath: found.statusPath || undefined,
+          });
           set((s) => ({
             miners: s.miners.map((m) =>
-              m.id === id ? { ...m, apiPath: found.infoPath || undefined, statusPath: found.statusPath || undefined } : m
+              m.id === id
+                ? {
+                    ...m,
+                    apiPath: found.infoPath || undefined,
+                    statusPath: found.statusPath || undefined,
+                  }
+                : m,
             ),
           }));
         }
       }
       set((s) => ({
-        miners: s.miners.map((m) =>
-          m.id === id ? { ...m, isOnline: false } : m
-        ),
+        miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
       }));
     }
   },

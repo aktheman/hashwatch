@@ -73,6 +73,7 @@ describe('POST /api/stats/:minerId', () => {
   it('creates a snapshot and broadcasts via WS', async () => {
     const snapshot = { id: 1, minerId: 'm1', hashRate: 500 };
     mockQuery.mockResolvedValueOnce({ rows: [snapshot] });
+    mockQuery.mockResolvedValueOnce({ rows: [{ name: 'TestMiner', ip: '192.168.1.100' }] });
 
     const res = await request(app).post('/api/stats/m1').send({
       hashRate: 500,

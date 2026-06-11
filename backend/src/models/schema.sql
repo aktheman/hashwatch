@@ -38,5 +38,19 @@ CREATE TABLE IF NOT EXISTS push_tokens (
   createdAt TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS user_settings (
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (userId, key)
+);
+CREATE TABLE IF NOT EXISTS user_subscriptions (
+  userId UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  platform TEXT NOT NULL,
+  productId TEXT NOT NULL,
+  expiresAt TIMESTAMP NOT NULL,
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);
 CREATE INDEX IF NOT EXISTS idx_snapshots_minerId ON miner_snapshots(minerId, timestamp);

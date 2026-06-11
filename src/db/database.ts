@@ -1,55 +1,79 @@
 import { Miner, MinerSnapshot } from '../types';
 
-const _miners: Miner[] = [];
-const _snapshots: MinerSnapshot[] = [];
-const _settings: { key: string; value: string }[] = [];
+const STORAGE_KEY_MINERS = 'hashwatch_miners';
+const STORAGE_KEY_SNAPSHOTS = 'hashwatch_snapshots';
+const STORAGE_KEY_SETTINGS = 'hashwatch_settings';
+
+function loadJSON<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJSON(key: string, value: any): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // storage full or unavailable
+  }
+}
 
 export async function getSetting(key: string): Promise<string | null> {
-  return _settings.find((s) => s.key === key)?.value || null;
+  const settings = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});
+  return settings[key] || null;
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
-  const idx = _settings.findIndex((s) => s.key === key);
-  if (idx >= 0) _settings[idx] = { key, value };
-  else _settings.push({ key, value });
+  const settings = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});
+  settings[key] = value;
+  saveJSON(STORAGE_KEY_SETTINGS, settings);
 }
 
 export async function loadMiners(): Promise<Miner[]> {
-  return _miners;
+  return loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
 }
 
 export async function saveMiner(m: Miner): Promise<void> {
-  const idx = _miners.findIndex((x) => x.id === m.id);
-  if (idx >= 0) _miners[idx] = m;
-  else _miners.push(m);
+  const miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
+  const idx = miners.findIndex((x) => x.id === m.id);
+  if (idx >= 0) miners[idx] = m;
+  else miners.push(m);
+  saveJSON(STORAGE_KEY_MINERS, miners);
 }
 
 export async function deleteMiner(id: string): Promise<void> {
-  const idx = _miners.findIndex((m) => m.id === id);
-  if (idx >= 0) _miners.splice(idx, 1);
+  let miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
+  miners = miners.filter((m) => m.id !== id);
+  saveJSON(STORAGE_KEY_MINERS, miners);
+  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  saveJSON(
+    STORAGE_KEY_SNAPSHOTS,
+    snapshots.filter((s) => s.minerId !== id),
+  );
 }
 
 export async function saveSnapshot(s: MinerSnapshot): Promise<void> {
-  _snapshots.push(s);
+  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  snapshots.push(s);
+  saveJSON(STORAGE_KEY_SNAPSHOTS, snapshots);
 }
 
-export async function getSnapshots(
-  minerId: string,
-  limit: number = 100
-): Promise<MinerSnapshot[]> {
-  return _snapshots
+export async function getSnapshots(minerId: string, limit: number = 100): Promise<MinerSnapshot[]> {
+  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  return snapshots
     .filter((s) => s.minerId === minerId)
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, limit);
 }
 
 export async function cleanupOldSnapshots(
-  olderThan: number = 7 * 24 * 60 * 60 * 1000
+  olderThan: number = 7 * 24 * 60 * 60 * 1000,
 ): Promise<void> {
   const cutoff = Date.now() - olderThan;
-  for (let i = _snapshots.length - 1; i >= 0; i--) {
-    if (_snapshots[i].timestamp < cutoff) {
-      _snapshots.splice(i, 1);
-    }
-  }
+  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  const filtered = snapshots.filter((s) => s.timestamp >= cutoff);
+  saveJSON(STORAGE_KEY_SNAPSHOTS, filtered);
 }
