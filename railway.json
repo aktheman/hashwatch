@@ -9,5 +9,6 @@
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 10,
     "restartPolicyType": "on_failure"
-  }
+  },
+  "rootDirectory": "backend"
 }
