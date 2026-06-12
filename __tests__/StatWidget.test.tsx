@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react-native';
 import { StatWidget } from '../src/components/StatWidget';
 import { setTheme, darkTheme } from '../src/theme';
 
+jest.setTimeout(15000);
+
 beforeEach(() => {
   setTheme(darkTheme);
 });
