@@ -236,7 +236,7 @@ export function SettingsScreen({ navigation }: any) {
           <TextInput
             style={styles.input}
             value={proxyUrl}
-            onChangeText={setProxyUrl}
+            onChangeText={setProxyUrlState}
             placeholder="http://localhost:4567"
             placeholderTextColor={theme.textMuted}
             onSubmitEditing={saveProxyUrl}
