@@ -9,8 +9,10 @@ import { proxyRouter } from './routes/proxy';
 import { pushRouter } from './routes/push';
 import { settingsRouter } from './routes/settings';
 import { receiptRouter } from './routes/receipt';
+import { notificationPrefsRouter } from './routes/notificationPrefs';
 import { createWebSocketServer } from './ws';
 import { query } from './db';
+import { startMinerPoller } from './services/minerPoller';
 
 const app = express();
 const server = createServer(app);
@@ -44,6 +46,7 @@ app.use('/api/proxy', proxyRouter);
 app.use('/api/push', pushRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/receipt', receiptRouter);
+app.use('/api/notification-prefs', notificationPrefsRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -99,6 +102,13 @@ async function initSchema() {
         expiresAt TIMESTAMP NOT NULL,
         createdAt TIMESTAMP DEFAULT NOW()
       );
+      CREATE TABLE IF NOT EXISTS notification_prefs (
+        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+        alertType TEXT NOT NULL,
+        enabled BOOLEAN NOT NULL DEFAULT true,
+        PRIMARY KEY (userId, minerId, alertType)
+      );
       CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);
       CREATE INDEX IF NOT EXISTS idx_snapshots_minerId ON miner_snapshots(minerId, timestamp);
     `);
@@ -112,5 +122,6 @@ const PORT = process.env.PORT || 4000;
 initSchema().then(() => {
   server.listen(PORT, () => {
     console.log(`HashWatch API running on :${PORT}`);
+    startMinerPoller();
   });
 });

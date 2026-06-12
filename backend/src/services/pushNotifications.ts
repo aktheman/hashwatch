@@ -75,3 +75,15 @@ export async function sendMinerHotNotification(
     { minerId, type: 'hot' },
   );
 }
+
+export async function sendHashrateDropNotification(
+  userId: string,
+  minerName: string,
+  minerId: string,
+  pct: number,
+): Promise<void> {
+  await sendPushNotification(userId, 'Hashrate Drop', `${minerName} hashrate dropped ${pct}%`, {
+    minerId,
+    type: 'hashrate_drop',
+  });
+}

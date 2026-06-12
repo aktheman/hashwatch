@@ -104,3 +104,12 @@ export async function validateReceipt(receipt: string, productId: string) {
   const res = await client.post('/api/receipt/validate', { receipt, productId });
   return res.data;
 }
+
+export async function getNotificationPrefs(minerId: string) {
+  const res = await client.get(`/api/notification-prefs/${minerId}`);
+  return res.data as Record<string, boolean>;
+}
+
+export async function setNotificationPref(minerId: string, alertType: string, enabled: boolean) {
+  await client.put(`/api/notification-prefs/${minerId}`, { alertType, enabled });
+}

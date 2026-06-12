@@ -1,11 +1,14 @@
 import { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share } from 'react-native';
 import { useMinerStore } from '../store/miners';
-import { MinerSnapshot } from '../types';
+import { MinerSnapshot, Wallet } from '../types';
+import * as DB from '../db/database';
 import { StatWidget } from '../components/StatWidget';
 import { HashrateChart } from '../components/HashrateChart';
+import { EfficiencyTrend } from '../components/EfficiencyTrend';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
+import { NotificationPrefs } from '../components/NotificationPrefs';
 import {
   formatHashrate,
   formatTemperature,
@@ -215,8 +218,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const refreshMiner = useMinerStore((s) => s.refreshMiner);
   const removeMiner = useMinerStore((s) => s.removeMiner);
   const getSnapshots = useMinerStore((s) => s.getSnapshots);
+  const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
+
+  useEffect(() => {
+    DB.loadWallets().then(setWallets);
+  }, []);
 
   const miner = miners.find((m) => m.id === minerId);
 
@@ -252,6 +262,26 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   }
 
   const s = miner.status;
+
+  const handleShare = async () => {
+    const wallet = miner.walletId ? wallets.find((w) => w.id === miner.walletId) : null;
+    const msg = [
+      `⬡ ${miner.name}`,
+      `Hashrate: ${formatHashrate(s.hashRate, s.hashRateUnit)}`,
+      `Temp: ${formatTemperature(s.temperature)}`,
+      `Power: ${formatPower(s.power)}`,
+      `Uptime: ${formatUptime(s.uptimeSeconds)}`,
+      `Pool: ${s.pool}${s.poolPort ? `:${s.poolPort}` : ''}`,
+      `Efficiency: ${formatWTHs(s.power, s.hashRate, s.hashRateUnit)}`,
+      wallet ? `Wallet: ${wallet.name}` : '',
+      `IP: ${miner.ip}`,
+      '',
+      `Shared via HashWatch`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    await Share.share({ message: msg }).catch(() => {});
+  };
 
   const handleDelete = async () => {
     await removeMiner(minerId);
@@ -293,6 +323,89 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.ip}>{miner.ip}</Text>
         {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
         {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
+      </View>
+
+      <NotificationPrefs minerId={miner.id} />
+
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: theme.surface,
+            borderRadius: 14,
+            padding: 14,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
+          onPress={() => setShowWalletPicker(!showWalletPicker)}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ fontSize: 14, marginRight: 8 }}>💼</Text>
+            <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>
+              {miner.walletId
+                ? wallets.find((w) => w.id === miner.walletId)?.name || 'Unknown Wallet'
+                : 'No Wallet'}
+            </Text>
+          </View>
+          <Text style={{ color: theme.textMuted, fontSize: 12 }}>Assign ›</Text>
+        </TouchableOpacity>
+        {showWalletPicker && (
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: theme.border,
+              marginTop: 6,
+              overflow: 'hidden',
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                padding: 12,
+                borderBottomWidth: 1,
+                borderBottomColor: theme.border,
+                backgroundColor: !miner.walletId ? theme.primary + '20' : 'transparent',
+              }}
+              onPress={() => {
+                setMinerWallet(minerId, undefined);
+                setShowWalletPicker(false);
+              }}
+            >
+              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '500' }}>None</Text>
+            </TouchableOpacity>
+            {wallets.map((w) => (
+              <TouchableOpacity
+                key={w.id}
+                style={{
+                  padding: 12,
+                  borderBottomWidth: 1,
+                  borderBottomColor: theme.border,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: miner.walletId === w.id ? theme.primary + '20' : 'transparent',
+                }}
+                onPress={() => {
+                  setMinerWallet(minerId, w.id);
+                  setShowWalletPicker(false);
+                }}
+              >
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: w.color,
+                    marginRight: 8,
+                  }}
+                />
+                <Text style={{ color: theme.text, fontSize: 14, fontWeight: '500' }}>{w.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -426,6 +539,37 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <SubscriptionGate feature="30-day charts">
           <HashrateChart snapshots={snapshots} />
         </SubscriptionGate>
+      </View>
+
+      {snapshots.length > 1 && (
+        <View style={[styles.section, { paddingTop: 0 }]}>
+          <Text style={styles.sectionTitle}>
+            <Text style={styles.sectionIcon}>📊</Text> Efficiency Trend
+          </Text>
+          <SubscriptionGate feature="30-day charts">
+            <EfficiencyTrend snapshots={snapshots} />
+          </SubscriptionGate>
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.primary + '15',
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.primary + '30',
+            gap: 8,
+          }}
+          onPress={handleShare}
+        >
+          <Text style={{ fontSize: 16 }}>📤</Text>
+          <Text style={{ color: theme.primary, fontWeight: '700', fontSize: 15 }}>Share Stats</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>

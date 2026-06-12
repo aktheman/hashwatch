@@ -32,11 +32,20 @@ export interface MinerStatus {
   poolResponseTime: number;
 }
 
+export interface Wallet {
+  id: string;
+  name: string;
+  address: string;
+  color: string;
+  createdAt: number;
+}
+
 export interface Miner {
   id: string;
   name: string;
   ip: string;
   port: number;
+  walletId?: string;
   remoteId?: string;
   apiPath?: string;
   statusPath?: string;

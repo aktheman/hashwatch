@@ -9,6 +9,8 @@ import { AddMinerScreen } from '../screens/AddMinerScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { PoolsScreen } from '../screens/PoolsScreen';
+import { AnalyticsScreen } from '../screens/AnalyticsScreen';
+import { WalletsScreen } from '../screens/WalletsScreen';
 import { useTheme } from '../theme';
 
 type RootStackParamList = {
@@ -16,11 +18,13 @@ type RootStackParamList = {
   MinerDetail: { minerId: string };
   AddMiner: undefined;
   Subscription: undefined;
+  Wallets: undefined;
 };
 
 type TabParamList = {
   Dashboard: undefined;
   Pools: undefined;
+  Analytics: undefined;
   Settings: undefined;
 };
 
@@ -32,6 +36,8 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const icons: Record<string, string> = {
     Dashboard: '⬡',
     Pools: '🌊',
+    Analytics: '📊',
+    Wallets: '💼',
     Settings: '⚙',
   };
   return (
@@ -68,6 +74,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Pools" component={PoolsScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Analytics" component={AnalyticsScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
@@ -97,6 +104,7 @@ export function AppNavigator() {
           component={SubscriptionScreen}
           options={{ title: 'HashWatch Pro' }}
         />
+        <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

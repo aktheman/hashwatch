@@ -1,0 +1,25 @@
+{
+  "models": [
+    {
+      "title": "Qwen Local",
+      "provider": "openai",
+      "model": "qwen2.5-coder:3b",
+      "apiBase": "http://192.168.1",
+      "apiKey": "sk-ec14399f7c7945bb9069c4361f94e01c"
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "Qwen Autocomplete",
+    "provider": "openai",
+    "model": "qwen2.5-coder:3b",
+    "apiBase": "http://192.168.1",
+    "apiKey": "sk-ec14399f7c7945bb9069c4361f94e01c"
+  },
+  "requestOptions": {
+    "headers": {
+      "Authorization": "Bearer sk-ec14399f7c7945bb9069c4361f94e01c"
+    }
+  },
+  "contextProviders": [],
+  "slashCommands": []
+}
