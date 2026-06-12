@@ -341,6 +341,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
           style={styles.settingsBtn}
           onPress={() => navigation.navigate('Settings')}
         >
@@ -406,6 +408,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           }}
         >
           <TouchableOpacity
+            accessibilityRole="button"
             style={[
               styles.walletChip,
               {
@@ -429,6 +432,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           </TouchableOpacity>
           {wallets.map((w) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={w.id}
               style={[
                 styles.walletChip,
@@ -451,6 +455,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           ))}
           {groups.map((g) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={g}
               style={[
                 styles.walletChip,
@@ -473,6 +478,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {!canAdd && miners.length > 0 && (
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.upgradeBanner}
           onPress={() => navigation.navigate('Subscription')}
         >
@@ -507,10 +513,18 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={styles.stepText}>3. Enter the IP and a name</Text>
           </View>
           <View style={styles.emptyActions}>
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleAddMiner}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.primaryBtn}
+              onPress={handleAddMiner}
+            >
               <Text style={styles.primaryBtnText}>Add Miner</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={scanNetwork}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.secondaryBtn}
+              onPress={scanNetwork}
+            >
               <Text style={styles.secondaryBtnText}>Scan Network</Text>
             </TouchableOpacity>
           </View>
@@ -541,6 +555,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Add miner"
         style={[styles.fab, !canAdd && styles.fabDisabled]}
         onPress={handleAddMiner}
       >

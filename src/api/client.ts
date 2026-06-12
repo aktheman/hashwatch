@@ -4,13 +4,28 @@ import { MinerSnapshot, RemoteMiner } from '../types';
 
 let _getToken: () => string | null = () => null;
 let _onUnauthorized: () => void = () => {};
+let _baseUrl: string = getExtra().apiUrl;
 
 export function configureClient(opts: {
   getToken: () => string | null;
   onUnauthorized: () => void;
+  baseUrl?: string;
 }) {
   _getToken = opts.getToken;
   _onUnauthorized = opts.onUnauthorized;
+  if (opts.baseUrl) {
+    _baseUrl = opts.baseUrl;
+    client.defaults.baseURL = _baseUrl;
+  }
+}
+
+export function getBaseUrl(): string {
+  return _baseUrl;
+}
+
+export function setBaseUrl(url: string) {
+  _baseUrl = url;
+  client.defaults.baseURL = _baseUrl;
 }
 
 export const BASE_URL = getExtra().apiUrl;

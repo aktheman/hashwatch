@@ -180,6 +180,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
             <View style={styles.minerList}>
               {item.miners.map((m) => (
                 <TouchableOpacity
+                  accessibilityRole="button"
                   key={m.id}
                   style={styles.minerRow}
                   onPress={() => navigation.navigate('MinerDetail', { minerId: m.id })}

@@ -251,7 +251,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       <View style={styles.center}>
         <Text style={styles.offlineIcon}>⬡</Text>
         <Text style={styles.offlineText}>Miner Not Found</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.retryBtn}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.retryBtnText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -264,7 +268,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.offlineIcon}>📡</Text>
         <Text style={styles.offlineText}>Miner Offline</Text>
         <Text style={styles.offlineSubtext}>Unable to reach {miner.ip}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={() => refreshMiner(minerId)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.retryBtn}
+          onPress={() => refreshMiner(minerId)}
+        >
           <Text style={styles.retryBtnText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -339,6 +347,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <TouchableOpacity
+          accessibilityRole="button"
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -373,6 +382,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             }}
           >
             <TouchableOpacity
+              accessibilityRole="button"
               style={{
                 padding: 12,
                 borderBottomWidth: 1,
@@ -388,6 +398,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </TouchableOpacity>
             {wallets.map((w) => (
               <TouchableOpacity
+                accessibilityRole="button"
                 key={w.id}
                 style={{
                   padding: 12,
@@ -440,6 +451,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           }}
           placeholder="Group tag (e.g. Garage)"
           placeholderTextColor={theme.textMuted}
+          accessibilityLabel="Group tag input"
         />
       </View>
 
@@ -589,6 +601,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <TouchableOpacity
+          accessibilityRole="button"
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -612,6 +625,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <Text style={styles.sectionIcon}>⚡</Text> Actions
         </Text>
         <TouchableOpacity
+          accessibilityRole="button"
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -646,7 +660,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
           <Text style={styles.sectionIcon}>⚠</Text> Danger Zone
         </Text>
-        <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowConfirm(!showConfirm)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.deleteBtn}
+          onPress={() => setShowConfirm(!showConfirm)}
+        >
           <Text style={styles.deleteBtnText}>Remove Miner</Text>
         </TouchableOpacity>
         {showConfirm && (
@@ -654,7 +672,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.confirmText}>
               This permanently deletes {miner.name} and all its history.
             </Text>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleDelete}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.confirmBtn}
+              onPress={handleDelete}
+            >
               <Text style={styles.confirmBtnText}>Yes, Remove</Text>
             </TouchableOpacity>
           </View>

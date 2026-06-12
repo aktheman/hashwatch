@@ -235,7 +235,7 @@ export function WalletsScreen() {
           <Text style={styles.emptyText}>
             Create wallets to organize your miners by payout address
           </Text>
-          <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
+          <TouchableOpacity accessibilityRole="button" style={styles.addBtn} onPress={openCreate}>
             <Text style={styles.addBtnText}>Create Wallet</Text>
           </TouchableOpacity>
         </View>
@@ -246,7 +246,7 @@ export function WalletsScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
+            <TouchableOpacity accessibilityRole="button" style={styles.addBtn} onPress={openCreate}>
               <Text style={styles.addBtnText}>+ Add Wallet</Text>
             </TouchableOpacity>
           }
@@ -270,12 +270,14 @@ export function WalletsScreen() {
               </Text>
               <View style={styles.cardActions}>
                 <TouchableOpacity
+                  accessibilityRole="button"
                   style={[styles.actionBtn, styles.actionBtnEdit]}
                   onPress={() => openEdit(item)}
                 >
                   <Text style={[styles.actionText, styles.actionTextEdit]}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  accessibilityRole="button"
                   style={[styles.actionBtn, styles.actionBtnDelete]}
                   onPress={() => remove(item.id)}
                 >
@@ -298,6 +300,7 @@ export function WalletsScreen() {
               onChangeText={setName}
               placeholder="My Mining Wallet"
               placeholderTextColor={theme.textMuted}
+              accessibilityLabel="Wallet name input"
             />
             <Text style={styles.label}>Bitcoin Address</Text>
             <TextInput
@@ -308,12 +311,15 @@ export function WalletsScreen() {
               placeholderTextColor={theme.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel="Bitcoin address input"
             />
             <Text style={styles.label}>Color</Text>
             <View style={styles.colorRow}>
               {WALLET_COLORS.map((c) => (
                 <TouchableOpacity
                   key={c}
+                  accessibilityRole="button"
+                  accessibilityLabel="Select color"
                   style={[
                     styles.colorCircle,
                     { backgroundColor: c },
@@ -324,10 +330,14 @@ export function WalletsScreen() {
               ))}
             </View>
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.modalCancel}
+                onPress={() => setModalVisible(false)}
+              >
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalSave} onPress={save}>
+              <TouchableOpacity accessibilityRole="button" style={styles.modalSave} onPress={save}>
                 <Text style={styles.modalSaveText}>Save</Text>
               </TouchableOpacity>
             </View>
