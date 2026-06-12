@@ -13,9 +13,10 @@ import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
 import { useTheme } from '../theme';
+import { NavigationProp } from '../types';
 
 interface AddMinerScreenProps {
-  navigation: any;
+  navigation: NavigationProp;
 }
 
 export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
@@ -42,8 +43,8 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
     try {
       await addMiner(ip.trim(), 80, name.trim() || undefined);
       navigation.goBack();
-    } catch (e: any) {
-      setError(e.message || 'Failed to connect');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to connect');
     } finally {
       setConnecting(false);
     }
@@ -55,8 +56,8 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
     try {
       const found = await scanNetwork();
       setFoundMiners(found);
-    } catch (e: any) {
-      setError(e.message || 'Scan failed');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Scan failed');
     } finally {
       setScanning(false);
     }
@@ -72,8 +73,8 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
     try {
       await addMiner(m.ip, m.port);
       navigation.goBack();
-    } catch (e: any) {
-      setError(e.message || 'Failed to connect');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to connect');
     } finally {
       setConnecting(false);
     }

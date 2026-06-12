@@ -73,3 +73,36 @@ export interface MinerSnapshot {
 }
 
 export type SubscriptionTier = 'free' | 'pro';
+
+export type RootStackParamList = {
+  MainTabs: undefined;
+  MinerDetail: { minerId: string };
+  AddMiner: undefined;
+  Subscription: undefined;
+  Wallets: undefined;
+};
+
+export type TabParamList = {
+  Dashboard: undefined;
+  Pools: undefined;
+  Analytics: undefined;
+  Settings: undefined;
+};
+
+export type RemoteMiner = {
+  id: string;
+  ip: string;
+  port?: number;
+  name: string;
+};
+
+export type WSMessage =
+  | { type: 'snapshot'; snapshot: MinerSnapshot }
+  | { type: 'auth'; token: string }
+  | { type: string; [key: string]: unknown };
+
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+export type NavigationProp = NativeStackNavigationProp<RootStackParamList & TabParamList>;
+
+export type APIError = { message: string; response?: { data?: { error?: string } } };

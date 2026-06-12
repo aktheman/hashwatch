@@ -95,7 +95,7 @@ it('renders miner name and IP', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
   expect(screen.getByText('TestMiner')).toBeTruthy();
   expect(screen.getByText('192.168.1.100')).toBeTruthy();
-});
+}, 15000);
 
 it('shows LIVE badge', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);

@@ -13,15 +13,14 @@ import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
-import { Miner } from '../types';
+import { Miner, Wallet, NavigationProp } from '../types';
 import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
-import { Wallet } from '../types';
 import * as DB from '../db/database';
 
 interface DashboardScreenProps {
-  navigation: any;
+  navigation: NavigationProp;
 }
 
 export function DashboardScreen({ navigation }: DashboardScreenProps) {
@@ -397,7 +396,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       {miners.length > 0 && <EarningsCard miners={miners} />}
 
       {(wallets.length > 0 || groups.length > 0) && (
-        <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: 16,
+            gap: 6,
+            marginBottom: 6,
+            flexWrap: 'wrap',
+          }}
+        >
           <TouchableOpacity
             style={[
               styles.walletChip,
@@ -406,9 +413,17 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 borderColor: !walletFilter && !groupFilter ? theme.primary : theme.border,
               },
             ]}
-            onPress={() => { setWalletFilter(null); setGroupFilter(null); }}
+            onPress={() => {
+              setWalletFilter(null);
+              setGroupFilter(null);
+            }}
           >
-            <Text style={[styles.walletChipText, { color: !walletFilter && !groupFilter ? '#FFF' : theme.text }]}>
+            <Text
+              style={[
+                styles.walletChipText,
+                { color: !walletFilter && !groupFilter ? '#FFF' : theme.text },
+              ]}
+            >
               All
             </Text>
           </TouchableOpacity>
@@ -447,10 +462,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               onPress={() => setGroupFilter(groupFilter === g ? null : g)}
             >
               <Text
-                style={[
-                  styles.walletChipText,
-                  { color: groupFilter === g ? '#FFF' : theme.text },
-                ]}
+                style={[styles.walletChipText, { color: groupFilter === g ? '#FFF' : theme.text }]}
               >
                 📁 {g}
               </Text>

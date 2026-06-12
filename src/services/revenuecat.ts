@@ -45,8 +45,8 @@ export async function purchasePro(): Promise<CustomerInfo | null> {
 
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     return customerInfo;
-  } catch (e: any) {
-    if (e.userCancelled) return null;
+  } catch (e: unknown) {
+    if ((e as { userCancelled?: boolean })?.userCancelled) return null;
     throw e;
   }
 }

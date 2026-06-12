@@ -7,7 +7,12 @@ import { pushStats } from '../api/client';
 import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
 import { useAuthStore } from './auth';
 import { updateWidget } from '../services/widget';
-import { toHashesPerSecond, formatHashrateValue, estimateBTCPerDay, formatBTC } from '../utils/hashrate';
+import {
+  toHashesPerSecond,
+  formatHashrateValue,
+  estimateBTCPerDay,
+  formatBTC,
+} from '../utils/hashrate';
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -70,8 +75,8 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       if (useAuthStore.getState().token) {
         get().syncWithBackend();
       }
-    } catch (e: any) {
-      set({ error: e.message, loading: false, initialized: true });
+    } catch (e: unknown) {
+      set({ error: e instanceof Error ? e.message : String(e), loading: false, initialized: true });
     }
   },
 
@@ -124,8 +129,9 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       await DB.saveMiner(miner);
       await DB.saveSnapshot(buildSnapshot(miner.id, status));
       set((s) => ({ miners: [...s.miners, miner] }));
-    } catch (e: any) {
-      set({ error: `Failed to connect to ${ip}: ${e.message}` });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      set({ error: `Failed to connect to ${ip}: ${msg}` });
       throw e;
     }
   },
@@ -143,7 +149,12 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === id);
     if (!miner) return;
     try {
-      const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath ?? undefined, miner.statusPath ?? undefined);
+      const client = new BitAxeClient(
+        miner.ip,
+        miner.port,
+        miner.apiPath ?? undefined,
+        miner.statusPath ?? undefined,
+      );
       const { info, status } = await client.fetchAll();
       const updated: Miner = {
         ...miner,
@@ -239,8 +250,12 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         }
       }
       set({ scanning: false, scanProgress: null });
-    } catch (e: any) {
-      set({ scanning: false, scanProgress: null, error: e.message });
+    } catch (e: unknown) {
+      set({
+        scanning: false,
+        scanProgress: null,
+        error: e instanceof Error ? e.message : String(e),
+      });
     }
   },
 

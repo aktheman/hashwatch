@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { setSetting } from '../db/database';
 import { useTheme } from '../theme';
+import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -64,7 +65,7 @@ export function OnboardingScreen({ onComplete }: Props) {
     useNativeDriver: false,
   });
 
-  const onMomentumEnd = (e: any) => {
+  const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / width);
     setCurrentIndex(idx);
   };

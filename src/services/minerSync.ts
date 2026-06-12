@@ -1,13 +1,13 @@
 import * as API from '../api/client';
 import * as DB from '../db/database';
-import { Miner } from '../types';
+import { Miner, RemoteMiner } from '../types';
 
 function minerKey(ip: string, port: number): string {
   return `${ip}:${port}`;
 }
 
 export async function syncMinersWithBackend(localMiners: Miner[]): Promise<Miner[]> {
-  const remoteMiners: any[] = await API.fetchMiners();
+  const remoteMiners: RemoteMiner[] = await API.fetchMiners();
   const remoteByKey = new Map(remoteMiners.map((m) => [minerKey(m.ip, m.port ?? 80), m]));
   const updated: Miner[] = [];
 
