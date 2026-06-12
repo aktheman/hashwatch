@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
@@ -14,10 +15,17 @@ import { useAuthStore } from '../store/auth';
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { setSetting } from '../db/database';
 import { exportAllData } from '../utils/export';
+import { setProxyUrl, getProxyUrl } from '../constants';
 
 export function SettingsScreen({ navigation }: any) {
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
+  const [proxyUrl, setProxyUrlState] = useState(getProxyUrl());
+
+  const saveProxyUrl = async () => {
+    await setProxyUrl(proxyUrl);
+    Alert.alert('Proxy URL Updated', `Proxy URL set to ${proxyUrl}`);
+  };
   const loadMiners = useMinerStore((s) => s.loadMiners);
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const scanning = useMinerStore((s) => s.scanning);
@@ -181,6 +189,32 @@ export function SettingsScreen({ navigation }: any) {
           fontSize: 12,
           fontWeight: '600',
         },
+        sectionSub: {
+          color: theme.textDim,
+          fontSize: 12,
+          lineHeight: 18,
+        },
+        input: {
+          backgroundColor: theme.surfaceLight,
+          borderRadius: 10,
+          padding: 12,
+          color: theme.text,
+          fontSize: 14,
+          fontFamily: 'monospace',
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        proxyBtn: {
+          borderRadius: 10,
+          padding: 10,
+          alignItems: 'center',
+          marginTop: 8,
+        },
+        proxyBtnText: {
+          color: '#FFF',
+          fontWeight: '700',
+          fontSize: 13,
+        },
       }),
     [theme],
   );
@@ -188,6 +222,34 @@ export function SettingsScreen({ navigation }: any) {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Settings</Text>
+
+      {Platform.OS === 'web' && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Connection</Text>
+          <Text style={[styles.sectionSub, { marginBottom: 10 }]}>
+            On web, a local proxy is needed to reach miners on your network. Run{' '}
+            <Text style={{ fontFamily: 'monospace', color: theme.primary }}>
+              node local-proxy.js
+            </Text>{' '}
+            on this machine and enter the URL below.
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={proxyUrl}
+            onChangeText={setProxyUrl}
+            placeholder="http://localhost:4567"
+            placeholderTextColor={theme.textMuted}
+            onSubmitEditing={saveProxyUrl}
+            returnKeyType="done"
+          />
+          <TouchableOpacity
+            style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
+            onPress={saveProxyUrl}
+          >
+            <Text style={styles.proxyBtnText}>Save Proxy URL</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>

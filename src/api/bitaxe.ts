@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { Platform } from 'react-native';
 import { MinerInfo, MinerStatus } from '../types';
-import { PROXY_URL, getExtra } from '../constants';
+import { getProxyUrl, getExtra } from '../constants';
 import { useAuthStore } from '../store/auth';
 
 const TIMEOUT = 5000;
@@ -39,12 +39,12 @@ async function fetchUrl(url: string, timeout = PROBE_TIMEOUT): Promise<any> {
     if (isWeb) {
       const headers: Record<string, string> = {};
       const apiUrl = getExtra().apiUrl;
-      if (PROXY_URL === apiUrl || PROXY_URL.startsWith(apiUrl)) {
+      if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
         const token = useAuthStore.getState().token;
         if (token) headers.Authorization = `Bearer ${token}`;
       }
       const { data } = await axios.post(
-        `${PROXY_URL}/api/proxy`,
+        `${getProxyUrl()}/api/proxy`,
         { url, method: 'GET' },
         { timeout, validateStatus: () => true, headers },
       );
@@ -114,12 +114,12 @@ export class BitAxeClient {
     try {
       const headers: Record<string, string> = {};
       const apiUrl = getExtra().apiUrl;
-      if (PROXY_URL === apiUrl || PROXY_URL.startsWith(apiUrl)) {
+      if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
         const token = useAuthStore.getState().token;
         if (token) headers.Authorization = `Bearer ${token}`;
       }
       const { data } = await axios.post(
-        `${PROXY_URL}/api/proxy`,
+        `${getProxyUrl()}/api/proxy`,
         {
           url: `http://${this.ip}:${this.port}${path}`,
           method: 'GET',
