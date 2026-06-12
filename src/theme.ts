@@ -28,6 +28,56 @@ export const darkTheme = {
   glowWarning: 'rgba(245, 158, 11, 0.3)',
 };
 
+export const neonTheme: Theme = {
+  bg: '#08080F',
+  surface: '#0F0A20',
+  surfaceLight: '#1A1035',
+  border: '#2A1550',
+  primary: '#00FFFF',
+  primaryLight: '#66FFFF',
+  primaryDark: '#00CCCC',
+  accent: '#FF00FF',
+  success: '#00FF88',
+  successLight: '#66FFBB',
+  danger: '#FF3366',
+  dangerLight: '#FF6699',
+  warning: '#FFCC00',
+  warningLight: '#FFDD44',
+  info: '#00DDFF',
+  text: '#E0E0FF',
+  textDim: '#8888BB',
+  textMuted: '#555588',
+  glow: 'rgba(0, 255, 255, 0.3)',
+  glowSuccess: 'rgba(0, 255, 136, 0.25)',
+  glowDanger: 'rgba(255, 51, 102, 0.25)',
+  glowWarning: 'rgba(255, 204, 0, 0.25)',
+};
+
+export const matrixTheme: Theme = {
+  bg: '#000000',
+  surface: '#0A1A0A',
+  surfaceLight: '#0F2A0F',
+  border: '#1A3A1A',
+  primary: '#00FF41',
+  primaryLight: '#33FF77',
+  primaryDark: '#00CC33',
+  accent: '#00CC66',
+  success: '#00FF41',
+  successLight: '#33FF77',
+  danger: '#FF3333',
+  dangerLight: '#FF6666',
+  warning: '#FFD700',
+  warningLight: '#FFE44D',
+  info: '#00CCCC',
+  text: '#00FF41',
+  textDim: '#008800',
+  textMuted: '#005500',
+  glow: 'rgba(0, 255, 65, 0.25)',
+  glowSuccess: 'rgba(0, 255, 65, 0.25)',
+  glowDanger: 'rgba(255, 51, 51, 0.25)',
+  glowWarning: 'rgba(255, 215, 0, 0.25)',
+};
+
 export const lightTheme: Theme = {
   bg: '#F8F9FC',
   surface: '#FFFFFF',
@@ -54,7 +104,7 @@ export const lightTheme: Theme = {
 };
 
 let _current: Theme = darkTheme;
-let _mode: 'dark' | 'light' | 'system' = 'dark';
+let _mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' = 'dark';
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -68,16 +118,18 @@ function getSnapshot() {
 
 export function setTheme(t: Theme) {
   _current = t;
-  _mode = t === darkTheme ? 'dark' : 'light';
+  if (t === matrixTheme) _mode = 'matrix';
+  else if (t === neonTheme) _mode = 'neon';
+  else _mode = t === darkTheme ? 'dark' : 'light';
   listeners.forEach((cb) => cb());
 }
 
-export function setThemeMode(mode: 'dark' | 'light' | 'system') {
+export function setThemeMode(mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon') {
   _mode = mode;
   applyMode();
 }
 
-export function getThemeMode(): 'dark' | 'light' | 'system' {
+export function getThemeMode(): 'dark' | 'light' | 'system' | 'matrix' | 'neon' {
   return _mode;
 }
 
@@ -86,10 +138,16 @@ export function getTheme() {
 }
 
 function applyMode() {
-  const prefersDark =
-    _mode === 'dark' ||
-    (_mode === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-  _current = prefersDark ? darkTheme : lightTheme;
+  if (_mode === 'matrix') {
+    _current = matrixTheme;
+  } else if (_mode === 'neon') {
+    _current = neonTheme;
+  } else {
+    const prefersDark =
+      _mode === 'dark' ||
+      (_mode === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+    _current = prefersDark ? darkTheme : lightTheme;
+  }
   listeners.forEach((cb) => cb());
 }
 

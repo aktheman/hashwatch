@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
-import { parseVersion, needsUpdate, LATEST_FIRMWARE, getFirmwareUrl } from '../utils/version';
+import { parseVersion, needsUpdate, LATEST_FIRMWARE, getFirmwareUrl, fetchLatestFirmware } from '../utils/version';
 
 interface FirmwareBannerProps {
   rawVersion: string | null | undefined;
@@ -8,11 +9,19 @@ interface FirmwareBannerProps {
 
 export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
   const theme = useTheme();
+  const [latest, setLatest] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchLatestFirmware().then((v) => setLatest(v));
+  }, []);
+
   if (!rawVersion) return null;
 
   const parsed = parseVersion(rawVersion);
   if (!parsed) return null;
-  if (!needsUpdate(parsed)) return null;
+
+  const target = latest || LATEST_FIRMWARE;
+  if (!needsUpdate(parsed, target)) return null;
 
   const handlePress = () => {
     const url = getFirmwareUrl();
@@ -32,7 +41,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
       <View style={styles.textWrap}>
         <Text style={[styles.title, { color: theme.warning }]}>Firmware Update Available</Text>
         <Text style={[styles.detail, { color: theme.textDim }]}>
-          {parsed} → {LATEST_FIRMWARE}
+          {parsed} → {target}
         </Text>
       </View>
       <Text style={[styles.arrow, { color: theme.textMuted }]}>›</Text>

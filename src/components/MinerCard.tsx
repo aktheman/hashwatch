@@ -12,6 +12,7 @@ interface MinerCardProps {
 
 export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
   const theme = useTheme();
+  const accentColor = miner.isOnline ? theme.success : theme.danger;
   const styles = useMemo(() => StyleSheet.create({
     card: {
       backgroundColor: theme.surface,
@@ -22,15 +23,28 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       borderWidth: 1,
       borderColor: theme.border,
       boxShadow: `0 4px 24px rgba(0,0,0,0.4)`,
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    cardAccent: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
+      backgroundColor: accentColor,
+      borderTopLeftRadius: 20,
+      borderBottomLeftRadius: 20,
     },
     cardOffline: {
-      opacity: 0.6,
+      opacity: 0.55,
     },
     topRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 4,
+      paddingLeft: 4,
     },
     nameRow: {
       flexDirection: 'row',
@@ -38,17 +52,17 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       flex: 1,
     },
     dot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: 10,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginRight: 8,
     },
     name: {
       color: theme.text,
-      fontSize: 17,
+      fontSize: 16,
       fontWeight: '700',
       flex: 1,
-      letterSpacing: -0.2,
+      letterSpacing: -0.3,
     },
     pulse: {
       width: 28,
@@ -56,23 +70,24 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       borderRadius: 14,
       justifyContent: 'center',
       alignItems: 'center',
+      boxShadow: `0 0 12px ${accentColor}40`,
     },
     pulseInner: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
     },
     ip: {
       color: theme.textMuted,
-      fontSize: 12,
+      fontSize: 11,
       fontFamily: 'monospace',
       marginBottom: 10,
-      marginLeft: 20,
+      marginLeft: 12,
     },
     divider: {
       height: 1,
       backgroundColor: theme.border,
-      marginBottom: 10,
+      marginBottom: 12,
     },
     stats: {
       flexDirection: 'row',
@@ -83,25 +98,25 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
     },
     statDivider: {
       width: 1,
-      height: 28,
+      height: 32,
       backgroundColor: theme.border,
-      marginHorizontal: 8,
+      marginHorizontal: 10,
     },
     statLabel: {
       color: theme.textDim,
-      fontSize: 10,
-      fontWeight: '600',
+      fontSize: 9,
+      fontWeight: '700',
       textTransform: 'uppercase',
-      letterSpacing: 0.5,
+      letterSpacing: 0.8,
       marginBottom: 2,
     },
     statValue: {
-      fontSize: 17,
+      fontSize: 18,
       fontWeight: '800',
     },
     footer: {
       flexDirection: 'row',
-      gap: 14,
+      gap: 16,
       marginTop: 10,
       paddingTop: 10,
       borderTopWidth: 1,
@@ -119,7 +134,7 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
     footerText: {
       color: theme.textDim,
       fontSize: 11,
-      fontWeight: '500',
+      fontWeight: '600',
     },
     subFooter: {
       flexDirection: 'row',
@@ -142,7 +157,7 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       flex: 1,
       textAlign: 'right',
     },
-  }), [theme]);
+  }), [theme, accentColor]);
 
   const { status, isOnline } = miner;
   const hashrate = status
@@ -177,13 +192,14 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       delayLongPress={600}
       activeOpacity={0.7}
     >
+      <View style={styles.cardAccent} />
       <View style={styles.topRow}>
         <View style={styles.nameRow}>
-          <View style={[styles.dot, { backgroundColor: isOnline ? theme.success : theme.danger }]} />
+          <View style={[styles.dot, { backgroundColor: accentColor }]} />
           <Text style={styles.name} numberOfLines={1}>{miner.name}</Text>
         </View>
-        <View style={[styles.pulse, { backgroundColor: isOnline ? theme.success + '20' : theme.danger + '20' }]}>
-          <View style={[styles.pulseInner, { backgroundColor: isOnline ? theme.success : theme.danger }]} />
+        <View style={[styles.pulse, { backgroundColor: accentColor + '20' }]}>
+          <View style={[styles.pulseInner, { backgroundColor: accentColor }]} />
         </View>
       </View>
 

@@ -164,7 +164,7 @@ export function SubscriptionScreen() {
         </View>
         <View style={styles.featureList}>
           <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Up to 3 miners
+            <Text style={styles.featureCheck}>✓</Text> Unlimited miners
           </Text>
           <Text style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text> Live dashboard

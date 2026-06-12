@@ -186,6 +186,30 @@ export class BitAxeClient {
     return { info, status };
   }
 
+  async restart(): Promise<boolean> {
+    try {
+      const path = this.apiPath.replace(/\/info$/, '/restart');
+      if (isWeb) {
+        const headers: Record<string, string> = {};
+        const apiUrl = getExtra().apiUrl;
+        if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
+          const token = useAuthStore.getState().token;
+          if (token) headers.Authorization = `Bearer ${token}`;
+        }
+        const { data } = await axios.post(
+          `${getProxyUrl()}/api/proxy/restart`,
+          { url: `http://${this.ip}:${this.port}${path}` },
+          { timeout: 8000, headers, validateStatus: () => true },
+        );
+        return data?.success === true;
+      }
+      await this.client.post(path);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   static async probe(ip: string, port: number = 80): Promise<FoundPaths | null> {
     const paths = await findPaths(ip, port);
     if (!paths.infoPath) return null;

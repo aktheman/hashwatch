@@ -6,6 +6,8 @@ import { checkMinerAlerts } from '../services/notifications';
 import { pushStats } from '../api/client';
 import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
 import { useAuthStore } from './auth';
+import { updateWidget } from '../services/widget';
+import { toHashesPerSecond, formatHashrateValue, estimateBTCPerDay, formatBTC } from '../utils/hashrate';
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -141,7 +143,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === id);
     if (!miner) return;
     try {
-      const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath, miner.statusPath);
+      const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath ?? undefined, miner.statusPath ?? undefined);
       const { info, status } = await client.fetchAll();
       const updated: Miner = {
         ...miner,
@@ -197,6 +199,18 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     if (current.length > 0) {
       checkMinerAlerts(prev, current);
     }
+    const totalHash = current.reduce(
+      (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+      0,
+    );
+    const online = current.filter((m) => m.isOnline).length;
+    const btc = estimateBTCPerDay(totalHash);
+    updateWidget(
+      totalHash > 0 ? formatHashrateValue(totalHash) : '---',
+      online,
+      current.length,
+      btc > 0 ? formatBTC(btc) : '---',
+    );
   },
 
   startPolling: (intervalMs: number = 30000) => {

@@ -98,7 +98,7 @@ beforeEach(() => {
   useSubscriptionStore.setState({
     tier: 'free',
     isPro: false,
-    maxMiners: 3,
+    maxMiners: 999,
     initialized: true,
     loading: false,
   });
@@ -205,28 +205,19 @@ it('navigates to MinerDetail on miner press', async () => {
   expect(navigation.navigate).toHaveBeenCalledWith('MinerDetail', { minerId: 'm1' });
 });
 
-it('shows upgrade banner when at miner limit', async () => {
+it('shows add miner button when under limit', async () => {
   useMinerStore.setState({
     miners: [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText(/Upgrade to Pro/)).toBeTruthy();
+  expect(screen.getByText('+')).toBeTruthy();
 });
 
-it('navigates to Subscription from upgrade banner', async () => {
+it('navigates to AddMiner from FAB', async () => {
   useMinerStore.setState({
-    miners: [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }] as any[],
-  });
-  await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText(/Upgrade to Pro/));
-  expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
-});
-
-it('navigates to Subscription when adding beyond limit', async () => {
-  useMinerStore.setState({
-    miners: [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }] as any[],
+    miners: [{ id: 'm1' }] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
   fireEvent.press(screen.getByText('+'));
-  expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
+  expect(navigation.navigate).toHaveBeenCalledWith('AddMiner');
 });

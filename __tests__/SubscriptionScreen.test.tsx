@@ -16,7 +16,7 @@ beforeEach(() => {
   useSubscriptionStore.setState({
     tier: 'free',
     isPro: false,
-    maxMiners: 3,
+    maxMiners: 999,
     initialized: false,
     loading: false,
   });
@@ -50,7 +50,7 @@ it('shows Active badge for pro users', async () => {
 
 it('displays feature list', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getByText(/Up to 3 miners/)).toBeTruthy();
+  expect(screen.getAllByText(/Unlimited miners/).length).toBe(3);
   expect(screen.getByText(/30-day charts/)).toBeTruthy();
   expect(screen.getByText(/Push notifications/)).toBeTruthy();
 });

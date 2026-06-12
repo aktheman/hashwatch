@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,11 @@ export function AnalyticsScreen() {
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<'1h' | '24h' | '7d'>('24h');
+  const [powerCost, setPowerCost] = useState(0);
+
+  useEffect(() => {
+    DB.getSetting('power_cost').then((v) => setPowerCost(parseFloat(v || '0') || 0));
+  }, []);
 
   useEffect(() => {
     loadSnapshots();
@@ -302,6 +307,48 @@ export function AnalyticsScreen() {
             <Text style={styles.summaryLabel}>Total Shares</Text>
           </View>
         </View>
+
+        {powerCost > 0 && (
+          <View style={styles.chartCard}>
+            <Text style={styles.chartTitle}>Power Cost</Text>
+            <View style={styles.summaryRow}>
+              <View style={[styles.summaryCard, { flex: 1 }]}>
+                <Text style={styles.summaryIcon}>🔌</Text>
+                <Text style={[styles.summaryValue, { color: theme.warning, fontSize: 22 }]}>
+                  {totalPower.toFixed(0)}
+                </Text>
+                <Text style={styles.summaryLabel}>Watts</Text>
+              </View>
+              <View style={[styles.summaryCard, { flex: 1 }]}>
+                <Text style={styles.summaryIcon}>💵</Text>
+                <Text style={[styles.summaryValue, { color: theme.danger, fontSize: 22 }]}>
+                  ${((totalPower / 1000) * 24 * powerCost).toFixed(2)}
+                </Text>
+                <Text style={styles.summaryLabel}>Cost/Day</Text>
+              </View>
+              <View style={[styles.summaryCard, { flex: 1 }]}>
+                <Text style={styles.summaryIcon}>📈</Text>
+                <Text
+                  style={[
+                    styles.summaryValue,
+                    {
+                      color:
+                        totalEarnings * 85000 - (totalPower / 1000) * 24 * powerCost > 0
+                          ? theme.success
+                          : theme.danger,
+                      fontSize: 22,
+                    },
+                  ]}
+                >
+                  {totalEarnings > 0
+                    ? `$${(totalEarnings * 85000 - (totalPower / 1000) * 24 * powerCost).toFixed(2)}`
+                    : '—'}
+                </Text>
+                <Text style={styles.summaryLabel}>Net/Day</Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Hashrate History</Text>
