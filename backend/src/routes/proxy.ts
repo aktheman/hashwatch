@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import axios from 'axios';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { AuthRequest } from '../middleware/auth';
 import { isAllowedProxyUrl } from '../utils/urlValidation';
 
 export const proxyRouter = Router();
-proxyRouter.use(authMiddleware);
 
 proxyRouter.post('/', async (req: AuthRequest, res) => {
   try {
