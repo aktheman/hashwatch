@@ -2,10 +2,17 @@ import { Miner, MinerSnapshot } from '../types';
 import * as SQLite from 'expo-sqlite';
 
 interface MinerRow {
-  id: string; name: string; ip: string; port: number;
-  addedAt: number; lastSeen: number;
-  apiPath?: string; statusPath?: string;
-  info?: string; status?: string;
+  id: string;
+  name: string;
+  ip: string;
+  port: number;
+  addedAt: number;
+  lastSeen: number;
+  remoteId?: string;
+  apiPath?: string;
+  statusPath?: string;
+  info?: string;
+  status?: string;
 }
 
 let db: any = null;
@@ -47,6 +54,7 @@ async function initTables(d: any): Promise<void> {
       minerId TEXT NOT NULL,
       timestamp INTEGER NOT NULL,
       hashRate REAL NOT NULL,
+      hashRateUnit TEXT DEFAULT 'GH/s',
       temperature REAL NOT NULL,
       voltage REAL NOT NULL,
       current REAL NOT NULL,
@@ -64,42 +72,41 @@ async function initTables(d: any): Promise<void> {
       value TEXT NOT NULL
     );
   `);
-  const cols = ['apiPath', 'statusPath', 'info', 'status'];
+  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId'];
   for (const col of cols) {
     try {
       await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
-    } catch { }
+    } catch {}
   }
+  try {
+    await d.execAsync(`ALTER TABLE miner_snapshots ADD COLUMN hashRateUnit TEXT DEFAULT 'GH/s'`);
+  } catch {}
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   await d.runAsync('DELETE FROM miner_snapshots WHERE timestamp < ?', [cutoff]);
 }
 
 export async function getSetting(key: string): Promise<string | null> {
   const d = await getDb();
-  const row: any = await d.getFirstAsync(
-    'SELECT value FROM settings WHERE key = ?', [key]
-  );
+  const row: any = await d.getFirstAsync('SELECT value FROM settings WHERE key = ?', [key]);
   return row?.value ?? null;
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
   const d = await getDb();
-  await d.runAsync(
-    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
-    [key, value]
-  );
+  await d.runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
 }
 
 export async function loadMiners(): Promise<Miner[]> {
   const d = await getDb();
   const rows: MinerRow[] = await d.getAllAsync('SELECT * FROM miners');
-  return rows.map(r => ({
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     ip: r.ip,
     port: r.port,
     addedAt: r.addedAt,
     lastSeen: r.lastSeen,
+    remoteId: r.remoteId || undefined,
     apiPath: r.apiPath || undefined,
     statusPath: r.statusPath || undefined,
     info: r.info && r.info !== 'null' && r.info !== '' ? JSON.parse(r.info) : null,
@@ -111,14 +118,21 @@ export async function loadMiners(): Promise<Miner[]> {
 export async function saveMiner(m: Miner): Promise<void> {
   const d = await getDb();
   await d.runAsync(
-    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, apiPath, statusPath, info, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, remoteId, apiPath, statusPath, info, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      m.id, m.name, m.ip, m.port, m.addedAt, m.lastSeen,
-      m.apiPath || null, m.statusPath || null,
+      m.id,
+      m.name,
+      m.ip,
+      m.port,
+      m.addedAt,
+      m.lastSeen,
+      m.remoteId || null,
+      m.apiPath || null,
+      m.statusPath || null,
       m.info ? JSON.stringify(m.info) : null,
       m.status ? JSON.stringify(m.status) : null,
-    ]
+    ],
   );
 }
 
@@ -132,31 +146,40 @@ export async function saveSnapshot(s: MinerSnapshot): Promise<void> {
   const d = await getDb();
   await d.runAsync(
     `INSERT INTO miner_snapshots
-     (minerId, timestamp, hashRate, temperature, voltage, current, power,
+     (minerId, timestamp, hashRate, hashRateUnit, temperature, voltage, current, power,
       sharesAccepted, sharesRejected, uptimeSeconds, frequency)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [s.minerId, s.timestamp, s.hashRate, s.temperature, s.voltage, s.current,
-     s.power, s.sharesAccepted, s.sharesRejected, s.uptimeSeconds, s.frequency]
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      s.minerId,
+      s.timestamp,
+      s.hashRate,
+      s.hashRateUnit || 'GH/s',
+      s.temperature,
+      s.voltage,
+      s.current,
+      s.power,
+      s.sharesAccepted,
+      s.sharesRejected,
+      s.uptimeSeconds,
+      s.frequency,
+    ],
   );
 }
 
-export async function getSnapshots(
-  minerId: string,
-  limit: number = 100
-): Promise<MinerSnapshot[]> {
+export async function getSnapshots(minerId: string, limit: number = 100): Promise<MinerSnapshot[]> {
   const d = await getDb();
   const snapshots: MinerSnapshot[] = await d.getAllAsync(
     `SELECT * FROM miner_snapshots
      WHERE minerId = ?
      ORDER BY timestamp DESC
      LIMIT ?`,
-    [minerId, limit]
+    [minerId, limit],
   );
   return snapshots;
 }
 
 export async function cleanupOldSnapshots(
-  olderThan: number = 7 * 24 * 60 * 60 * 1000
+  olderThan: number = 7 * 24 * 60 * 60 * 1000,
 ): Promise<void> {
   const d = await getDb();
   const cutoff = Date.now() - olderThan;

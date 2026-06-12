@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
-import { Miner, MinerSnapshot } from '../types';
+import { MinerSnapshot } from '../types';
 import { StatWidget } from '../components/StatWidget';
 import { HashrateChart } from '../components/HashrateChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
@@ -222,13 +222,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   useEffect(() => {
     if (minerId) {
       getSnapshots(minerId, 50).then(setSnapshots);
-      const interval = setInterval(() => {
-        refreshMiner(minerId);
-        getSnapshots(minerId, 50).then(setSnapshots);
-      }, 15000);
-      return () => clearInterval(interval);
     }
-  }, [minerId]);
+  }, [minerId, miner?.lastSeen]);
 
   if (!miner) {
     return (

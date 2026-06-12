@@ -15,6 +15,15 @@ function getBaseUrl(): string {
 export function connectWebSocket(authToken: string) {
   token = authToken;
   url = getBaseUrl();
+  if (ws) {
+    ws.onclose = null;
+    ws.close();
+    ws = null;
+  }
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
   doConnect();
 }
 
@@ -46,7 +55,7 @@ function doConnect() {
 }
 
 function scheduleReconnect() {
-  if (reconnectTimer) return;
+  if (reconnectTimer || !token) return;
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
     doConnect();
@@ -56,9 +65,9 @@ function scheduleReconnect() {
 function handleMessage(msg: any) {
   if (msg.type === 'snapshot' && msg.snapshot) {
     const snap = msg.snapshot as MinerSnapshot;
-    const miner = useMinerStore.getState().miners.find((m) => m.id === snap.minerId);
+    const miner = useMinerStore.getState().miners.find((m) => m.remoteId === snap.minerId);
     if (miner) {
-      useMinerStore.getState().refreshMiner(snap.minerId);
+      useMinerStore.getState().applyRemoteSnapshot(miner.id, snap);
     }
   }
 }
@@ -70,6 +79,9 @@ export function disconnectWebSocket() {
   }
   token = null;
   url = null;
-  ws?.close();
-  ws = null;
+  if (ws) {
+    ws.onclose = null;
+    ws.close();
+    ws = null;
+  }
 }

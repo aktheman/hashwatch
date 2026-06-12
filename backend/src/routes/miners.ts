@@ -83,6 +83,12 @@ minersRouter.put('/:id', async (req: AuthRequest, res) => {
 
 minersRouter.delete('/:id', async (req: AuthRequest, res) => {
   const id = req.params.id as string;
-  await query('DELETE FROM miners WHERE id = $1 AND userId = $2', [id, req.userId]);
+  const result = await query('DELETE FROM miners WHERE id = $1 AND userId = $2 RETURNING id', [
+    id,
+    req.userId,
+  ]);
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'miner not found' });
+  }
   res.json({ deleted: true });
 });

@@ -71,6 +71,10 @@ export default {
         projectId: '7e9a5883-0170-44fc-be43-ccba1e11db30',
       },
       apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000',
+      minerProxyUrl:
+        process.env.EXPO_PUBLIC_MINER_PROXY_URL ||
+        process.env.EXPO_PUBLIC_API_URL ||
+        'http://localhost:4000',
       revenuecatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '',
       revenuecatAndroidKey: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '',
     },

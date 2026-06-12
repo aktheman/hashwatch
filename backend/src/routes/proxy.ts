@@ -1,20 +1,29 @@
 import { Router } from 'express';
 import axios from 'axios';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { isAllowedProxyUrl } from '../utils/urlValidation';
 
 export const proxyRouter = Router();
+proxyRouter.use(authMiddleware);
 
-proxyRouter.post('/', async (req, res) => {
+proxyRouter.post('/', async (req: AuthRequest, res) => {
   try {
     const { url, method = 'GET', headers, data } = req.body;
     if (!url) {
       return res.status(400).json({ error: 'url is required' });
     }
 
+    if (!isAllowedProxyUrl(url)) {
+      return res
+        .status(403)
+        .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+    }
+
     const response = await axios({
       url,
       method: method.toUpperCase(),
       headers: {
-        'Connection': 'close',
+        Connection: 'close',
         ...(headers || {}),
       },
       data,
@@ -34,13 +43,22 @@ proxyRouter.post('/', async (req, res) => {
     res.json(response.data);
   } catch (e: any) {
     if (e.code === 'ECONNREFUSED' || e.code === 'EHOSTUNREACH') {
-      return res.status(502).json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
+      return res
+        .status(502)
+        .json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
     }
-    if (e.code === 'ETIMEDOUT' || e.code === 'ENETUNREACH' || e.code === 'ENETDOWN' || e.code === 'EINVAL') {
+    if (
+      e.code === 'ETIMEDOUT' ||
+      e.code === 'ENETUNREACH' ||
+      e.code === 'ENETDOWN' ||
+      e.code === 'EINVAL'
+    ) {
       return res.status(502).json({ error: 'unreachable', message: 'Miner unreachable (timeout)' });
     }
     if (e.code === 'ERR_BAD_RESPONSE') {
-      return res.status(502).json({ error: 'bad_response', message: 'Invalid response from miner' });
+      return res
+        .status(502)
+        .json({ error: 'bad_response', message: 'Invalid response from miner' });
     }
     res.status(500).json({ error: 'proxy_error', message: e.message });
   }

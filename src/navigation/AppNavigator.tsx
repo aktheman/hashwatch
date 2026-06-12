@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { MinerDetailScreen } from '../screens/MinerDetailScreen';

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
 
 interface SubscriptionGateProps {
@@ -7,7 +7,7 @@ interface SubscriptionGateProps {
 }
 
 export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
-  const { canAddMiner, isPro } = useSubscriptionStore();
+  const { isPro } = useSubscriptionStore();
 
   if (isPro) {
     return <>{children}</>;
@@ -32,7 +32,10 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.3)',

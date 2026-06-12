@@ -72,8 +72,10 @@ describe('GET /api/stats/:minerId', () => {
 describe('POST /api/stats/:minerId', () => {
   it('creates a snapshot and broadcasts via WS', async () => {
     const snapshot = { id: 1, minerId: 'm1', hashRate: 500 };
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ id: 'm1', name: 'TestMiner', ip: '192.168.1.100' }],
+    });
     mockQuery.mockResolvedValueOnce({ rows: [snapshot] });
-    mockQuery.mockResolvedValueOnce({ rows: [{ name: 'TestMiner', ip: '192.168.1.100' }] });
 
     const res = await request(app).post('/api/stats/m1').send({
       hashRate: 500,
@@ -93,5 +95,18 @@ describe('POST /api/stats/:minerId', () => {
       type: 'snapshot',
       snapshot,
     });
+  });
+
+  it('returns 404 when miner is not owned by user', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).post('/api/stats/m1').send({
+      hashRate: 500,
+      temperature: 60,
+    });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('miner not found');
+    expect(mockBroadcast).not.toHaveBeenCalled();
   });
 });

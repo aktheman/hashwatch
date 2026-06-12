@@ -1,13 +1,31 @@
 import { create } from 'zustand';
-import { Miner, MinerSnapshot } from '../types';
+import { Miner, MinerSnapshot, MinerStatus } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
 import { pushStats } from '../api/client';
+import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
 import { useAuthStore } from './auth';
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildSnapshot(minerId: string, status: MinerStatus): MinerSnapshot {
+  return {
+    minerId,
+    timestamp: Date.now(),
+    hashRate: status.hashRate,
+    hashRateUnit: status.hashRateUnit,
+    temperature: status.temperature,
+    voltage: status.voltage,
+    current: status.current,
+    power: status.power,
+    sharesAccepted: status.sharesAccepted,
+    sharesRejected: status.sharesRejected,
+    uptimeSeconds: status.uptimeSeconds,
+    frequency: status.frequency,
+  };
 }
 
 interface MinersState {
@@ -19,12 +37,14 @@ interface MinersState {
   error: string | null;
 
   loadMiners: () => Promise<void>;
+  syncWithBackend: () => Promise<void>;
   addMiner: (ip: string, port?: number, name?: string) => Promise<void>;
   removeMiner: (id: string) => Promise<void>;
   refreshMiner: (id: string) => Promise<void>;
   refreshAll: () => Promise<void>;
   startPolling: (intervalMs?: number) => () => void;
   scanNetwork: () => Promise<void>;
+  applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
 }
@@ -44,13 +64,32 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       set({ miners, loading: false, initialized: true });
       DB.cleanupOldSnapshots();
       get().refreshAll();
+      if (useAuthStore.getState().token) {
+        get().syncWithBackend();
+      }
     } catch (e: any) {
       set({ error: e.message, loading: false, initialized: true });
     }
   },
 
+  syncWithBackend: async () => {
+    if (!useAuthStore.getState().token) return;
+    try {
+      const synced = await syncMinersWithBackend(get().miners);
+      set({ miners: synced });
+    } catch {
+      // sync is best-effort
+    }
+  },
+
   addMiner: async (ip: string, port: number = 80, name?: string) => {
     set({ error: null });
+    const existing = get().miners.find((m) => m.ip === ip && m.port === port);
+    if (existing) {
+      const msg = `Miner at ${ip} is already added`;
+      set({ error: msg });
+      throw new Error(msg);
+    }
     try {
       const found = await BitAxeClient.probe(ip, port);
       if (!found) {
@@ -74,20 +113,13 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         addedAt: Date.now(),
         isOnline: true,
       };
+
+      if (useAuthStore.getState().token) {
+        miner.remoteId = await createRemoteMiner(miner);
+      }
+
       await DB.saveMiner(miner);
-      await DB.saveSnapshot({
-        minerId: miner.id,
-        timestamp: Date.now(),
-        hashRate: status.hashRate,
-        temperature: status.temperature,
-        voltage: status.voltage,
-        current: status.current,
-        power: status.power,
-        sharesAccepted: status.sharesAccepted,
-        sharesRejected: status.sharesRejected,
-        uptimeSeconds: status.uptimeSeconds,
-        frequency: status.frequency,
-      });
+      await DB.saveSnapshot(buildSnapshot(miner.id, status));
       set((s) => ({ miners: [...s.miners, miner] }));
     } catch (e: any) {
       set({ error: `Failed to connect to ${ip}: ${e.message}` });
@@ -96,6 +128,10 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   removeMiner: async (id: string) => {
+    const miner = get().miners.find((m) => m.id === id);
+    if (miner?.remoteId && useAuthStore.getState().token) {
+      await deleteRemoteMiner(miner.remoteId);
+    }
     await DB.deleteMiner(id);
     set((s) => ({ miners: s.miners.filter((m) => m.id !== id) }));
   },
@@ -114,23 +150,11 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         isOnline: true,
       };
       await DB.saveMiner(updated);
-      const snapshot = {
-        minerId: id,
-        timestamp: Date.now(),
-        hashRate: status.hashRate,
-        temperature: status.temperature,
-        voltage: status.voltage,
-        current: status.current,
-        power: status.power,
-        sharesAccepted: status.sharesAccepted,
-        sharesRejected: status.sharesRejected,
-        uptimeSeconds: status.uptimeSeconds,
-        frequency: status.frequency,
-      };
+      const snapshot = buildSnapshot(id, status);
       await DB.saveSnapshot(snapshot);
       const token = useAuthStore.getState().token;
-      if (token) {
-        pushStats(id, snapshot).catch(() => {});
+      if (token && miner.remoteId) {
+        pushStats(miner.remoteId, snapshot).catch(() => {});
       }
       set((s) => ({
         miners: s.miners.map((m) => (m.id === id ? updated : m)),
@@ -203,6 +227,37 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     } catch (e: any) {
       set({ scanning: false, scanProgress: null, error: e.message });
     }
+  },
+
+  applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
+    const miner = get().miners.find((m) => m.id === localId);
+    if (!miner) return;
+
+    const localSnapshot: MinerSnapshot = { ...snapshot, minerId: localId };
+    await DB.saveSnapshot(localSnapshot);
+
+    if (!miner.status) return;
+    const updated: Miner = {
+      ...miner,
+      status: {
+        ...miner.status,
+        hashRate: snapshot.hashRate,
+        temperature: snapshot.temperature,
+        voltage: snapshot.voltage,
+        current: snapshot.current,
+        power: snapshot.power,
+        sharesAccepted: snapshot.sharesAccepted,
+        sharesRejected: snapshot.sharesRejected,
+        uptimeSeconds: snapshot.uptimeSeconds,
+        frequency: snapshot.frequency,
+      },
+      lastSeen: snapshot.timestamp,
+      isOnline: true,
+    };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === localId ? updated : m)),
+    }));
   },
 
   clearError: () => set({ error: null }),

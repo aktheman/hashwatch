@@ -38,6 +38,15 @@ jest.mock('../src/api/client', () => ({
   BASE_URL: 'http://localhost:4000',
   configureClient: jest.fn(),
   pushStats: jest.fn(),
+  fetchMiners: jest.fn().mockResolvedValue([]),
+  createMiner: jest.fn(),
+  deleteMinerAPI: jest.fn(),
+}));
+
+jest.mock('../src/services/minerSync', () => ({
+  syncMinersWithBackend: jest.fn().mockResolvedValue([]),
+  createRemoteMiner: jest.fn(),
+  deleteRemoteMiner: jest.fn(),
 }));
 
 jest.mock('../src/api/bitaxe', () => ({

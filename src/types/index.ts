@@ -37,6 +37,7 @@ export interface Miner {
   name: string;
   ip: string;
   port: number;
+  remoteId?: string;
   apiPath?: string;
   statusPath?: string;
   info: MinerInfo | null;
@@ -50,6 +51,7 @@ export interface MinerSnapshot {
   minerId: string;
   timestamp: number;
   hashRate: number;
+  hashRateUnit?: string;
   temperature: number;
   voltage: number;
   current: number;
