@@ -32,7 +32,7 @@ const slides = [
   {
     icon: '⭐',
     title: 'Ready to Mine',
-    subtitle: 'Free for up to 3 miners. Upgrade to Pro for unlimited monitoring.',
+    subtitle: 'Monitor all your miners for free. Upgrade to Pro for extra features.',
   },
 ];
 

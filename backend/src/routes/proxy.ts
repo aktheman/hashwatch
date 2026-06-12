@@ -62,3 +62,19 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
     res.status(500).json({ error: 'proxy_error', message: e.message });
   }
 });
+
+proxyRouter.post('/restart', async (req: AuthRequest, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: 'url is required' });
+    }
+    if (!isAllowedProxyUrl(url)) {
+      return res.status(403).json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+    }
+    await axios({ url, method: 'POST', timeout: 5000, validateStatus: () => true });
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(502).json({ error: 'restart_failed', message: e.message });
+  }
+});

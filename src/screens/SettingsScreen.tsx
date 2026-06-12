@@ -7,13 +7,14 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Switch,
   StyleSheet,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore } from '../store/auth';
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
-import { setSetting } from '../db/database';
+import { getSetting, setSetting } from '../db/database';
 import { exportAllData } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
 
@@ -37,8 +38,12 @@ export function SettingsScreen({ navigation }: any) {
   const [authPassword, setAuthPassword] = useState('');
   const [isRegister, setIsRegister] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [powerCost, setPowerCost] = useState('');
+  const [autoScan, setAutoScan] = useState(false);
 
   useEffect(() => {
+    getSetting('power_cost').then((v) => setPowerCost(v || ''));
+    getSetting('auto_scan').then((v) => setAutoScan(v === 'true'));
     restoreSession();
   }, []);
 
@@ -333,7 +338,7 @@ export function SettingsScreen({ navigation }: any) {
         <View style={styles.row}>
           <Text style={styles.rowLabel}>Theme</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(['system', 'dark', 'light'] as const).map((mode) => (
+            {(['system', 'dark', 'light', 'neon', 'matrix'] as const).map((mode) => (
               <TouchableOpacity
                 key={mode}
                 style={[
@@ -354,12 +359,33 @@ export function SettingsScreen({ navigation }: any) {
                     { color: getThemeMode() === mode ? '#FFF' : theme.text },
                   ]}
                 >
-                  {mode === 'dark' ? '🌙' : mode === 'light' ? '☀' : '🔄'}{' '}
+                  {mode === 'dark' ? '🌙' : mode === 'light' ? '☀' : mode === 'neon' ? '💜' : mode === 'matrix' ? '💚' : '🔄'}{' '}
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Power</Text>
+        <Text style={[styles.sectionSub, { marginBottom: 10 }]}>
+          Enter your electricity rate to see power cost and net profit.
+        </Text>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>$/kWh</Text>
+          <TextInput
+            style={[styles.input, { flex: 1, marginLeft: 12, maxWidth: 120, textAlign: 'right' }]}
+            value={powerCost}
+            onChangeText={(t) => {
+              setPowerCost(t);
+              setSetting('power_cost', t);
+            }}
+            placeholder="0.12"
+            placeholderTextColor={theme.textMuted}
+            keyboardType="decimal-pad"
+          />
         </View>
       </View>
 
@@ -374,6 +400,18 @@ export function SettingsScreen({ navigation }: any) {
           <Text style={[styles.rowValue, { color: theme.success }]}>
             {miners.filter((m) => m.isOnline).length}
           </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>Auto-Scan Network</Text>
+          <Switch
+            value={autoScan}
+            onValueChange={(v) => {
+              setAutoScan(v);
+              setSetting('auto_scan', String(v));
+            }}
+            trackColor={{ false: theme.border, true: theme.primary + '60' }}
+            thumbColor={autoScan ? theme.primary : theme.textMuted}
+          />
         </View>
         <TouchableOpacity style={styles.row} onPress={() => loadMiners()}>
           <Text style={styles.rowLabel}>Refresh All</Text>

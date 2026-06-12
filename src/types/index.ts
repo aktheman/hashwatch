@@ -46,13 +46,14 @@ export interface Miner {
   ip: string;
   port: number;
   walletId?: string;
+  group?: string;
   remoteId?: string;
-  apiPath?: string;
-  statusPath?: string;
-  info: MinerInfo | null;
-  status: MinerStatus | null;
-  lastSeen: number;
-  addedAt: number;
+  apiPath?: string | null;
+  statusPath?: string | null;
+  info?: MinerInfo | null;
+  status?: MinerStatus | null;
+  lastSeen?: number;
+  addedAt?: number;
   isOnline: boolean;
 }
 

@@ -19,3 +19,25 @@ export function needsUpdate(current: string, latest: string = LATEST_FIRMWARE): 
 export function getFirmwareUrl(): string {
   return 'https://github.com/skot/bitaxe/releases/latest';
 }
+
+export async function fetchLatestFirmware(): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch('https://api.github.com/repos/skot/bitaxe/releases/latest', {
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const tag: string = data.tag_name || '';
+    if (parseVersion(tag)) return parseVersion(tag);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function getFirmwareChangelogUrl(version: string): string {
+  return `https://github.com/skot/bitaxe/releases/tag/${version}`;
+}

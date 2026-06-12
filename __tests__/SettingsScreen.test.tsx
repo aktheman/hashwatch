@@ -110,7 +110,7 @@ beforeEach(() => {
   useSubscriptionStore.setState({
     tier: 'free',
     isPro: false,
-    maxMiners: 3,
+    maxMiners: 999,
     initialized: true,
     loading: false,
   });

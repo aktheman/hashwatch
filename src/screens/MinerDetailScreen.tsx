@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Share } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Share, Alert } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { MinerSnapshot, Wallet } from '../types';
 import * as DB from '../db/database';
 import { StatWidget } from '../components/StatWidget';
+import { BitAxeClient } from '../api/bitaxe';
 import { HashrateChart } from '../components/HashrateChart';
 import { EfficiencyTrend } from '../components/EfficiencyTrend';
 import { SubscriptionGate } from '../components/SubscriptionGate';
@@ -408,6 +409,31 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         )}
       </View>
 
+      <View style={[styles.section, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+        <Text style={{ fontSize: 14 }}>📁</Text>
+        <TextInput
+          style={{
+            flex: 1,
+            backgroundColor: theme.surface,
+            borderRadius: 14,
+            padding: 14,
+            color: theme.text,
+            fontSize: 14,
+            fontWeight: '500',
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
+          value={miner.group || ''}
+          onChangeText={(t) => {
+            const updated = { ...miner, group: t || undefined };
+            DB.saveMiner(updated);
+            useMinerStore.getState().loadMiners();
+          }}
+          placeholder="Group tag (e.g. Garage)"
+          placeholderTextColor={theme.textMuted}
+        />
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
           <Text style={styles.sectionIcon}>⚡</Text> Mining
@@ -573,6 +599,31 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       </View>
 
       <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.warning }]}>
+          <Text style={styles.sectionIcon}>⚡</Text> Actions
+        </Text>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.warning + '15',
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.warning + '30',
+            gap: 8,
+            marginBottom: 12,
+          }}
+          onPress={async () => {
+            const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath ?? undefined, miner.statusPath ?? undefined);
+            const ok = await client.restart();
+            Alert.alert(ok ? 'Restart Sent' : 'Restart Failed', ok ? 'Miner should reboot shortly.' : 'Could not restart this miner.');
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>🔄</Text>
+          <Text style={{ color: theme.warning, fontWeight: '700', fontSize: 15 }}>Restart Miner</Text>
+        </TouchableOpacity>
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
           <Text style={styles.sectionIcon}>⚠</Text> Danger Zone
         </Text>

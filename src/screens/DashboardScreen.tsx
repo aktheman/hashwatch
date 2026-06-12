@@ -40,18 +40,37 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const initSubscription = useSubscriptionStore((s) => s.initialize);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [walletFilter, setWalletFilter] = useState<string | null>(null);
+  const [groupFilter, setGroupFilter] = useState<string | null>(null);
+
+  const groups = useMemo(() => {
+    const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
+    return Array.from(gs).sort();
+  }, [miners]);
 
   useEffect(() => {
     DB.loadWallets().then(setWallets);
   }, []);
 
-  const filteredMiners = walletFilter ? miners.filter((m) => m.walletId === walletFilter) : miners;
+  const filteredMiners = miners.filter((m) => {
+    if (walletFilter && m.walletId !== walletFilter) return false;
+    if (groupFilter && m.group !== groupFilter) return false;
+    return true;
+  });
 
   useEffect(() => {
     initSubscription();
     loadMiners();
     const stop = startPolling(30000);
-    return stop;
+    const autoScanInterval = setInterval(async () => {
+      const v = await DB.getSetting('auto_scan');
+      if (v === 'true' && !scanning) {
+        scanNetwork();
+      }
+    }, 300000);
+    return () => {
+      stop();
+      clearInterval(autoScanInterval);
+    };
   }, []);
 
   const handleMinerPress = useCallback(
@@ -377,19 +396,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {miners.length > 0 && <EarningsCard miners={miners} />}
 
-      {wallets.length > 0 && (
-        <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 6, marginBottom: 6 }}>
+      {(wallets.length > 0 || groups.length > 0) && (
+        <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
           <TouchableOpacity
             style={[
               styles.walletChip,
               {
-                backgroundColor: !walletFilter ? theme.primary : theme.surfaceLight,
-                borderColor: !walletFilter ? theme.primary : theme.border,
+                backgroundColor: !walletFilter && !groupFilter ? theme.primary : theme.surfaceLight,
+                borderColor: !walletFilter && !groupFilter ? theme.primary : theme.border,
               },
             ]}
-            onPress={() => setWalletFilter(null)}
+            onPress={() => { setWalletFilter(null); setGroupFilter(null); }}
           >
-            <Text style={[styles.walletChipText, { color: !walletFilter ? '#FFF' : theme.text }]}>
+            <Text style={[styles.walletChipText, { color: !walletFilter && !groupFilter ? '#FFF' : theme.text }]}>
               All
             </Text>
           </TouchableOpacity>
@@ -412,6 +431,28 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 ]}
               >
                 {w.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          {groups.map((g) => (
+            <TouchableOpacity
+              key={g}
+              style={[
+                styles.walletChip,
+                {
+                  backgroundColor: groupFilter === g ? theme.accent : theme.surfaceLight,
+                  borderColor: groupFilter === g ? theme.accent : theme.border,
+                },
+              ]}
+              onPress={() => setGroupFilter(groupFilter === g ? null : g)}
+            >
+              <Text
+                style={[
+                  styles.walletChipText,
+                  { color: groupFilter === g ? '#FFF' : theme.text },
+                ]}
+              >
+                📁 {g}
               </Text>
             </TouchableOpacity>
           ))}
