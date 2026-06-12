@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
-import { Miner } from '../types';
+import { Miner, NavigationProp } from '../types';
 import {
   toHashesPerSecond,
   formatHashrateValue,
@@ -19,7 +19,7 @@ interface PoolGroup {
 }
 
 interface PoolsScreenProps {
-  navigation: any;
+  navigation: NavigationProp;
 }
 
 export function PoolsScreen({ navigation }: PoolsScreenProps) {

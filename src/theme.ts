@@ -171,7 +171,7 @@ export function useTheme(): Theme {
 }
 
 export const theme = new Proxy({} as Theme, {
-  get(_target, prop) {
-    return (_current as any)[prop];
+  get(_target, prop: string) {
+    return (_current as Record<string, unknown>)[prop];
   },
 });

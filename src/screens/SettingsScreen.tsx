@@ -17,8 +17,9 @@ import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { getSetting, setSetting } from '../db/database';
 import { exportAllData } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
+import { NavigationProp } from '../types';
 
-export function SettingsScreen({ navigation }: any) {
+export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const [proxyUrl, setProxyUrlState] = useState(getProxyUrl());
@@ -359,7 +360,15 @@ export function SettingsScreen({ navigation }: any) {
                     { color: getThemeMode() === mode ? '#FFF' : theme.text },
                   ]}
                 >
-                  {mode === 'dark' ? '🌙' : mode === 'light' ? '☀' : mode === 'neon' ? '💜' : mode === 'matrix' ? '💚' : '🔄'}{' '}
+                  {mode === 'dark'
+                    ? '🌙'
+                    : mode === 'light'
+                      ? '☀'
+                      : mode === 'neon'
+                        ? '💜'
+                        : mode === 'matrix'
+                          ? '💚'
+                          : '🔄'}{' '}
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </Text>
               </TouchableOpacity>

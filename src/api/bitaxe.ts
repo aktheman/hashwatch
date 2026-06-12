@@ -12,7 +12,7 @@ const INFO_PATHS = ['/api/system/info', '/api/info', '/system/info', '/api/miner
 
 const STATUS_PATHS = ['/api/system/status', '/api/status', '/system/status', '/api/miner/getall'];
 
-function isBitAxeResponse(data: any): boolean {
+function isBitAxeResponse(data: Record<string, unknown> | null): boolean {
   if (!data) return false;
   return !!(
     data?.hostname ||
@@ -23,7 +23,7 @@ function isBitAxeResponse(data: any): boolean {
   );
 }
 
-function isStatusResponse(data: any): boolean {
+function isStatusResponse(data: Record<string, unknown> | null): boolean {
   if (!data) return false;
   return (
     data?.hashRate !== undefined ||
@@ -34,7 +34,10 @@ function isStatusResponse(data: any): boolean {
   );
 }
 
-async function fetchUrl(url: string, timeout = PROBE_TIMEOUT): Promise<any> {
+async function fetchUrl(
+  url: string,
+  timeout = PROBE_TIMEOUT,
+): Promise<Record<string, unknown> | null> {
   try {
     if (isWeb) {
       const headers: Record<string, string> = {};
@@ -110,7 +113,7 @@ export class BitAxeClient {
     });
   }
 
-  private async proxyGet(path: string): Promise<any> {
+  private async proxyGet(path: string): Promise<Record<string, unknown>> {
     try {
       const headers: Record<string, string> = {};
       const apiUrl = getExtra().apiUrl;
@@ -127,13 +130,14 @@ export class BitAxeClient {
         { timeout: TIMEOUT + 3000, headers },
       );
       return data;
-    } catch (e: any) {
-      const msg = e.response?.data?.message || e.message || 'Connection failed';
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      const msg = err.response?.data?.message || err.message || 'Connection failed';
       throw new Error(msg);
     }
   }
 
-  private async get(path: string): Promise<any> {
+  private async get(path: string): Promise<Record<string, unknown>> {
     if (isWeb) {
       return this.proxyGet(path);
     }

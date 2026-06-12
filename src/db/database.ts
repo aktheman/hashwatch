@@ -14,7 +14,7 @@ function loadJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function saveJSON(key: string, value: any): void {
+function saveJSON<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {

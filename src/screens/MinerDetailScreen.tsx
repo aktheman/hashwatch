@@ -1,7 +1,16 @@
 import { useEffect, useState, useMemo } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Share, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Share,
+  Alert,
+} from 'react-native';
 import { useMinerStore } from '../store/miners';
-import { MinerSnapshot, Wallet } from '../types';
+import { MinerSnapshot, Wallet, NavigationProp } from '../types';
 import * as DB from '../db/database';
 import { StatWidget } from '../components/StatWidget';
 import { BitAxeClient } from '../api/bitaxe';
@@ -24,7 +33,7 @@ import { useTheme } from '../theme';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
-  navigation: any;
+  navigation: NavigationProp;
 }
 
 export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps) {
@@ -616,13 +625,23 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             marginBottom: 12,
           }}
           onPress={async () => {
-            const client = new BitAxeClient(miner.ip, miner.port, miner.apiPath ?? undefined, miner.statusPath ?? undefined);
+            const client = new BitAxeClient(
+              miner.ip,
+              miner.port,
+              miner.apiPath ?? undefined,
+              miner.statusPath ?? undefined,
+            );
             const ok = await client.restart();
-            Alert.alert(ok ? 'Restart Sent' : 'Restart Failed', ok ? 'Miner should reboot shortly.' : 'Could not restart this miner.');
+            Alert.alert(
+              ok ? 'Restart Sent' : 'Restart Failed',
+              ok ? 'Miner should reboot shortly.' : 'Could not restart this miner.',
+            );
           }}
         >
           <Text style={{ fontSize: 16 }}>🔄</Text>
-          <Text style={{ color: theme.warning, fontWeight: '700', fontSize: 15 }}>Restart Miner</Text>
+          <Text style={{ color: theme.warning, fontWeight: '700', fontSize: 15 }}>
+            Restart Miner
+          </Text>
         </TouchableOpacity>
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
           <Text style={styles.sectionIcon}>⚠</Text> Danger Zone

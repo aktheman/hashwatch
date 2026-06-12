@@ -1,5 +1,5 @@
 import { useMinerStore } from '../store/miners';
-import { MinerSnapshot } from '../types';
+import { WSMessage } from '../types';
 import { getExtra } from '../constants';
 
 let ws: WebSocket | null = null;
@@ -62,9 +62,9 @@ function scheduleReconnect() {
   }, 5000);
 }
 
-function handleMessage(msg: any) {
+function handleMessage(msg: WSMessage) {
   if (msg.type === 'snapshot' && msg.snapshot) {
-    const snap = msg.snapshot as MinerSnapshot;
+    const snap = msg.snapshot;
     const miner = useMinerStore.getState().miners.find((m) => m.remoteId === snap.minerId);
     if (miner) {
       useMinerStore.getState().applyRemoteSnapshot(miner.id, snap);

@@ -2,6 +2,8 @@ import { Platform, Share } from 'react-native';
 import * as DB from '../db/database';
 import { Miner, MinerSnapshot } from '../types';
 
+type SnapshotKey = keyof MinerSnapshot;
+
 function escapeCSV(val: string | number | null | undefined): string {
   if (val == null) return '';
   const s = String(val);
@@ -13,8 +15,8 @@ function escapeCSV(val: string | number | null | undefined): string {
 
 function snapshotsToCSV(snapshots: MinerSnapshot[], miners: Miner[]): string {
   const minerMap = new Map(miners.map((m) => [m.id, m.name || m.ip]));
-  const headers = [
-    'miner',
+  const headers: SnapshotKey[] = [
+    'miner' as SnapshotKey,
     'timestamp',
     'hashRate',
     'hashRateUnit',
@@ -27,12 +29,13 @@ function snapshotsToCSV(snapshots: MinerSnapshot[], miners: Miner[]): string {
     'uptimeSeconds',
     'frequency',
   ];
-  const rows = snapshots.map((s) =>
+  const rows = snapshots.map((snap) =>
     headers
       .map((h) => {
-        if (h === 'miner') return escapeCSV(minerMap.get(s.minerId) || s.minerId);
-        if (h === 'timestamp') return escapeCSV(new Date(s.timestamp).toISOString());
-        return escapeCSV((s as any)[h]);
+        if (h === ('miner' as SnapshotKey))
+          return escapeCSV(minerMap.get(snap.minerId) || snap.minerId);
+        if (h === 'timestamp') return escapeCSV(new Date(snap.timestamp).toISOString());
+        return escapeCSV(snap[h]);
       })
       .join(','),
   );

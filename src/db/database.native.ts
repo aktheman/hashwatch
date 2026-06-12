@@ -16,7 +16,7 @@ interface MinerRow {
   status?: string;
 }
 
-let db: any = null;
+let db: SQLite.SQLiteDatabase | null = null;
 let dbInit: Promise<void> | null = null;
 
 async function getDb() {
@@ -36,7 +36,7 @@ async function getDb() {
   return db;
 }
 
-async function initTables(d: any): Promise<void> {
+async function initTables(d: SQLite.SQLiteDatabase): Promise<void> {
   await d.execAsync(`
     CREATE TABLE IF NOT EXISTS miners (
       id TEXT PRIMARY KEY NOT NULL,
@@ -95,7 +95,10 @@ async function initTables(d: any): Promise<void> {
 
 export async function getSetting(key: string): Promise<string | null> {
   const d = await getDb();
-  const row: any = await d.getFirstAsync('SELECT value FROM settings WHERE key = ?', [key]);
+  const row: { value: string } | null = await d.getFirstAsync(
+    'SELECT value FROM settings WHERE key = ?',
+    [key],
+  );
   return row?.value ?? null;
 }
 

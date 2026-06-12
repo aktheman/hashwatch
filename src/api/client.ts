@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { getExtra } from '../constants';
+import { MinerSnapshot, RemoteMiner } from '../types';
 
 let _getToken: () => string | null = () => null;
 let _onUnauthorized: () => void = () => {};
@@ -53,12 +54,16 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return res.data;
 }
 
-export async function fetchMiners() {
+export async function fetchMiners(): Promise<RemoteMiner[]> {
   const res = await client.get('/api/miners');
   return res.data;
 }
 
-export async function createMiner(data: { name: string; ip: string; port?: number }) {
+export async function createMiner(data: {
+  name: string;
+  ip: string;
+  port?: number;
+}): Promise<{ id: string }> {
   const res = await client.post('/api/miners', data);
   return res.data;
 }
@@ -72,7 +77,7 @@ export async function fetchStats(minerId: string) {
   return res.data;
 }
 
-export async function pushStats(minerId: string, stats: any) {
+export async function pushStats(minerId: string, stats: MinerSnapshot) {
   const res = await client.post(`/api/stats/${minerId}`, stats);
   return res.data;
 }
