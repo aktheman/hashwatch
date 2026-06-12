@@ -8,6 +8,7 @@ import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
 import { darkTheme, lightTheme, useTheme, setTheme, setThemeMode } from './src/theme';
+import { initProxyUrl } from './src/constants';
 
 export default function App() {
   const theme = useTheme();
@@ -17,6 +18,7 @@ export default function App() {
   useEffect(() => {
     (async () => {
       requestNotificationPermissions();
+      await initProxyUrl();
       const saved = await getSetting('theme_mode');
       if (saved === 'system' || saved === 'dark' || saved === 'light') {
         setThemeMode(saved);

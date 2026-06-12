@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
@@ -304,6 +305,16 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>⚠ {error}</Text>
+          {Platform.OS === 'web' && (
+            <Text style={[styles.errorText, { marginTop: 8, fontSize: 12, lineHeight: 16 }]}>
+              Web requires a local proxy to reach miners on your network. Go to Settings → add your
+              proxy URL (e.g. http://localhost:4567) and run{' '}
+              <Text style={{ fontFamily: 'monospace', color: theme.primaryLight }}>
+                node local-proxy.js
+              </Text>{' '}
+              on this machine.
+            </Text>
+          )}
         </View>
       )}
     </ScrollView>
