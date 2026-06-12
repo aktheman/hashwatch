@@ -1,10 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  StyleSheet,
+} from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore } from '../store/auth';
 import { darkTheme, lightTheme, useTheme, setTheme } from '../theme';
 import { setSetting } from '../db/database';
+import { exportAllData } from '../utils/export';
 
 export function SettingsScreen({ navigation }: any) {
   const theme = useTheme();
@@ -299,6 +308,17 @@ export function SettingsScreen({ navigation }: any) {
         <TouchableOpacity style={styles.row} onPress={scanNetwork} disabled={scanning}>
           <Text style={styles.rowLabel}>Scan Network</Text>
           <Text style={styles.actionText}>{scanning ? 'Scanning...' : 'Scan'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => {
+            exportAllData().catch(() => {
+              Alert.alert('Export Failed', 'Could not export miner data');
+            });
+          }}
+        >
+          <Text style={styles.rowLabel}>Export Data</Text>
+          <Text style={styles.actionText}>CSV</Text>
         </TouchableOpacity>
       </View>
 

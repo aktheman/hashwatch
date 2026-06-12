@@ -5,6 +5,7 @@ import { MinerSnapshot } from '../types';
 import { StatWidget } from '../components/StatWidget';
 import { HashrateChart } from '../components/HashrateChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
+import { FirmwareBanner } from '../components/FirmwareBanner';
 import {
   formatHashrate,
   formatTemperature,
@@ -291,6 +292,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </View>
         <Text style={styles.ip}>{miner.ip}</Text>
         {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
+        {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
       </View>
 
       <View style={styles.section}>
