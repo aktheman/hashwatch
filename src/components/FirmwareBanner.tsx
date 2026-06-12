@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
-import { parseVersion, needsUpdate, LATEST_FIRMWARE, getFirmwareUrl, fetchLatestFirmware } from '../utils/version';
+import {
+  parseVersion,
+  needsUpdate,
+  LATEST_FIRMWARE,
+  getFirmwareUrl,
+  fetchLatestFirmware,
+} from '../utils/version';
 
 interface FirmwareBannerProps {
   rawVersion: string | null | undefined;
@@ -30,6 +36,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
       style={[
         styles.banner,
         { backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: theme.warning },

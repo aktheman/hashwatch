@@ -53,23 +53,29 @@ export function AnalyticsScreen() {
     setLoading(false);
   };
 
-  const totalHashrate = miners.reduce(
-    (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-    0,
-  );
-  const totalEarnings = estimateBTCPerDay(totalHashrate);
-  const totalPower = miners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
-  const avgTemp =
-    miners.filter((m) => m.status?.temperature).length > 0
-      ? miners
-          .filter((m) => m.status?.temperature)
-          .reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) /
-        miners.filter((m) => m.status?.temperature).length
-      : 0;
-  const totalShares = miners.reduce(
-    (sum, m) => sum + (m.status?.sharesAccepted ?? 0) + (m.status?.sharesRejected ?? 0),
-    0,
-  );
+  const { totalHashrate, totalEarnings, totalPower, avgTemp, totalShares } = useMemo(() => {
+    const hps = miners.reduce(
+      (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+      0,
+    );
+    const power = miners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
+    const tempMiners = miners.filter((m) => m.status?.temperature);
+    const temp =
+      tempMiners.length > 0
+        ? tempMiners.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / tempMiners.length
+        : 0;
+    const shares = miners.reduce(
+      (sum, m) => sum + (m.status?.sharesAccepted ?? 0) + (m.status?.sharesRejected ?? 0),
+      0,
+    );
+    return {
+      totalHashrate: hps,
+      totalEarnings: estimateBTCPerDay(hps),
+      totalPower: power,
+      avgTemp: temp,
+      totalShares: shares,
+    };
+  }, [miners]);
 
   const chartData = useMemo(() => {
     if (snapshots.length < 2) return null;
@@ -355,6 +361,7 @@ export function AnalyticsScreen() {
           <View style={styles.rangeRow}>
             {(['1h', '24h', '7d'] as const).map((r) => (
               <TouchableOpacity
+                accessibilityRole="button"
                 key={r}
                 style={[
                   styles.rangeBtn,

@@ -28,7 +28,8 @@ export async function getLocalSubnet(): Promise<string | null> {
 }
 
 export async function scanNetwork(
-  onProgress?: (found: number, scanned: number, total: number) => void
+  onProgress?: (found: number, scanned: number, total: number) => void,
+  timeoutMs: number = 120000,
 ): Promise<DiscoveredMiner[]> {
   const myIP = await getLocalSubnet();
   if (!myIP) return [];
@@ -37,18 +38,26 @@ export async function scanNetwork(
   const found: DiscoveredMiner[] = [];
   const CONCURRENCY = 20;
 
-  for (let i = 0; i < ips.length; i += CONCURRENCY) {
-    const batch = ips.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(
-      batch.map(async (ip) => {
-        const isBitAxe = await BitAxeClient.probe(ip);
-        return isBitAxe ? { ip, port: 80 } : null;
-      })
-    );
-    for (const r of results) {
-      if (r) found.push(r);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    for (let i = 0; i < ips.length; i += CONCURRENCY) {
+      if (controller.signal.aborted) break;
+      const batch = ips.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(
+        batch.map(async (ip) => {
+          const isBitAxe = await BitAxeClient.probe(ip);
+          return isBitAxe ? { ip, port: 80 } : null;
+        }),
+      );
+      for (const r of results) {
+        if (r) found.push(r);
+      }
+      onProgress?.(found.length, Math.min(i + CONCURRENCY, ips.length), ips.length);
     }
-    onProgress?.(found.length, Math.min(i + CONCURRENCY, ips.length), ips.length);
+  } finally {
+    clearTimeout(timeout);
   }
 
   return found;

@@ -4,6 +4,7 @@ import * as API from '../api/client';
 import { configureClient } from '../api/client';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken } from '../services/pushRegistration';
+import { useMinerStore } from './miners';
 
 interface AuthState {
   token: string | null;
@@ -33,7 +34,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
       registerPushToken();
-      const { useMinerStore } = await import('./miners');
       await useMinerStore.getState().syncWithBackend();
       return true;
     } catch {
@@ -49,7 +49,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
       registerPushToken();
-      const { useMinerStore } = await import('./miners');
       await useMinerStore.getState().syncWithBackend();
       return true;
     } catch {
@@ -71,7 +70,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ token, email, userId: null });
       connectWebSocket(token);
       registerPushToken();
-      const { useMinerStore } = await import('./miners');
       if (useMinerStore.getState().initialized) {
         await useMinerStore.getState().syncWithBackend();
       }

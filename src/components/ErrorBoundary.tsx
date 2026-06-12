@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { theme } from '../theme';
 
 interface Props {
   children: ReactNode;
@@ -21,15 +22,28 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('App crash:', error, errorInfo);
   }
 
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
+      const t = theme;
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: t.bg }]}>
           <Text style={styles.icon}>⚠</Text>
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
+          <Text style={[styles.title, { color: t.text }]}>Something went wrong</Text>
+          <Text style={[styles.message, { color: t.textDim }]}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
+          <TouchableOpacity
+            style={[styles.retryBtn, { backgroundColor: t.primary }]}
+            onPress={this.handleRetry}
+            accessibilityLabel="Try again"
+            accessibilityRole="button"
+          >
+            <Text style={styles.retryText}>Try Again</Text>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -40,7 +54,6 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A1A',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
@@ -51,15 +64,24 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
   title: {
-    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 8,
   },
   message: {
-    color: '#8B8FA3',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+    marginBottom: 24,
+  },
+  retryBtn: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

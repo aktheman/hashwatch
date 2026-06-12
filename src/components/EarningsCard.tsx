@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
 import { toHashesPerSecond, estimateBTCPerDay, formatBTC, formatUSD } from '../utils/hashrate';
@@ -11,12 +12,14 @@ interface EarningsCardProps {
 export function EarningsCard({ miners, title = 'Estimated Earnings' }: EarningsCardProps) {
   const theme = useTheme();
 
-  const totalHps = miners.reduce(
-    (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-    0,
-  );
-  const btcPerDay = estimateBTCPerDay(totalHps);
-  const sats = Math.round(btcPerDay * 100000000);
+  const { totalHps, btcPerDay, sats } = useMemo(() => {
+    const hps = miners.reduce(
+      (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+      0,
+    );
+    const btc = estimateBTCPerDay(hps);
+    return { totalHps: hps, btcPerDay: btc, sats: Math.round(btc * 100000000) };
+  }, [miners]);
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>

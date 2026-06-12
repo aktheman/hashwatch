@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Platform } from 'react-native';
 
 export type Theme = typeof darkTheme;
 
@@ -145,7 +145,9 @@ function applyMode() {
   } else {
     const prefersDark =
       _mode === 'dark' ||
-      (_mode === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+      (_mode === 'system' &&
+        Platform.OS === 'web' &&
+        window.matchMedia?.('(prefers-color-scheme: dark)').matches);
     _current = prefersDark ? darkTheme : lightTheme;
   }
   listeners.forEach((cb) => cb());
@@ -156,6 +158,7 @@ export function useTheme(): Theme {
   useSyncExternalStore(
     (cb) => {
       if (_mode !== 'system') return () => {};
+      if (_mode !== 'system' || Platform.OS !== 'web') return () => {};
       const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
       if (!mq) return () => {};
       mq.addEventListener('change', cb);

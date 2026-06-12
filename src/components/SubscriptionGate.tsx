@@ -14,9 +14,14 @@ export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
   }
 
   return (
-    <View style={styles.wrapper}>
-      {children}
-      <View style={styles.overlay}>
+    <View style={styles.wrapper} pointerEvents="box-none">
+      <View pointerEvents="none">{children}</View>
+      <View
+        style={styles.overlay}
+        pointerEvents="auto"
+        accessibilityElementsHidden
+        accessible={false}
+      >
         <Text style={styles.lockIcon}>🔒</Text>
         {feature && <Text style={styles.text}>{feature}</Text>}
         <Text style={styles.subtext}>Upgrade to Pro to unlock</Text>

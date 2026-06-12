@@ -238,6 +238,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           onChangeText={setIp}
           keyboardType="numeric"
           autoCapitalize="none"
+          accessibilityLabel="IP address input"
         />
         <TextInput
           style={styles.input}
@@ -245,8 +246,10 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           placeholderTextColor={theme.textMuted}
           value={name}
           onChangeText={setName}
+          accessibilityLabel="Miner name input"
         />
         <TouchableOpacity
+          accessibilityRole="button"
           style={[styles.primaryBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
           onPress={handleAddByIP}
           disabled={connecting || !ip.trim()}
@@ -268,6 +271,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Scan Network</Text>
         <TouchableOpacity
+          accessibilityRole="button"
           style={[styles.secondaryBtn, scanning && styles.btnDisabled]}
           onPress={handleScan}
           disabled={scanning}
@@ -287,6 +291,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           </Text>
           {foundMiners.map((m) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={m.ip}
               style={styles.foundItem}
               onPress={() => handleAddDiscovered(m)}

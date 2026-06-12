@@ -10,66 +10,76 @@ interface ErrorBannerProps {
 
 export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
   const theme = useTheme();
-  const styles = useMemo(() => StyleSheet.create({
-    banner: {
-      backgroundColor: 'rgba(239, 68, 68, 0.1)',
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      marginHorizontal: 16,
-      borderRadius: 12,
-      marginBottom: 8,
-      gap: 8,
-      borderWidth: 1,
-      borderColor: 'rgba(239, 68, 68, 0.2)',
-    },
-    icon: {
-      fontSize: 14,
-    },
-    text: {
-      color: theme.danger,
-      fontSize: 13,
-      flex: 1,
-      fontWeight: '500',
-    },
-    actions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    btn: {
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
-    },
-    btnText: {
-      color: theme.danger,
-      fontSize: 12,
-      fontWeight: '700',
-    },
-    dismiss: {
-      color: theme.textMuted,
-      fontSize: 14,
-      fontWeight: '300',
-    },
-  }), [theme]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        banner: {
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 14,
+          paddingVertical: 10,
+          marginHorizontal: 16,
+          borderRadius: 12,
+          marginBottom: 8,
+          gap: 8,
+          borderWidth: 1,
+          borderColor: 'rgba(239, 68, 68, 0.2)',
+        },
+        icon: {
+          fontSize: 14,
+        },
+        text: {
+          color: theme.danger,
+          fontSize: 13,
+          flex: 1,
+          fontWeight: '500',
+        },
+        actions: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+        },
+        btn: {
+          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          paddingHorizontal: 10,
+          paddingVertical: 4,
+          borderRadius: 6,
+        },
+        btnText: {
+          color: theme.danger,
+          fontSize: 12,
+          fontWeight: '700',
+        },
+        dismiss: {
+          color: theme.textMuted,
+          fontSize: 14,
+          fontWeight: '300',
+        },
+      }),
+    [theme],
+  );
 
   if (!message) return null;
 
   return (
     <View style={styles.banner}>
       <Text style={styles.icon}>⚠</Text>
-      <Text style={styles.text} numberOfLines={2}>{message}</Text>
+      <Text style={styles.text} numberOfLines={2}>
+        {message}
+      </Text>
       <View style={styles.actions}>
         {onRetry && (
-          <TouchableOpacity onPress={onRetry} style={styles.btn}>
+          <TouchableOpacity accessibilityRole="button" onPress={onRetry} style={styles.btn}>
             <Text style={styles.btnText}>Retry</Text>
           </TouchableOpacity>
         )}
         {onDismiss && (
-          <TouchableOpacity onPress={onDismiss}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Dismiss error"
+            onPress={onDismiss}
+          >
             <Text style={styles.dismiss}>✕</Text>
           </TouchableOpacity>
         )}

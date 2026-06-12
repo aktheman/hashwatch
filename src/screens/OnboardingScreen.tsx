@@ -169,7 +169,7 @@ export function OnboardingScreen({ onComplete }: Props) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.skipBtn} onPress={handleSkip}>
+      <TouchableOpacity accessibilityRole="button" style={styles.skipBtn} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
 
@@ -200,7 +200,7 @@ export function OnboardingScreen({ onComplete }: Props) {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.btn} onPress={handleNext}>
+        <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={handleNext}>
           <Text style={styles.btnText}>{isLast ? 'Get Started' : 'Next'}</Text>
         </TouchableOpacity>
       </View>

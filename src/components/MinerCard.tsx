@@ -1,7 +1,13 @@
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { Miner } from '../types';
-import { formatHashrate, formatTemperature, formatUptime, formatPower, formatWTHs } from '../utils/formatters';
+import {
+  formatHashrate,
+  formatTemperature,
+  formatUptime,
+  formatPower,
+  formatWTHs,
+} from '../utils/formatters';
 import { useTheme } from '../theme';
 
 interface MinerCardProps {
@@ -13,179 +19,181 @@ interface MinerCardProps {
 export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
   const theme = useTheme();
   const accentColor = miner.isOnline ? theme.success : theme.danger;
-  const styles = useMemo(() => StyleSheet.create({
-    card: {
-      backgroundColor: theme.surface,
-      borderRadius: 20,
-      padding: 16,
-      marginHorizontal: 16,
-      marginVertical: 6,
-      borderWidth: 1,
-      borderColor: theme.border,
-      boxShadow: `0 4px 24px rgba(0,0,0,0.4)`,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    cardAccent: {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 4,
-      backgroundColor: accentColor,
-      borderTopLeftRadius: 20,
-      borderBottomLeftRadius: 20,
-    },
-    cardOffline: {
-      opacity: 0.55,
-    },
-    topRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 4,
-      paddingLeft: 4,
-    },
-    nameRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginRight: 8,
-    },
-    name: {
-      color: theme.text,
-      fontSize: 16,
-      fontWeight: '700',
-      flex: 1,
-      letterSpacing: -0.3,
-    },
-    pulse: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      justifyContent: 'center',
-      alignItems: 'center',
-      boxShadow: `0 0 12px ${accentColor}40`,
-    },
-    pulseInner: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-    ip: {
-      color: theme.textMuted,
-      fontSize: 11,
-      fontFamily: 'monospace',
-      marginBottom: 10,
-      marginLeft: 12,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: theme.border,
-      marginBottom: 12,
-    },
-    stats: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    statItem: {
-      flex: 1,
-    },
-    statDivider: {
-      width: 1,
-      height: 32,
-      backgroundColor: theme.border,
-      marginHorizontal: 10,
-    },
-    statLabel: {
-      color: theme.textDim,
-      fontSize: 9,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      marginBottom: 2,
-    },
-    statValue: {
-      fontSize: 18,
-      fontWeight: '800',
-    },
-    footer: {
-      flexDirection: 'row',
-      gap: 16,
-      marginTop: 10,
-      paddingTop: 10,
-      borderTopWidth: 1,
-      borderTopColor: theme.border,
-    },
-    footerItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    footerIcon: {
-      fontSize: 10,
-      color: theme.textMuted,
-    },
-    footerText: {
-      color: theme.textDim,
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    subFooter: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: 8,
-      paddingTop: 8,
-      borderTopWidth: 1,
-      borderTopColor: theme.border,
-    },
-    powerText: {
-      color: theme.textDim,
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    poolText: {
-      color: theme.textMuted,
-      fontSize: 10,
-      fontFamily: 'monospace',
-      flex: 1,
-      textAlign: 'right',
-    },
-  }), [theme, accentColor]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        card: {
+          backgroundColor: theme.surface,
+          borderRadius: 20,
+          padding: 16,
+          marginHorizontal: 16,
+          marginVertical: 6,
+          borderWidth: 1,
+          borderColor: theme.border,
+          boxShadow: `0 4px 24px rgba(0,0,0,0.4)`,
+          position: 'relative',
+          overflow: 'hidden',
+        },
+        cardAccent: {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          backgroundColor: accentColor,
+          borderTopLeftRadius: 20,
+          borderBottomLeftRadius: 20,
+        },
+        cardOffline: {
+          opacity: 0.55,
+        },
+        topRow: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 4,
+          paddingLeft: 4,
+        },
+        nameRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          flex: 1,
+        },
+        dot: {
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          marginRight: 8,
+        },
+        name: {
+          color: theme.text,
+          fontSize: 16,
+          fontWeight: '700',
+          flex: 1,
+          letterSpacing: -0.3,
+        },
+        pulse: {
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          justifyContent: 'center',
+          alignItems: 'center',
+          boxShadow: `0 0 12px ${accentColor}40`,
+        },
+        pulseInner: {
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+        },
+        ip: {
+          color: theme.textMuted,
+          fontSize: 11,
+          fontFamily: 'monospace',
+          marginBottom: 10,
+          marginLeft: 12,
+        },
+        divider: {
+          height: 1,
+          backgroundColor: theme.border,
+          marginBottom: 12,
+        },
+        stats: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        statItem: {
+          flex: 1,
+        },
+        statDivider: {
+          width: 1,
+          height: 32,
+          backgroundColor: theme.border,
+          marginHorizontal: 10,
+        },
+        statLabel: {
+          color: theme.textDim,
+          fontSize: 9,
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: 0.8,
+          marginBottom: 2,
+        },
+        statValue: {
+          fontSize: 18,
+          fontWeight: '800',
+        },
+        footer: {
+          flexDirection: 'row',
+          gap: 16,
+          marginTop: 10,
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: theme.border,
+        },
+        footerItem: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 4,
+        },
+        footerIcon: {
+          fontSize: 10,
+          color: theme.textMuted,
+        },
+        footerText: {
+          color: theme.textDim,
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        subFooter: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: 8,
+          paddingTop: 8,
+          borderTopWidth: 1,
+          borderTopColor: theme.border,
+        },
+        powerText: {
+          color: theme.textDim,
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        poolText: {
+          color: theme.textMuted,
+          fontSize: 10,
+          fontFamily: 'monospace',
+          flex: 1,
+          textAlign: 'right',
+        },
+      }),
+    [theme, accentColor],
+  );
 
   const { status, isOnline } = miner;
-  const hashrate = status
-    ? formatHashrate(status.hashRate, status.hashRateUnit)
-    : '---';
-  const tempColor = !status ? theme.textMuted
-    : status.temperature > 80 ? theme.danger
-    : status.temperature > 65 ? theme.warning
-    : theme.success;
+  const hashrate = status ? formatHashrate(status.hashRate, status.hashRateUnit) : '---';
+  const tempColor = !status
+    ? theme.textMuted
+    : status.temperature > 80
+      ? theme.danger
+      : status.temperature > 65
+        ? theme.warning
+        : theme.success;
 
   const handleLongPress = () => {
     if (!onDelete) return;
-    Alert.alert(
-      'Remove Miner',
-      `Remove ${miner.name}? All history will be deleted.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => onDelete(miner),
-        },
-      ]
-    );
+    Alert.alert('Remove Miner', `Remove ${miner.name}? All history will be deleted.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => onDelete(miner),
+      },
+    ]);
   };
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
       style={[styles.card, !isOnline && styles.cardOffline]}
       onPress={() => onPress(miner)}
       onLongPress={handleLongPress}
@@ -196,7 +204,9 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       <View style={styles.topRow}>
         <View style={styles.nameRow}>
           <View style={[styles.dot, { backgroundColor: accentColor }]} />
-          <Text style={styles.name} numberOfLines={1}>{miner.name}</Text>
+          <Text style={styles.name} numberOfLines={1}>
+            {miner.name}
+          </Text>
         </View>
         <View style={[styles.pulse, { backgroundColor: accentColor + '20' }]}>
           <View style={[styles.pulseInner, { backgroundColor: accentColor }]} />
@@ -215,7 +225,9 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statLabel}>Temp</Text>
-          <Text style={[styles.statValue, { color: tempColor }]}>{status ? formatTemperature(status.temperature) : '---'}</Text>
+          <Text style={[styles.statValue, { color: tempColor }]}>
+            {status ? formatTemperature(status.temperature) : '---'}
+          </Text>
         </View>
         {status && status.fanSpeed > 0 && (
           <>
@@ -254,10 +266,13 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
           </View>
           <View style={styles.subFooter}>
             <Text style={styles.powerText}>
-              {formatPower(status.power)} · {formatWTHs(status.power, status.hashRate, status.hashRateUnit)}
+              {formatPower(status.power)} ·{' '}
+              {formatWTHs(status.power, status.hashRate, status.hashRateUnit)}
             </Text>
             <Text style={styles.poolText} numberOfLines={1}>
-              {status.pool && status.poolPort ? `${status.pool}:${status.poolPort}` : status.pool || 'No pool'}
+              {status.pool && status.poolPort
+                ? `${status.pool}:${status.poolPort}`
+                : status.pool || 'No pool'}
             </Text>
           </View>
         </>

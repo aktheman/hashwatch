@@ -49,6 +49,7 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
             onValueChange={(v) => toggle(key, v)}
             trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
             thumbColor={prefs[key] ? theme.primary : theme.textMuted}
+            accessibilityLabel={`${label} notification`}
           />
         </View>
       ))}

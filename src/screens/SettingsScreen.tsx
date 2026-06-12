@@ -247,8 +247,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             placeholderTextColor={theme.textMuted}
             onSubmitEditing={saveProxyUrl}
             returnKeyType="done"
+            accessibilityLabel="Proxy URL input"
           />
           <TouchableOpacity
+            accessibilityRole="button"
             style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
             onPress={saveProxyUrl}
           >
@@ -259,13 +261,21 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Wallets')}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={() => navigation.navigate('Wallets')}
+        >
           <Text style={styles.rowLabel}>Wallets</Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Subscription')}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={() => navigation.navigate('Subscription')}
+        >
           <Text style={styles.rowLabel}>Plan</Text>
           <View style={styles.rowRight}>
             <View
@@ -282,7 +292,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.row} onPress={() => setShowAuth(!showAuth)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={() => setShowAuth(!showAuth)}
+        >
           <Text style={styles.rowLabel}>Remote Sync</Text>
           <View style={styles.rowRight}>
             <Text style={[styles.rowValue, token && { color: theme.success }]}>
@@ -295,7 +309,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         {showAuth && (
           <View style={styles.authBox}>
             {token ? (
-              <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.logoutBtn}
+                onPress={logout}
+              >
                 <Text style={styles.logoutBtnText}>Disconnect</Text>
               </TouchableOpacity>
             ) : (
@@ -308,6 +326,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   onChangeText={setAuthEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
+                  accessibilityLabel="Email input"
                 />
                 <TextInput
                   style={styles.authInput}
@@ -316,14 +335,22 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   value={authPassword}
                   onChangeText={setAuthPassword}
                   secureTextEntry
+                  accessibilityLabel="Password input"
                 />
                 {authError && <Text style={styles.authError}>{authError}</Text>}
-                <TouchableOpacity style={styles.authBtn} onPress={handleAuth}>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  style={styles.authBtn}
+                  onPress={handleAuth}
+                >
                   <Text style={styles.authBtnText}>
                     {isRegister ? 'Create Account' : 'Sign In'}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={() => setIsRegister(!isRegister)}
+                >
                   <Text style={styles.authToggle}>
                     {isRegister ? 'Already have an account? Sign In' : 'No account? Create one'}
                   </Text>
@@ -341,6 +368,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {(['system', 'dark', 'light', 'neon', 'matrix'] as const).map((mode) => (
               <TouchableOpacity
+                accessibilityRole="button"
                 key={mode}
                 style={[
                   styles.themeBtn,
@@ -394,6 +422,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             placeholder="0.12"
             placeholderTextColor={theme.textMuted}
             keyboardType="decimal-pad"
+            accessibilityLabel="Power cost input"
           />
         </View>
       </View>
@@ -420,17 +449,28 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             }}
             trackColor={{ false: theme.border, true: theme.primary + '60' }}
             thumbColor={autoScan ? theme.primary : theme.textMuted}
+            accessibilityLabel="Auto-scan network"
           />
         </View>
-        <TouchableOpacity style={styles.row} onPress={() => loadMiners()}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={() => loadMiners()}
+        >
           <Text style={styles.rowLabel}>Refresh All</Text>
           <Text style={styles.actionText}>Refresh</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.row} onPress={scanNetwork} disabled={scanning}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={scanNetwork}
+          disabled={scanning}
+        >
           <Text style={styles.rowLabel}>Scan Network</Text>
           <Text style={styles.actionText}>{scanning ? 'Scanning...' : 'Scan'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.row}
           onPress={() => {
             exportAllData().catch(() => {
