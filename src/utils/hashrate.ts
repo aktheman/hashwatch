@@ -29,3 +29,29 @@ export function formatHashrateWithUnit(hashRate: number, unit?: string): string 
   }
   return formatHashrateValue(toHashesPerSecond(hashRate, 'GH/s'));
 }
+
+const BLOCK_REWARD_BTC = 3.125;
+const BLOCKS_PER_DAY = 144;
+const NETWORK_HASHRATE = 750_000_000_000_000_000_000;
+
+export function estimateBTCPerDay(hashesPerSecond: number): number {
+  const shareOfNetwork = hashesPerSecond / NETWORK_HASHRATE;
+  return shareOfNetwork * BLOCKS_PER_DAY * BLOCK_REWARD_BTC;
+}
+
+export function formatBTC(value: number): string {
+  if (value >= 1) return `${value.toFixed(4)} BTC`;
+  if (value >= 0.001) return `${(value * 1000).toFixed(2)} mBTC`;
+  if (value >= 0.000001) return `${(value * 1000000).toFixed(0)} μBTC`;
+  return `${(value * 100000000).toFixed(0)} sat`;
+}
+
+export function estimateUSDBTC(): number {
+  return 85000;
+}
+
+export function formatUSD(satsPerDay: number): string {
+  const btcPrice = estimateUSDBTC();
+  const btc = satsPerDay / 100000000;
+  return `$${(btc * btcPrice).toFixed(2)}`;
+}

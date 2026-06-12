@@ -12,6 +12,7 @@ import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { EarningsCard } from '../components/EarningsCard';
 import { Miner } from '../types';
 import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
@@ -353,6 +354,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={styles.summaryLabel}>Efficiency</Text>
         </View>
       </View>
+
+      {miners.length > 0 && <EarningsCard miners={miners} />}
 
       {!canAdd && miners.length > 0 && (
         <TouchableOpacity

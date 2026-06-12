@@ -3,7 +3,12 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
-import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
+import {
+  toHashesPerSecond,
+  formatHashrateValue,
+  estimateBTCPerDay,
+  formatBTC,
+} from '../utils/hashrate';
 
 interface PoolGroup {
   pool: string;
@@ -158,6 +163,14 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
               <View style={styles.stat}>
                 <Text style={styles.statValue}>{formatRate(item.totalHashrate)}</Text>
                 <Text style={styles.statLabel}>Hashrate</Text>
+              </View>
+              <View style={styles.stat}>
+                <Text style={styles.statValue}>
+                  {estimateBTCPerDay(item.totalHashrate) > 0
+                    ? formatBTC(estimateBTCPerDay(item.totalHashrate))
+                    : '—'}
+                </Text>
+                <Text style={styles.statLabel}>Est. Daily</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={styles.statValue}>{item.miners.length}</Text>
