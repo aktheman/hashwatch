@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/28902861/README.md)
 # HashWatch
 
 Real-time Bitaxe miner monitoring app. Track hashrate, temperature, pool stats, power cost, and more across all your miners from one dashboard.
