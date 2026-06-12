@@ -2,9 +2,14 @@ import request from 'supertest';
 import express from 'express';
 
 jest.mock('axios', () => jest.fn());
+jest.mock('../middleware/auth', () => ({
+  authMiddleware: (req: any, _res: any, next: any) => {
+    req.userId = 'test-user-id';
+    next();
+  },
+}));
 
 import axios from 'axios';
-
 import { proxyRouter } from '../routes/proxy';
 
 const mockAxios = axios as unknown as jest.Mock;
@@ -30,6 +35,16 @@ describe('POST /api/proxy', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ hostname: 'bitaxe-test', hashRate: 500 });
+  });
+
+  it('rejects public URLs', async () => {
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://example.com/api/system/info', method: 'GET' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('forbidden');
+    expect(mockAxios).not.toHaveBeenCalled();
   });
 
   it('returns 502 when miner is unreachable (connection refused)', async () => {
@@ -86,9 +101,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 400 when no url provided', async () => {
-    const res = await request(app)
-      .post('/api/proxy')
-      .send({ method: 'GET' });
+    const res = await request(app).post('/api/proxy').send({ method: 'GET' });
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('url is required');

@@ -1,25 +1,16 @@
 import axios, { AxiosInstance } from 'axios';
 import { Platform } from 'react-native';
 import { MinerInfo, MinerStatus } from '../types';
-import * as API from './client';
+import { PROXY_URL, getExtra } from '../constants';
+import { useAuthStore } from '../store/auth';
 
 const TIMEOUT = 5000;
 const PROBE_TIMEOUT = 3000;
 const isWeb = Platform.OS === 'web';
 
-const INFO_PATHS = [
-  '/api/system/info',
-  '/api/info',
-  '/system/info',
-  '/api/miner/getall',
-];
+const INFO_PATHS = ['/api/system/info', '/api/info', '/system/info', '/api/miner/getall'];
 
-const STATUS_PATHS = [
-  '/api/system/status',
-  '/api/status',
-  '/system/status',
-  '/api/miner/getall',
-];
+const STATUS_PATHS = ['/api/system/status', '/api/status', '/system/status', '/api/miner/getall'];
 
 function isBitAxeResponse(data: any): boolean {
   if (!data) return false;
@@ -45,9 +36,21 @@ function isStatusResponse(data: any): boolean {
 
 async function fetchUrl(url: string, timeout = PROBE_TIMEOUT): Promise<any> {
   try {
-    const { data } = isWeb
-      ? await axios.post(`${API.BASE_URL}/api/proxy`, { url, method: 'GET' }, { timeout, validateStatus: () => true })
-      : await axios.get(url, { timeout, validateStatus: () => true });
+    if (isWeb) {
+      const headers: Record<string, string> = {};
+      const apiUrl = getExtra().apiUrl;
+      if (PROXY_URL === apiUrl || PROXY_URL.startsWith(apiUrl)) {
+        const token = useAuthStore.getState().token;
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
+      const { data } = await axios.post(
+        `${PROXY_URL}/api/proxy`,
+        { url, method: 'GET' },
+        { timeout, validateStatus: () => true, headers },
+      );
+      return data;
+    }
+    const { data } = await axios.get(url, { timeout, validateStatus: () => true });
     return data;
   } catch {
     return null;
@@ -60,23 +63,21 @@ export interface FoundPaths {
 }
 
 async function findPaths(ip: string, port: number): Promise<FoundPaths> {
-  const infoUrls = INFO_PATHS.map(path => `http://${ip}:${port}${path}`);
-  const infoResults = await Promise.all(infoUrls.map(url => fetchUrl(url)));
+  const infoUrls = INFO_PATHS.map((path) => `http://${ip}:${port}${path}`);
+  const infoResults = await Promise.all(infoUrls.map((url) => fetchUrl(url)));
 
   for (let i = 0; i < infoResults.length; i++) {
     if (infoResults[i] && isBitAxeResponse(infoResults[i])) {
       const infoPath = INFO_PATHS[i];
 
       const derived = infoPath.replace(/\/info$/, '/status');
-      const data = derived !== infoPath
-        ? await fetchUrl(`http://${ip}:${port}${derived}`)
-        : null;
+      const data = derived !== infoPath ? await fetchUrl(`http://${ip}:${port}${derived}`) : null;
       if (data && isStatusResponse(data)) {
         return { infoPath, statusPath: derived };
       }
 
-      const statusUrls = STATUS_PATHS.map(p => `http://${ip}:${port}${p}`);
-      const statusResults = await Promise.all(statusUrls.map(url => fetchUrl(url)));
+      const statusUrls = STATUS_PATHS.map((p) => `http://${ip}:${port}${p}`);
+      const statusResults = await Promise.all(statusUrls.map((url) => fetchUrl(url)));
       for (let j = 0; j < statusResults.length; j++) {
         if (isStatusResponse(statusResults[j])) {
           return { infoPath, statusPath: STATUS_PATHS[j] };
@@ -111,13 +112,19 @@ export class BitAxeClient {
 
   private async proxyGet(path: string): Promise<any> {
     try {
+      const headers: Record<string, string> = {};
+      const apiUrl = getExtra().apiUrl;
+      if (PROXY_URL === apiUrl || PROXY_URL.startsWith(apiUrl)) {
+        const token = useAuthStore.getState().token;
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
       const { data } = await axios.post(
-        `${API.BASE_URL}/api/proxy`,
+        `${PROXY_URL}/api/proxy`,
         {
           url: `http://${this.ip}:${this.port}${path}`,
           method: 'GET',
         },
-        { timeout: TIMEOUT + 3000 }
+        { timeout: TIMEOUT + 3000, headers },
       );
       return data;
     } catch (e: any) {
@@ -144,7 +151,7 @@ export class BitAxeClient {
       ip: this.ip,
       ssid: d.wifi?.ssid || d.ssid,
       wifiSignal: d.wifi?.signal ?? d.wifiStatus?.signal,
-      powerMode: d.powerMode ?? d.powerMode,
+      powerMode: d.powerMode,
     };
   }
 
@@ -175,10 +182,7 @@ export class BitAxeClient {
   }
 
   async fetchAll(): Promise<{ info: MinerInfo; status: MinerStatus }> {
-    const [info, status] = await Promise.all([
-      this.getSystemInfo(),
-      this.getMinerStatus(),
-    ]);
+    const [info, status] = await Promise.all([this.getSystemInfo(), this.getMinerStatus()]);
     return { info, status };
   }
 
@@ -188,5 +192,3 @@ export class BitAxeClient {
     return paths;
   }
 }
-
-

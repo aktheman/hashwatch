@@ -1,18 +1,10 @@
+import { formatHashrateValue } from './hashrate';
+
 export function formatHashrate(hashRate: number, unit?: string): string {
-  if (hashRate === 0) return '0 H/s';
-  const units = ['H/s', 'KH/s', 'MH/s', 'GH/s', 'TH/s', 'PH/s'];
-  let value = hashRate;
-  let unitIndex = 0;
   if (unit) {
-    unitIndex = units.indexOf(unit);
-    if (unitIndex === -1) unitIndex = 0;
-  } else {
-    while (value >= 1000 && unitIndex < units.length - 1) {
-      value /= 1000;
-      unitIndex++;
-    }
+    return `${hashRate.toFixed(1)} ${unit}`;
   }
-  return `${value.toFixed(1)} ${units[unitIndex]}`;
+  return formatHashrateValue(hashRate);
 }
 
 export function formatTemperature(temp: number): string {
@@ -58,11 +50,16 @@ export function formatDifficulty(diff: string | number): string {
 }
 
 export function formatWTHs(power: number, hashRate: number, hashRateUnit: string): string {
-  const th = hashRateUnit === 'TH/s' ? hashRate
-    : hashRateUnit === 'GH/s' ? hashRate / 1000
-    : hashRateUnit === 'MH/s' ? hashRate / 1_000_000
-    : hashRateUnit === 'KH/s' ? hashRate / 1_000_000_000
-    : 0;
+  const th =
+    hashRateUnit === 'TH/s'
+      ? hashRate
+      : hashRateUnit === 'GH/s'
+        ? hashRate / 1000
+        : hashRateUnit === 'MH/s'
+          ? hashRate / 1_000_000
+          : hashRateUnit === 'KH/s'
+            ? hashRate / 1_000_000_000
+            : 0;
   if (th === 0) return '—';
   return `${(power / th).toFixed(1)} W/THs`;
 }

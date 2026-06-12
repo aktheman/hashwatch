@@ -6,6 +6,7 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
+import { useAuthStore } from './src/store/auth';
 import { darkTheme, lightTheme, useTheme, setTheme } from './src/theme';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
       setTheme(saved === 'light' ? lightTheme : darkTheme);
       const done = await getSetting('onboarding_complete');
       setShowOnboarding(done !== 'true');
+      await useAuthStore.getState().restoreSession();
       setReady(true);
     })();
   }, []);

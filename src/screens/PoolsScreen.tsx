@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
+import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 
 interface PoolGroup {
   pool: string;
@@ -35,7 +36,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         };
       }
       groups[key].miners.push(m);
-      groups[key].totalHashrate += m.status.hashRate || 0;
+      groups[key].totalHashrate += toHashesPerSecond(m.status.hashRate || 0, m.status.hashRateUnit);
     }
     return Object.values(groups).sort((a, b) => b.totalHashrate - a.totalHashrate);
   }, [miners]);
@@ -101,12 +102,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
     [theme],
   );
 
-  const formatRate = (v: number) => {
-    if (v >= 1e12) return `${(v / 1e12).toFixed(1)} TH/s`;
-    if (v >= 1e9) return `${(v / 1e9).toFixed(1)} GH/s`;
-    if (v >= 1e6) return `${(v / 1e6).toFixed(1)} MH/s`;
-    return `${v.toFixed(0)} H/s`;
-  };
+  const formatRate = (hashesPerSecond: number) => formatHashrateValue(hashesPerSecond);
 
   if (poolGroups.length === 0) {
     return (
@@ -184,7 +180,9 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
                   <Text style={styles.minerName} numberOfLines={1}>
                     {m.name}
                   </Text>
-                  <Text style={styles.minerHash}>{formatRate(m.status?.hashRate || 0)}</Text>
+                  <Text style={styles.minerHash}>
+                    {formatRate(toHashesPerSecond(m.status?.hashRate || 0, m.status?.hashRateUnit))}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>

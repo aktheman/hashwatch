@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
+import { toHashesPerSecond } from '../utils/hashrate';
 
 interface HashrateChartProps {
   snapshots: MinerSnapshot[];
@@ -11,54 +12,58 @@ interface HashrateChartProps {
 
 export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const theme = useTheme();
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      marginVertical: 8,
-    },
-    title: {
-      color: theme.text,
-      fontSize: 15,
-      fontWeight: '700',
-      marginBottom: 12,
-      marginLeft: 4,
-    },
-    yLabel: {
-      position: 'absolute',
-      top: 12,
-      right: 14,
-      color: theme.textMuted,
-      fontSize: 10,
-      fontWeight: '600',
-      zIndex: 10,
-    },
-    chartWrapper: {
-      backgroundColor: theme.surface,
-      borderRadius: 16,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: theme.border,
-    },
-    chart: {
-      borderRadius: 12,
-    },
-    empty: {
-      backgroundColor: theme.surface,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: theme.border,
-      padding: 28,
-      alignItems: 'center',
-      marginVertical: 8,
-      gap: 8,
-    },
-    emptyIcon: {
-      fontSize: 32,
-    },
-    emptyText: {
-      color: theme.textDim,
-      fontSize: 14,
-    },
-  }), [theme]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          marginVertical: 8,
+        },
+        title: {
+          color: theme.text,
+          fontSize: 15,
+          fontWeight: '700',
+          marginBottom: 12,
+          marginLeft: 4,
+        },
+        yLabel: {
+          position: 'absolute',
+          top: 12,
+          right: 14,
+          color: theme.textMuted,
+          fontSize: 10,
+          fontWeight: '600',
+          zIndex: 10,
+        },
+        chartWrapper: {
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          padding: 12,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        chart: {
+          borderRadius: 12,
+        },
+        empty: {
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: theme.border,
+          padding: 28,
+          alignItems: 'center',
+          marginVertical: 8,
+          gap: 8,
+        },
+        emptyIcon: {
+          fontSize: 32,
+        },
+        emptyText: {
+          color: theme.textDim,
+          fontSize: 14,
+        },
+      }),
+    [theme],
+  );
 
   if (snapshots.length < 2) {
     return (
@@ -76,26 +81,14 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
     const m = d.getMinutes().toString().padStart(2, '0');
     return `${h}:${m}`;
   });
-  const values = sorted.map((s) => {
-    const v = s.hashRate;
-    if (v >= 1e12) return v / 1e12;
-    if (v >= 1e9) return v / 1e9;
-    if (v >= 1e6) return v / 1e6;
-    if (v >= 1e3) return v / 1e3;
-    return v;
-  });
+  const values = sorted.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit) / 1e9);
 
   const screenWidth = Dimensions.get('window').width - 64;
   const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
   const formatValue = (v: string) => parseFloat(v).toFixed(1);
-
-  const unit = sorted[sorted.length - 1]?.hashRate >= 1e12 ? 'TH/s'
-    : sorted[sorted.length - 1]?.hashRate >= 1e9 ? 'GH/s'
-    : sorted[sorted.length - 1]?.hashRate >= 1e6 ? 'MH/s'
-    : sorted[sorted.length - 1]?.hashRate >= 1e3 ? 'KH/s'
-    : 'H/s';
+  const unit = 'GH/s';
 
   return (
     <View style={styles.container}>

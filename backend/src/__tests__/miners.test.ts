@@ -39,7 +39,7 @@ describe('GET /api/miners', () => {
     expect(res.body).toEqual(fakeMiners);
     expect(mockQuery).toHaveBeenCalledWith(
       'SELECT * FROM miners WHERE userId = $1 ORDER BY addedAt DESC',
-      ['test-user-id']
+      ['test-user-id'],
     );
   });
 });
@@ -55,24 +55,22 @@ describe('POST /api/miners', () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual(newMiner);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO miners'),
-      ['test-user-id', 'New Miner', '192.168.1.12', 80]
-    );
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO miners'), [
+      'test-user-id',
+      'New Miner',
+      '192.168.1.12',
+      80,
+    ]);
   });
 
   it('returns 400 for invalid ip', async () => {
-    const res = await request(app)
-      .post('/api/miners')
-      .send({ name: 'Bad', ip: 'not-an-ip' });
+    const res = await request(app).post('/api/miners').send({ name: 'Bad', ip: 'not-an-ip' });
 
     expect(res.status).toBe(400);
   });
 
   it('returns 400 for empty name', async () => {
-    const res = await request(app)
-      .post('/api/miners')
-      .send({ name: '', ip: '192.168.1.1' });
+    const res = await request(app).post('/api/miners').send({ name: '', ip: '192.168.1.1' });
 
     expect(res.status).toBe(400);
   });
@@ -80,15 +78,24 @@ describe('POST /api/miners', () => {
 
 describe('DELETE /api/miners/:id', () => {
   it('deletes a miner', async () => {
-    mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] });
 
     const res = await request(app).delete('/api/miners/m1');
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ deleted: true });
     expect(mockQuery).toHaveBeenCalledWith(
-      'DELETE FROM miners WHERE id = $1 AND userId = $2',
-      ['m1', 'test-user-id']
+      'DELETE FROM miners WHERE id = $1 AND userId = $2 RETURNING id',
+      ['m1', 'test-user-id'],
     );
+  });
+
+  it('returns 404 when miner is not found', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).delete('/api/miners/m1');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('miner not found');
   });
 });

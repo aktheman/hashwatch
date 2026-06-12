@@ -46,7 +46,7 @@ describe('POST /api/push/register', () => {
 
 describe('DELETE /api/push/unregister', () => {
   it('unregisters a push token', async () => {
-    mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'expo-push-token-123' }] });
 
     const res = await request(app)
       .delete('/api/push/unregister')
@@ -54,9 +54,21 @@ describe('DELETE /api/push/unregister', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
-    expect(mockQuery).toHaveBeenCalledWith('DELETE FROM push_tokens WHERE token = $1', [
-      'expo-push-token-123',
-    ]);
+    expect(mockQuery).toHaveBeenCalledWith(
+      'DELETE FROM push_tokens WHERE token = $1 AND userId = $2 RETURNING token',
+      ['expo-push-token-123', 'test-user-id'],
+    );
+  });
+
+  it('returns 404 when token is not found', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app)
+      .delete('/api/push/unregister')
+      .send({ token: 'expo-push-token-123' });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('token not found');
   });
 
   it('returns 400 if token is missing', async () => {

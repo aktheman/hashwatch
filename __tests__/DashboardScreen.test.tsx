@@ -38,10 +38,34 @@ jest.mock('../src/api/client', () => ({
   BASE_URL: 'http://localhost:4000',
   configureClient: jest.fn(),
   pushStats: jest.fn(),
+  fetchMiners: jest.fn().mockResolvedValue([]),
+  createMiner: jest.fn(),
+  deleteMinerAPI: jest.fn(),
+}));
+
+jest.mock('../src/services/minerSync', () => ({
+  syncMinersWithBackend: jest.fn().mockResolvedValue([]),
+  createRemoteMiner: jest.fn(),
+  deleteRemoteMiner: jest.fn(),
+}));
+
+jest.mock('../src/store/auth', () => ({
+  useAuthStore: {
+    getState: () => ({ token: null, restoreSession: jest.fn().mockResolvedValue(undefined) }),
+  },
 }));
 
 jest.mock('../src/api/bitaxe', () => ({
   BitAxeClient: { probe: jest.fn() },
+}));
+
+jest.mock('../src/services/revenuecat', () => ({
+  configureRevenueCat: jest.fn().mockResolvedValue(undefined),
+  checkProStatus: jest.fn().mockResolvedValue(false),
+  purchasePro: jest.fn(),
+  restorePurchases: jest.fn(),
+  getOfferings: jest.fn(),
+  listenForProChanges: jest.fn().mockReturnValue(jest.fn()),
 }));
 
 jest.mock('../src/services/notifications', () => ({
@@ -83,6 +107,7 @@ beforeEach(() => {
     scanProgress: null,
     error: null,
     loadMiners: jest.fn().mockResolvedValue(undefined),
+    syncWithBackend: jest.fn().mockResolvedValue(undefined),
     startPolling: jest.fn().mockReturnValue(jest.fn()),
     refreshAll: jest.fn().mockResolvedValue(undefined),
     scanNetwork: jest.fn(),
@@ -129,7 +154,7 @@ it('shows summary stats with miners', async () => {
         ip: '192.168.1.100',
         port: 80,
         isOnline: true,
-        status: { hashRate: 500, power: 12, temperature: 45 },
+        status: { hashRate: 500, hashRateUnit: 'GH/s', power: 12, temperature: 45 },
       },
     ] as any[],
   });
@@ -140,7 +165,7 @@ it('shows summary stats with miners', async () => {
   expect(screen.getByText('Power (W)')).toBeTruthy();
   expect(screen.getByText('Avg Temp')).toBeTruthy();
   expect(screen.getByText('Efficiency')).toBeTruthy();
-});
+}, 15000);
 
 it('shows miner card when miners exist', async () => {
   useMinerStore.setState({

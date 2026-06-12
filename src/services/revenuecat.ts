@@ -1,9 +1,4 @@
-import Purchases, {
-  LOG_LEVEL,
-  CustomerInfo,
-  PurchasesOfferings,
-  PurchasesPackage,
-} from 'react-native-purchases';
+import Purchases, { LOG_LEVEL, CustomerInfo, PurchasesOfferings } from 'react-native-purchases';
 import { Platform } from 'react-native';
 import { getExtra } from '../constants';
 
@@ -11,8 +6,6 @@ const API_KEYS = {
   ios: getExtra().revenuecatIosKey,
   android: getExtra().revenuecatAndroidKey,
 };
-
-const PRO_MONTHLY_ID = 'hashwatch_pro_monthly';
 
 export async function configureRevenueCat(): Promise<void> {
   if (__DEV__) {
@@ -87,5 +80,5 @@ export function listenForProChanges(callback: (isPro: boolean) => void): () => v
     callback(isPro(customerInfo));
   };
   Purchases.addCustomerInfoUpdateListener(listener);
-  return () => {};
+  return () => Purchases.removeCustomerInfoUpdateListener(listener);
 }

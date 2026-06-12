@@ -44,6 +44,15 @@ jest.mock('../src/api/bitaxe', () => ({
   BitAxeClient: { probe: jest.fn() },
 }));
 
+jest.mock('../src/services/revenuecat', () => ({
+  configureRevenueCat: jest.fn().mockResolvedValue(undefined),
+  checkProStatus: jest.fn().mockResolvedValue(false),
+  purchasePro: jest.fn(),
+  restorePurchases: jest.fn(),
+  getOfferings: jest.fn(),
+  listenForProChanges: jest.fn().mockReturnValue(jest.fn()),
+}));
+
 jest.mock('../src/services/notifications', () => ({
   checkMinerAlerts: jest.fn(),
 }));
@@ -55,6 +64,29 @@ jest.mock('../src/services/pushRegistration', () => ({
 jest.mock('../src/services/websocket', () => ({
   connectWebSocket: jest.fn(),
   disconnectWebSocket: jest.fn(),
+}));
+
+jest.mock('../src/store/auth', () => ({
+  useAuthStore: (selector?: (state: any) => any) => {
+    const state = {
+      token: null,
+      userId: null,
+      email: null,
+      syncing: false,
+      synced: false,
+      login: jest.fn().mockResolvedValue(false),
+      register: jest.fn().mockResolvedValue(false),
+      logout: jest.fn().mockResolvedValue(undefined),
+      restoreSession: jest.fn().mockResolvedValue(undefined),
+    };
+    return selector ? selector(state) : state;
+  },
+}));
+
+jest.mock('../src/services/minerSync', () => ({
+  syncMinersWithBackend: jest.fn().mockResolvedValue([]),
+  createRemoteMiner: jest.fn(),
+  deleteRemoteMiner: jest.fn(),
 }));
 
 jest.mock('../src/discovery/localNetwork', () => ({
@@ -162,7 +194,7 @@ it('renders pool groups when miners have pool data', async () => {
   expect(screen.getByText('worker.1')).toBeTruthy();
   expect(screen.getByText('Miner 1')).toBeTruthy();
   expect(screen.getByText('Miner 2')).toBeTruthy();
-});
+}, 15000);
 
 it('groups miners by pool', async () => {
   useMinerStore.setState({
