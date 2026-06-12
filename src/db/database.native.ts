@@ -1,4 +1,4 @@
-import { Miner, MinerSnapshot } from '../types';
+import { Miner, MinerSnapshot, Wallet } from '../types';
 import * as SQLite from 'expo-sqlite';
 
 interface MinerRow {
@@ -8,6 +8,7 @@ interface MinerRow {
   port: number;
   addedAt: number;
   lastSeen: number;
+  walletId?: string;
   remoteId?: string;
   apiPath?: string;
   statusPath?: string;
@@ -71,8 +72,15 @@ async function initTables(d: any): Promise<void> {
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS wallets (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      address TEXT NOT NULL,
+      color TEXT NOT NULL DEFAULT '#6C63FF',
+      createdAt INTEGER NOT NULL
+    );
   `);
-  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId'];
+  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId', 'walletId'];
   for (const col of cols) {
     try {
       await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
@@ -106,6 +114,7 @@ export async function loadMiners(): Promise<Miner[]> {
     port: r.port,
     addedAt: r.addedAt,
     lastSeen: r.lastSeen,
+    walletId: r.walletId || undefined,
     remoteId: r.remoteId || undefined,
     apiPath: r.apiPath || undefined,
     statusPath: r.statusPath || undefined,
@@ -176,6 +185,25 @@ export async function getSnapshots(minerId: string, limit: number = 100): Promis
     [minerId, limit],
   );
   return snapshots;
+}
+
+export async function loadWallets(): Promise<Wallet[]> {
+  const d = await getDb();
+  const rows: Wallet[] = await d.getAllAsync('SELECT * FROM wallets ORDER BY createdAt DESC');
+  return rows;
+}
+
+export async function saveWallet(w: Wallet): Promise<void> {
+  const d = await getDb();
+  await d.runAsync(
+    `INSERT OR REPLACE INTO wallets (id, name, address, color, createdAt) VALUES (?, ?, ?, ?, ?)`,
+    [w.id, w.name, w.address, w.color, w.createdAt],
+  );
+}
+
+export async function deleteWallet(id: string): Promise<void> {
+  const d = await getDb();
+  await d.runAsync('DELETE FROM wallets WHERE id = ?', [id]);
 }
 
 export async function cleanupOldSnapshots(

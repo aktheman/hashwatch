@@ -1,8 +1,9 @@
-import { Miner, MinerSnapshot } from '../types';
+import { Miner, MinerSnapshot, Wallet } from '../types';
 
 const STORAGE_KEY_MINERS = 'hashwatch_miners';
 const STORAGE_KEY_SNAPSHOTS = 'hashwatch_snapshots';
 const STORAGE_KEY_SETTINGS = 'hashwatch_settings';
+const STORAGE_KEY_WALLETS = 'hashwatch_wallets';
 
 function loadJSON<T>(key: string, fallback: T): T {
   try {
@@ -67,6 +68,24 @@ export async function getSnapshots(minerId: string, limit: number = 100): Promis
     .filter((s) => s.minerId === minerId)
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, limit);
+}
+
+export async function loadWallets(): Promise<Wallet[]> {
+  return loadJSON<Wallet[]>(STORAGE_KEY_WALLETS, []);
+}
+
+export async function saveWallet(w: Wallet): Promise<void> {
+  const wallets = loadJSON<Wallet[]>(STORAGE_KEY_WALLETS, []);
+  const idx = wallets.findIndex((x) => x.id === w.id);
+  if (idx >= 0) wallets[idx] = w;
+  else wallets.push(w);
+  saveJSON(STORAGE_KEY_WALLETS, wallets);
+}
+
+export async function deleteWallet(id: string): Promise<void> {
+  let wallets = loadJSON<Wallet[]>(STORAGE_KEY_WALLETS, []);
+  wallets = wallets.filter((w) => w.id !== id);
+  saveJSON(STORAGE_KEY_WALLETS, wallets);
 }
 
 export async function cleanupOldSnapshots(

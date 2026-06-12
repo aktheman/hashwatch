@@ -17,6 +17,8 @@ import { Miner } from '../types';
 import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
+import { Wallet } from '../types';
+import * as DB from '../db/database';
 
 interface DashboardScreenProps {
   navigation: any;
@@ -36,6 +38,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const clearError = useMinerStore((s) => s.clearError);
   const canAddMiner = useSubscriptionStore((s) => s.canAddMiner);
   const initSubscription = useSubscriptionStore((s) => s.initialize);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [walletFilter, setWalletFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    DB.loadWallets().then(setWallets);
+  }, []);
+
+  const filteredMiners = walletFilter ? miners.filter((m) => m.walletId === walletFilter) : miners;
 
   useEffect(() => {
     initSubscription();
@@ -289,6 +299,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           fontWeight: '400',
           lineHeight: 30,
         },
+        walletChip: {
+          paddingHorizontal: 12,
+          paddingVertical: 5,
+          borderRadius: 16,
+          borderWidth: 1,
+        },
+        walletChipText: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }),
     [theme],
   );
@@ -357,6 +377,47 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {miners.length > 0 && <EarningsCard miners={miners} />}
 
+      {wallets.length > 0 && (
+        <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 6, marginBottom: 6 }}>
+          <TouchableOpacity
+            style={[
+              styles.walletChip,
+              {
+                backgroundColor: !walletFilter ? theme.primary : theme.surfaceLight,
+                borderColor: !walletFilter ? theme.primary : theme.border,
+              },
+            ]}
+            onPress={() => setWalletFilter(null)}
+          >
+            <Text style={[styles.walletChipText, { color: !walletFilter ? '#FFF' : theme.text }]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          {wallets.map((w) => (
+            <TouchableOpacity
+              key={w.id}
+              style={[
+                styles.walletChip,
+                {
+                  backgroundColor: walletFilter === w.id ? theme.primary : theme.surfaceLight,
+                  borderColor: walletFilter === w.id ? theme.primary : theme.border,
+                },
+              ]}
+              onPress={() => setWalletFilter(walletFilter === w.id ? null : w.id)}
+            >
+              <Text
+                style={[
+                  styles.walletChipText,
+                  { color: walletFilter === w.id ? '#FFF' : theme.text },
+                ]}
+              >
+                {w.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       {!canAdd && miners.length > 0 && (
         <TouchableOpacity
           style={styles.upgradeBanner}
@@ -403,7 +464,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       ) : (
         <FlatList
-          data={miners}
+          data={filteredMiners}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <MinerCard

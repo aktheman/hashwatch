@@ -24,6 +24,19 @@ jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(),
 }));
 
+jest.mock('../src/db/database', () => ({
+  loadMiners: jest.fn().mockResolvedValue([]),
+  saveMiner: jest.fn().mockResolvedValue(undefined),
+  deleteMiner: jest.fn().mockResolvedValue(undefined),
+  getSetting: jest.fn().mockResolvedValue(null),
+  setSetting: jest.fn().mockResolvedValue(undefined),
+  saveSnapshot: jest.fn().mockResolvedValue(undefined),
+  getSnapshots: jest.fn().mockResolvedValue([]),
+  loadWallets: jest.fn().mockResolvedValue([]),
+  saveWallet: jest.fn().mockResolvedValue(undefined),
+  deleteWallet: jest.fn().mockResolvedValue(undefined),
+}));
+
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 import { MinerDetailScreen } from '../src/screens/MinerDetailScreen';

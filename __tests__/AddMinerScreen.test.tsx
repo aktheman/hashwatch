@@ -32,6 +32,9 @@ jest.mock('../src/db/database', () => ({
   setSetting: jest.fn().mockResolvedValue(undefined),
   saveSnapshot: jest.fn().mockResolvedValue(undefined),
   getSnapshots: jest.fn().mockResolvedValue([]),
+  loadWallets: jest.fn().mockResolvedValue([]),
+  saveWallet: jest.fn().mockResolvedValue(undefined),
+  deleteWallet: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../src/api/client', () => ({

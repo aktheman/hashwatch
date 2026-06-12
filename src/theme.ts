@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { useColorScheme } from 'react-native';
 
 export type Theme = typeof darkTheme;
 
@@ -53,6 +54,7 @@ export const lightTheme: Theme = {
 };
 
 let _current: Theme = darkTheme;
+let _mode: 'dark' | 'light' | 'system' = 'dark';
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -66,14 +68,47 @@ function getSnapshot() {
 
 export function setTheme(t: Theme) {
   _current = t;
+  _mode = t === darkTheme ? 'dark' : 'light';
   listeners.forEach((cb) => cb());
+}
+
+export function setThemeMode(mode: 'dark' | 'light' | 'system') {
+  _mode = mode;
+  applyMode();
+}
+
+export function getThemeMode(): 'dark' | 'light' | 'system' {
+  return _mode;
 }
 
 export function getTheme() {
   return _current;
 }
 
+function applyMode() {
+  const prefersDark =
+    _mode === 'dark' ||
+    (_mode === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  _current = prefersDark ? darkTheme : lightTheme;
+  listeners.forEach((cb) => cb());
+}
+
 export function useTheme(): Theme {
+  const system = useColorScheme();
+  useSyncExternalStore(
+    (cb) => {
+      if (_mode !== 'system') return () => {};
+      const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+      if (!mq) return () => {};
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    getSnapshot,
+    getSnapshot,
+  );
+  if (_mode === 'system' && system) {
+    _current = system === 'dark' ? darkTheme : lightTheme;
+  }
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 

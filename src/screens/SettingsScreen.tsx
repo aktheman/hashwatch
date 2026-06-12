@@ -11,7 +11,7 @@ import {
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore } from '../store/auth';
-import { darkTheme, lightTheme, useTheme, setTheme } from '../theme';
+import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { setSetting } from '../db/database';
 import { exportAllData } from '../utils/export';
 
@@ -171,25 +171,15 @@ export function SettingsScreen({ navigation }: any) {
           color: theme.danger,
           fontWeight: '700',
         },
-        toggle: {
-          width: 44,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: theme.textMuted,
-          justifyContent: 'center',
-          paddingHorizontal: 2,
+        themeBtn: {
+          paddingHorizontal: 10,
+          paddingVertical: 6,
+          borderRadius: 8,
+          borderWidth: 1,
         },
-        toggleActive: {
-          backgroundColor: theme.primary,
-        },
-        toggleKnob: {
-          width: 20,
-          height: 20,
-          borderRadius: 10,
-          backgroundColor: '#FFF',
-        },
-        toggleKnobActive: {
-          alignSelf: 'flex-end',
+        themeBtnText: {
+          fontSize: 12,
+          fontWeight: '600',
         },
       }),
     [theme],
@@ -201,6 +191,12 @@ export function SettingsScreen({ navigation }: any) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
+        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Wallets')}>
+          <Text style={styles.rowLabel}>Wallets</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Subscription')}>
           <Text style={styles.rowLabel}>Plan</Text>
           <View style={styles.rowRight}>
@@ -272,21 +268,37 @@ export function SettingsScreen({ navigation }: any) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Appearance</Text>
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => {
-            const next = theme.bg === darkTheme.bg ? 'light' : 'dark';
-            setTheme(next === 'dark' ? darkTheme : lightTheme);
-            setSetting('theme_mode', next);
-          }}
-        >
-          <Text style={styles.rowLabel}>Dark Mode</Text>
-          <View style={[styles.toggle, theme.bg === darkTheme.bg && styles.toggleActive]}>
-            <View
-              style={[styles.toggleKnob, theme.bg === darkTheme.bg && styles.toggleKnobActive]}
-            />
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>Theme</Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {(['system', 'dark', 'light'] as const).map((mode) => (
+              <TouchableOpacity
+                key={mode}
+                style={[
+                  styles.themeBtn,
+                  {
+                    backgroundColor: getThemeMode() === mode ? theme.primary : theme.surfaceLight,
+                    borderColor: getThemeMode() === mode ? theme.primary : theme.border,
+                  },
+                ]}
+                onPress={() => {
+                  setThemeMode(mode);
+                  setSetting('theme_mode', mode === 'system' ? 'system' : mode);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.themeBtnText,
+                    { color: getThemeMode() === mode ? '#FFF' : theme.text },
+                  ]}
+                >
+                  {mode === 'dark' ? '🌙' : mode === 'light' ? '☀' : '🔄'}{' '}
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.section}>

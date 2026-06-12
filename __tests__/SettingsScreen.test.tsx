@@ -33,6 +33,9 @@ jest.mock('../src/db/database', () => ({
   deleteMiner: jest.fn().mockResolvedValue(undefined),
   saveSnapshot: jest.fn().mockResolvedValue(undefined),
   getSnapshots: jest.fn().mockResolvedValue([]),
+  loadWallets: jest.fn().mockResolvedValue([]),
+  saveWallet: jest.fn().mockResolvedValue(undefined),
+  deleteWallet: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../src/api/client', () => ({
@@ -143,9 +146,12 @@ it('shows Remote Sync section', async () => {
   expect(screen.getByText('Remote Sync')).toBeTruthy();
 });
 
-it('shows Dark Mode toggle', async () => {
+it('shows Theme selector', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Dark Mode')).toBeTruthy();
+  expect(screen.getByText('Theme')).toBeTruthy();
+  expect(screen.getByText(/System/)).toBeTruthy();
+  expect(screen.getByText(/Dark/)).toBeTruthy();
+  expect(screen.getByText(/Light/)).toBeTruthy();
 });
 
 it('shows miner count', async () => {
