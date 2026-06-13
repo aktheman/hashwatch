@@ -19,7 +19,7 @@ interface MinerRow {
 let db: SQLite.SQLiteDatabase | null = null;
 let dbInit: Promise<void> | null = null;
 
-async function getDb() {
+async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
   if (!dbInit) {
     dbInit = (async () => {
@@ -33,7 +33,7 @@ async function getDb() {
     })();
   }
   await dbInit;
-  return db;
+  return db!;
 }
 
 async function initTables(d: SQLite.SQLiteDatabase): Promise<void> {
@@ -137,8 +137,8 @@ export async function saveMiner(m: Miner): Promise<void> {
       m.name,
       m.ip,
       m.port,
-      m.addedAt,
-      m.lastSeen,
+      m.addedAt ?? null,
+      m.lastSeen ?? null,
       m.remoteId || null,
       m.apiPath || null,
       m.statusPath || null,
