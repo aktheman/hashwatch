@@ -17,6 +17,7 @@ import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { getSetting, setSetting } from '../db/database';
 import { exportAllData } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
+import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
 
 export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
@@ -379,7 +380,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 ]}
                 onPress={() => {
                   setThemeMode(mode);
-                  setSetting('theme_mode', mode === 'system' ? 'system' : mode);
+                  const val = mode === 'system' ? 'system' : mode;
+                  setSetting('theme_mode', val);
+                  if (token) putRemoteSetting('theme_mode', val).catch(() => {});
                 }}
               >
                 <Text
@@ -418,6 +421,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             onChangeText={(t) => {
               setPowerCost(t);
               setSetting('power_cost', t);
+              if (token) putRemoteSetting('power_cost', t).catch(() => {});
             }}
             placeholder="0.12"
             placeholderTextColor={theme.textMuted}
@@ -445,7 +449,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             value={autoScan}
             onValueChange={(v) => {
               setAutoScan(v);
-              setSetting('auto_scan', String(v));
+              const val = String(v);
+              setSetting('auto_scan', val);
+              if (token) putRemoteSetting('auto_scan', val).catch(() => {});
             }}
             trackColor={{ false: theme.border, true: theme.primary + '60' }}
             thumbColor={autoScan ? theme.primary : theme.textMuted}

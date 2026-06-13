@@ -6,6 +6,21 @@ import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken } from '../services/pushRegistration';
 import { useMinerStore } from './miners';
 
+async function syncSettingsFromBackend() {
+  try {
+    const remote = await API.getSettings();
+    if (remote && typeof remote === 'object') {
+      for (const [key, value] of Object.entries(remote)) {
+        if (typeof value === 'string') {
+          await DB.setSetting(key, value);
+        }
+      }
+    }
+  } catch {
+    // best-effort
+  }
+}
+
 interface AuthState {
   token: string | null;
   userId: string | null;
@@ -35,6 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       connectWebSocket(res.token);
       registerPushToken();
       await useMinerStore.getState().syncWithBackend();
+      syncSettingsFromBackend();
       return true;
     } catch {
       return false;
@@ -50,6 +66,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       connectWebSocket(res.token);
       registerPushToken();
       await useMinerStore.getState().syncWithBackend();
+      syncSettingsFromBackend();
       return true;
     } catch {
       return false;
@@ -73,6 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (useMinerStore.getState().initialized) {
         await useMinerStore.getState().syncWithBackend();
       }
+      syncSettingsFromBackend();
     }
   },
 }));

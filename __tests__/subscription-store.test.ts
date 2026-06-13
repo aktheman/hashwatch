@@ -1,5 +1,13 @@
 import { useSubscriptionStore } from '../src/store/subscription';
 
+jest.mock('../src/api/client', () => ({
+  validateReceipt: jest.fn(),
+}));
+
+jest.mock('../src/store/auth', () => ({
+  useAuthStore: () => ({ token: null }),
+}));
+
 jest.mock('../src/services/revenuecat', () => ({
   configureRevenueCat: jest.fn(),
   checkProStatus: jest.fn().mockResolvedValue(false),

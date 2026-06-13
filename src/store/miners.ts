@@ -3,7 +3,7 @@ import { Miner, MinerSnapshot, MinerStatus } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
-import { pushStats } from '../api/client';
+import { pushStats, fetchStats, updateMinerAPI } from '../api/client';
 import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
 import { useAuthStore } from './auth';
 import { updateWidget } from '../services/widget';
@@ -267,6 +267,9 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
     }));
+    if (useAuthStore.getState().token && miner.remoteId) {
+      updateMinerAPI(miner.remoteId, { name: updated.name }).catch(() => {});
+    }
   },
 
   applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
@@ -303,6 +306,25 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   clearError: () => set({ error: null }),
 
   getSnapshots: async (minerId: string, limit: number = 100) => {
-    return await DB.getSnapshots(minerId, limit);
+    const local = await DB.getSnapshots(minerId, limit);
+    const token = useAuthStore.getState().token;
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (token && miner?.remoteId) {
+      try {
+        const remote = await fetchStats(miner.remoteId);
+        if (Array.isArray(remote)) {
+          for (const s of remote) {
+            const exists = local.some((l) => l.timestamp === s.timestamp);
+            if (!exists && s.timestamp > 0) {
+              local.push({ ...s, minerId });
+            }
+          }
+          local.sort((a, b) => a.timestamp - b.timestamp);
+        }
+      } catch {
+        // best-effort
+      }
+    }
+    return local.slice(-limit);
   },
 }));

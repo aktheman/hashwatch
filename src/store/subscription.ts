@@ -6,6 +6,8 @@ import {
   restorePurchases,
   checkProStatus,
 } from '../services/revenuecat';
+import { validateReceipt } from '../api/client';
+import { useAuthStore } from './auth';
 
 const FREE_MAX_MINERS = 4;
 
@@ -49,11 +51,12 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
   purchase: async () => {
     set({ loading: true });
     try {
-      const customerInfo = await purchasePro();
-      if (!customerInfo) {
+      const result = await purchasePro();
+      if (!result) {
         set({ loading: false });
         return false;
       }
+      const { customerInfo, productIdentifier } = result;
       const pro = customerInfo.entitlements.active['pro'] !== undefined;
       set({
         isPro: pro,
@@ -61,6 +64,12 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
         maxMiners: pro ? 999 : FREE_MAX_MINERS,
         loading: false,
       });
+      if (pro && useAuthStore.getState().token) {
+        const ent = customerInfo.entitlements.active['pro'];
+        validateReceipt(ent?.originalPurchaseDate ?? productIdentifier, productIdentifier).catch(
+          () => {},
+        );
+      }
       return pro;
     } catch {
       set({ loading: false });
@@ -83,6 +92,11 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
         maxMiners: pro ? 999 : FREE_MAX_MINERS,
         loading: false,
       });
+      if (pro && useAuthStore.getState().token) {
+        const pid = customerInfo.allPurchasedProductIdentifiers[0] || 'hashwatch_pro';
+        const ent = customerInfo.entitlements.active['pro'];
+        validateReceipt(ent?.originalPurchaseDate ?? pid, pid).catch(() => {});
+      }
       return pro;
     } catch {
       set({ loading: false });

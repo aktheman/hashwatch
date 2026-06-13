@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, ActivityIndicator } from 'react-native';
 import * as DB from '../db/database';
+import { startPricePolling } from '../utils/hashrate';
 
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
@@ -91,6 +92,8 @@ export function AppNavigator() {
     DB.getSetting('onboarding_complete').then((v) => {
       setOnboardingDone(v === 'true');
     });
+    const stop = startPricePolling();
+    return stop;
   }, []);
 
   if (onboardingDone === null) {

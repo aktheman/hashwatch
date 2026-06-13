@@ -12,6 +12,8 @@ import {
 import { useMinerStore } from '../store/miners';
 import { MinerSnapshot, Wallet, NavigationProp } from '../types';
 import * as DB from '../db/database';
+import { useAuthStore } from '../store/auth';
+import { updateMinerAPI } from '../api/client';
 import { StatWidget } from '../components/StatWidget';
 import { BitAxeClient } from '../api/bitaxe';
 import { HashrateChart } from '../components/HashrateChart';
@@ -448,6 +450,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             const updated = { ...miner, group: t || undefined };
             DB.saveMiner(updated);
             useMinerStore.getState().loadMiners();
+            if (useAuthStore.getState().token && miner.remoteId) {
+              updateMinerAPI(miner.remoteId, { name: updated.name }).catch(() => {});
+            }
           }}
           placeholder="Group tag (e.g. Garage)"
           placeholderTextColor={theme.textMuted}

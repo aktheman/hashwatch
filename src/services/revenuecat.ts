@@ -37,14 +37,17 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
   }
 }
 
-export async function purchasePro(): Promise<CustomerInfo | null> {
+export async function purchasePro(): Promise<{
+  customerInfo: CustomerInfo;
+  productIdentifier: string;
+} | null> {
   try {
     const offerings = await getOfferings();
     const pkg = offerings?.current?.availablePackages?.[0];
     if (!pkg) return null;
 
-    const { customerInfo } = await Purchases.purchasePackage(pkg);
-    return customerInfo;
+    const result = await Purchases.purchasePackage(pkg);
+    return { customerInfo: result.customerInfo, productIdentifier: result.productIdentifier };
   } catch (e: unknown) {
     if ((e as { userCancelled?: boolean })?.userCancelled) return null;
     throw e;
