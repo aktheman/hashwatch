@@ -367,7 +367,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <View style={styles.row}>
           <Text style={styles.rowLabel}>Theme</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(['system', 'dark', 'light', 'neon', 'matrix'] as const).map((mode) => (
+            {(['system', 'dark', 'light', 'neon', 'matrix', '5tratum'] as const).map((mode) => (
               <TouchableOpacity
                 accessibilityRole="button"
                 key={mode}
@@ -399,8 +399,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                         ? '💜'
                         : mode === 'matrix'
                           ? '💚'
-                          : '🔄'}{' '}
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                          : mode === '5tratum'
+                            ? '🔶'
+                            : '🔄'}{' '}
+                  {mode === '5tratum' ? '5tratum' : mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}

@@ -78,6 +78,31 @@ export const matrixTheme: Theme = {
   glowWarning: 'rgba(255, 215, 0, 0.25)',
 };
 
+export const stratumTheme: Theme = {
+  bg: '#0A0806',
+  surface: '#16100A',
+  surfaceLight: '#201810',
+  border: '#2E2218',
+  primary: '#E88500',
+  primaryLight: '#FF9E20',
+  primaryDark: '#CC7700',
+  accent: '#FF6B35',
+  success: '#22C55E',
+  successLight: '#4ADE80',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
+  info: '#38BDF8',
+  text: '#F5E6D3',
+  textDim: '#A09080',
+  textMuted: '#706050',
+  glow: 'rgba(232, 133, 0, 0.25)',
+  glowSuccess: 'rgba(34, 197, 94, 0.2)',
+  glowDanger: 'rgba(239, 68, 68, 0.2)',
+  glowWarning: 'rgba(245, 158, 11, 0.2)',
+};
+
 export const lightTheme: Theme = {
   bg: '#F8F9FC',
   surface: '#FFFFFF',
@@ -104,7 +129,7 @@ export const lightTheme: Theme = {
 };
 
 let _current: Theme = darkTheme;
-let _mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' = 'dark';
+let _mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum' = 'dark';
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -120,16 +145,17 @@ export function setTheme(t: Theme) {
   _current = t;
   if (t === matrixTheme) _mode = 'matrix';
   else if (t === neonTheme) _mode = 'neon';
+  else if (t === stratumTheme) _mode = '5tratum';
   else _mode = t === darkTheme ? 'dark' : 'light';
   listeners.forEach((cb) => cb());
 }
 
-export function setThemeMode(mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon') {
+export function setThemeMode(mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum') {
   _mode = mode;
   applyMode();
 }
 
-export function getThemeMode(): 'dark' | 'light' | 'system' | 'matrix' | 'neon' {
+export function getThemeMode(): 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum' {
   return _mode;
 }
 
@@ -142,6 +168,8 @@ function applyMode() {
     _current = matrixTheme;
   } else if (_mode === 'neon') {
     _current = neonTheme;
+  } else if (_mode === '5tratum') {
+    _current = stratumTheme;
   } else {
     const prefersDark =
       _mode === 'dark' ||
