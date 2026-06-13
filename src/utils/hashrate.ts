@@ -32,10 +32,18 @@ export function formatHashrateWithUnit(hashRate: number, unit?: string): string 
 
 const BLOCK_REWARD_BTC = 3.125;
 const BLOCKS_PER_DAY = 144;
-const NETWORK_HASHRATE = 750_000_000_000_000_000_000;
+let _networkHashrate = 750_000_000_000_000_000_000;
+
+export function getNetworkHashrate(): number {
+  return _networkHashrate;
+}
+
+export function setNetworkHashrate(hps: number): void {
+  _networkHashrate = hps;
+}
 
 export function estimateBTCPerDay(hashesPerSecond: number): number {
-  const shareOfNetwork = hashesPerSecond / NETWORK_HASHRATE;
+  const shareOfNetwork = hashesPerSecond / _networkHashrate;
   return shareOfNetwork * BLOCKS_PER_DAY * BLOCK_REWARD_BTC;
 }
 
@@ -46,12 +54,42 @@ export function formatBTC(value: number): string {
   return `${(value * 100000000).toFixed(0)} sat`;
 }
 
-export function estimateUSDBTC(): number {
-  return 85000;
+let _btcPrice = 85000;
+let _btcPricePromise: Promise<number> | null = null;
+
+export function getBTCPrice(): number {
+  return _btcPrice;
+}
+
+export function setBTCPrice(price: number): void {
+  _btcPrice = price;
+}
+
+export async function fetchBTCPrice(): Promise<number> {
+  if (_btcPricePromise) return _btcPricePromise;
+  _btcPricePromise = (async () => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch('https://api.coindesk.com/v1/bpi/currentprice/USD.json', {
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+      if (!res.ok) return _btcPrice;
+      const data = await res.json();
+      _btcPrice = data.bpi?.USD?.rate_float ?? _btcPrice;
+      return _btcPrice;
+    } catch {
+      clearTimeout(id);
+      return _btcPrice;
+    }
+  })();
+  const price = await _btcPricePromise;
+  _btcPricePromise = null;
+  return price;
 }
 
 export function formatUSD(satsPerDay: number): string {
-  const btcPrice = estimateUSDBTC();
   const btc = satsPerDay / 100000000;
-  return `$${(btc * btcPrice).toFixed(2)}`;
+  return `$${(btc * _btcPrice).toFixed(2)}`;
 }

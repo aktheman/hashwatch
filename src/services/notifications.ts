@@ -40,7 +40,39 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   }
 }
 
+export function resetAlertState(): void {
+  notifiedOfflineAt = new Map();
+  notifiedHot = new Set();
+  notifiedHashrateDrop = new Set();
+  notifiedPoolLoss = new Set();
+  notifiedLongUptime = new Set();
+  prevHashrates = new Map();
+}
+
+export function cleanupAlertState(activeMinerIds: Set<string>): void {
+  for (const key of notifiedOfflineAt.keys()) {
+    if (!activeMinerIds.has(key)) notifiedOfflineAt.delete(key);
+  }
+  for (const key of notifiedHot) {
+    if (!activeMinerIds.has(key)) notifiedHot.delete(key);
+  }
+  for (const key of notifiedHashrateDrop) {
+    if (!activeMinerIds.has(key)) notifiedHashrateDrop.delete(key);
+  }
+  for (const key of notifiedPoolLoss) {
+    if (!activeMinerIds.has(key)) notifiedPoolLoss.delete(key);
+  }
+  for (const key of notifiedLongUptime) {
+    if (!activeMinerIds.has(key)) notifiedLongUptime.delete(key);
+  }
+  for (const key of prevHashrates.keys()) {
+    if (!activeMinerIds.has(key)) prevHashrates.delete(key);
+  }
+}
+
 export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner[]): Promise<void> {
+  cleanupAlertState(new Set(currentMiners.map((m) => m.id)));
+
   for (const current of currentMiners) {
     const prev = prevMiners.find((m) => m.id === current.id);
     if (!prev) continue;

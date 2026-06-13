@@ -4,6 +4,8 @@ const STORAGE_KEY_MINERS = 'hashwatch_miners';
 const STORAGE_KEY_SNAPSHOTS = 'hashwatch_snapshots';
 const STORAGE_KEY_SETTINGS = 'hashwatch_settings';
 const STORAGE_KEY_WALLETS = 'hashwatch_wallets';
+const STORAGE_KEY_SCHEMA = 'hashwatch_schema_version';
+const CURRENT_SCHEMA_VERSION = 2;
 
 function loadJSON<T>(key: string, fallback: T): T {
   try {
@@ -21,6 +23,45 @@ function saveJSON<T>(key: string, value: T): void {
     // storage full or unavailable
   }
 }
+
+function getSchemaVersion(): number {
+  return parseInt(localStorage.getItem(STORAGE_KEY_SCHEMA) || '0', 10);
+}
+
+function setSchemaVersion(v: number): void {
+  localStorage.setItem(STORAGE_KEY_SCHEMA, String(v));
+}
+
+async function migrate(): Promise<void> {
+  const version = getSchemaVersion();
+  if (version >= CURRENT_SCHEMA_VERSION) return;
+
+  if (version < 1) {
+    const miners = loadJSON<any[]>(STORAGE_KEY_MINERS, []);
+    const migrated = miners.map((m: any) => ({
+      ...m,
+      remoteId: m.remoteId || undefined,
+      apiPath: m.apiPath || undefined,
+      statusPath: m.statusPath || undefined,
+      walletId: m.walletId || undefined,
+    }));
+    saveJSON(STORAGE_KEY_MINERS, migrated);
+    setSchemaVersion(1);
+  }
+
+  if (version < 2) {
+    const snapshots = loadJSON<any[]>(STORAGE_KEY_SNAPSHOTS, []);
+    const migrated = snapshots.map((s: any) => ({
+      ...s,
+      hashRateUnit: s.hashRateUnit || 'GH/s',
+    }));
+    saveJSON(STORAGE_KEY_SNAPSHOTS, migrated);
+    setSchemaVersion(2);
+  }
+}
+
+// Run migration at module load
+migrate();
 
 export async function getSetting(key: string): Promise<string | null> {
   const settings = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});
