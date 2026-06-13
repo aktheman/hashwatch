@@ -50,7 +50,6 @@ it('shows Active badge for pro users', async () => {
 
 it('displays feature list', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getAllByText(/Unlimited miners/).length).toBe(3);
-  expect(screen.getByText(/30-day charts/)).toBeTruthy();
-  expect(screen.getByText(/Push notifications/)).toBeTruthy();
+  expect(screen.getByText(/Up to 4 miners/)).toBeTruthy();
+  expect(screen.getAllByText(/30-day charts/).length).toBe(2);
 });

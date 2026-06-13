@@ -3,6 +3,7 @@ import { View, Text, Switch, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
 import { useAuthStore } from '../store/auth';
 import { getNotificationPrefs, setNotificationPref } from '../api/client';
+import * as DB from '../db/database';
 
 interface NotificationPrefsProps {
   minerId: string;
@@ -17,23 +18,40 @@ const ALERT_LABELS: Record<string, string> = {
   long_uptime: 'Long Uptime',
 };
 
+async function getLocalPrefs(minerId: string): Promise<Record<string, boolean>> {
+  const raw = await DB.getSetting(`notify_${minerId}`);
+  return raw ? JSON.parse(raw) : {};
+}
+
+async function setLocalPref(minerId: string, alertType: string, enabled: boolean): Promise<void> {
+  const prefs = await getLocalPrefs(minerId);
+  prefs[alertType] = enabled;
+  await DB.setSetting(`notify_${minerId}`, JSON.stringify(prefs));
+}
+
 export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
   const theme = useTheme();
   const token = useAuthStore((s) => s.token);
   const [prefs, setPrefs] = useState<Record<string, boolean> | null>(null);
 
   useEffect(() => {
-    if (!token) return;
-    getNotificationPrefs(minerId)
-      .then(setPrefs)
-      .catch(() => {});
+    if (token) {
+      getNotificationPrefs(minerId)
+        .then(setPrefs)
+        .catch(() => {});
+    } else {
+      getLocalPrefs(minerId).then(setPrefs);
+    }
   }, [minerId, token]);
 
-  if (!token || !prefs) return null;
+  if (!prefs) return null;
 
   const toggle = async (alertType: string, enabled: boolean) => {
     setPrefs((p) => (p ? { ...p, [alertType]: enabled } : p));
-    await setNotificationPref(minerId, alertType, enabled).catch(() => {
+    const persist = token
+      ? () => setNotificationPref(minerId, alertType, enabled)
+      : () => setLocalPref(minerId, alertType, enabled);
+    await persist().catch(() => {
       setPrefs((p) => (p ? { ...p, [alertType]: !enabled } : p));
     });
   };

@@ -11,17 +11,17 @@ beforeEach(() => {
   useSubscriptionStore.setState({
     tier: 'free',
     isPro: false,
-    maxMiners: 999,
+    maxMiners: 4,
     initialized: false,
     loading: false,
   });
 });
 
-it('starts as free tier with unlimited miners', () => {
+it('starts as free tier with 4 miners', () => {
   const state = useSubscriptionStore.getState();
   expect(state.tier).toBe('free');
   expect(state.isPro).toBe(false);
-  expect(state.maxMiners).toBe(999);
+  expect(state.maxMiners).toBe(4);
 });
 
 it('canAddMiner returns true when under limit', () => {
@@ -30,8 +30,8 @@ it('canAddMiner returns true when under limit', () => {
 });
 
 it('canAddMiner returns false when at or over limit', () => {
-  expect(useSubscriptionStore.getState().canAddMiner(999)).toBe(false);
-  expect(useSubscriptionStore.getState().canAddMiner(1000)).toBe(false);
+  expect(useSubscriptionStore.getState().canAddMiner(4)).toBe(false);
+  expect(useSubscriptionStore.getState().canAddMiner(5)).toBe(false);
 });
 
 it('setPro upgrades to unlimited miners', () => {
@@ -42,13 +42,13 @@ it('setPro upgrades to unlimited miners', () => {
   expect(state.maxMiners).toBe(999);
 });
 
-it('setFree stays unlimited (free tier override)', () => {
+it('setFree resets to 4 miners', () => {
   useSubscriptionStore.getState().setPro();
   useSubscriptionStore.getState().setFree();
   const state = useSubscriptionStore.getState();
   expect(state.tier).toBe('free');
   expect(state.isPro).toBe(false);
-  expect(state.maxMiners).toBe(999);
+  expect(state.maxMiners).toBe(4);
 });
 
 it('canAddMiner follows maxMiners limit for pro users', () => {

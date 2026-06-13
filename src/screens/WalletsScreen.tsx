@@ -13,6 +13,7 @@ import { useTheme } from '../theme';
 import { Wallet } from '../types';
 import * as DB from '../db/database';
 import { useMinerStore } from '../store/miners';
+import { isValidBitcoinAddress } from '../utils/bitcoin';
 
 const WALLET_COLORS = [
   '#6C63FF',
@@ -63,6 +64,10 @@ export function WalletsScreen() {
   const save = async () => {
     if (!name.trim() || !address.trim()) {
       Alert.alert('Validation', 'Name and address are required');
+      return;
+    }
+    if (!isValidBitcoinAddress(address.trim())) {
+      Alert.alert('Invalid Address', 'Enter a valid Bitcoin address (bc1..., 1..., or 3...)');
       return;
     }
     const w: Wallet = editingWallet

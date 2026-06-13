@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 import { SubscriptionTier } from '../types';
-import { configureRevenueCat, purchasePro, restorePurchases, checkProStatus } from '../services/revenuecat';
+import {
+  configureRevenueCat,
+  purchasePro,
+  restorePurchases,
+  checkProStatus,
+} from '../services/revenuecat';
 
-const FREE_MAX_MINERS = 999;
+const FREE_MAX_MINERS = 4;
 
 interface SubscriptionStore {
   tier: SubscriptionTier;
