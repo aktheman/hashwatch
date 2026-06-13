@@ -48,8 +48,13 @@ app.use('/api/settings', settingsRouter);
 app.use('/api/receipt', receiptRouter);
 app.use('/api/notification-prefs', notificationPrefsRouter);
 
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: Date.now() });
+app.get('/api/health', async (_req, res) => {
+  try {
+    await query('SELECT 1');
+    res.json({ status: 'ok', timestamp: Date.now(), db: 'connected' });
+  } catch {
+    res.status(503).json({ status: 'degraded', timestamp: Date.now(), db: 'disconnected' });
+  }
 });
 
 async function initSchema() {

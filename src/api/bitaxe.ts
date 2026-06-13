@@ -137,7 +137,8 @@ export class BitAxeClient {
     }
   }
 
-  private async get(path: string): Promise<Record<string, unknown>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async get(path: string): Promise<Record<string, any>> {
     if (isWeb) {
       return this.proxyGet(path);
     }
