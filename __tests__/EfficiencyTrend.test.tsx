@@ -1,0 +1,49 @@
+import { render, screen } from '@testing-library/react-native';
+import React from 'react';
+import { EfficiencyTrend } from '../src/components/EfficiencyTrend';
+import { MinerSnapshot } from '../src/types';
+
+jest.mock('../src/theme', () => ({
+  useTheme: () => ({
+    surface: '#1a1a2e',
+    border: '#2a2a4e',
+    text: '#fff',
+    textDim: '#888',
+    textMuted: '#666',
+    primary: '#6C63FF',
+  }),
+}));
+
+jest.mock('react-native-chart-kit', () => ({
+  LineChart: () => null,
+}));
+
+function makeSnapshot(power: number, hashRate: number): MinerSnapshot {
+  return {
+    minerId: '1',
+    timestamp: Date.now(),
+    hashRate,
+    hashRateUnit: 'GH/s',
+    temperature: 50,
+    voltage: 1200,
+    current: 3.5,
+    power,
+    sharesAccepted: 100,
+    sharesRejected: 1,
+    uptimeSeconds: 3600,
+    frequency: 400,
+  };
+}
+
+describe('EfficiencyTrend', () => {
+  it('returns container with < 2 snapshots', async () => {
+    const { container } = await render(<EfficiencyTrend snapshots={[makeSnapshot(12, 500)]} />);
+    expect(container).toBeTruthy();
+  });
+
+  it('renders chart with sufficient snapshots', async () => {
+    const snapshots = [makeSnapshot(12, 500), makeSnapshot(12.5, 480), makeSnapshot(11.8, 510)];
+    const { container } = await render(<EfficiencyTrend snapshots={snapshots} />);
+    expect(container).toBeTruthy();
+  });
+});
