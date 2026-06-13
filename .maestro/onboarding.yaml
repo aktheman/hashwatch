@@ -1,0 +1,7 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- assertVisible: "Monitor Your BitAxe"
+- tapOn: "Skip"
+- assertVisible: "No Miners Yet"
+- assertVisible: "Add Your First Miner"

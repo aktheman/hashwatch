@@ -50,12 +50,12 @@ npx expo start
 
 ### Environment Variables
 
-| Variable | Description |
-|---|---|
-| `EXPO_PUBLIC_API_URL` | Backend API URL (default: `http://localhost:4000`) |
-| `EXPO_PUBLIC_MINER_PROXY_URL` | Proxy URL for web builds |
-| `EXPO_PUBLIC_REVENUECAT_IOS_KEY` | RevenueCat iOS SDK key |
-| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat Android SDK key |
+| Variable                             | Description                                        |
+| ------------------------------------ | -------------------------------------------------- |
+| `EXPO_PUBLIC_API_URL`                | Backend API URL (default: `http://localhost:4000`) |
+| `EXPO_PUBLIC_MINER_PROXY_URL`        | Proxy URL for web builds                           |
+| `EXPO_PUBLIC_REVENUECAT_IOS_KEY`     | RevenueCat iOS SDK key                             |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat Android SDK key                         |
 
 ### Web Proxy
 
@@ -96,11 +96,14 @@ npm run deploy:web
 ## Testing
 
 ```bash
-# Frontend
+# Unit tests (215+ passing)
 npm test
 
 # Backend
 cd backend && npm test
+
+# E2E (Maestro — requires iOS simulator or Maestro Cloud)
+maestro test .maestro/onboarding.yaml
 ```
 
 ## License
