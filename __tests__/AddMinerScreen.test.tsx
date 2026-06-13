@@ -73,7 +73,7 @@ jest.mock('../src/discovery/localNetwork', () => ({
   scanNetwork: jest.fn(),
 }));
 
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, act, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 import { AddMinerScreen } from '../src/screens/AddMinerScreen';
 import { setTheme, darkTheme } from '../src/theme';
@@ -118,4 +118,35 @@ it('renders Scan Network section', async () => {
 it('shows "or" divider', async () => {
   await render(<AddMinerScreen navigation={navigation} />);
   expect(screen.getByText('or')).toBeTruthy();
+});
+
+it('shows Cancel Scan button while scanning', async () => {
+  const { scanNetwork } = require('../src/discovery/localNetwork');
+  let resolveScan: () => void;
+  (scanNetwork as jest.Mock).mockReturnValue(
+    new Promise((resolve) => {
+      resolveScan = () => resolve([]);
+    }),
+  );
+
+  await render(<AddMinerScreen navigation={navigation} />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Find Miners'));
+  });
+  expect(await screen.findByText('Cancel Scan')).toBeTruthy();
+
+  // Cleanup: resolve the hanging promise
+  resolveScan!();
+});
+
+it('hides Cancel Scan after scan completes', async () => {
+  const { scanNetwork } = require('../src/discovery/localNetwork');
+  (scanNetwork as jest.Mock).mockResolvedValue([]);
+
+  await render(<AddMinerScreen navigation={navigation} />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Find Miners'));
+  });
+  expect(screen.queryByText('Cancel Scan')).toBeNull();
+  expect(await screen.findByText('Find Miners')).toBeTruthy();
 });
