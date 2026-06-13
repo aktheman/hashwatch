@@ -26,6 +26,11 @@ jest.mock('../src/store/auth', () => ({
     selector({ token: mockToken }),
 }));
 
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn().mockResolvedValue(null),
+  setSetting: jest.fn().mockResolvedValue(undefined),
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockToken = 'test-token';
@@ -47,9 +52,10 @@ describe('NotificationPrefs', () => {
     expect(await screen.findByText('High Temperature')).toBeTruthy();
   });
 
-  it('returns null when not authenticated', async () => {
+  it('renders notification toggles when not authenticated (local prefs)', async () => {
     mockToken = null;
-    const { container } = await render(<NotificationPrefs minerId="miner-1" />);
-    expect(container).toBeTruthy();
+    await render(<NotificationPrefs minerId="miner-1" />);
+    expect(await screen.findByText('Notifications')).toBeTruthy();
+    expect(await screen.findByText('Offline')).toBeTruthy();
   });
 });

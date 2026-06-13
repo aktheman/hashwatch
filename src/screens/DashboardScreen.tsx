@@ -482,7 +482,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={styles.upgradeBanner}
           onPress={() => navigation.navigate('Subscription')}
         >
-          <Text style={styles.upgradeBannerText}>🔒 Upgrade to Pro for unlimited miners</Text>
+          <Text style={styles.upgradeBannerText}>🔒 Upgrade to Pro to add more miners</Text>
         </TouchableOpacity>
       )}
 

@@ -156,7 +156,7 @@ export function SubscriptionScreen() {
       <View style={styles.hero}>
         <Text style={styles.heroIcon}>⭐</Text>
         <Text style={styles.heroTitle}>HashWatch Pro</Text>
-        <Text style={styles.heroSub}>Unlimited miners, cloud backup, and more</Text>
+        <Text style={styles.heroSub}>Unlimited miners, 30-day charts, and push alerts</Text>
       </View>
 
       <View style={[styles.planCard, tier === 'free' && styles.planCardActive]}>
@@ -166,13 +166,16 @@ export function SubscriptionScreen() {
         </View>
         <View style={styles.featureList}>
           <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Unlimited miners
+            <Text style={styles.featureCheck}>✓</Text> Up to 4 miners
           </Text>
           <Text style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text> Live dashboard
           </Text>
           <Text style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text> Basic stats
+          </Text>
+          <Text style={styles.featureItem}>
+            <Text style={styles.featureCheck}>✓</Text> Push alerts
           </Text>
         </View>
         {tier === 'free' && (
@@ -194,14 +197,7 @@ export function SubscriptionScreen() {
           </View>
         </View>
         <View style={styles.featureList}>
-          {[
-            'Unlimited miners',
-            '30-day charts',
-            'Push notifications',
-            'Cloud backup',
-            'Remote monitoring',
-            'Multi-wallet',
-          ].map((f) => (
+          {['Unlimited miners', '30-day charts', 'Push notifications', 'Multi-wallet'].map((f) => (
             <Text key={f} style={styles.featureItem}>
               <Text style={styles.featureCheck}>✓</Text> {f}
             </Text>

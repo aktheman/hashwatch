@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View } from 'react-native';
+import { Text, View, ActivityIndicator } from 'react-native';
+import * as DB from '../db/database';
 
+import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { MinerDetailScreen } from '../screens/MinerDetailScreen';
 import { AddMinerScreen } from '../screens/AddMinerScreen';
@@ -82,6 +85,33 @@ function MainTabs() {
 
 export function AppNavigator() {
   const theme = useTheme();
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    DB.getSetting('onboarding_complete').then((v) => {
+      setOnboardingDone(v === 'true');
+    });
+  }, []);
+
+  if (onboardingDone === null) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.bg,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
+
+  if (!onboardingDone) {
+    return <OnboardingScreen onComplete={() => setOnboardingDone(true)} />;
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,8 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   const [scanning, setScanning] = useState(false);
   const [foundMiners, setFoundMiners] = useState<DiscoveredMiner[]>([]);
   const [error, setError] = useState('');
+  const [scanProgress, setScanProgress] = useState({ found: 0, scanned: 0, total: 0 });
+  const scanAbortRef = useRef<AbortController | null>(null);
 
   const addMiner = useMinerStore((s) => s.addMiner);
   const miners = useMinerStore((s) => s.miners);
@@ -51,16 +53,30 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   };
 
   const handleScan = async () => {
+    const controller = new AbortController();
+    scanAbortRef.current = controller;
     setScanning(true);
     setError('');
+    setFoundMiners([]);
+    setScanProgress({ found: 0, scanned: 0, total: 0 });
     try {
-      const found = await scanNetwork();
+      const found = await scanNetwork(
+        (found, scanned, total) => setScanProgress({ found, scanned, total }),
+        120000,
+        controller.signal,
+      );
       setFoundMiners(found);
     } catch (e: unknown) {
+      if ((e as Error)?.name === 'AbortError') return;
       setError(e instanceof Error ? e.message : 'Scan failed');
     } finally {
       setScanning(false);
+      scanAbortRef.current = null;
     }
+  };
+
+  const handleCancelScan = () => {
+    scanAbortRef.current?.abort();
   };
 
   const handleAddDiscovered = async (m: DiscoveredMiner) => {
@@ -270,18 +286,46 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Scan Network</Text>
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={[styles.secondaryBtn, scanning && styles.btnDisabled]}
-          onPress={handleScan}
-          disabled={scanning}
-        >
-          {scanning ? (
-            <ActivityIndicator size="small" color={theme.primary} />
-          ) : (
+        {scanning && scanProgress.total > 0 && (
+          <View style={{ marginBottom: 10 }}>
+            <View
+              style={{
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: theme.border,
+                overflow: 'hidden',
+              }}
+            >
+              <View
+                style={{
+                  width: `${(scanProgress.scanned / scanProgress.total) * 100}%`,
+                  height: '100%',
+                  backgroundColor: theme.primary,
+                }}
+              />
+            </View>
+            <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 4 }}>
+              Scanned {scanProgress.scanned}/{scanProgress.total} · {scanProgress.found} found
+            </Text>
+          </View>
+        )}
+        {scanning ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            style={[styles.secondaryBtn, { borderColor: theme.danger }]}
+            onPress={handleCancelScan}
+          >
+            <Text style={[styles.secondaryBtnText, { color: theme.danger }]}>Cancel Scan</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            accessibilityRole="button"
+            style={styles.secondaryBtn}
+            onPress={handleScan}
+          >
             <Text style={styles.secondaryBtnText}>Find Miners</Text>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
       </View>
 
       {foundMiners.length > 0 && (
