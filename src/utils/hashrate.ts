@@ -56,6 +56,7 @@ export function formatBTC(value: number): string {
 
 let _btcPrice = 85000;
 let _btcPricePromise: Promise<number> | null = null;
+let _btcPriceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function getBTCPrice(): number {
   return _btcPrice;
@@ -87,6 +88,40 @@ export async function fetchBTCPrice(): Promise<number> {
   const price = await _btcPricePromise;
   _btcPricePromise = null;
   return price;
+}
+
+export async function fetchNetworkHashrate(): Promise<number> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch('https://mempool.space/api/v1/mining/hashrate/24h', {
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    if (!res.ok) return _networkHashrate;
+    const data = await res.json();
+    const hps = data?.currentHashrate ?? data?.hashrate ?? _networkHashrate;
+    _networkHashrate = hps;
+    return hps;
+  } catch {
+    clearTimeout(id);
+    return _networkHashrate;
+  }
+}
+
+export function startPricePolling(intervalMs: number = 300000): () => void {
+  fetchBTCPrice();
+  fetchNetworkHashrate();
+  _btcPriceTimer = setInterval(() => {
+    fetchBTCPrice();
+    fetchNetworkHashrate();
+  }, intervalMs);
+  return () => {
+    if (_btcPriceTimer) {
+      clearInterval(_btcPriceTimer);
+      _btcPriceTimer = null;
+    }
+  };
 }
 
 export function formatUSD(satsPerDay: number): string {

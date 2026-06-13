@@ -15,6 +15,9 @@ import {
   formatHashrateValue,
   estimateBTCPerDay,
   formatBTC,
+  getBTCPrice,
+  fetchBTCPrice,
+  fetchNetworkHashrate,
 } from '../utils/hashrate';
 import * as DB from '../db/database';
 import { LineChart } from 'react-native-chart-kit';
@@ -29,9 +32,12 @@ export function AnalyticsScreen() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<'1h' | '24h' | '7d'>('24h');
   const [powerCost, setPowerCost] = useState(0);
+  const [btcPrice, setBtcPrice] = useState(getBTCPrice);
 
   useEffect(() => {
     DB.getSetting('power_cost').then((v) => setPowerCost(parseFloat(v || '0') || 0));
+    fetchBTCPrice().then(setBtcPrice);
+    fetchNetworkHashrate();
   }, []);
 
   useEffect(() => {
@@ -339,7 +345,7 @@ export function AnalyticsScreen() {
                     styles.summaryValue,
                     {
                       color:
-                        totalEarnings * 85000 - (totalPower / 1000) * 24 * powerCost > 0
+                        totalEarnings * btcPrice - (totalPower / 1000) * 24 * powerCost > 0
                           ? theme.success
                           : theme.danger,
                       fontSize: 22,
@@ -347,7 +353,7 @@ export function AnalyticsScreen() {
                   ]}
                 >
                   {totalEarnings > 0
-                    ? `$${(totalEarnings * 85000 - (totalPower / 1000) * 24 * powerCost).toFixed(2)}`
+                    ? `$${(totalEarnings * btcPrice - (totalPower / 1000) * 24 * powerCost).toFixed(2)}`
                     : '—'}
                 </Text>
                 <Text style={styles.summaryLabel}>Net/Day</Text>
