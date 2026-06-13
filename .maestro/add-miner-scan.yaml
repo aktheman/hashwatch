@@ -1,0 +1,10 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- assertVisible: "No Miners Yet"
+- tapOn: "Add Your First Miner"
+- assertVisible: "Scan Network"
+- tapOn: "Find Miners"
+- assertVisible: "Cancel Scan"
+- tapOn: "Cancel Scan"
+- assertVisible: "Find Miners"
