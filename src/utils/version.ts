@@ -24,6 +24,9 @@ export async function fetchLatestFirmware(): Promise<string | null> {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 5000);
+    if (typeof id === 'object' && id !== null && 'unref' in id) {
+      (id as { unref: () => void }).unref();
+    }
     const res = await fetch('https://api.github.com/repos/skot/bitaxe/releases/latest', {
       signal: controller.signal,
     });

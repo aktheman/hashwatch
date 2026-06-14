@@ -32,6 +32,9 @@ function startPolling() {
   if (_interval) return;
   pollNetwork();
   _interval = setInterval(pollNetwork, 10000);
+  if (_interval && typeof _interval === 'object' && 'unref' in _interval) {
+    (_interval as { unref: () => void }).unref();
+  }
 }
 
 function stopPolling() {
