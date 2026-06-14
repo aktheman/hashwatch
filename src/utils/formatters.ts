@@ -1,6 +1,7 @@
 import { formatHashrateValue } from './hashrate';
+import { HashRateUnit } from '../types';
 
-export function formatHashrate(hashRate: number, unit?: string): string {
+export function formatHashrate(hashRate: number, unit?: HashRateUnit): string {
   if (unit) {
     return `${hashRate.toFixed(1)} ${unit}`;
   }
@@ -49,7 +50,7 @@ export function formatDifficulty(diff: string | number): string {
   return `${val.toFixed(1)}${units[i]}`;
 }
 
-export function formatWTHs(power: number, hashRate: number, hashRateUnit: string): string {
+export function formatWTHs(power: number, hashRate: number, hashRateUnit: HashRateUnit): string {
   const th =
     hashRateUnit === 'TH/s'
       ? hashRate

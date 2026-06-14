@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View, ActivityIndicator } from 'react-native';
-import * as DB from '../db/database';
+import { Text, View } from 'react-native';
 import { startPricePolling } from '../utils/hashrate';
 
-import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { MinerDetailScreen } from '../screens/MinerDetailScreen';
 import { AddMinerScreen } from '../screens/AddMinerScreen';
@@ -15,22 +13,11 @@ import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { PoolsScreen } from '../screens/PoolsScreen';
 import { AnalyticsScreen } from '../screens/AnalyticsScreen';
 import { WalletsScreen } from '../screens/WalletsScreen';
+import { GroupsScreen } from '../screens/GroupsScreen';
+import { ImportDataScreen } from '../screens/ImportDataScreen';
+import { OfflineBanner } from '../components/OfflineBanner';
 import { useTheme } from '../theme';
-
-type RootStackParamList = {
-  MainTabs: undefined;
-  MinerDetail: { minerId: string };
-  AddMiner: undefined;
-  Subscription: undefined;
-  Wallets: undefined;
-};
-
-type TabParamList = {
-  Dashboard: undefined;
-  Pools: undefined;
-  Analytics: undefined;
-  Settings: undefined;
-};
+import type { RootStackParamList, TabParamList } from '../types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -41,7 +28,6 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
     Dashboard: '⬡',
     Pools: '🌊',
     Analytics: '📊',
-    Wallets: '💼',
     Settings: '⚙',
   };
   return (
@@ -86,37 +72,15 @@ function MainTabs() {
 
 export function AppNavigator() {
   const theme = useTheme();
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
   useEffect(() => {
-    DB.getSetting('onboarding_complete').then((v) => {
-      setOnboardingDone(v === 'true');
-    });
     const stop = startPricePolling();
     return stop;
   }, []);
 
-  if (onboardingDone === null) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.bg,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <ActivityIndicator size="large" color={theme.primary} />
-      </View>
-    );
-  }
-
-  if (!onboardingDone) {
-    return <OnboardingScreen onComplete={() => setOnboardingDone(true)} />;
-  }
-
   return (
     <NavigationContainer>
+      <OfflineBanner />
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: theme.bg },
@@ -138,9 +102,13 @@ export function AppNavigator() {
           options={{ title: 'HashWatch Pro' }}
         />
         <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
+        <Stack.Screen name="Groups" component={GroupsScreen} options={{ title: 'Groups' }} />
+        <Stack.Screen
+          name="ImportData"
+          component={ImportDataScreen}
+          options={{ title: 'Import Data' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-export type { RootStackParamList, TabParamList };

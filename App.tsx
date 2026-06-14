@@ -7,7 +7,15 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
-import { darkTheme, lightTheme, matrixTheme, neonTheme, useTheme, setTheme, setThemeMode } from './src/theme';
+import {
+  darkTheme,
+  lightTheme,
+  matrixTheme,
+  neonTheme,
+  useTheme,
+  setTheme,
+  setThemeMode,
+} from './src/theme';
 import { initProxyUrl } from './src/constants';
 
 export default function App() {
@@ -17,18 +25,30 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      requestNotificationPermissions();
-      await initProxyUrl();
-      const saved = await getSetting('theme_mode');
-      if (saved === 'system' || saved === 'dark' || saved === 'light' || saved === 'matrix' || saved === 'neon') {
-        setThemeMode(saved);
-      } else {
-        setTheme(saved === 'light' ? lightTheme : darkTheme);
+      try {
+        requestNotificationPermissions();
+        await initProxyUrl();
+        const saved = await getSetting('theme_mode');
+        if (
+          saved === 'system' ||
+          saved === 'dark' ||
+          saved === 'light' ||
+          saved === 'matrix' ||
+          saved === 'neon' ||
+          saved === '5tratum'
+        ) {
+          setThemeMode(saved);
+        } else {
+          setTheme(darkTheme);
+        }
+        const done = await getSetting('onboarding_complete');
+        setShowOnboarding(done !== 'true');
+        await useAuthStore.getState().restoreSession();
+      } catch {
+        // init failed but we still show the app
+      } finally {
+        setReady(true);
       }
-      const done = await getSetting('onboarding_complete');
-      setShowOnboarding(done !== 'true');
-      await useAuthStore.getState().restoreSession();
-      setReady(true);
     })();
   }, []);
 

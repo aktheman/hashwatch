@@ -1,3 +1,5 @@
+export type HashRateUnit = 'H/s' | 'KH/s' | 'MH/s' | 'GH/s' | 'TH/s' | 'PH/s';
+
 export interface MinerInfo {
   version?: string;
   chipType?: string;
@@ -11,7 +13,7 @@ export interface MinerInfo {
 
 export interface MinerStatus {
   hashRate: number;
-  hashRateUnit: string;
+  hashRateUnit: HashRateUnit;
   temperature: number;
   vrTemp: number;
   voltage: number;
@@ -61,7 +63,7 @@ export interface MinerSnapshot {
   minerId: string;
   timestamp: number;
   hashRate: number;
-  hashRateUnit?: string;
+  hashRateUnit?: HashRateUnit;
   temperature: number;
   voltage: number;
   current: number;
@@ -80,6 +82,8 @@ export type RootStackParamList = {
   AddMiner: undefined;
   Subscription: undefined;
   Wallets: undefined;
+  Groups: undefined;
+  ImportData: undefined;
 };
 
 export type TabParamList = {
@@ -106,3 +110,20 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList & TabParamList>;
 
 export type APIError = { message: string; response?: { data?: { error?: string } } };
+
+export interface SettingsResponse {
+  [key: string]: string;
+}
+
+export interface ReceiptValidationResponse {
+  valid: boolean;
+  expiresDate: string | null;
+}
+
+export interface DeleteResponse {
+  deleted: boolean;
+}
+
+export interface OkResponse {
+  ok: boolean;
+}

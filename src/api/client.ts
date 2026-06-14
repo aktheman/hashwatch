@@ -1,6 +1,44 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { getExtra } from '../constants';
-import { MinerSnapshot, RemoteMiner } from '../types';
+import {
+  MinerSnapshot,
+  RemoteMiner,
+  SettingsResponse,
+  ReceiptValidationResponse,
+  DeleteResponse,
+  OkResponse,
+} from '../types';
+
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+  ttl: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const DEFAULT_TTL = 60000;
+
+function getCacheKey(config: { method?: string; url?: string; params?: unknown }): string {
+  return `${config.method || 'get'}:${config.url || ''}:${JSON.stringify(config.params)}`;
+}
+
+function getFromCache(key: string): AxiosResponse | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > entry.ttl) {
+    cache.delete(key);
+    return null;
+  }
+  return { data: entry.data, status: 200, statusText: 'OK (cached)' } as AxiosResponse;
+}
+
+function setCache(key: string, data: unknown, ttl: number = DEFAULT_TTL) {
+  cache.set(key, { data, timestamp: Date.now(), ttl });
+}
+
+export function clearCache() {
+  cache.clear();
+}
 
 let _getToken: () => string | null = () => null;
 let _onUnauthorized: () => void = () => {};
@@ -45,10 +83,21 @@ client.interceptors.request.use((config) => {
 });
 
 client.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    if (res.config.method === 'get') {
+      setCache(getCacheKey(res.config), res.data);
+    }
+    return res;
+  },
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && err.config?.baseURL === _baseUrl) {
       _onUnauthorized();
+    }
+    if (!err.response && err.config?.method === 'get') {
+      const cached = getFromCache(getCacheKey(err.config));
+      if (cached) {
+        return Promise.resolve(cached);
+      }
     }
     return Promise.reject(err);
   },
@@ -70,7 +119,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
 }
 
 export async function fetchMiners(): Promise<RemoteMiner[]> {
-  const res = await client.get('/api/miners');
+  const res = await client.get<RemoteMiner[]>('/api/miners');
   return res.data;
 }
 
@@ -78,58 +127,73 @@ export async function createMiner(data: {
   name: string;
   ip: string;
   port?: number;
-}): Promise<{ id: string }> {
-  const res = await client.post('/api/miners', data);
+}): Promise<RemoteMiner> {
+  const res = await client.post<RemoteMiner>('/api/miners', data);
   return res.data;
 }
 
-export async function deleteMinerAPI(id: string) {
-  await client.delete(`/api/miners/${id}`);
-}
-
-export async function fetchStats(minerId: string) {
-  const res = await client.get(`/api/stats/${minerId}`);
+export async function deleteMinerAPI(id: string): Promise<DeleteResponse> {
+  const res = await client.delete<DeleteResponse>(`/api/miners/${id}`);
   return res.data;
 }
 
-export async function pushStats(minerId: string, stats: MinerSnapshot) {
-  const res = await client.post(`/api/stats/${minerId}`, stats);
+export async function fetchStats(minerId: string): Promise<MinerSnapshot[]> {
+  const res = await client.get<MinerSnapshot[]>(`/api/stats/${minerId}`);
+  return res.data;
+}
+
+export async function pushStats(minerId: string, stats: MinerSnapshot): Promise<MinerSnapshot> {
+  const res = await client.post<MinerSnapshot>(`/api/stats/${minerId}`, stats);
   return res.data;
 }
 
 export async function updateMinerAPI(
   id: string,
   data: { name?: string; ip?: string; port?: number },
-) {
-  const res = await client.put(`/api/miners/${id}`, data);
+): Promise<RemoteMiner> {
+  const res = await client.put<RemoteMiner>(`/api/miners/${id}`, data);
   return res.data;
 }
 
-export async function getSettings() {
-  const res = await client.get('/api/settings');
+export async function getSettings(): Promise<SettingsResponse> {
+  const res = await client.get<SettingsResponse>('/api/settings');
   return res.data;
 }
 
-export async function putSetting(key: string, value: string) {
-  const res = await client.put('/api/settings', { key, value });
+export async function putSetting(key: string, value: string): Promise<OkResponse> {
+  const res = await client.put<OkResponse>('/api/settings', { key, value });
   return res.data;
 }
 
-export async function deleteSetting(key: string) {
-  const res = await client.delete(`/api/settings/${key}`);
+export async function deleteSetting(key: string): Promise<DeleteResponse> {
+  const res = await client.delete<DeleteResponse>(`/api/settings/${key}`);
   return res.data;
 }
 
-export async function validateReceipt(receipt: string, productId: string) {
-  const res = await client.post('/api/receipt/validate', { receipt, productId });
+export async function validateReceipt(
+  receipt: string,
+  productId: string,
+): Promise<ReceiptValidationResponse> {
+  const res = await client.post<ReceiptValidationResponse>('/api/receipt/validate', {
+    receipt,
+    productId,
+  });
   return res.data;
 }
 
-export async function getNotificationPrefs(minerId: string) {
-  const res = await client.get(`/api/notification-prefs/${minerId}`);
-  return res.data as Record<string, boolean>;
+export async function getNotificationPrefs(minerId: string): Promise<Record<string, boolean>> {
+  const res = await client.get<Record<string, boolean>>(`/api/notification-prefs/${minerId}`);
+  return res.data;
 }
 
-export async function setNotificationPref(minerId: string, alertType: string, enabled: boolean) {
-  await client.put(`/api/notification-prefs/${minerId}`, { alertType, enabled });
+export async function setNotificationPref(
+  minerId: string,
+  alertType: string,
+  enabled: boolean,
+): Promise<OkResponse> {
+  const res = await client.put<OkResponse>(`/api/notification-prefs/${minerId}`, {
+    alertType,
+    enabled,
+  });
+  return res.data;
 }

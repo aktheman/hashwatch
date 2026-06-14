@@ -1,11 +1,12 @@
 import { create } from 'zustand';
+import { AppState } from 'react-native';
 import { Miner, MinerSnapshot, MinerStatus } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
-import { pushStats, fetchStats, updateMinerAPI } from '../api/client';
+import { pushStats, fetchStats } from '../api/client';
 import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
-import { useAuthStore } from './auth';
+import { getAuthToken, onAuthLogin } from './authToken';
 import { updateWidget } from '../services/widget';
 import {
   toHashesPerSecond,
@@ -52,6 +53,7 @@ interface MinersState {
   startPolling: (intervalMs?: number) => () => void;
   scanNetwork: () => Promise<void>;
   setMinerWallet: (minerId: string, walletId: string | undefined) => Promise<void>;
+  setMinerGroup: (minerId: string, group: string | undefined) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
@@ -72,7 +74,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       set({ miners, loading: false, initialized: true });
       DB.cleanupOldSnapshots();
       get().refreshAll();
-      if (useAuthStore.getState().token) {
+      if (getAuthToken()) {
         get().syncWithBackend();
       }
     } catch (e: unknown) {
@@ -81,7 +83,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   syncWithBackend: async () => {
-    if (!useAuthStore.getState().token) return;
+    if (!getAuthToken()) return;
     try {
       const synced = await syncMinersWithBackend(get().miners);
       set({ miners: synced });
@@ -122,7 +124,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         isOnline: true,
       };
 
-      if (useAuthStore.getState().token) {
+      if (getAuthToken()) {
         miner.remoteId = await createRemoteMiner(miner);
       }
 
@@ -138,7 +140,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   removeMiner: async (id: string) => {
     const miner = get().miners.find((m) => m.id === id);
-    if (miner?.remoteId && useAuthStore.getState().token) {
+    if (miner?.remoteId && getAuthToken()) {
       await deleteRemoteMiner(miner.remoteId);
     }
     await DB.deleteMiner(id);
@@ -166,7 +168,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       await DB.saveMiner(updated);
       const snapshot = buildSnapshot(id, status);
       await DB.saveSnapshot(snapshot);
-      const token = useAuthStore.getState().token;
+      const token = getAuthToken();
       if (token && miner.remoteId) {
         pushStats(miner.remoteId, snapshot).catch(() => {});
       }
@@ -205,7 +207,11 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   refreshAll: async () => {
     const prev = get().miners;
-    await Promise.allSettled(prev.map((m) => get().refreshMiner(m.id)));
+    const CONCURRENCY = 5;
+    for (let i = 0; i < prev.length; i += CONCURRENCY) {
+      const batch = prev.slice(i, i + CONCURRENCY);
+      await Promise.allSettled(batch.map((m) => get().refreshMiner(m.id)));
+    }
     const current = get().miners;
     if (current.length > 0) {
       checkMinerAlerts(prev, current);
@@ -225,11 +231,25 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   startPolling: (intervalMs: number = 30000) => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let paused = false;
+
+    const tick = () => {
+      if (!paused) get().refreshAll();
+    };
+
     get().refreshAll();
-    const interval = setInterval(() => {
-      get().refreshAll();
-    }, intervalMs);
-    return () => clearInterval(interval);
+    interval = setInterval(tick, intervalMs);
+
+    const sub = AppState.addEventListener('change', (state) => {
+      paused = state !== 'active';
+      if (!paused) get().refreshAll();
+    });
+
+    return () => {
+      if (interval) clearInterval(interval);
+      sub.remove();
+    };
   },
 
   scanNetwork: async () => {
@@ -267,9 +287,16 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
     }));
-    if (useAuthStore.getState().token && miner.remoteId) {
-      updateMinerAPI(miner.remoteId, { name: updated.name }).catch(() => {});
-    }
+  },
+
+  setMinerGroup: async (minerId: string, group: string | undefined) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, group: group || undefined };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
   },
 
   applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
@@ -307,7 +334,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   getSnapshots: async (minerId: string, limit: number = 100) => {
     const local = await DB.getSnapshots(minerId, limit);
-    const token = useAuthStore.getState().token;
+    const token = getAuthToken();
     const miner = get().miners.find((m) => m.id === minerId);
     if (token && miner?.remoteId) {
       try {
@@ -328,3 +355,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     return local.slice(-limit);
   },
 }));
+
+onAuthLogin(() => {
+  useMinerStore.getState().syncWithBackend();
+});

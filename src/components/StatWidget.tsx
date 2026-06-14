@@ -12,44 +12,51 @@ interface StatWidgetProps {
 export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetProps) {
   const theme = useTheme();
   const color = colorProp ?? theme.primary;
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      minWidth: '45%',
-      backgroundColor: theme.surface,
-      borderRadius: 16,
-      padding: 14,
-      margin: 5,
-      borderWidth: 1,
-      gap: 2,
-    },
-    iconCircle: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 6,
-    },
-    iconText: {
-      fontSize: 12,
-      fontWeight: '700',
-    },
-    label: {
-      color: theme.textDim,
-      fontSize: 10,
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
-    value: {
-      fontSize: 20,
-      fontWeight: '800',
-    },
-  }), [theme]);
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          minWidth: '45%',
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          padding: 14,
+          margin: 5,
+          borderWidth: 1,
+          gap: 2,
+        },
+        iconCircle: {
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 6,
+        },
+        iconText: {
+          fontSize: 12,
+          fontWeight: '700',
+        },
+        label: {
+          color: theme.textDim,
+          fontSize: 10,
+          fontWeight: '600',
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+        },
+        value: {
+          fontSize: 22,
+          fontWeight: '800',
+        },
+      }),
+    [theme],
+  );
 
   return (
-    <View style={[styles.container, { borderColor: color + '20' }]}>
+    <View
+      accessibilityLabel={`${label}: ${value}`}
+      style={[styles.container, { borderColor: color + '20' }]}
+    >
       {icon && (
         <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
           <Text style={[styles.iconText, { color }]}>{icon}</Text>

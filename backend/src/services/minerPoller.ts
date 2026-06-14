@@ -1,10 +1,5 @@
 import { query } from '../db';
-import {
-  sendMinerOfflineNotification,
-  sendMinerOnlineNotification,
-  sendMinerHotNotification,
-  sendHashrateDropNotification,
-} from './pushNotifications';
+import { checkMinerStatus } from './minerMonitor';
 
 interface MinerRow {
   id: string;
@@ -16,15 +11,6 @@ interface MinerRow {
 
 const POLL_INTERVAL = 60_000;
 const TIMEOUT = 5000;
-
-interface MinerState {
-  isOnline: boolean;
-  temperature: number;
-  hashRate: number;
-  pool: string | null;
-}
-
-const states = new Map<string, MinerState>();
 
 async function fetchJson(url: string): Promise<any | null> {
   try {
@@ -39,48 +25,15 @@ async function fetchJson(url: string): Promise<any | null> {
   }
 }
 
-function probePaths(ip: string, port: number): { info: string; status: string } {
-  return {
-    info: `http://${ip}:${port}/api/system/info`,
-    status: `http://${ip}:${port}/api/system/info`,
-  };
-}
-
 async function pollMiner(miner: MinerRow): Promise<void> {
-  const key = `${miner.userid}:${miner.id}`;
-  const paths = probePaths(miner.ip, miner.port);
-  const data = await fetchJson(paths.status);
+  const url = `http://${miner.ip}:${miner.port}/api/system/info`;
+  const data = await fetchJson(url);
 
-  if (!data) {
-    const prev = states.get(key);
-    if (prev?.isOnline !== false) {
-      sendMinerOfflineNotification(miner.userid, miner.name, miner.ip, miner.id);
-    }
-    states.set(key, { isOnline: false, temperature: 0, hashRate: 0, pool: null });
-    return;
-  }
+  const isOnline = !!data;
+  const temperature = typeof data?.temperature === 'number' ? data.temperature : 0;
+  const hashRate = typeof data?.hashRate === 'number' ? data.hashRate : 0;
 
-  const hashRate = typeof data.hashRate === 'number' ? data.hashRate : 0;
-  const temperature = typeof data.temperature === 'number' ? data.temperature : 0;
-  const pool = typeof data.pool === 'string' && data.pool ? data.pool : null;
-
-  const prev = states.get(key);
-
-  if (!prev || (!prev.isOnline && hashRate > 0)) {
-    sendMinerOnlineNotification(miner.userid, miner.name, miner.ip, miner.id);
-  }
-
-  if (temperature > 70 && (!prev || prev.temperature <= 70)) {
-    sendMinerHotNotification(miner.userid, miner.name, miner.ip, temperature, miner.id);
-  }
-
-  const prevHr = prev?.hashRate ?? 0;
-  if (prevHr > hashRate * 2 && hashRate > 0) {
-    const pct = Math.round((1 - hashRate / prevHr) * 100);
-    sendHashrateDropNotification(miner.userid, miner.name, miner.id, pct);
-  }
-
-  states.set(key, { isOnline: true, temperature, hashRate, pool });
+  checkMinerStatus(miner.userid, miner.id, miner.name, miner.ip, isOnline, temperature, hashRate);
 }
 
 let intervalHandle: ReturnType<typeof setInterval> | null = null;

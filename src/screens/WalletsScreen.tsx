@@ -167,7 +167,7 @@ export function WalletsScreen() {
         addBtnText: { color: '#FFF', fontSize: 15, fontWeight: '700' },
         modalOverlay: {
           flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.6)',
+          backgroundColor: theme.bg + '99',
           justifyContent: 'flex-end',
         },
         modalContent: {
@@ -240,7 +240,12 @@ export function WalletsScreen() {
           <Text style={styles.emptyText}>
             Create wallets to organize your miners by payout address
           </Text>
-          <TouchableOpacity accessibilityRole="button" style={styles.addBtn} onPress={openCreate}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Create Wallet"
+            style={styles.addBtn}
+            onPress={openCreate}
+          >
             <Text style={styles.addBtnText}>Create Wallet</Text>
           </TouchableOpacity>
         </View>
@@ -251,7 +256,12 @@ export function WalletsScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            <TouchableOpacity accessibilityRole="button" style={styles.addBtn} onPress={openCreate}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Add Wallet"
+              style={styles.addBtn}
+              onPress={openCreate}
+            >
               <Text style={styles.addBtnText}>+ Add Wallet</Text>
             </TouchableOpacity>
           }
@@ -276,6 +286,7 @@ export function WalletsScreen() {
               <View style={styles.cardActions}>
                 <TouchableOpacity
                   accessibilityRole="button"
+                  accessibilityLabel={`Edit wallet: ${item.name}`}
                   style={[styles.actionBtn, styles.actionBtnEdit]}
                   onPress={() => openEdit(item)}
                 >
@@ -283,6 +294,7 @@ export function WalletsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   accessibilityRole="button"
+                  accessibilityLabel={`Delete wallet: ${item.name}`}
                   style={[styles.actionBtn, styles.actionBtnDelete]}
                   onPress={() => remove(item.id)}
                 >
@@ -337,12 +349,18 @@ export function WalletsScreen() {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 accessibilityRole="button"
+                accessibilityLabel="Cancel"
                 style={styles.modalCancel}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity accessibilityRole="button" style={styles.modalSave} onPress={save}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Save"
+                style={styles.modalSave}
+                onPress={save}
+              >
                 <Text style={styles.modalSaveText}>Save</Text>
               </TouchableOpacity>
             </View>

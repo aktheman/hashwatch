@@ -9,6 +9,7 @@ interface MinerRow {
   addedAt: number;
   lastSeen: number;
   walletId?: string;
+  group?: string;
   remoteId?: string;
   apiPath?: string;
   statusPath?: string;
@@ -80,7 +81,7 @@ async function initTables(d: SQLite.SQLiteDatabase): Promise<void> {
       createdAt INTEGER NOT NULL
     );
   `);
-  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId', 'walletId'];
+  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId', 'walletId', 'group'];
   for (const col of cols) {
     try {
       await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
@@ -118,6 +119,7 @@ export async function loadMiners(): Promise<Miner[]> {
     addedAt: r.addedAt,
     lastSeen: r.lastSeen,
     walletId: r.walletId || undefined,
+    group: r.group || undefined,
     remoteId: r.remoteId || undefined,
     apiPath: r.apiPath || undefined,
     statusPath: r.statusPath || undefined,
@@ -130,8 +132,8 @@ export async function loadMiners(): Promise<Miner[]> {
 export async function saveMiner(m: Miner): Promise<void> {
   const d = await getDb();
   await d.runAsync(
-    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, remoteId, apiPath, statusPath, info, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO miners (id, name, ip, port, addedAt, lastSeen, remoteId, walletId, \`group\`, apiPath, statusPath, info, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       m.id,
       m.name,
@@ -140,6 +142,8 @@ export async function saveMiner(m: Miner): Promise<void> {
       m.addedAt ?? null,
       m.lastSeen ?? null,
       m.remoteId || null,
+      m.walletId || null,
+      m.group || null,
       m.apiPath || null,
       m.statusPath || null,
       m.info ? JSON.stringify(m.info) : null,

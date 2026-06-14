@@ -139,11 +139,59 @@ function doubleSHA256Checksum(full: Uint8Array): boolean {
   );
 }
 
+const BECH32_CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+
+function bech32Polymod(values: number[]): number {
+  const GEN = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+  let chk = 1;
+  for (const v of values) {
+    const top = chk >> 25;
+    chk = ((chk & 0x1ffffff) << 5) ^ v;
+    for (let i = 0; i < 5; i++) {
+      if ((top >> i) & 1) {
+        chk ^= GEN[i];
+      }
+    }
+  }
+  return chk;
+}
+
+function bech32VerifyChecksum(hrp: string, data: number[]): boolean {
+  const hrpExpand: number[] = [];
+  for (const c of hrp) {
+    hrpExpand.push(c.charCodeAt(0) >> 5);
+  }
+  hrpExpand.push(0);
+  for (const c of hrp) {
+    hrpExpand.push(c.charCodeAt(0) & 31);
+  }
+  return bech32Polymod(hrpExpand.concat(data)) === 1;
+}
+
+function decodeBech32(str: string): { hrp: string; data: number[] } | null {
+  const lower = str.toLowerCase();
+  if (lower !== str && str.toUpperCase() !== str) return null;
+  const s = lower;
+  const pos = s.lastIndexOf('1');
+  if (pos < 1 || pos + 7 > s.length || s.length > 90) return null;
+  const data: number[] = [];
+  for (let i = pos + 1; i < s.length; i++) {
+    const idx = BECH32_CHARSET.indexOf(s[i]);
+    if (idx === -1) return null;
+    data.push(idx);
+  }
+  const hrp = s.slice(0, pos);
+  if (!bech32VerifyChecksum(hrp, data)) return null;
+  return { hrp, data: data.slice(0, data.length - 6) };
+}
+
 export function isValidBitcoinAddress(address: string): boolean {
   const trimmed = address.trim();
 
-  // Bech32/Bech32m (bc1...)
-  if (/^bc1[a-z0-9]{39,59}$/i.test(trimmed)) return true;
+  // Bech32/Bech32m (bc1...) with checksum verification
+  if (/^bc1[a-z0-9]{39,59}$/i.test(trimmed)) {
+    return decodeBech32(trimmed) !== null;
+  }
 
   // Legacy (1...) or P2SH (3...) with double SHA-256 checksum
   if (/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(trimmed)) {
@@ -152,8 +200,17 @@ export function isValidBitcoinAddress(address: string): boolean {
     return doubleSHA256Checksum(decoded);
   }
 
-  // Testnet (tb1... or m/n followed by base58)
-  if (/^(tb1[a-z0-9]{39,59}|[mn][a-km-zA-HJ-NP-Z1-9]{25,34})$/i.test(trimmed)) return true;
+  // Testnet bech32 (tb1...) with checksum verification
+  if (/^tb1[a-z0-9]{39,59}$/i.test(trimmed)) {
+    return decodeBech32(trimmed) !== null;
+  }
+
+  // Testnet legacy (m/n...) with double SHA-256 checksum
+  if (/^[mn][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(trimmed)) {
+    const decoded = base58Decode(trimmed);
+    if (!decoded || decoded.length < 4) return false;
+    return doubleSHA256Checksum(decoded);
+  }
 
   return false;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,6 @@ import {
 import { useMinerStore } from '../store/miners';
 import { MinerSnapshot, Wallet, NavigationProp } from '../types';
 import * as DB from '../db/database';
-import { useAuthStore } from '../store/auth';
-import { updateMinerAPI } from '../api/client';
 import { StatWidget } from '../components/StatWidget';
 import { BitAxeClient } from '../api/bitaxe';
 import { HashrateChart } from '../components/HashrateChart';
@@ -90,7 +88,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           borderRadius: 20,
           borderWidth: 1,
           borderColor: theme.border,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          boxShadow: `0 4px 20px ${theme.glow}`,
         },
         headerTop: {
           flexDirection: 'row',
@@ -126,17 +124,107 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           letterSpacing: 0.8,
         },
         ip: {
-          color: theme.textMuted,
-          fontSize: 12,
+          color: theme.textDim,
+          fontSize: 14,
           fontFamily: 'monospace',
-          marginTop: 4,
-          marginLeft: 22,
         },
         hostname: {
-          color: theme.textDim,
+          color: theme.textMuted,
           fontSize: 12,
           marginTop: 2,
-          marginLeft: 22,
+        },
+        walletRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: theme.surface,
+          borderRadius: 14,
+          padding: 14,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        walletRowLeft: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+        walletRowIcon: {
+          fontSize: 14,
+          marginRight: 8,
+        },
+        walletRowText: {
+          color: theme.text,
+          fontSize: 14,
+          fontWeight: '600',
+        },
+        walletRowArrow: {
+          color: theme.textMuted,
+          fontSize: 12,
+        },
+        walletPicker: {
+          backgroundColor: theme.surface,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: theme.border,
+          marginTop: 6,
+          overflow: 'hidden',
+        },
+        walletOption: {
+          padding: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.border,
+        },
+        walletOptionRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.border,
+        },
+        walletDot: {
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+          marginRight: 8,
+        },
+        walletName: {
+          color: theme.text,
+          fontSize: 14,
+          fontWeight: '500',
+        },
+        groupTagRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+        },
+        groupTagIcon: {
+          fontSize: 14,
+        },
+        groupTagInput: {
+          flex: 1,
+          backgroundColor: theme.surface,
+          borderRadius: 14,
+          padding: 14,
+          color: theme.text,
+          fontSize: 14,
+          fontWeight: '500',
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        actionBtn: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 14,
+          borderRadius: 12,
+          borderWidth: 1,
+          gap: 8,
+        },
+        actionBtnIcon: {
+          fontSize: 16,
+        },
+        actionBtnText: {
+          fontWeight: '700',
+          fontSize: 15,
         },
         section: {
           marginHorizontal: 16,
@@ -185,12 +273,12 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           fontFamily: 'monospace',
         },
         deleteBtn: {
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: theme.danger + '1A',
           padding: 14,
           borderRadius: 12,
           alignItems: 'center',
           borderWidth: 1,
-          borderColor: 'rgba(239, 68, 68, 0.3)',
+          borderColor: theme.danger + '4D',
         },
         deleteBtnText: {
           color: theme.danger,
@@ -235,6 +323,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [showConfirm, setShowConfirm] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
+  const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     DB.loadWallets().then(setWallets);
@@ -255,6 +344,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.offlineText}>Miner Not Found</Text>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Go back"
           style={styles.retryBtn}
           onPress={() => navigation.goBack()}
         >
@@ -272,6 +362,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.offlineSubtext}>Unable to reach {miner.ip}</Text>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Retry"
           style={styles.retryBtn}
           onPress={() => refreshMiner(minerId)}
         >
@@ -329,7 +420,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             style={[
               styles.badge,
               {
-                backgroundColor: miner.isOnline ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                backgroundColor: miner.isOnline ? theme.success + '26' : theme.danger + '26',
               },
             ]}
           >
@@ -350,109 +441,72 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       <View style={styles.section}>
         <TouchableOpacity
           accessibilityRole="button"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backgroundColor: theme.surface,
-            borderRadius: 14,
-            padding: 14,
-            borderWidth: 1,
-            borderColor: theme.border,
-          }}
+          accessibilityLabel="Assign wallet"
+          style={styles.walletRow}
           onPress={() => setShowWalletPicker(!showWalletPicker)}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ fontSize: 14, marginRight: 8 }}>💼</Text>
-            <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>
+          <View style={styles.walletRowLeft}>
+            <Text style={styles.walletRowIcon}>💼</Text>
+            <Text style={styles.walletRowText}>
               {miner.walletId
                 ? wallets.find((w) => w.id === miner.walletId)?.name || 'Unknown Wallet'
                 : 'No Wallet'}
             </Text>
           </View>
-          <Text style={{ color: theme.textMuted, fontSize: 12 }}>Assign ›</Text>
+          <Text style={styles.walletRowArrow}>Assign ›</Text>
         </TouchableOpacity>
         {showWalletPicker && (
-          <View
-            style={{
-              backgroundColor: theme.surface,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme.border,
-              marginTop: 6,
-              overflow: 'hidden',
-            }}
-          >
+          <View style={styles.walletPicker}>
             <TouchableOpacity
               accessibilityRole="button"
-              style={{
-                padding: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.border,
-                backgroundColor: !miner.walletId ? theme.primary + '20' : 'transparent',
-              }}
+              accessibilityLabel="No wallet"
+              style={[
+                styles.walletOption,
+                { backgroundColor: !miner.walletId ? theme.primary + '20' : 'transparent' },
+              ]}
               onPress={() => {
                 setMinerWallet(minerId, undefined);
                 setShowWalletPicker(false);
               }}
             >
-              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '500' }}>None</Text>
+              <Text style={styles.walletName}>None</Text>
             </TouchableOpacity>
             {wallets.map((w) => (
               <TouchableOpacity
                 accessibilityRole="button"
                 key={w.id}
-                style={{
-                  padding: 12,
-                  borderBottomWidth: 1,
-                  borderBottomColor: theme.border,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: miner.walletId === w.id ? theme.primary + '20' : 'transparent',
-                }}
+                accessibilityLabel={`Select wallet: ${w.name}`}
+                style={[
+                  styles.walletOptionRow,
+                  {
+                    backgroundColor: miner.walletId === w.id ? theme.primary + '20' : 'transparent',
+                  },
+                ]}
                 onPress={() => {
                   setMinerWallet(minerId, w.id);
                   setShowWalletPicker(false);
                 }}
               >
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: w.color,
-                    marginRight: 8,
-                  }}
-                />
-                <Text style={{ color: theme.text, fontSize: 14, fontWeight: '500' }}>{w.name}</Text>
+                <View style={[styles.walletDot, { backgroundColor: w.color }]} />
+                <Text style={styles.walletName}>{w.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
       </View>
 
-      <View style={[styles.section, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
-        <Text style={{ fontSize: 14 }}>📁</Text>
+      <View style={[styles.section, styles.groupTagRow]}>
+        <Text style={styles.groupTagIcon}>📁</Text>
         <TextInput
-          style={{
-            flex: 1,
-            backgroundColor: theme.surface,
-            borderRadius: 14,
-            padding: 14,
-            color: theme.text,
-            fontSize: 14,
-            fontWeight: '500',
-            borderWidth: 1,
-            borderColor: theme.border,
-          }}
+          style={styles.groupTagInput}
           value={miner.group || ''}
           onChangeText={(t) => {
-            const updated = { ...miner, group: t || undefined };
-            DB.saveMiner(updated);
-            useMinerStore.getState().loadMiners();
-            if (useAuthStore.getState().token && miner.remoteId) {
-              updateMinerAPI(miner.remoteId, { name: updated.name }).catch(() => {});
-            }
+            if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
+            groupDebounceRef.current = setTimeout(() => {
+              const updated = { ...miner, group: t || undefined };
+              DB.saveMiner(updated);
+              useMinerStore.getState().setMinerGroup(minerId, t || undefined);
+            }, 500);
           }}
           placeholder="Group tag (e.g. Garage)"
           placeholderTextColor={theme.textMuted}
@@ -471,7 +525,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             value={formatHashrate(s.hashRate, s.hashRateUnit)}
             color={theme.primary}
           />
-          <StatWidget icon="〰" label="Frequency" value={`${s.frequency} MHz`} color="#8B5CF6" />
+          <StatWidget icon="〰" label="Frequency" value={`${s.frequency} MHz`} color={theme.info} />
           <StatWidget
             icon="🎯"
             label="Best Diff"
@@ -503,7 +557,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               icon="🔌"
               label="VR Temp"
               value={formatTemperature(s.vrTemp)}
-              color="#F97316"
+              color={theme.warningLight}
             />
           )}
           <StatWidget
@@ -512,20 +566,25 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             value={formatVoltage(s.voltage)}
             color={theme.primary}
           />
-          <StatWidget icon="🔀" label="Current" value={`${s.current} mA`} color="#EC4899" />
+          <StatWidget icon="🔀" label="Current" value={`${s.current} mA`} color={theme.accent} />
           <StatWidget icon="🔋" label="Power" value={formatPower(s.power)} color={theme.warning} />
           <StatWidget
             icon="📊"
             label="Efficiency"
             value={formatWTHs(s.power, s.hashRate, s.hashRateUnit)}
-            color="#10B981"
+            color={theme.successLight}
           />
-          <StatWidget icon="🔬" label="Core V" value={`${s.coreVoltage} mV`} color="#8B5CF6" />
+          <StatWidget
+            icon="🔬"
+            label="Core V"
+            value={`${s.coreVoltage} mV`}
+            color={theme.primaryLight}
+          />
           <StatWidget
             icon="🌀"
             label="Fan"
             value={s.fanRpm > 0 ? `${s.fanRpm} RPM (${s.fanSpeed}%)` : `${s.fanSpeed}%`}
-            color="#06B6D4"
+            color={theme.info}
           />
         </View>
       </View>
@@ -607,21 +666,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       <View style={styles.section}>
         <TouchableOpacity
           accessibilityRole="button"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.primary + '15',
-            padding: 14,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.primary + '30',
-            gap: 8,
-          }}
+          accessibilityLabel="Share Stats"
+          style={[
+            styles.actionBtn,
+            { backgroundColor: theme.primary + '15', borderColor: theme.primary + '30' },
+          ]}
           onPress={handleShare}
         >
-          <Text style={{ fontSize: 16 }}>📤</Text>
-          <Text style={{ color: theme.primary, fontWeight: '700', fontSize: 15 }}>Share Stats</Text>
+          <Text style={styles.actionBtnIcon}>📤</Text>
+          <Text style={[styles.actionBtnText, { color: theme.primary }]}>Share Stats</Text>
         </TouchableOpacity>
       </View>
 
@@ -631,18 +684,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.warning + '15',
-            padding: 14,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.warning + '30',
-            gap: 8,
-            marginBottom: 12,
-          }}
+          accessibilityLabel="Restart Miner"
+          style={[
+            styles.actionBtn,
+            {
+              backgroundColor: theme.warning + '15',
+              borderColor: theme.warning + '30',
+              marginBottom: 12,
+            },
+          ]}
           onPress={async () => {
             const client = new BitAxeClient(
               miner.ip,
@@ -657,16 +707,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             );
           }}
         >
-          <Text style={{ fontSize: 16 }}>🔄</Text>
-          <Text style={{ color: theme.warning, fontWeight: '700', fontSize: 15 }}>
-            Restart Miner
-          </Text>
+          <Text style={styles.actionBtnIcon}>🔄</Text>
+          <Text style={[styles.actionBtnText, { color: theme.warning }]}>Restart Miner</Text>
         </TouchableOpacity>
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
           <Text style={styles.sectionIcon}>⚠</Text> Danger Zone
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Remove Miner"
           style={styles.deleteBtn}
           onPress={() => setShowConfirm(!showConfirm)}
         >
@@ -679,6 +728,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Text>
             <TouchableOpacity
               accessibilityRole="button"
+              accessibilityLabel="Yes, Remove"
               style={styles.confirmBtn}
               onPress={handleDelete}
             >

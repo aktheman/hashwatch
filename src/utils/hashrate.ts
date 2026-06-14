@@ -1,4 +1,6 @@
-const UNIT_MULTIPLIERS: Record<string, number> = {
+import { HashRateUnit } from '../types';
+
+const UNIT_MULTIPLIERS: Record<HashRateUnit, number> = {
   'H/s': 1,
   'KH/s': 1e3,
   'MH/s': 1e6,
@@ -7,7 +9,7 @@ const UNIT_MULTIPLIERS: Record<string, number> = {
   'PH/s': 1e15,
 };
 
-export function toHashesPerSecond(hashRate: number, unit: string = 'GH/s'): number {
+export function toHashesPerSecond(hashRate: number, unit: HashRateUnit = 'GH/s'): number {
   return hashRate * (UNIT_MULTIPLIERS[unit] ?? UNIT_MULTIPLIERS['GH/s']);
 }
 
@@ -23,7 +25,7 @@ export function formatHashrateValue(hashesPerSecond: number): string {
   return `${value.toFixed(1)} ${units[unitIndex]}`;
 }
 
-export function formatHashrateWithUnit(hashRate: number, unit?: string): string {
+export function formatHashrateWithUnit(hashRate: number, unit?: HashRateUnit): string {
   if (unit) {
     return `${hashRate.toFixed(1)} ${unit}`;
   }
@@ -72,13 +74,14 @@ export async function fetchBTCPrice(): Promise<number> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 5000);
     try {
-      const res = await fetch('https://api.coindesk.com/v1/bpi/currentprice/USD.json', {
-        signal: controller.signal,
-      });
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+        { signal: controller.signal },
+      );
       clearTimeout(id);
       if (!res.ok) return _btcPrice;
       const data = await res.json();
-      _btcPrice = data.bpi?.USD?.rate_float ?? _btcPrice;
+      _btcPrice = data?.bitcoin?.usd ?? _btcPrice;
       return _btcPrice;
     } catch {
       clearTimeout(id);

@@ -53,12 +53,12 @@ receiptRouter.post('/validate', async (req: AuthRequest, res) => {
 
     res.json({
       valid: !!isPro,
-      ...rcResponse.data,
+      expiresDate: rcResponse.data?.entitlements?.pro?.expires_date ?? null,
     });
   } catch (e: any) {
+    console.error('Receipt validation error:', e);
     res.status(400).json({
       error: 'receipt validation failed',
-      detail: e.response?.data || e.message,
     });
   }
 });

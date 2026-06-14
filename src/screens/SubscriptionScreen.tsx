@@ -43,6 +43,7 @@ export function SubscriptionScreen() {
           marginBottom: 12,
           borderWidth: 1,
           borderColor: theme.border,
+          boxShadow: `0 2px 12px ${theme.glow}`,
         },
         planCardActive: {
           borderColor: theme.textMuted,
@@ -114,8 +115,8 @@ export function SubscriptionScreen() {
           borderColor: theme.border,
         },
         activeBadge: {
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderColor: 'rgba(16, 185, 129, 0.3)',
+          backgroundColor: theme.success + '1A',
+          borderColor: theme.success + '4D',
         },
         currentBadgeText: {
           color: theme.textMuted,
@@ -210,6 +211,7 @@ export function SubscriptionScreen() {
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityLabel="Upgrade to Pro"
             style={[styles.upgradeBtn, loading && styles.btnDisabled]}
             onPress={purchase}
             disabled={loading}
@@ -225,6 +227,7 @@ export function SubscriptionScreen() {
 
       <TouchableOpacity
         accessibilityRole="button"
+        accessibilityLabel="Restore Purchases"
         style={[styles.restoreBtn, loading && styles.btnDisabled]}
         onPress={restore}
         disabled={loading}

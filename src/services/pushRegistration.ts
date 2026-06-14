@@ -2,10 +2,14 @@ import { Platform } from 'react-native';
 import { getExpoPushTokenAsync } from 'expo-notifications';
 import { BASE_URL } from '../api/client';
 import { useAuthStore } from '../store/auth';
+import { requestNotificationPermissions } from './notifications';
 
 export async function registerPushToken() {
   if (Platform.OS === 'web') return;
   try {
+    const granted = await requestNotificationPermissions();
+    if (!granted) return;
+
     const { data: token } = await getExpoPushTokenAsync();
     const authToken = useAuthStore.getState().token;
     if (!authToken || !token) return;

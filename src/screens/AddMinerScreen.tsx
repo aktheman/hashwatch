@@ -215,7 +215,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           fontWeight: '500',
         },
         foundAddBadge: {
-          backgroundColor: 'rgba(108, 99, 255, 0.15)',
+          backgroundColor: theme.primary + '26',
           paddingHorizontal: 12,
           paddingVertical: 5,
           borderRadius: 8,
@@ -226,12 +226,12 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           fontSize: 13,
         },
         errorBox: {
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: theme.danger + '1A',
           borderRadius: 12,
           padding: 12,
           marginTop: 16,
           borderWidth: 1,
-          borderColor: 'rgba(239, 68, 68, 0.2)',
+          borderColor: theme.danger + '33',
         },
         errorText: {
           color: theme.danger,
@@ -266,6 +266,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         />
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Add Miner"
           style={[styles.primaryBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
           onPress={handleAddByIP}
           disabled={connecting || !ip.trim()}
@@ -312,6 +313,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         {scanning ? (
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityLabel="Cancel Scan"
             style={[styles.secondaryBtn, { borderColor: theme.danger }]}
             onPress={handleCancelScan}
           >
@@ -320,6 +322,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityLabel="Find Miners"
             style={styles.secondaryBtn}
             onPress={handleScan}
           >
@@ -337,6 +340,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
             <TouchableOpacity
               accessibilityRole="button"
               key={m.ip}
+              accessibilityLabel={`Add miner: ${m.ip}`}
               style={styles.foundItem}
               onPress={() => handleAddDiscovered(m)}
             >

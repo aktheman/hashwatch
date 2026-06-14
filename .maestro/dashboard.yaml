@@ -1,0 +1,12 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- assertVisible: "HashWatch"
+- assertVisible: "Live Monitor"
+- assertVisible: "Miners"
+- assertVisible: "Online"
+- assertVisible: "Hashrate"
+- assertVisible: "No Miners Yet"
+- assertVisible: "Add Miner"
+- assertVisible: "Scan Network"

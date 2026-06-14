@@ -1,0 +1,19 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Settings"
+- assertVisible: "Wallets"
+- tapOn: "Wallets"
+- assertVisible: "Wallets"
+- assertVisible: "Add Wallet"
+- tapOn: "Add Wallet"
+- assertVisible: "Wallet Name"
+- tapOn:
+    accessibilityLabel: "Wallet name"
+- inputText: "Test Wallet"
+- tapOn:
+    accessibilityLabel: "Wallet address"
+- inputText: "bc1qtestwalletaddress"
+- tapOn:
+    accessibilityLabel: "Save wallet"
+- assertVisible: "Test Wallet"

@@ -1,46 +1,59 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
-import { SubscriptionGate } from '../src/components/SubscriptionGate';
 import { Text } from 'react-native';
-
-let mockIsPro = false;
+import { SubscriptionGate } from '../src/components/SubscriptionGate';
 
 jest.mock('../src/store/subscription', () => ({
-  useSubscriptionStore: () => ({ isPro: mockIsPro }),
+  useSubscriptionStore: jest.fn(),
 }));
 
-beforeEach(() => {
-  mockIsPro = false;
-});
+import { useSubscriptionStore } from '../src/store/subscription';
+
+const mockUseSubscriptionStore = useSubscriptionStore as jest.MockedFunction<
+  typeof useSubscriptionStore
+>;
 
 describe('SubscriptionGate', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders children when pro', async () => {
-    mockIsPro = true;
-    const { findByText } = await render(
+    mockUseSubscriptionStore.mockReturnValue({ isPro: true } as never);
+    const { getByText } = await render(
       <SubscriptionGate>
         <Text>Pro Content</Text>
       </SubscriptionGate>,
     );
-    expect(await findByText('Pro Content')).toBeTruthy();
+    expect(getByText('Pro Content')).toBeTruthy();
   });
 
-  it('shows overlay with feature name when not pro', async () => {
-    const { container } = await render(
+  it('renders overlay with lock icon when not pro', async () => {
+    mockUseSubscriptionStore.mockReturnValue({ isPro: false } as never);
+    const { getAllByText } = await render(
       <SubscriptionGate feature="Advanced Charts">
         <Text>Locked Content</Text>
       </SubscriptionGate>,
     );
-    const json = container.toJSON();
-    expect(json).toBeTruthy();
+    expect(getAllByText('🔒', { includeHiddenElements: true }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      getAllByText('Upgrade to Pro to unlock', { includeHiddenElements: true }).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      getAllByText('Advanced Charts', { includeHiddenElements: true }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
-  it('shows overlay without feature name when not pro', async () => {
-    const { container } = await render(
+  it('renders overlay without feature name when not provided', async () => {
+    mockUseSubscriptionStore.mockReturnValue({ isPro: false } as never);
+    const { getAllByText } = await render(
       <SubscriptionGate>
         <Text>Locked</Text>
       </SubscriptionGate>,
     );
-    const json = container.toJSON();
-    expect(json).toBeTruthy();
+    expect(getAllByText('🔒', { includeHiddenElements: true }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      getAllByText('Upgrade to Pro to unlock', { includeHiddenElements: true }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 });

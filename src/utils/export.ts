@@ -1,6 +1,6 @@
 import { Platform, Share } from 'react-native';
 import * as DB from '../db/database';
-import { Miner, MinerSnapshot } from '../types';
+import { Miner, MinerSnapshot, Wallet } from '../types';
 
 type SnapshotKey = keyof MinerSnapshot;
 
@@ -42,6 +42,20 @@ function snapshotsToCSV(snapshots: MinerSnapshot[], miners: Miner[]): string {
   return [headers.join(','), ...rows].join('\n');
 }
 
+function triggerDownload(content: string, filename: string, mime: string): void {
+  if (Platform.OS === 'web') {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = window.document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+  Share.share({ message: content, title: filename });
+}
+
 export async function exportAllData(): Promise<void> {
   const miners = await DB.loadMiners();
   const allSnapshots: MinerSnapshot[] = [];
@@ -53,20 +67,86 @@ export async function exportAllData(): Promise<void> {
 
   const csv = snapshotsToCSV(allSnapshots, miners);
   const filename = `hashwatch_export_${Date.now()}.csv`;
+  triggerDownload(csv, filename, 'text/csv');
+}
 
-  if (Platform.OS === 'web') {
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    return;
+export interface ExportJSON {
+  version: 2;
+  exportedAt: string;
+  miners: Miner[];
+  snapshots: MinerSnapshot[];
+  wallets: Wallet[];
+  settings: Record<string, string>;
+}
+
+export async function exportJSON(): Promise<void> {
+  const miners = await DB.loadMiners();
+  const wallets = await DB.loadWallets();
+  const allSnapshots: MinerSnapshot[] = [];
+  for (const m of miners) {
+    const snaps = await DB.getSnapshots(m.id, 10000);
+    allSnapshots.push(...snaps);
+  }
+  allSnapshots.sort((a, b) => a.timestamp - b.timestamp);
+
+  const settingsRaw = {} as Record<string, string>;
+  const settingKeys = ['power_cost', 'auto_scan', 'theme_mode', 'onboarding_complete', 'api_url'];
+  for (const key of settingKeys) {
+    const val = await DB.getSetting(key);
+    if (val !== null) settingsRaw[key] = val;
   }
 
-  await Share.share({
-    message: csv,
-    title: filename,
-  });
+  const data: ExportJSON = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    miners,
+    snapshots: allSnapshots,
+    wallets,
+    settings: settingsRaw,
+  };
+
+  const json = JSON.stringify(data, null, 2);
+  const filename = `hashwatch_backup_${Date.now()}.json`;
+  triggerDownload(json, filename, 'application/json');
+}
+
+export async function importFromJSON(jsonStr: string): Promise<{
+  miners: number;
+  snapshots: number;
+  wallets: number;
+}> {
+  const data: ExportJSON = JSON.parse(jsonStr);
+
+  if (!data.version || data.version < 2) {
+    throw new Error('Unsupported backup format version');
+  }
+
+  const seenMinerIds = new Set<string>();
+
+  for (const m of data.miners) {
+    await DB.saveMiner(m);
+    seenMinerIds.add(m.id);
+  }
+
+  for (const snap of data.snapshots) {
+    if (seenMinerIds.has(snap.minerId)) {
+      await DB.saveSnapshot(snap);
+    }
+  }
+
+  for (const w of data.wallets) {
+    await DB.saveWallet(w);
+  }
+
+  if (data.settings) {
+    for (const [key, value] of Object.entries(data.settings)) {
+      await DB.setSetting(key, value);
+    }
+  }
+
+  return {
+    miners: data.miners.length,
+    snapshots: data.snapshots.length,
+    wallets: data.wallets.length,
+  };
 }

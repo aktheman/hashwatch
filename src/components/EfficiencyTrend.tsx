@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
@@ -18,6 +18,7 @@ function calcJperTH(snap: MinerSnapshot): number | null {
 
 export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
   const theme = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
 
   const { labels, values, avg } = useMemo(() => {
     const sorted = [...snapshots].sort((a, b) => a.timestamp - b.timestamp);
@@ -37,12 +38,24 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
     return { labels: filteredLabels, values: effs, avg };
   }, [snapshots]);
 
-  if (values.length < 2) return null;
+  const screenWidth = windowWidth - 64;
 
-  const screenWidth = Dimensions.get('window').width - 64;
+  if (values.length < 2) {
+    return (
+      <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Text style={styles.emptyIcon}>📉</Text>
+        <Text style={[styles.emptyText, { color: theme.textDim }]}>
+          Not enough data for efficiency trend
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      accessibilityLabel={`Efficiency trend, average ${avg.toFixed(1)} J/TH`}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+    >
       <LineChart
         data={{
           labels,
@@ -84,5 +97,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 6,
+  },
+  emptyIcon: {
+    fontSize: 28,
+    textAlign: 'center',
+    paddingTop: 12,
+  },
+  emptyText: {
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 12,
   },
 });
