@@ -96,7 +96,7 @@ npm run deploy:web
 ## Testing
 
 ```bash
-# Unit tests (215+ passing)
+# Unit tests (350+ passing)
 npm test
 
 # Backend

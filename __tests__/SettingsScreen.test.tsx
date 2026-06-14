@@ -164,3 +164,50 @@ it('shows version', async () => {
   await render(<SettingsScreen navigation={navigation} />);
   expect(screen.getByText('1.0.0')).toBeTruthy();
 });
+
+it('navigates to Wallets', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  fireEvent.press(screen.getByText('Wallets'));
+  expect(navigation.navigate).toHaveBeenCalledWith('Wallets');
+});
+
+it('navigates to Groups', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  fireEvent.press(screen.getByText('Groups'));
+  expect(navigation.navigate).toHaveBeenCalledWith('Groups');
+});
+
+it('navigates to ImportData', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  fireEvent.press(screen.getByText('Import Data'));
+  expect(navigation.navigate).toHaveBeenCalledWith('ImportData');
+});
+
+it('shows Export CSV and Export JSON buttons', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.getByText('Export CSV')).toBeTruthy();
+  expect(screen.getByText('Export JSON')).toBeTruthy();
+});
+
+it('shows online miner count', async () => {
+  useMinerStore.setState({
+    miners: [
+      { id: 'm1', name: 'T1', isOnline: true } as any,
+      { id: 'm2', name: 'T2', isOnline: false } as any,
+    ],
+  });
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.getByText('Online')).toBeTruthy();
+  expect(screen.getByText('1')).toBeTruthy();
+});
+
+it('shows auto-scan toggle', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.getByText('Auto-Scan Network')).toBeTruthy();
+});
+
+it('shows Refresh All and Scan Network buttons', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.getByText('Refresh All')).toBeTruthy();
+  expect(screen.getByText('Scan Network')).toBeTruthy();
+});

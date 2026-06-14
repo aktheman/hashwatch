@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 
 jest.setTimeout(30000);
 
@@ -35,6 +35,16 @@ jest.mock('../src/theme', () => ({
     accent: '#3B82F6',
     info: '#06B6D4',
   }),
+}));
+
+jest.mock('../src/utils/hashrate', () => ({
+  toHashesPerSecond: (rate: number, unit?: string) => rate,
+  formatHashrateValue: (rate: number) => `${rate}`,
+  estimateBTCPerDay: (hps: number) => hps * 0.000001,
+  formatBTC: (btc: number) => `${btc.toFixed(8)} BTC`,
+  getBTCPrice: () => 50000,
+  fetchBTCPrice: jest.fn().mockResolvedValue(50000),
+  fetchNetworkHashrate: jest.fn().mockResolvedValue(1e20),
 }));
 
 import { AnalyticsScreen } from '../src/screens/AnalyticsScreen';
@@ -99,5 +109,19 @@ describe('AnalyticsScreen', () => {
 
     await render(<AnalyticsScreen />);
     expect(screen.getByText('Analytics')).toBeTruthy();
+  });
+
+  it('shows range selector buttons', async () => {
+    await render(<AnalyticsScreen />);
+    expect(screen.getByText('1h')).toBeTruthy();
+    expect(screen.getByText('24h')).toBeTruthy();
+    expect(screen.getByText('7d')).toBeTruthy();
+  });
+
+  it('switches range on button press', async () => {
+    const { rerender } = await render(<AnalyticsScreen />);
+    fireEvent.press(screen.getByText('1h'));
+    await rerender(<AnalyticsScreen />);
+    expect(screen.getByText('1h')).toBeTruthy();
   });
 });

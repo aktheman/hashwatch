@@ -19,6 +19,8 @@ let mockWsSend: jest.Mock;
 let mockWsClose: jest.Mock;
 let mockWsOnopen: (() => void) | null;
 let mockWsOnclose: (() => void) | null;
+let mockWsOnmessage: ((event: { data: string }) => void) | null;
+let mockWsOnerror: (() => void) | null;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -28,6 +30,8 @@ beforeEach(() => {
   mockWsClose = jest.fn();
   mockWsOnopen = null;
   mockWsOnclose = null;
+  mockWsOnmessage = null;
+  mockWsOnerror = null;
 
   (global as any).WebSocket = jest.fn().mockImplementation(() => ({
     send: mockWsSend,
@@ -44,6 +48,18 @@ beforeEach(() => {
     set onclose(fn) {
       mockWsOnclose = fn;
     },
+    get onmessage() {
+      return mockWsOnmessage;
+    },
+    set onmessage(fn) {
+      mockWsOnmessage = fn;
+    },
+    get onerror() {
+      return mockWsOnerror;
+    },
+    set onerror(fn) {
+      mockWsOnerror = fn;
+    },
   }));
 });
 
@@ -57,6 +73,41 @@ describe('connectWebSocket', () => {
     connectWebSocket('test-token');
     mockWsOnopen?.();
     expect(mockWsSend).toHaveBeenCalledWith(JSON.stringify({ type: 'auth', token: 'test-token' }));
+  });
+
+  it('handles snapshot messages', () => {
+    connectWebSocket('test-token');
+    const snapshot = { minerId: 'remote-1', hashRate: 500, timestamp: Date.now() };
+    mockWsOnmessage?.({ data: JSON.stringify({ type: 'snapshot', snapshot }) });
+    expect(mockApply).toHaveBeenCalledWith('local-1');
+  });
+
+  it('ignores non-snapshot messages', () => {
+    connectWebSocket('test-token');
+    mockWsOnmessage?.({ data: JSON.stringify({ type: 'ping' }) });
+    expect(mockApply).not.toHaveBeenCalled();
+  });
+
+  it('handles invalid JSON messages', () => {
+    connectWebSocket('test-token');
+    mockWsOnmessage?.({ data: 'not json' });
+    expect(mockApply).not.toHaveBeenCalled();
+  });
+
+  it('reconnects on close', () => {
+    jest.useFakeTimers();
+    connectWebSocket('test-token');
+    mockWsOnclose?.();
+    jest.advanceTimersByTime(5000);
+    expect(global.WebSocket).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+    disconnectWebSocket();
+  });
+
+  it('closes existing connection before reconnecting', () => {
+    connectWebSocket('test-token');
+    connectWebSocket('new-token');
+    expect(mockWsClose).toHaveBeenCalled();
   });
 });
 
