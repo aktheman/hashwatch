@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { broadcast } from '../ws';
@@ -14,6 +15,18 @@ async function verifyMinerOwnership(minerId: string, userId: string) {
   ]);
   return result.rows[0] ?? null;
 }
+
+const snapshotSchema = z.object({
+  hashRate: z.number(),
+  temperature: z.number(),
+  voltage: z.number(),
+  current: z.number(),
+  power: z.number(),
+  sharesAccepted: z.number().int(),
+  sharesRejected: z.number().int(),
+  uptimeSeconds: z.number().int(),
+  frequency: z.number(),
+});
 
 statsRouter.get('/:minerId', async (req: AuthRequest, res) => {
   const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
@@ -37,6 +50,11 @@ statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
     return res.status(404).json({ error: 'miner not found' });
   }
 
+  const parsed = snapshotSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'invalid snapshot data', details: parsed.error.errors });
+  }
+
   const {
     hashRate,
     temperature,
@@ -47,7 +65,7 @@ statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
     sharesRejected,
     uptimeSeconds,
     frequency,
-  } = req.body;
+  } = parsed.data;
 
   const result = await query(
     `INSERT INTO miner_snapshots
@@ -70,7 +88,7 @@ statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
     ],
   );
 
-  checkMinerStatus(req.userId as string, minerId, miner.name, miner.ip, true, temperature || 0);
+  checkMinerStatus(req.userId as string, minerId, miner.name, miner.ip, true, temperature);
 
   broadcast(req.userId as string, { type: 'snapshot', snapshot: result.rows[0] });
   res.status(201).json(result.rows[0]);

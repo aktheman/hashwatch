@@ -224,11 +224,12 @@ export function AnalyticsScreen() {
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.border,
+          boxShadow: `0 2px 12px ${theme.glow}`,
         },
         summaryIcon: { fontSize: 16, marginBottom: 4 },
-        summaryValue: { fontSize: 18, fontWeight: '800', color: theme.text },
+        summaryValue: { fontSize: 22, fontWeight: '800', color: theme.text },
         summaryLabel: {
-          fontSize: 9,
+          fontSize: 10,
           color: theme.textDim,
           fontWeight: '600',
           textTransform: 'uppercase',
@@ -326,14 +327,14 @@ export function AnalyticsScreen() {
             <View style={styles.summaryRow}>
               <View style={[styles.summaryCard, { flex: 1 }]}>
                 <Text style={styles.summaryIcon}>🔌</Text>
-                <Text style={[styles.summaryValue, { color: theme.warning, fontSize: 22 }]}>
+                <Text style={[styles.summaryValue, { color: theme.warning }]}>
                   {totalPower.toFixed(0)}
                 </Text>
                 <Text style={styles.summaryLabel}>Watts</Text>
               </View>
               <View style={[styles.summaryCard, { flex: 1 }]}>
                 <Text style={styles.summaryIcon}>💵</Text>
-                <Text style={[styles.summaryValue, { color: theme.danger, fontSize: 22 }]}>
+                <Text style={[styles.summaryValue, { color: theme.danger }]}>
                   ${((totalPower / 1000) * 24 * powerCost).toFixed(2)}
                 </Text>
                 <Text style={styles.summaryLabel}>Cost/Day</Text>
@@ -348,7 +349,6 @@ export function AnalyticsScreen() {
                         totalEarnings * btcPrice - (totalPower / 1000) * 24 * powerCost > 0
                           ? theme.success
                           : theme.danger,
-                      fontSize: 22,
                     },
                   ]}
                 >
@@ -369,6 +369,7 @@ export function AnalyticsScreen() {
               <TouchableOpacity
                 accessibilityRole="button"
                 key={r}
+                accessibilityLabel={`Show ${r === '1h' ? '1 hour' : r === '24h' ? '24 hours' : '7 days'}`}
                 style={[
                   styles.rangeBtn,
                   {

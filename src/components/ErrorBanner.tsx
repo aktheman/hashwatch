@@ -14,7 +14,7 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
     () =>
       StyleSheet.create({
         banner: {
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: theme.danger + '18',
           flexDirection: 'row',
           alignItems: 'center',
           paddingHorizontal: 14,
@@ -24,7 +24,7 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
           marginBottom: 8,
           gap: 8,
           borderWidth: 1,
-          borderColor: 'rgba(239, 68, 68, 0.2)',
+          borderColor: theme.danger + '30',
         },
         icon: {
           fontSize: 14,
@@ -41,7 +41,7 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
           gap: 8,
         },
         btn: {
-          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          backgroundColor: theme.danger + '30',
           paddingHorizontal: 10,
           paddingVertical: 4,
           borderRadius: 6,

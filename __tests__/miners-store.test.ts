@@ -1,3 +1,4 @@
+import { act } from '@testing-library/react-native';
 import { useMinerStore } from '../src/store/miners';
 
 const mockSaveMiner = jest.fn();
@@ -47,14 +48,19 @@ jest.mock('../src/services/widget', () => ({
   updateWidget: (...args: unknown[]) => mockUpdateWidget(...args),
 }));
 
+const mockPushStats = jest.fn().mockResolvedValue(undefined);
+const mockFetchStats = jest.fn();
+const mockUpdateMinerAPI = jest.fn().mockResolvedValue(undefined);
 jest.mock('../src/api/client', () => ({
-  pushStats: jest.fn().mockResolvedValue(undefined),
+  pushStats: (...args: unknown[]) => mockPushStats(...args),
+  fetchStats: (...args: unknown[]) => mockFetchStats(...args),
+  updateMinerAPI: (...args: unknown[]) => mockUpdateMinerAPI(...args),
 }));
 
-jest.mock('../src/store/auth', () => ({
-  useAuthStore: {
-    getState: () => ({ token: null }),
-  },
+let mockAuthToken: string | null = null;
+jest.mock('../src/store/authToken', () => ({
+  getAuthToken: () => mockAuthToken,
+  onAuthLogin: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -160,14 +166,12 @@ describe('removeMiner', () => {
     };
     useMinerStore.setState({ miners: [miner as never] });
 
-    const mockGetState = jest
-      .spyOn(jest.requireMock('../src/store/auth').useAuthStore, 'getState')
-      .mockReturnValue({ token: 'abc' });
+    mockAuthToken = 'abc';
 
     await useMinerStore.getState().removeMiner('m1');
 
     expect(mockDeleteRemoteMiner).toHaveBeenCalledWith('remote-1');
-    mockGetState.mockRestore();
+    mockAuthToken = null;
   });
 });
 
@@ -289,5 +293,215 @@ describe('getSnapshots', () => {
     const result = await useMinerStore.getState().getSnapshots('m1', 50);
     expect(mockGetSnapshots).toHaveBeenCalledWith('m1', 50);
     expect(result).toEqual([{ minerId: 'm1', timestamp: 100 }]);
+  });
+
+  it('merges remote stats when authenticated and remoteId exists', async () => {
+    mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100, hashRate: 500 }]);
+    mockFetchStats.mockResolvedValue([
+      { minerId: 'm1', timestamp: 200, hashRate: 600 },
+      { minerId: 'm1', timestamp: 150, hashRate: 550 },
+    ]);
+    mockAuthToken = 'test-token';
+    useMinerStore.setState({
+      miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+    expect(mockFetchStats).toHaveBeenCalledWith('remote-1');
+    expect(result).toHaveLength(3);
+    expect(result[0].timestamp).toBe(100);
+    expect(result[1].timestamp).toBe(150);
+    expect(result[2].timestamp).toBe(200);
+    mockAuthToken = null;
+  });
+
+  it('skips remote fetch when unauthenticated', async () => {
+    mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100 }]);
+    mockAuthToken = null;
+    useMinerStore.setState({
+      miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().getSnapshots('m1', 100);
+
+    expect(mockFetchStats).not.toHaveBeenCalled();
+  });
+
+  it('handles remote fetch failure gracefully', async () => {
+    mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100 }]);
+    mockFetchStats.mockRejectedValue(new Error('network error'));
+    mockAuthToken = 'test-token';
+    useMinerStore.setState({
+      miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+    expect(result).toEqual([{ minerId: 'm1', timestamp: 100 }]);
+    mockAuthToken = null;
+  });
+});
+
+describe('syncWithBackend', () => {
+  it('calls syncMinersWithBackend and updates miners', async () => {
+    const existing = [
+      { id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, remoteId: 'r1' },
+    ] as never[];
+    useMinerStore.setState({ miners: existing });
+    mockAuthToken = 'test-token';
+    const synced = [{ id: 'm1', remoteId: 'r1', remoteUpdated: true }];
+    mockSyncMinersWithBackend.mockResolvedValue(synced);
+
+    await useMinerStore.getState().syncWithBackend();
+
+    expect(mockSyncMinersWithBackend).toHaveBeenCalledWith(existing);
+    expect(useMinerStore.getState().miners).toEqual(synced);
+    mockAuthToken = null;
+  });
+
+  it('skips sync when unauthenticated', async () => {
+    mockAuthToken = null;
+    await useMinerStore.getState().syncWithBackend();
+    expect(mockSyncMinersWithBackend).not.toHaveBeenCalled();
+  });
+});
+
+describe('applyRemoteSnapshot', () => {
+  const snapshot = {
+    minerId: 'm1',
+    timestamp: 2000,
+    hashRate: 700,
+    hashRateUnit: 'GH/s',
+    temperature: 65,
+    voltage: 1200,
+    current: 500,
+    power: 150,
+    sharesAccepted: 100,
+    sharesRejected: 2,
+    uptimeSeconds: 3600,
+    frequency: 600,
+  };
+
+  it('saves snapshot and updates miner status', async () => {
+    const miner = {
+      id: 'm1',
+      name: 'Test',
+      ip: '1.2.3.4',
+      port: 80,
+      status: {
+        hashRate: 0,
+        temperature: 0,
+        voltage: 0,
+        current: 0,
+        power: 0,
+        sharesAccepted: 0,
+        sharesRejected: 0,
+        uptimeSeconds: 0,
+        frequency: 0,
+      },
+    };
+    useMinerStore.setState({ miners: [miner as never] });
+
+    await useMinerStore.getState().applyRemoteSnapshot('m1', snapshot);
+
+    expect(mockSaveSnapshot).toHaveBeenCalled();
+    expect(mockSaveMiner).toHaveBeenCalled();
+    const updated = useMinerStore.getState().miners[0];
+    expect(updated.status.hashRate).toBe(700);
+    expect(updated.isOnline).toBe(true);
+    expect(updated.lastSeen).toBe(2000);
+  });
+
+  it('does nothing if miner not found', async () => {
+    await useMinerStore.getState().applyRemoteSnapshot('nonexistent', snapshot);
+    expect(mockSaveSnapshot).not.toHaveBeenCalled();
+  });
+
+  it('saves snapshot but skips status update when miner has no status', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+    await useMinerStore.getState().applyRemoteSnapshot('m1', snapshot);
+    expect(mockSaveSnapshot).toHaveBeenCalled();
+    expect(mockSaveMiner).not.toHaveBeenCalled();
+  });
+});
+
+describe('setMinerWallet persistence', () => {
+  it('saves miner with updated walletId to DB', async () => {
+    mockAuthToken = 'test-token';
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'OldName', ip: '1.2.3.4', port: 80, remoteId: 'r1' } as never],
+    });
+
+    await useMinerStore.getState().setMinerWallet('m1', 'wallet-1');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ walletId: 'wallet-1' }));
+    mockAuthToken = null;
+  });
+
+  it('clears walletId when undefined', async () => {
+    mockAuthToken = null;
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, walletId: 'w1' } as never],
+    });
+
+    await useMinerStore.getState().setMinerWallet('m1', undefined);
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ walletId: undefined }));
+  });
+});
+
+describe('loadMiners with auth', () => {
+  it('calls syncWithBackend when token is present', async () => {
+    mockLoadMiners.mockResolvedValue([]);
+    mockAuthToken = 'test-token';
+
+    await useMinerStore.getState().loadMiners();
+
+    expect(mockSyncMinersWithBackend).toHaveBeenCalled();
+    mockAuthToken = null;
+  });
+
+  it('skips syncWithBackend when token is null', async () => {
+    mockLoadMiners.mockResolvedValue([]);
+    mockAuthToken = null;
+
+    await useMinerStore.getState().loadMiners();
+
+    expect(mockSyncMinersWithBackend).not.toHaveBeenCalled();
+  });
+
+  it('setMinerGroup updates miner group field', async () => {
+    mockLoadMiners.mockResolvedValue([
+      { id: 'm1', name: 'Miner', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Old' },
+    ]);
+    await useMinerStore.getState().loadMiners();
+    await act(async () => {});
+
+    await useMinerStore.getState().setMinerGroup('m1', 'Garage');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', group: 'Garage' }),
+    );
+    const miner = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(miner?.group).toBe('Garage');
+  });
+
+  it('setMinerGroup clears group when undefined', async () => {
+    mockLoadMiners.mockResolvedValue([
+      { id: 'm1', name: 'Miner', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Old' },
+    ]);
+    await useMinerStore.getState().loadMiners();
+    await act(async () => {});
+
+    await useMinerStore.getState().setMinerGroup('m1', undefined);
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', group: undefined }),
+    );
+    const miner = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(miner?.group).toBeUndefined();
   });
 });

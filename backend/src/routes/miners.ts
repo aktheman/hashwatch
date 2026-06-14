@@ -33,7 +33,8 @@ minersRouter.post('/', async (req: AuthRequest, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    res.status(500).json({ error: e.message });
+    console.error('Create miner error:', e);
+    res.status(500).json({ error: 'internal server error' });
   }
 });
 
@@ -77,7 +78,8 @@ minersRouter.put('/:id', async (req: AuthRequest, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    res.status(500).json({ error: e.message });
+    console.error('Update miner error:', e);
+    res.status(500).json({ error: 'internal server error' });
   }
 });
 

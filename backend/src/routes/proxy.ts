@@ -1,9 +1,31 @@
 import { Router } from 'express';
 import axios from 'axios';
-import { AuthRequest } from '../middleware/auth';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isAllowedProxyUrl } from '../utils/urlValidation';
 
 export const proxyRouter = Router();
+proxyRouter.use(authMiddleware);
+
+const BLOCKED_HEADERS = new Set([
+  'host',
+  'authorization',
+  'cookie',
+  'x-forwarded-for',
+  'x-forwarded-host',
+  'x-forwarded-proto',
+  'connection',
+]);
+
+function sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+  const clean: Record<string, string> = { Connection: 'close' };
+  if (!headers) return clean;
+  for (const [key, value] of Object.entries(headers)) {
+    if (!BLOCKED_HEADERS.has(key.toLowerCase())) {
+      clean[key] = value;
+    }
+  }
+  return clean;
+}
 
 proxyRouter.post('/', async (req: AuthRequest, res) => {
   try {
@@ -21,10 +43,7 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
     const response = await axios({
       url,
       method: method.toUpperCase(),
-      headers: {
-        Connection: 'close',
-        ...(headers || {}),
-      },
+      headers: sanitizeHeaders(headers),
       data,
       timeout: 8000,
       responseType: 'json',
@@ -59,7 +78,8 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
         .status(502)
         .json({ error: 'bad_response', message: 'Invalid response from miner' });
     }
-    res.status(500).json({ error: 'proxy_error', message: e.message });
+    console.error('Proxy error:', e);
+    res.status(500).json({ error: 'proxy_error', message: 'Internal proxy error' });
   }
 });
 
@@ -70,11 +90,14 @@ proxyRouter.post('/restart', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'url is required' });
     }
     if (!isAllowedProxyUrl(url)) {
-      return res.status(403).json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+      return res
+        .status(403)
+        .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
     }
     await axios({ url, method: 'POST', timeout: 5000, validateStatus: () => true });
     res.json({ success: true });
   } catch (e: any) {
-    res.status(502).json({ error: 'restart_failed', message: e.message });
+    console.error('Restart proxy error:', e);
+    res.status(502).json({ error: 'restart_failed', message: 'Could not reach miner' });
   }
 });

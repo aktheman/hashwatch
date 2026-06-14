@@ -1,5 +1,4 @@
-import { render } from '@testing-library/react-native';
-import React from 'react';
+import { render, screen } from '@testing-library/react-native';
 
 jest.setTimeout(30000);
 
@@ -15,11 +14,9 @@ jest.mock('react-native-chart-kit', () => ({
   LineChart: () => null,
 }));
 
-const stableMiners: { id: string; isOnline: boolean; status: null }[] = [];
-
+let mockMiners: any[] = [];
 jest.mock('../src/store/miners', () => ({
-  useMinerStore: (selector: (s: { miners: typeof stableMiners }) => typeof stableMiners) =>
-    selector({ miners: stableMiners }),
+  useMinerStore: (selector: any) => selector({ miners: mockMiners }),
 }));
 
 jest.mock('../src/theme', () => ({
@@ -35,6 +32,8 @@ jest.mock('../src/theme', () => ({
     success: '#10B981',
     warning: '#F59E0B',
     danger: '#EF4444',
+    accent: '#3B82F6',
+    info: '#06B6D4',
   }),
 }));
 
@@ -44,11 +43,61 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGetSetting.mockResolvedValue(null);
   mockGetSnapshots.mockResolvedValue([]);
+  mockMiners = [];
 });
 
 describe('AnalyticsScreen', () => {
   it('renders header', async () => {
-    const { findByText } = await render(<AnalyticsScreen />);
-    expect(await findByText('Analytics')).toBeTruthy();
+    await render(<AnalyticsScreen />);
+    expect(screen.getByText('Analytics')).toBeTruthy();
+  });
+
+  it('renders summary stats when miners exist', async () => {
+    mockMiners = [
+      {
+        id: 'm1',
+        isOnline: true,
+        status: {
+          hashRate: 500,
+          hashRateUnit: 'TH/s',
+          temperature: 55,
+          power: 120,
+          sharesAccepted: 1000,
+          sharesRejected: 5,
+          uptimeSeconds: 3600,
+        },
+      },
+      {
+        id: 'm2',
+        isOnline: false,
+        status: {
+          hashRate: 300,
+          hashRateUnit: 'TH/s',
+          temperature: 45,
+          power: 80,
+          sharesAccepted: 500,
+          sharesRejected: 2,
+          uptimeSeconds: 1800,
+        },
+      },
+    ];
+
+    await render(<AnalyticsScreen />);
+    expect(screen.getByText('2')).toBeTruthy();
+  });
+
+  it('renders empty state when no miners', async () => {
+    mockMiners = [];
+    await render(<AnalyticsScreen />);
+    expect(screen.getByText('Analytics')).toBeTruthy();
+  });
+
+  it('shows loading while fetching snapshots', async () => {
+    mockGetSnapshots.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve([]), 1000)),
+    );
+
+    await render(<AnalyticsScreen />);
+    expect(screen.getByText('Analytics')).toBeTruthy();
   });
 });

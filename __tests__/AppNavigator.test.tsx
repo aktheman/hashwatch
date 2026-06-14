@@ -13,6 +13,7 @@ jest.mock('../src/db/database', () => ({
   loadWallets: jest.fn().mockResolvedValue([]),
   saveWallet: jest.fn().mockResolvedValue(undefined),
   deleteWallet: jest.fn().mockResolvedValue(undefined),
+  cleanupOldSnapshots: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../src/services/revenuecat', () => ({
@@ -109,23 +110,6 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-it('shows onboarding screen when onboarding_complete is not set', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue(null);
-  await act(async () => {
-    await render(<AppNavigator />);
-  });
-  expect(await screen.findByText('Monitor Your BitAxe')).toBeTruthy();
-  expect(screen.getByText('Skip')).toBeTruthy();
-});
-
-it('shows onboarding screen when onboarding_complete is false', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('false');
-  await act(async () => {
-    await render(<AppNavigator />);
-  });
-  expect(await screen.findByText('Monitor Your BitAxe')).toBeTruthy();
-});
-
 it('shows main app when onboarding_complete is true', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await act(async () => {
@@ -134,14 +118,11 @@ it('shows main app when onboarding_complete is true', async () => {
   expect(await screen.findByText('No Miners Yet')).toBeTruthy();
 });
 
-it('transitions to main app after completing onboarding', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue(null);
+it('shows dashboard with tabs', async () => {
+  (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await act(async () => {
     await render(<AppNavigator />);
   });
-  expect(await screen.findByText('Monitor Your BitAxe')).toBeTruthy();
-  await act(async () => {
-    fireEvent.press(screen.getByText('Skip'));
-  });
-  expect(await screen.findByText('No Miners Yet')).toBeTruthy();
+  expect(await screen.findByText('HashWatch')).toBeTruthy();
+  expect(screen.getByText('Dashboard')).toBeTruthy();
 });

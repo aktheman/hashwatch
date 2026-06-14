@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useMemo } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
@@ -12,6 +12,7 @@ interface HashrateChartProps {
 
 export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const theme = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -83,7 +84,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   });
   const values = sorted.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit) / 1e9);
 
-  const screenWidth = Dimensions.get('window').width - 64;
+  const screenWidth = windowWidth - 64;
   const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
@@ -91,7 +92,10 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const unit = 'GH/s';
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessibilityLabel={`Hashrate chart with ${snapshots.length} data points`}
+    >
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartWrapper}>
         <Text style={styles.yLabel}>{unit}</Text>
@@ -107,7 +111,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
           chartConfig={{
             backgroundColor: theme.surface,
             backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: '#0D0D24',
+            backgroundGradientTo: theme.surface,
             decimalPlaces: 1,
             color: () => theme.textMuted,
             labelColor: () => theme.textMuted,

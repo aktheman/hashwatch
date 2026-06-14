@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { Platform } from 'react-native';
-import { MinerInfo, MinerStatus } from '../types';
+import { MinerInfo, MinerStatus, HashRateUnit } from '../types';
 import { getProxyUrl, getExtra } from '../constants';
-import { useAuthStore } from '../store/auth';
+import { getAuthToken } from '../store/authToken';
 
 const TIMEOUT = 5000;
 const PROBE_TIMEOUT = 3000;
@@ -43,7 +43,7 @@ async function fetchUrl(
       const headers: Record<string, string> = {};
       const apiUrl = getExtra().apiUrl;
       if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
-        const token = useAuthStore.getState().token;
+        const token = getAuthToken();
         if (token) headers.Authorization = `Bearer ${token}`;
       }
       const { data } = await axios.post(
@@ -118,7 +118,7 @@ export class BitAxeClient {
       const headers: Record<string, string> = {};
       const apiUrl = getExtra().apiUrl;
       if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
-        const token = useAuthStore.getState().token;
+        const token = getAuthToken();
         if (token) headers.Authorization = `Bearer ${token}`;
       }
       const { data } = await axios.post(
@@ -162,9 +162,12 @@ export class BitAxeClient {
 
   async getMinerStatus(): Promise<MinerStatus> {
     const d = await this.get(this.statusPath);
+    const rawUnit = d.hashRateUnit || 'GH/s';
+    const validUnits: HashRateUnit[] = ['H/s', 'KH/s', 'MH/s', 'GH/s', 'TH/s', 'PH/s'];
+    const hashRateUnit: HashRateUnit = validUnits.includes(rawUnit) ? rawUnit : 'GH/s';
     return {
       hashRate: d.hashRate ?? 0,
-      hashRateUnit: d.hashRateUnit || 'GH/s',
+      hashRateUnit,
       temperature: d.temperature ?? d.temp ?? 0,
       vrTemp: d.vrTemp ?? 0,
       voltage: d.voltage ?? 0,
@@ -198,7 +201,7 @@ export class BitAxeClient {
         const headers: Record<string, string> = {};
         const apiUrl = getExtra().apiUrl;
         if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
-          const token = useAuthStore.getState().token;
+          const token = getAuthToken();
           if (token) headers.Authorization = `Bearer ${token}`;
         }
         const { data } = await axios.post(

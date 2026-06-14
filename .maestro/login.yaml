@@ -1,0 +1,17 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Settings"
+- assertVisible: "Remote Sync"
+- tapOn: "Remote Sync"
+- assertVisible: "Email"
+- tapOn: "Create Account"
+- assertVisible: "Email input"
+- tapOn:
+    accessibilityLabel: "Email input"
+- inputText: "test@example.com"
+- tapOn:
+    accessibilityLabel: "Password input"
+- inputText: "password123"
+- tapOn: "Create Account"
+- assertVisible: "Disconnect"

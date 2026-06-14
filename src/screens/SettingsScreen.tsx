@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore } from '../store/auth';
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { getSetting, setSetting } from '../db/database';
-import { exportAllData } from '../utils/export';
+import { exportAllData, exportJSON } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
@@ -33,7 +33,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const scanning = useMinerStore((s) => s.scanning);
   const { isPro } = useSubscriptionStore();
-  const { token, email, login, register, logout, restoreSession } = useAuthStore();
+  const { token, email, login, register, logout } = useAuthStore();
 
   const [showAuth, setShowAuth] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -42,11 +42,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [authError, setAuthError] = useState('');
   const [powerCost, setPowerCost] = useState('');
   const [autoScan, setAutoScan] = useState(false);
+  const powerCostDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     getSetting('power_cost').then((v) => setPowerCost(v || ''));
     getSetting('auto_scan').then((v) => setAutoScan(v === 'true'));
-    restoreSession();
   }, []);
 
   const handleAuth = async () => {
@@ -175,12 +175,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           fontWeight: '500',
         },
         logoutBtn: {
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          backgroundColor: theme.danger + '1A',
           borderRadius: 10,
           padding: 12,
           alignItems: 'center',
           borderWidth: 1,
-          borderColor: 'rgba(239, 68, 68, 0.3)',
+          borderColor: theme.danger + '4D',
         },
         logoutBtnText: {
           color: theme.danger,
@@ -252,6 +252,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           />
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityLabel="Save Proxy URL"
             style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
             onPress={saveProxyUrl}
           >
@@ -264,6 +265,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <Text style={styles.sectionTitle}>Account</Text>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Wallets"
           style={styles.row}
           onPress={() => navigation.navigate('Wallets')}
         >
@@ -274,6 +276,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Plan"
           style={styles.row}
           onPress={() => navigation.navigate('Subscription')}
         >
@@ -282,7 +285,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <View
               style={[
                 styles.badge,
-                { backgroundColor: isPro ? 'rgba(16,185,129,0.15)' : theme.surfaceLight },
+                { backgroundColor: isPro ? theme.success + '26' : theme.surfaceLight },
               ]}
             >
               <Text style={[styles.badgeText, { color: isPro ? theme.success : theme.textDim }]}>
@@ -295,6 +298,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Remote Sync"
           style={styles.row}
           onPress={() => setShowAuth(!showAuth)}
         >
@@ -312,6 +316,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             {token ? (
               <TouchableOpacity
                 accessibilityRole="button"
+                accessibilityLabel="Disconnect"
                 style={styles.logoutBtn}
                 onPress={logout}
               >
@@ -341,6 +346,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 {authError && <Text style={styles.authError}>{authError}</Text>}
                 <TouchableOpacity
                   accessibilityRole="button"
+                  accessibilityLabel={isRegister ? 'Create Account' : 'Sign In'}
                   style={styles.authBtn}
                   onPress={handleAuth}
                 >
@@ -350,6 +356,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   accessibilityRole="button"
+                  accessibilityLabel={isRegister ? 'Switch to sign in' : 'Switch to create account'}
                   onPress={() => setIsRegister(!isRegister)}
                 >
                   <Text style={styles.authToggle}>
@@ -371,6 +378,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               <TouchableOpacity
                 accessibilityRole="button"
                 key={mode}
+                accessibilityLabel={`${mode} theme`}
                 style={[
                   styles.themeBtn,
                   {
@@ -422,8 +430,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             value={powerCost}
             onChangeText={(t) => {
               setPowerCost(t);
-              setSetting('power_cost', t);
-              if (token) putRemoteSetting('power_cost', t).catch(() => {});
+              if (powerCostDebounceRef.current) clearTimeout(powerCostDebounceRef.current);
+              powerCostDebounceRef.current = setTimeout(() => {
+                setSetting('power_cost', t);
+                if (token) putRemoteSetting('power_cost', t).catch(() => {});
+              }, 500);
             }}
             placeholder="0.12"
             placeholderTextColor={theme.textMuted}
@@ -479,6 +490,19 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Groups"
+          style={styles.row}
+          onPress={() => navigation.navigate('Groups')}
+        >
+          <Text style={styles.rowLabel}>Groups</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.actionText}>Manage</Text>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Export CSV"
           style={styles.row}
           onPress={() => {
             exportAllData().catch(() => {
@@ -486,8 +510,33 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             });
           }}
         >
-          <Text style={styles.rowLabel}>Export Data</Text>
-          <Text style={styles.actionText}>CSV</Text>
+          <Text style={styles.rowLabel}>Export CSV</Text>
+          <Text style={styles.actionText}>Snapshots</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Export JSON backup"
+          style={styles.row}
+          onPress={() => {
+            exportJSON().catch(() => {
+              Alert.alert('Export Failed', 'Could not export data');
+            });
+          }}
+        >
+          <Text style={styles.rowLabel}>Export JSON</Text>
+          <Text style={styles.actionText}>Full Backup</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Import data"
+          style={styles.row}
+          onPress={() => navigation.navigate('ImportData')}
+        >
+          <Text style={styles.rowLabel}>Import Data</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.actionText}>Restore</Text>
+            <Text style={styles.chevron}>›</Text>
+          </View>
         </TouchableOpacity>
       </View>
 

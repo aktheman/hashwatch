@@ -1,0 +1,13 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- tapOn: "Settings"
+- assertVisible: "Settings"
+- assertVisible: "Account"
+- assertVisible: "Appearance"
+- assertVisible: "Theme"
+- assertVisible: "Power"
+- assertVisible: "Miners"
+- assertVisible: "About"
+- assertVisible: "Version"

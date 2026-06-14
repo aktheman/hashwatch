@@ -1,0 +1,10 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- tapOn: "Add Miner"
+- assertVisible: "Add Miner"
+- tapOn: "IP Address"
+- inputText: "999.999.999.999"
+- tapOn: "Connect"
+- assertVisible: "Failed to connect"

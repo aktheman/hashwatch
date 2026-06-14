@@ -72,6 +72,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
           padding: 16,
           borderWidth: 1,
           borderColor: theme.border,
+          boxShadow: `0 2px 12px ${theme.glow}`,
         },
         cardHeader: {
           flexDirection: 'row',
@@ -82,14 +83,14 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         poolUser: { color: theme.textDim, fontSize: 12, fontFamily: 'monospace', marginTop: 2 },
         statRow: { flexDirection: 'row', gap: 16, marginTop: 12 },
         stat: { flex: 1 },
-        statValue: { color: theme.text, fontSize: 18, fontWeight: '800' },
+        statValue: { color: theme.text, fontSize: 22, fontWeight: '800' },
         statLabel: {
           color: theme.textDim,
           fontSize: 10,
           fontWeight: '600',
           textTransform: 'uppercase',
           letterSpacing: 0.5,
-          marginTop: 1,
+          marginTop: 2,
         },
         minerList: { marginTop: 12, gap: 6 },
         minerRow: {
@@ -145,6 +146,9 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         keyExtractor={(item) => `${item.pool}:${item.poolPort}`}
         contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        windowSize={7}
+        maxToRenderPerBatch={10}
+        removeClippedSubviews
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -182,6 +186,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
                 <TouchableOpacity
                   accessibilityRole="button"
                   key={m.id}
+                  accessibilityLabel={`View miner: ${m.name}`}
                   style={styles.minerRow}
                   onPress={() => navigation.navigate('MinerDetail', { minerId: m.id })}
                 >

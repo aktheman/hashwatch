@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
-import { useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
 import { Miner } from '../types';
 import {
   formatHashrate,
@@ -16,7 +16,7 @@ interface MinerCardProps {
   onDelete?: (miner: Miner) => void;
 }
 
-export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
+export const MinerCard = memo(function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
   const theme = useTheme();
   const accentColor = miner.isOnline ? theme.success : theme.danger;
   const styles = useMemo(
@@ -30,7 +30,9 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
           marginVertical: 6,
           borderWidth: 1,
           borderColor: theme.border,
-          boxShadow: `0 4px 24px rgba(0,0,0,0.4)`,
+          ...(Platform.OS !== 'android'
+            ? { boxShadow: `0 4px 24px ${theme.glow}` }
+            : { elevation: 4 }),
           position: 'relative',
           overflow: 'hidden',
         },
@@ -78,7 +80,9 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
           borderRadius: 14,
           justifyContent: 'center',
           alignItems: 'center',
-          boxShadow: `0 0 12px ${accentColor}40`,
+          ...(Platform.OS !== 'android'
+            ? { boxShadow: `0 0 12px ${accentColor}40` }
+            : { elevation: 2 }),
         },
         pulseInner: {
           width: 8,
@@ -179,7 +183,7 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
         ? theme.warning
         : theme.success;
 
-  const handleLongPress = () => {
+  const handleLongPress = useCallback(() => {
     if (!onDelete) return;
     Alert.alert('Remove Miner', `Remove ${miner.name}? All history will be deleted.`, [
       { text: 'Cancel', style: 'cancel' },
@@ -189,11 +193,12 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
         onPress: () => onDelete(miner),
       },
     ]);
-  };
+  }, [miner, onDelete]);
 
   return (
     <TouchableOpacity
       accessibilityRole="button"
+      accessibilityLabel={`${miner.name}, ${miner.isOnline ? 'online' : 'offline'}, ${hashrate}`}
       style={[styles.card, !isOnline && styles.cardOffline]}
       onPress={() => onPress(miner)}
       onLongPress={handleLongPress}
@@ -279,4 +284,4 @@ export function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
       )}
     </TouchableOpacity>
   );
-}
+});

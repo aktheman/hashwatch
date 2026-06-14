@@ -36,14 +36,14 @@ function makeSnapshot(power: number, hashRate: number): MinerSnapshot {
 }
 
 describe('EfficiencyTrend', () => {
-  it('returns container with < 2 snapshots', async () => {
-    const { container } = await render(<EfficiencyTrend snapshots={[makeSnapshot(12, 500)]} />);
-    expect(container).toBeTruthy();
+  it('shows empty state with < 2 snapshots', async () => {
+    await render(<EfficiencyTrend snapshots={[makeSnapshot(12, 500)]} />);
+    expect(screen.getByText(/Not enough data/)).toBeTruthy();
   });
 
   it('renders chart with sufficient snapshots', async () => {
     const snapshots = [makeSnapshot(12, 500), makeSnapshot(12.5, 480), makeSnapshot(11.8, 510)];
-    const { container } = await render(<EfficiencyTrend snapshots={snapshots} />);
-    expect(container).toBeTruthy();
+    await render(<EfficiencyTrend snapshots={snapshots} />);
+    expect(screen.getByText(/Average/)).toBeTruthy();
   });
 });

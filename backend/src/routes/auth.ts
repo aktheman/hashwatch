@@ -23,7 +23,7 @@ authRouter.post('/register', async (req, res) => {
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
     const result = await query(
       'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id',
-      [email, password_hash]
+      [email, password_hash],
     );
     const userId = result.rows[0].id;
     const token = generateToken(userId);
@@ -32,17 +32,15 @@ authRouter.post('/register', async (req, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    res.status(500).json({ error: e.message });
+    console.error('Register error:', e);
+    res.status(500).json({ error: 'internal server error' });
   }
 });
 
 authRouter.post('/login', async (req, res) => {
   try {
     const { email, password } = registerSchema.parse(req.body);
-    const result = await query(
-      'SELECT id, password_hash FROM users WHERE email = $1',
-      [email]
-    );
+    const result = await query('SELECT id, password_hash FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'invalid credentials' });
     }
@@ -57,6 +55,7 @@ authRouter.post('/login', async (req, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    res.status(500).json({ error: e.message });
+    console.error('Login error:', e);
+    res.status(500).json({ error: 'internal server error' });
   }
 });

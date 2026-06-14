@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
       const t = theme;
       return (
         <View style={[styles.container, { backgroundColor: t.bg }]}>
-          <Text style={styles.icon}>⚠</Text>
+          <Text style={[styles.icon, { color: t.danger }]}>⚠</Text>
           <Text style={[styles.title, { color: t.text }]}>Something went wrong</Text>
           <Text style={[styles.message, { color: t.textDim }]}>
             {this.state.error?.message || 'An unexpected error occurred'}
@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
             accessibilityLabel="Try again"
             accessibilityRole="button"
           >
-            <Text style={styles.retryText}>Try Again</Text>
+            <Text style={[styles.retryText, { color: '#FFF' }]}>Try Again</Text>
           </TouchableOpacity>
         </View>
       );
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 48,
     marginBottom: 16,
-    color: '#EF4444',
   },
   title: {
     fontSize: 20,
@@ -80,7 +79,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   retryText: {
-    color: '#FFF',
     fontWeight: '700',
     fontSize: 15,
   },

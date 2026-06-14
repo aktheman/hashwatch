@@ -1,0 +1,9 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Settings"
+- assertVisible: "Plan"
+- tapOn: "Plan"
+- assertVisible: "HashWatch Pro"
+- assertVisible: "Pro"
+- assertVisible: "Free"

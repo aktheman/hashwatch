@@ -4,7 +4,7 @@ import * as API from '../api/client';
 import { configureClient } from '../api/client';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken } from '../services/pushRegistration';
-import { useMinerStore } from './miners';
+import { setTokenGetter, notifyAuthLogin } from './authToken';
 
 async function syncSettingsFromBackend() {
   try {
@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
       registerPushToken();
-      await useMinerStore.getState().syncWithBackend();
+      notifyAuthLogin();
       syncSettingsFromBackend();
       return true;
     } catch {
@@ -65,7 +65,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
       registerPushToken();
-      await useMinerStore.getState().syncWithBackend();
+      notifyAuthLogin();
       syncSettingsFromBackend();
       return true;
     } catch {
@@ -84,12 +84,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token = await DB.getSetting('auth_token');
     const email = await DB.getSetting('auth_email');
     if (token) {
-      set({ token, email, userId: null });
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1])) as { userId: string };
+        set({ token, email, userId: payload.userId || null });
+      } catch {
+        set({ token, email, userId: null });
+      }
       connectWebSocket(token);
       registerPushToken();
-      if (useMinerStore.getState().initialized) {
-        await useMinerStore.getState().syncWithBackend();
-      }
       syncSettingsFromBackend();
     }
   },
@@ -101,3 +103,5 @@ configureClient({
     useAuthStore.getState().logout();
   },
 });
+
+setTokenGetter(() => useAuthStore.getState().token);

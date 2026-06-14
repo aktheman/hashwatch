@@ -79,28 +79,28 @@ export const matrixTheme: Theme = {
 };
 
 export const stratumTheme: Theme = {
-  bg: '#0A0806',
-  surface: '#16100A',
-  surfaceLight: '#201810',
-  border: '#2E2218',
-  primary: '#E88500',
-  primaryLight: '#FF9E20',
-  primaryDark: '#CC7700',
-  accent: '#FF6B35',
-  success: '#22C55E',
-  successLight: '#4ADE80',
+  bg: '#0C0907',
+  surface: '#171310',
+  surfaceLight: '#201C18',
+  border: '#2C2722',
+  primary: '#FF8C00',
+  primaryLight: '#FFAA33',
+  primaryDark: '#CC7000',
+  accent: '#00B4D8',
+  success: '#10B981',
+  successLight: '#34D399',
   danger: '#EF4444',
   dangerLight: '#F87171',
   warning: '#F59E0B',
   warningLight: '#FBBF24',
   info: '#38BDF8',
-  text: '#F5E6D3',
-  textDim: '#A09080',
-  textMuted: '#706050',
-  glow: 'rgba(232, 133, 0, 0.25)',
-  glowSuccess: 'rgba(34, 197, 94, 0.2)',
-  glowDanger: 'rgba(239, 68, 68, 0.2)',
-  glowWarning: 'rgba(245, 158, 11, 0.2)',
+  text: '#F0ECE6',
+  textDim: '#A0988E',
+  textMuted: '#706860',
+  glow: 'rgba(255, 140, 0, 0.18)',
+  glowSuccess: 'rgba(16, 185, 129, 0.18)',
+  glowDanger: 'rgba(239, 68, 68, 0.18)',
+  glowWarning: 'rgba(245, 158, 11, 0.18)',
 };
 
 export const lightTheme: Theme = {
@@ -171,11 +171,7 @@ function applyMode() {
   } else if (_mode === '5tratum') {
     _current = stratumTheme;
   } else {
-    const prefersDark =
-      _mode === 'dark' ||
-      (_mode === 'system' &&
-        Platform.OS === 'web' &&
-        window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+    const prefersDark = _mode === 'dark';
     _current = prefersDark ? darkTheme : lightTheme;
   }
   listeners.forEach((cb) => cb());
@@ -186,11 +182,13 @@ export function useTheme(): Theme {
   useSyncExternalStore(
     (cb) => {
       if (_mode !== 'system') return () => {};
-      if (_mode !== 'system' || Platform.OS !== 'web') return () => {};
-      const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
-      if (!mq) return () => {};
-      mq.addEventListener('change', cb);
-      return () => mq.removeEventListener('change', cb);
+      if (Platform.OS === 'web') {
+        const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+        if (!mq) return () => {};
+        mq.addEventListener('change', cb);
+        return () => mq.removeEventListener('change', cb);
+      }
+      return () => {};
     },
     getSnapshot,
     getSnapshot,

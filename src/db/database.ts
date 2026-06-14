@@ -7,6 +7,12 @@ const STORAGE_KEY_WALLETS = 'hashwatch_wallets';
 const STORAGE_KEY_SCHEMA = 'hashwatch_schema_version';
 const CURRENT_SCHEMA_VERSION = 2;
 
+let _writeQueue: Promise<void> = Promise.resolve();
+
+function enqueueWrite(fn: () => void): void {
+  _writeQueue = _writeQueue.then(fn, fn);
+}
+
 function loadJSON<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -37,23 +43,23 @@ async function migrate(): Promise<void> {
   if (version >= CURRENT_SCHEMA_VERSION) return;
 
   if (version < 1) {
-    const miners = loadJSON<any[]>(STORAGE_KEY_MINERS, []);
-    const migrated = miners.map((m: any) => ({
+    const miners = loadJSON<Record<string, unknown>[]>(STORAGE_KEY_MINERS, []);
+    const migrated = miners.map((m: Record<string, unknown>) => ({
       ...m,
-      remoteId: m.remoteId || undefined,
-      apiPath: m.apiPath || undefined,
-      statusPath: m.statusPath || undefined,
-      walletId: m.walletId || undefined,
+      remoteId: (m.remoteId as string) || undefined,
+      apiPath: (m.apiPath as string) || undefined,
+      statusPath: (m.statusPath as string) || undefined,
+      walletId: (m.walletId as string) || undefined,
     }));
     saveJSON(STORAGE_KEY_MINERS, migrated);
     setSchemaVersion(1);
   }
 
   if (version < 2) {
-    const snapshots = loadJSON<any[]>(STORAGE_KEY_SNAPSHOTS, []);
-    const migrated = snapshots.map((s: any) => ({
+    const snapshots = loadJSON<Record<string, unknown>[]>(STORAGE_KEY_SNAPSHOTS, []);
+    const migrated = snapshots.map((s: Record<string, unknown>) => ({
       ...s,
-      hashRateUnit: s.hashRateUnit || 'GH/s',
+      hashRateUnit: (s.hashRateUnit as string) || 'GH/s',
     }));
     saveJSON(STORAGE_KEY_SNAPSHOTS, migrated);
     setSchemaVersion(2);
@@ -79,28 +85,43 @@ export async function loadMiners(): Promise<Miner[]> {
 }
 
 export async function saveMiner(m: Miner): Promise<void> {
-  const miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
-  const idx = miners.findIndex((x) => x.id === m.id);
-  if (idx >= 0) miners[idx] = m;
-  else miners.push(m);
-  saveJSON(STORAGE_KEY_MINERS, miners);
+  return new Promise<void>((resolve) => {
+    enqueueWrite(() => {
+      const miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
+      const idx = miners.findIndex((x) => x.id === m.id);
+      if (idx >= 0) miners[idx] = m;
+      else miners.push(m);
+      saveJSON(STORAGE_KEY_MINERS, miners);
+      resolve();
+    });
+  });
 }
 
 export async function deleteMiner(id: string): Promise<void> {
-  let miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
-  miners = miners.filter((m) => m.id !== id);
-  saveJSON(STORAGE_KEY_MINERS, miners);
-  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
-  saveJSON(
-    STORAGE_KEY_SNAPSHOTS,
-    snapshots.filter((s) => s.minerId !== id),
-  );
+  return new Promise<void>((resolve) => {
+    enqueueWrite(() => {
+      let miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
+      miners = miners.filter((m) => m.id !== id);
+      saveJSON(STORAGE_KEY_MINERS, miners);
+      const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+      saveJSON(
+        STORAGE_KEY_SNAPSHOTS,
+        snapshots.filter((s) => s.minerId !== id),
+      );
+      resolve();
+    });
+  });
 }
 
 export async function saveSnapshot(s: MinerSnapshot): Promise<void> {
-  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
-  snapshots.push(s);
-  saveJSON(STORAGE_KEY_SNAPSHOTS, snapshots);
+  return new Promise<void>((resolve) => {
+    enqueueWrite(() => {
+      const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+      snapshots.push(s);
+      saveJSON(STORAGE_KEY_SNAPSHOTS, snapshots);
+      resolve();
+    });
+  });
 }
 
 export async function getSnapshots(minerId: string, limit: number = 100): Promise<MinerSnapshot[]> {

@@ -50,11 +50,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     DB.loadWallets().then(setWallets);
   }, []);
 
-  const filteredMiners = miners.filter((m) => {
-    if (walletFilter && m.walletId !== walletFilter) return false;
-    if (groupFilter && m.group !== groupFilter) return false;
-    return true;
-  });
+  const filteredMiners = useMemo(
+    () =>
+      miners.filter((m) => {
+        if (walletFilter && m.walletId !== walletFilter) return false;
+        if (groupFilter && m.group !== groupFilter) return false;
+        return true;
+      }),
+    [miners, walletFilter, groupFilter],
+  );
 
   useEffect(() => {
     initSubscription();
@@ -62,7 +66,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     const stop = startPolling(30000);
     const autoScanInterval = setInterval(async () => {
       const v = await DB.getSetting('auto_scan');
-      if (v === 'true' && !scanning) {
+      if (v === 'true' && !useMinerStore.getState().scanning) {
         scanNetwork();
       }
     }, 300000);
@@ -95,18 +99,20 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     setRefreshing(false);
   }, []);
 
-  const onlineCount = miners.filter((m) => m.isOnline).length;
-  const totalHashrate = miners.reduce(
-    (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-    0,
-  );
-  const totalPower = miners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
-  const minersWithTemp = miners.filter((m) => m.status?.temperature);
-  const avgTemp =
-    minersWithTemp.length > 0
-      ? minersWithTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) /
-        minersWithTemp.length
-      : 0;
+  const { onlineCount, totalHashrate, totalPower, avgTemp } = useMemo(() => {
+    const on = miners.filter((m) => m.isOnline).length;
+    const hr = miners.reduce(
+      (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+      0,
+    );
+    const pw = miners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
+    const withTemp = miners.filter((m) => m.status?.temperature);
+    const at =
+      withTemp.length > 0
+        ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
+        : 0;
+    return { onlineCount: on, totalHashrate: hr, totalPower: pw, avgTemp: at };
+  }, [miners]);
 
   const canAdd = canAddMiner(miners.length);
 
@@ -172,6 +178,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.border,
+          boxShadow: `0 2px 12px ${theme.glow}`,
         },
         summaryIcon: {
           fontSize: 16,
@@ -191,7 +198,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           marginTop: 2,
         },
         upgradeBanner: {
-          backgroundColor: 'rgba(108, 99, 255, 0.1)',
+          backgroundColor: theme.primary + '1A',
           borderWidth: 1,
           borderColor: theme.primary,
           borderRadius: 10,
@@ -409,6 +416,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         >
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityLabel="Filter: All"
             style={[
               styles.walletChip,
               {
@@ -434,6 +442,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <TouchableOpacity
               accessibilityRole="button"
               key={w.id}
+              accessibilityLabel={`Filter by wallet: ${w.name}`}
               style={[
                 styles.walletChip,
                 {
@@ -457,6 +466,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <TouchableOpacity
               accessibilityRole="button"
               key={g}
+              accessibilityLabel={`Filter by group: ${g}`}
               style={[
                 styles.walletChip,
                 {
@@ -479,6 +489,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       {!canAdd && miners.length > 0 && (
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityLabel="Upgrade to Pro"
           style={styles.upgradeBanner}
           onPress={() => navigation.navigate('Subscription')}
         >
@@ -515,6 +526,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <View style={styles.emptyActions}>
             <TouchableOpacity
               accessibilityRole="button"
+              accessibilityLabel="Add Miner"
               style={styles.primaryBtn}
               onPress={handleAddMiner}
             >
@@ -522,6 +534,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             </TouchableOpacity>
             <TouchableOpacity
               accessibilityRole="button"
+              accessibilityLabel="Scan Network"
               style={styles.secondaryBtn}
               onPress={scanNetwork}
             >
@@ -551,6 +564,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           }
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          windowSize={7}
+          maxToRenderPerBatch={10}
+          removeClippedSubviews
         />
       )}
 

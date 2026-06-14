@@ -7,9 +7,10 @@ import {
   checkProStatus,
 } from '../services/revenuecat';
 import { validateReceipt } from '../api/client';
-import { useAuthStore } from './auth';
+import { getAuthToken } from './authToken';
 
 const FREE_MAX_MINERS = 4;
+const PRO_MAX_MINERS = 999;
 
 interface SubscriptionStore {
   tier: SubscriptionTier;
@@ -40,7 +41,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       set({
         isPro: pro,
         tier: pro ? 'pro' : 'free',
-        maxMiners: pro ? 999 : FREE_MAX_MINERS,
+        maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
         initialized: true,
       });
     } catch {
@@ -61,10 +62,10 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       set({
         isPro: pro,
         tier: pro ? 'pro' : 'free',
-        maxMiners: pro ? 999 : FREE_MAX_MINERS,
+        maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
         loading: false,
       });
-      if (pro && useAuthStore.getState().token) {
+      if (pro && getAuthToken()) {
         const ent = customerInfo.entitlements.active['pro'];
         validateReceipt(ent?.originalPurchaseDate ?? productIdentifier, productIdentifier).catch(
           () => {},
@@ -89,10 +90,10 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       set({
         isPro: pro,
         tier: pro ? 'pro' : 'free',
-        maxMiners: pro ? 999 : FREE_MAX_MINERS,
+        maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
         loading: false,
       });
-      if (pro && useAuthStore.getState().token) {
+      if (pro && getAuthToken()) {
         const pid = customerInfo.allPurchasedProductIdentifiers[0] || 'hashwatch_pro';
         const ent = customerInfo.entitlements.active['pro'];
         validateReceipt(ent?.originalPurchaseDate ?? pid, pid).catch(() => {});
@@ -104,7 +105,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
     }
   },
 
-  setPro: () => set({ tier: 'pro', isPro: true, maxMiners: 999, initialized: true }),
+  setPro: () => set({ tier: 'pro', isPro: true, maxMiners: PRO_MAX_MINERS, initialized: true }),
   setFree: () => set({ tier: 'free', isPro: false, maxMiners: FREE_MAX_MINERS, initialized: true }),
 
   canAddMiner: (currentCount: number) => {

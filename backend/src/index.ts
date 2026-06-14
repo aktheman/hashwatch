@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { authRouter } from './routes/auth';
 import { minersRouter } from './routes/miners';
 import { statsRouter } from './routes/stats';
@@ -12,13 +15,23 @@ import { receiptRouter } from './routes/receipt';
 import { notificationPrefsRouter } from './routes/notificationPrefs';
 import { createWebSocketServer } from './ws';
 import { query } from './db';
-import { startMinerPoller } from './services/minerPoller';
+import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
 
 const app = express();
 const server = createServer(app);
 createWebSocketServer(server, '/ws');
 
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+  : undefined;
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: '1mb' }));
 
 const limiter = rateLimit({
@@ -59,67 +72,12 @@ app.get('/api/health', async (_req, res) => {
 
 async function initSchema() {
   try {
-    await query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        createdAt TIMESTAMP DEFAULT NOW()
-      );
-      CREATE TABLE IF NOT EXISTS miners (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
-        ip TEXT NOT NULL,
-        port INTEGER NOT NULL DEFAULT 80,
-        addedAt TIMESTAMP DEFAULT NOW(),
-        lastSeen TIMESTAMP
-      );
-      CREATE TABLE IF NOT EXISTS miner_snapshots (
-        id BIGSERIAL PRIMARY KEY,
-        minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
-        timestamp BIGINT NOT NULL,
-        hashRate REAL NOT NULL,
-        temperature REAL NOT NULL,
-        voltage REAL NOT NULL,
-        current REAL NOT NULL,
-        power REAL NOT NULL,
-        sharesAccepted INTEGER NOT NULL,
-        sharesRejected INTEGER NOT NULL,
-        uptimeSeconds INTEGER NOT NULL,
-        frequency REAL NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS push_tokens (
-        token TEXT PRIMARY KEY NOT NULL,
-        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        createdAt TIMESTAMP DEFAULT NOW()
-      );
-      CREATE TABLE IF NOT EXISTS user_settings (
-        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        key TEXT NOT NULL,
-        value TEXT NOT NULL DEFAULT '',
-        PRIMARY KEY (userId, key)
-      );
-      CREATE TABLE IF NOT EXISTS user_subscriptions (
-        userId UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-        platform TEXT NOT NULL,
-        productId TEXT NOT NULL,
-        expiresAt TIMESTAMP NOT NULL,
-        createdAt TIMESTAMP DEFAULT NOW()
-      );
-      CREATE TABLE IF NOT EXISTS notification_prefs (
-        userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
-        alertType TEXT NOT NULL,
-        enabled BOOLEAN NOT NULL DEFAULT true,
-        PRIMARY KEY (userId, minerId, alertType)
-      );
-      CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);
-      CREATE INDEX IF NOT EXISTS idx_snapshots_minerId ON miner_snapshots(minerId, timestamp);
-    `);
+    const schemaPath = join(__dirname, 'models', 'schema.sql');
+    const sql = readFileSync(schemaPath, 'utf-8');
+    await query(sql);
     console.log('DB schema initialized');
-  } catch {
-    console.log('Schema init skipped (tables may already exist)');
+  } catch (e) {
+    console.error('Schema init error:', e);
   }
 }
 
@@ -130,3 +88,19 @@ initSchema().then(() => {
     startMinerPoller();
   });
 });
+
+function gracefulShutdown(signal: string) {
+  console.log(`Received ${signal}, shutting down gracefully...`);
+  stopMinerPoller();
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

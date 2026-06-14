@@ -55,10 +55,14 @@
     "build:web": "expo export --platform web",
     "deploy:web": "expo export --platform web && npx vercel --prod",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
     "format": "prettier --check src/",
     "format:fix": "prettier --write src/",
+    "version:patch": "npm version patch --no-git-tag-version && git add package.json && git commit -m 'bump: patch'",
+    "version:minor": "npm version minor --no-git-tag-version && git add package.json && git commit -m 'bump: minor'",
+    "version:major": "npm version major --no-git-tag-version && git add package.json && git commit -m 'bump: major'",
     "prepare": "husky"
   },
   "lint-staged": {

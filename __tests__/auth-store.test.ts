@@ -10,10 +10,11 @@ jest.mock('../src/db/database', () => ({
 
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
-
+const mockGetSettings = jest.fn();
 jest.mock('../src/api/client', () => ({
   login: (e: string, p: string) => mockLogin(e, p),
   register: (e: string, p: string) => mockRegister(e, p),
+  getSettings: (...args: unknown[]) => mockGetSettings(...args),
   configureClient: jest.fn(),
 }));
 
@@ -31,15 +32,13 @@ jest.mock('../src/services/pushRegistration', () => ({
   registerPushToken: () => mockRegisterPush(),
 }));
 
-const mockSyncWithBackend = jest.fn();
+const mockNotifyAuthLogin = jest.fn();
 
-jest.mock('../src/store/miners', () => ({
-  useMinerStore: {
-    getState: () => ({
-      syncWithBackend: () => mockSyncWithBackend(),
-      initialized: true,
-    }),
-  },
+jest.mock('../src/store/authToken', () => ({
+  setTokenGetter: jest.fn(),
+  getAuthToken: jest.fn(),
+  onAuthLogin: jest.fn(),
+  notifyAuthLogin: () => mockNotifyAuthLogin(),
 }));
 
 beforeEach(() => {
@@ -68,7 +67,7 @@ describe('login', () => {
     expect(mockSetSetting).toHaveBeenCalledWith('auth_email', 'a@b.com');
     expect(mockConnectWS).toHaveBeenCalledWith('t1');
     expect(mockRegisterPush).toHaveBeenCalled();
-    expect(mockSyncWithBackend).toHaveBeenCalled();
+    expect(mockNotifyAuthLogin).toHaveBeenCalled();
   });
 
   it('returns false on failure', async () => {
@@ -92,7 +91,7 @@ describe('register', () => {
     expect(state.token).toBe('t2');
     expect(state.userId).toBe('u2');
     expect(state.email).toBe('c@d.com');
-    expect(mockSyncWithBackend).toHaveBeenCalled();
+    expect(mockNotifyAuthLogin).toHaveBeenCalled();
   });
 
   it('returns false on failure', async () => {
@@ -136,7 +135,6 @@ describe('restoreSession', () => {
     expect(state.email).toBe('a@b.com');
     expect(mockConnectWS).toHaveBeenCalledWith('t1');
     expect(mockRegisterPush).toHaveBeenCalled();
-    expect(mockSyncWithBackend).toHaveBeenCalled();
   });
 
   it('does nothing when no token stored', async () => {
@@ -145,5 +143,40 @@ describe('restoreSession', () => {
     await useAuthStore.getState().restoreSession();
 
     expect(mockConnectWS).not.toHaveBeenCalled();
+  });
+});
+
+describe('syncSettingsFromBackend', () => {
+  it('fetches settings from API and saves to DB on login', async () => {
+    mockLogin.mockResolvedValue({ token: 't1', userId: 'u1' });
+    mockGetSettings.mockResolvedValue({ theme: 'dark', auto_scan: 'true' });
+
+    await useAuthStore.getState().login('a@b.com', 'pass');
+    await Promise.resolve();
+
+    expect(mockGetSettings).toHaveBeenCalled();
+    expect(mockSetSetting).toHaveBeenCalledWith('theme', 'dark');
+    expect(mockSetSetting).toHaveBeenCalledWith('auto_scan', 'true');
+  });
+
+  it('ignores non-string values from settings', async () => {
+    mockLogin.mockResolvedValue({ token: 't1', userId: 'u1' });
+    mockGetSettings.mockResolvedValue({ theme: 'dark', count: 42 });
+
+    await useAuthStore.getState().login('a@b.com', 'pass');
+    await Promise.resolve();
+
+    expect(mockSetSetting).toHaveBeenCalledWith('theme', 'dark');
+    expect(mockSetSetting).not.toHaveBeenCalledWith('count', 42);
+  });
+
+  it('handles settings fetch failure gracefully', async () => {
+    mockLogin.mockResolvedValue({ token: 't1', userId: 'u1' });
+    mockGetSettings.mockRejectedValue(new Error('network error'));
+
+    await useAuthStore.getState().login('a@b.com', 'pass');
+    await Promise.resolve();
+
+    expect(mockGetSettings).toHaveBeenCalled();
   });
 });

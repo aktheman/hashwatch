@@ -44,12 +44,21 @@ CREATE TABLE IF NOT EXISTS user_settings (
   value TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (userId, key)
 );
+
 CREATE TABLE IF NOT EXISTS user_subscriptions (
   userId UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   platform TEXT NOT NULL,
   productId TEXT NOT NULL,
   expiresAt TIMESTAMP NOT NULL,
   createdAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notification_prefs (
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+  alertType TEXT NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT true,
+  PRIMARY KEY (userId, minerId, alertType)
 );
 
 CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);

@@ -37,10 +37,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      style={[
-        styles.banner,
-        { backgroundColor: 'rgba(251, 191, 36, 0.1)', borderColor: theme.warning },
-      ]}
+      style={[styles.banner, { backgroundColor: theme.warning + '1A', borderColor: theme.warning }]}
       onPress={handlePress}
       activeOpacity={0.7}
     >
