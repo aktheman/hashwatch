@@ -99,3 +99,64 @@ describe('DELETE /api/miners/:id', () => {
     expect(res.body.error).toBe('miner not found');
   });
 });
+
+describe('PUT /api/miners/:id', () => {
+  it('updates all fields', async () => {
+    const updatedMiner = { id: 'm1', name: 'Updated', ip: '10.0.0.1', port: 8080 };
+    mockQuery.mockResolvedValueOnce({ rows: [updatedMiner] });
+
+    const res = await request(app)
+      .put('/api/miners/m1')
+      .send({ name: 'Updated', ip: '10.0.0.1', port: 8080 });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(updatedMiner);
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE miners SET'),
+      expect.arrayContaining(['Updated', '10.0.0.1', 8080, 'm1', 'test-user-id']),
+    );
+  });
+
+  it('updates partial fields (just name)', async () => {
+    const updatedMiner = { id: 'm1', name: 'Just Name', ip: '192.168.1.10', port: 80 };
+    mockQuery.mockResolvedValueOnce({ rows: [updatedMiner] });
+
+    const res = await request(app).put('/api/miners/m1').send({ name: 'Just Name' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(updatedMiner);
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SET name = $1'), [
+      'Just Name',
+      'm1',
+      'test-user-id',
+    ]);
+  });
+
+  it('returns 400 when no fields provided', async () => {
+    const res = await request(app).put('/api/miners/m1').send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('no fields to update');
+  });
+
+  it('returns 404 when miner not found', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).put('/api/miners/m1').send({ name: 'Nope' });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('miner not found');
+  });
+
+  it('returns 400 when invalid IP provided', async () => {
+    const res = await request(app).put('/api/miners/m1').send({ name: 'Bad', ip: 'not-an-ip' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when empty name provided', async () => {
+    const res = await request(app).put('/api/miners/m1').send({ name: '' });
+
+    expect(res.status).toBe(400);
+  });
+});

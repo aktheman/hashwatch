@@ -104,6 +104,7 @@ import { useSubscriptionStore } from '../src/store/subscription';
 const navigation = { navigate: jest.fn() };
 
 beforeEach(() => {
+  jest.clearAllMocks();
   setTheme(darkTheme);
   useMinerStore.setState({
     miners: [],
@@ -122,11 +123,8 @@ beforeEach(() => {
     initialized: true,
     loading: false,
   });
-  mockRestoreSession.mockClear();
-  mockLogout.mockClear();
   mockLogin.mockResolvedValue(false);
   mockRegister.mockResolvedValue(false);
-  jest.clearAllMocks();
 });
 
 it('renders settings title', async () => {
@@ -233,7 +231,10 @@ it('toggles auth form when Remote Sync row is pressed', async () => {
 
 it('calls login when auth form is submitted', async () => {
   mockLogin.mockResolvedValueOnce(true);
-  await render(<SettingsScreen navigation={navigation} />);
+  render(<SettingsScreen navigation={navigation} />);
+  await waitFor(() => {
+    expect(screen.getByText('Remote Sync')).toBeTruthy();
+  });
   await fireEvent.press(screen.getByLabelText('Remote Sync'));
   const emailInput = await screen.findByLabelText('Email input');
   await fireEvent.changeText(emailInput, 'test@test.com');
@@ -246,7 +247,10 @@ it('calls login when auth form is submitted', async () => {
 
 it('shows error on failed login', async () => {
   mockLogin.mockResolvedValueOnce(false);
-  await render(<SettingsScreen navigation={navigation} />);
+  render(<SettingsScreen navigation={navigation} />);
+  await waitFor(() => {
+    expect(screen.getByText('Remote Sync')).toBeTruthy();
+  });
   await fireEvent.press(screen.getByLabelText('Remote Sync'));
   const emailInput = await screen.findByLabelText('Email input');
   await fireEvent.changeText(emailInput, 'bad@test.com');

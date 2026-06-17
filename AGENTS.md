@@ -33,17 +33,21 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/ImportDataScreen.test.tsx`: 8 tests (empty input, importing state, button disabled, success, singular, failure, non-Error throw)
 - `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
 - `__tests__/AppNavigator.test.tsx`: 5 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback)
+- `__tests__/constants.test.ts`: 10 tests (getExtra, getProxyUrl, setProxyUrl success/DB failure, initProxyUrl saved/null/error)
+- `__tests__/bitaxe.test.ts`: 18 tests (system info, miner status, fetchAll, restart, probe with fallback paths, non-primary paths, wifi fields)
+- `__tests__/bitaxe-web.test.ts`: 13 tests (web proxy for info/status/fetchAll/restart/probe, auth header injection, error handling)
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, deploy, e2e
 - `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 497 frontend (47 suites) + 37 backend (6 suites) = 534 total
-- Coverage: 84.17% stmts, 73.53% branches, 78.13% funcs, 86.87% lines (thresholds: 50/50/60/60)
-- miners.ts: 97.75% stmts, 79.62% branches, 96.15% funcs, 100% lines
-- networkStatus.ts: 100% stmts, 86.66% branches, 100% funcs, 100% lines (unref check only: Node.js-specific, untestable in Jest)
-- AddMinerScreen.tsx: 95.16% stmts, 80.55% branches, 100% funcs, 96.49% lines (uncovered: line 47 goBack in handleAddByIP happy path)
+- Tests: 524 frontend (49 suites) + 37 backend (6 suites) = 561 total
+- Coverage: thresholds: 50/50/60/60
+  - constants.ts: 100% stmts/funcs/branches/lines
+  - bitaxe.ts: 94.84% stmts, 93.49% branches, 84.21% funcs, 97.61% lines
+  - miners.ts: 97.75% stmts, 79.62% branches, 96.15% funcs, 100% lines
+  - networkStatus.ts: 100% stmts, 86.66% branches, 100% funcs, 100% lines
 - web bundle: 2.0MB / 781 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
 - AppNavigator code-split: all 10 screens use `React.lazy(() => import(...).then(m => ({ default: m.ScreenName })))` wrapped in `<Suspense>` — enables Metro to create separate chunks per screen
 - `formatTemperature` now accepts `number | undefined | null`, returns `'--'` for nullish

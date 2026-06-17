@@ -52,4 +52,24 @@ describe('HashrateChart', () => {
     await render(<HashrateChart snapshots={snapshots} title="Hashrate over time" />);
     expect(await screen.findByText('Hashrate over time')).toBeTruthy();
   });
+
+  it('sets accessibility label with snapshot count', async () => {
+    const snapshots = [makeSnapshot(1000), makeSnapshot(2000), makeSnapshot(3000)];
+    await render(<HashrateChart snapshots={snapshots} />);
+    const chart = screen.getByLabelText('Hashrate chart with 3 data points');
+    expect(chart).toBeTruthy();
+  });
+
+  it('renders y-axis label', async () => {
+    const snapshots = [makeSnapshot(1000), makeSnapshot(2000)];
+    await render(<HashrateChart snapshots={snapshots} />);
+    expect(screen.getByText('GH/s')).toBeTruthy();
+  });
+
+  it('handles hashrate with different units', async () => {
+    const s1 = { ...makeSnapshot(1000), hashRate: 1, hashRateUnit: 'TH/s' };
+    const s2 = { ...makeSnapshot(2000), hashRate: 1.2, hashRateUnit: 'TH/s' };
+    await render(<HashrateChart snapshots={[s1, s2]} />);
+    expect(screen.getByText('GH/s')).toBeTruthy();
+  });
 });
