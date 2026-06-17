@@ -42,3 +42,6 @@ yarn-error.*
 /android
 /package-lock.json
 .vercel
+
+# coverage
+coverage/

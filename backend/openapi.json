@@ -1,0 +1,1277 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HashWatch API",
+    "description": "Backend API for HashWatch — monitor and manage cryptocurrency miners in real-time.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://{host}:{port}/api",
+      "variables": {
+        "host": {
+          "default": "localhost",
+          "description": "API host"
+        },
+        "port": {
+          "default": "4000",
+          "description": "API port"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Log in with existing credentials",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check endpoint",
+        "responses": {
+          "200": {
+            "description": "Server healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/miners": {
+      "get": {
+        "tags": ["Miners"],
+        "summary": "List all miners for the authenticated user",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of miners",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Miner"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Miners"],
+        "summary": "Register a new miner",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMinerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Miner created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Miner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/miners/{id}": {
+      "put": {
+        "tags": ["Miners"],
+        "summary": "Update a miner (partial)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMinerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Miner updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Miner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No fields to update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Miners"],
+        "summary": "Delete a miner",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Miner deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/{minerId}": {
+      "get": {
+        "tags": ["Stats"],
+        "summary": "Get snapshots for a miner",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of snapshots (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MinerSnapshot"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Stats"],
+        "summary": "Submit a new snapshot for a miner",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Snapshot created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinerSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid snapshot data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Proxy an HTTP request to a miner",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProxyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Miner response data",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "URL is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream error or miner unreachable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/restart": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Send restart command to a miner",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProxyRestartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Restart command sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Could not reach miner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/register": {
+      "post": {
+        "tags": ["Push"],
+        "summary": "Register a push notification token",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/unregister": {
+      "delete": {
+        "tags": ["Push"],
+        "summary": "Unregister a push notification token",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token unregistered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "summary": "Get all settings for the authenticated user",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Settings key-value map",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "theme": "dark",
+                    "refreshInterval": "30"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Settings"],
+        "summary": "Set a setting key/value pair",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingPutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Key is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings/{key}": {
+      "delete": {
+        "tags": ["Settings"],
+        "summary": "Delete a setting",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Setting deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receipt/validate": {
+      "post": {
+        "tags": ["Receipt"],
+        "summary": "Validate an in-app purchase receipt via RevenueCat",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptValidateRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-platform",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ios", "android"],
+              "default": "ios"
+            },
+            "description": "App platform"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptValidateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or missing fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "RevenueCat not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification-prefs/{minerId}": {
+      "get": {
+        "tags": ["Notification Preferences"],
+        "summary": "Get notification preferences for a miner",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert type -> enabled map (defaults all true)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPrefsMap"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Notification Preferences"],
+        "summary": "Update a notification preference for a miner",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPrefUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preference updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid alert type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from /auth/register or /auth/login. Expires in 30 days."
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "required": ["token", "userId"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT Bearer token"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Authenticated user ID"
+          }
+        }
+      },
+      "Miner": {
+        "type": "object",
+        "required": ["id", "userId", "name", "ip", "port", "addedat"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "userid": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "ip": { "type": "string", "format": "ip" },
+          "port": { "type": "integer", "default": 80 },
+          "addedat": { "type": "string", "format": "date-time" },
+          "lastseen": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "CreateMinerRequest": {
+        "type": "object",
+        "required": ["name", "ip"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "ip": {
+            "type": "string",
+            "format": "ip"
+          },
+          "port": {
+            "type": "integer",
+            "default": 80
+          }
+        }
+      },
+      "UpdateMinerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "ip": {
+            "type": "string",
+            "format": "ip"
+          },
+          "port": {
+            "type": "integer"
+          }
+        },
+        "minProperties": 1
+      },
+      "MinerSnapshot": {
+        "type": "object",
+        "required": [
+          "id",
+          "minerid",
+          "timestamp",
+          "hashrate",
+          "temperature",
+          "voltage",
+          "current",
+          "power",
+          "sharesaccepted",
+          "sharesrejected",
+          "uptimeseconds",
+          "frequency"
+        ],
+        "properties": {
+          "id": { "type": "integer" },
+          "minerid": { "type": "string", "format": "uuid" },
+          "timestamp": { "type": "integer", "description": "Unix ms timestamp" },
+          "hashrate": { "type": "number" },
+          "temperature": { "type": "number" },
+          "voltage": { "type": "number" },
+          "current": { "type": "number" },
+          "power": { "type": "number" },
+          "sharesaccepted": { "type": "integer" },
+          "sharesrejected": { "type": "integer" },
+          "uptimeseconds": { "type": "integer" },
+          "frequency": { "type": "number" }
+        }
+      },
+      "CreateSnapshotRequest": {
+        "type": "object",
+        "required": [
+          "hashRate",
+          "temperature",
+          "voltage",
+          "current",
+          "power",
+          "sharesAccepted",
+          "sharesRejected",
+          "uptimeSeconds",
+          "frequency"
+        ],
+        "properties": {
+          "hashRate": { "type": "number" },
+          "temperature": { "type": "number" },
+          "voltage": { "type": "number" },
+          "current": { "type": "number" },
+          "power": { "type": "number" },
+          "sharesAccepted": { "type": "integer" },
+          "sharesRejected": { "type": "integer" },
+          "uptimeSeconds": { "type": "integer" },
+          "frequency": { "type": "number" }
+        }
+      },
+      "ProxyRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target miner URL"
+          },
+          "method": {
+            "type": "string",
+            "default": "GET",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "description": "Headers to forward (blocked: host, authorization, cookie, etc.)"
+          },
+          "data": {
+            "description": "Request body to forward"
+          }
+        }
+      },
+      "ProxyRestartRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target miner URL"
+          }
+        }
+      },
+      "PushTokenRequest": {
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Push notification token"
+          }
+        }
+      },
+      "SettingPutRequest": {
+        "type": "object",
+        "required": ["key"],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "ReceiptValidateRequest": {
+        "type": "object",
+        "required": ["receipt", "productId"],
+        "properties": {
+          "receipt": {
+            "type": "string",
+            "description": "Base64-encoded App Store / Play Store receipt"
+          },
+          "productId": {
+            "type": "string",
+            "description": "Product identifier"
+          }
+        }
+      },
+      "ReceiptValidateResponse": {
+        "type": "object",
+        "required": ["valid", "expiresDate"],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the entitlement 'pro' is currently active"
+          },
+          "expiresDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Expiration date of the pro entitlement"
+          }
+        }
+      },
+      "NotificationPrefsMap": {
+        "type": "object",
+        "description": "Map of alert type to enabled status",
+        "properties": {
+          "offline": { "type": "boolean", "default": true },
+          "online": { "type": "boolean", "default": true },
+          "hot": { "type": "boolean", "default": true },
+          "hashrate_drop": { "type": "boolean", "default": true },
+          "pool_lost": { "type": "boolean", "default": true },
+          "long_uptime": { "type": "boolean", "default": true }
+        },
+        "additionalProperties": { "type": "boolean" }
+      },
+      "NotificationPrefUpdateRequest": {
+        "type": "object",
+        "required": ["alertType", "enabled"],
+        "properties": {
+          "alertType": {
+            "type": "string",
+            "enum": ["offline", "online", "hot", "hashrate_drop", "pool_lost", "long_uptime"]
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "degraded"]
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix ms timestamp"
+          },
+          "db": {
+            "type": "string",
+            "enum": ["connected", "disconnected"]
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "ProxyErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" },
+          "upstreamStatus": { "type": "integer" }
+        }
+      },
+      "OkResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "enum": [true]
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          }
+        }
+      },
+      "DeleteResponse": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean",
+            "enum": [true]
+          }
+        }
+      }
+    }
+  },
+  "x-webSocket": {
+    "description": "Real-time updates via WebSocket at /ws",
+    "url": "ws://{host}:{port}/ws",
+    "protocol": "WebSocket",
+    "messages": {
+      "clientToServer": [
+        {
+          "type": "auth",
+          "description": "Authenticate the WebSocket connection",
+          "required": true,
+          "payload": {
+            "type": "object",
+            "required": ["type", "token"],
+            "properties": {
+              "type": { "type": "string", "enum": ["auth"] },
+              "token": { "type": "string", "description": "JWT Bearer token" }
+            }
+          }
+        },
+        {
+          "type": "subscribe",
+          "description": "Subscribe to real-time updates for a specific miner",
+          "payload": {
+            "type": "object",
+            "required": ["type", "minerId"],
+            "properties": {
+              "type": { "type": "string", "enum": ["subscribe"] },
+              "minerId": { "type": "string", "format": "uuid" }
+            }
+          }
+        },
+        {
+          "type": "pong",
+          "description": "Heartbeat response",
+          "payload": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type": "string", "enum": ["pong"] }
+            }
+          }
+        }
+      ],
+      "serverToClient": [
+        {
+          "type": "auth_ok",
+          "description": "Authentication successful",
+          "payload": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "type": "string", "enum": ["auth_ok"] }
+            }
+          }
+        },
+        {
+          "type": "auth_error",
+          "description": "Authentication failed or timed out",
+          "payload": {
+            "type": "object",
+            "required": ["type", "message"],
+            "properties": {
+              "type": { "type": "string", "enum": ["auth_error"] },
+              "message": { "type": "string" }
+            }
+          }
+        },
+        {
+          "type": "subscribed",
+          "description": "Successfully subscribed to a miner's updates",
+          "payload": {
+            "type": "object",
+            "required": ["type", "minerId"],
+            "properties": {
+              "type": { "type": "string", "enum": ["subscribed"] },
+              "minerId": { "type": "string", "format": "uuid" }
+            }
+          }
+        },
+        {
+          "type": "snapshot",
+          "description": "Real-time miner snapshot broadcast",
+          "payload": {
+            "type": "object",
+            "required": ["type", "snapshot"],
+            "properties": {
+              "type": { "type": "string", "enum": ["snapshot"] },
+              "snapshot": { "$ref": "#/components/schemas/MinerSnapshot" }
+            }
+          }
+        },
+        {
+          "type": "error",
+          "description": "Generic error message",
+          "payload": {
+            "type": "object",
+            "required": ["type", "message"],
+            "properties": {
+              "type": { "type": "string", "enum": ["error"] },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      ],
+      "heartbeat": {
+        "description": "Server pings every 30s; client must respond with pong or be disconnected",
+        "intervalMs": 30000
+      },
+      "authTimeoutMs": 30000
+    }
+  }
+}

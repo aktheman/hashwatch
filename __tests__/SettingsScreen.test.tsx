@@ -66,8 +66,16 @@ jest.mock('../src/api/bitaxe', () => ({
   BitAxeClient: { probe: jest.fn() },
 }));
 
+jest.mock('../src/utils/export', () => ({
+  exportAllData: jest.fn().mockResolvedValue(undefined),
+  exportJSON: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockRestoreSession = jest.fn().mockResolvedValue(undefined);
 const mockLogout = jest.fn().mockResolvedValue(undefined);
+
+const mockLogin = jest.fn().mockResolvedValue(false);
+const mockRegister = jest.fn().mockResolvedValue(false);
 
 jest.mock('../src/store/auth', () => ({
   useAuthStore: (selector?: (state: any) => any) => {
@@ -77,8 +85,8 @@ jest.mock('../src/store/auth', () => ({
       email: null,
       syncing: false,
       synced: false,
-      login: jest.fn().mockResolvedValue(false),
-      register: jest.fn().mockResolvedValue(false),
+      login: mockLogin,
+      register: mockRegister,
       logout: mockLogout,
       restoreSession: mockRestoreSession,
     };
@@ -86,7 +94,7 @@ jest.mock('../src/store/auth', () => ({
   },
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { SettingsScreen } from '../src/screens/SettingsScreen';
 import { setTheme, darkTheme } from '../src/theme';
@@ -116,6 +124,8 @@ beforeEach(() => {
   });
   mockRestoreSession.mockClear();
   mockLogout.mockClear();
+  mockLogin.mockResolvedValue(false);
+  mockRegister.mockResolvedValue(false);
   jest.clearAllMocks();
 });
 
@@ -210,4 +220,89 @@ it('shows Refresh All and Scan Network buttons', async () => {
   await render(<SettingsScreen navigation={navigation} />);
   expect(screen.getByText('Refresh All')).toBeTruthy();
   expect(screen.getByText('Scan Network')).toBeTruthy();
+});
+
+it('toggles auth form when Remote Sync row is pressed', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.queryByLabelText('Email input')).toBeNull();
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  expect(screen.getByLabelText('Email input')).toBeTruthy();
+  expect(screen.getByLabelText('Password input')).toBeTruthy();
+  expect(screen.getByLabelText('Sign In')).toBeTruthy();
+});
+
+it('calls login when auth form is submitted', async () => {
+  mockLogin.mockResolvedValueOnce(true);
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  const emailInput = await screen.findByLabelText('Email input');
+  await fireEvent.changeText(emailInput, 'test@test.com');
+  await fireEvent.changeText(screen.getByLabelText('Password input'), 'password123');
+  await fireEvent.press(screen.getByLabelText('Sign In'));
+  await waitFor(() => {
+    expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'password123');
+  });
+});
+
+it('shows error on failed login', async () => {
+  mockLogin.mockResolvedValueOnce(false);
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  const emailInput = await screen.findByLabelText('Email input');
+  await fireEvent.changeText(emailInput, 'bad@test.com');
+  await fireEvent.changeText(screen.getByLabelText('Password input'), 'wrong');
+  await fireEvent.press(screen.getByLabelText('Sign In'));
+  await waitFor(() => {
+    expect(screen.getByText('Login failed')).toBeTruthy();
+  });
+});
+
+it('toggles between register and sign in modes', async () => {
+  mockRegister.mockResolvedValueOnce(false);
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  await waitFor(() => expect(screen.getByLabelText('Sign In')).toBeTruthy());
+
+  await fireEvent.press(screen.getByLabelText('Switch to create account'));
+  await waitFor(() => expect(screen.getByLabelText('Create Account')).toBeTruthy());
+
+  await fireEvent.changeText(screen.getByLabelText('Email input'), 'new@test.com');
+  await fireEvent.changeText(screen.getByLabelText('Password input'), 'password123');
+  await fireEvent.press(screen.getByLabelText('Create Account'));
+  await waitFor(() => {
+    expect(mockRegister).toHaveBeenCalledWith('new@test.com', 'password123');
+  });
+});
+
+it('presses a theme button', async () => {
+  const { getThemeMode } = require('../src/theme');
+  const { setThemeMode } = require('../src/theme');
+  await render(<SettingsScreen navigation={navigation} />);
+  const lightThemeBtn = screen.getByLabelText('light theme');
+  fireEvent.press(lightThemeBtn);
+  expect(getThemeMode()).toBe('light');
+});
+
+it('changes power cost input', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  const powerInput = screen.getByLabelText('Power cost input');
+  await fireEvent.changeText(powerInput, '0.15');
+  await waitFor(() => {
+    expect(screen.getByLabelText('Power cost input').props.value).toBe('0.15');
+  });
+});
+
+it('toggles auto-scan switch', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  const switchEl = screen.getByLabelText('Auto-scan network');
+  expect(switchEl).toBeTruthy();
+  fireEvent(switchEl, 'onValueChange', true);
+});
+
+it('calls loadMiners on Refresh All press', async () => {
+  const mockLoadMiners = jest.fn().mockResolvedValue(undefined);
+  useMinerStore.setState({ loadMiners: mockLoadMiners } as any);
+  await render(<SettingsScreen navigation={navigation} />);
+  fireEvent.press(screen.getByText('Refresh All'));
+  expect(mockLoadMiners).toHaveBeenCalled();
 });

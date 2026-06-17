@@ -1,0 +1,30 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- assertVisible: "No Miners Yet"
+# Add first miner attempt
+- tapOn: "Add Miner"
+- assertVisible: "Add Miner"
+- tapOn: "IP Address"
+- inputText: "192.168.1.100"
+- tapOn: "Miner Name"
+- inputText: "Miner Alpha"
+- tapOn: "Connect"
+- runFlow:
+    when:
+      visible: "Failed to connect"
+    commands:
+      - assertVisible: "Failed to connect"
+# Go back to dashboard
+- tapOn: "HashWatch"
+- assertVisible: "Miners"
+- assertVisible: "0"
+- assertVisible: "No Miners Yet"
+# Try add second miner via scan
+- tapOn: "Scan Network"
+- assertVisible: "Find Miners"
+- tapOn: "Find Miners"
+- assertVisible: "Cancel Scan"
+- tapOn: "Cancel Scan"
+- assertVisible: "Find Miners"

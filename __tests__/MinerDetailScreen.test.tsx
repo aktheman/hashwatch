@@ -37,11 +37,14 @@ jest.mock('../src/db/database', () => ({
   deleteWallet: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import { Share } from 'react-native';
 import { MinerDetailScreen } from '../src/screens/MinerDetailScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
+
+jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.sharedAction });
 
 const navigation = { goBack: jest.fn(), navigate: jest.fn() };
 const route = { params: { minerId: 'm1' } };
@@ -174,4 +177,50 @@ it('shows not found state for unknown miner', async () => {
   await render(<MinerDetailScreen route={badRoute} navigation={navigation} />);
   expect(screen.getByText('Miner Not Found')).toBeTruthy();
   expect(screen.getByText('Go Back')).toBeTruthy();
+});
+
+it('calls goBack when Go Back is pressed in not found state', async () => {
+  const badRoute = { params: { minerId: 'nonexistent' } };
+  await render(<MinerDetailScreen route={badRoute} navigation={navigation} />);
+  fireEvent.press(screen.getByText('Go Back'));
+  expect(navigation.goBack).toHaveBeenCalled();
+});
+
+it('calls refreshMiner when Retry is pressed in offline state', async () => {
+  const refreshMinerSpy = jest
+    .spyOn(useMinerStore.getState(), 'refreshMiner')
+    .mockResolvedValue(undefined);
+  const offlineMiner: any = {
+    id: 'm3',
+    name: 'OfflineMiner2',
+    ip: '10.0.0.1',
+    port: 80,
+    isOnline: false,
+  };
+  useMinerStore.setState({ miners: [offlineMiner] });
+  const offlineRoute = { params: { minerId: 'm3' } };
+  await render(<MinerDetailScreen route={offlineRoute} navigation={navigation} />);
+  fireEvent.press(screen.getByText('Retry'));
+  expect(refreshMinerSpy).toHaveBeenCalledWith('m3');
+  refreshMinerSpy.mockRestore();
+});
+
+it('shows Share Stats button and calls Share.share on press', async () => {
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('Share Stats')).toBeTruthy();
+  fireEvent.press(screen.getByLabelText('Share Stats'));
+  await waitFor(() => {
+    expect(Share.share).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('TestMiner') }),
+    );
+  });
+});
+
+it('navigates back after confirming remove', async () => {
+  useMinerStore.setState({ removeMiner: jest.fn().mockResolvedValue(undefined) } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  fireEvent.press(screen.getByText('Remove Miner'));
+  await waitFor(() => expect(screen.getByText('Yes, Remove')).toBeTruthy());
+  fireEvent.press(screen.getByLabelText('Yes, Remove'));
+  await waitFor(() => expect(navigation.goBack).toHaveBeenCalled());
 });

@@ -8,7 +8,8 @@ export function formatHashrate(hashRate: number, unit?: HashRateUnit): string {
   return formatHashrateValue(hashRate);
 }
 
-export function formatTemperature(temp: number): string {
+export function formatTemperature(temp: number | undefined | null): string {
+  if (temp === undefined || temp === null) return '--';
   return `${temp.toFixed(0)}°C`;
 }
 

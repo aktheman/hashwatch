@@ -1,23 +1,53 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View } from 'react-native';
+import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { startPricePolling } from '../utils/hashrate';
 
-import { DashboardScreen } from '../screens/DashboardScreen';
-import { MinerDetailScreen } from '../screens/MinerDetailScreen';
-import { AddMinerScreen } from '../screens/AddMinerScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
-import { SubscriptionScreen } from '../screens/SubscriptionScreen';
-import { PoolsScreen } from '../screens/PoolsScreen';
-import { AnalyticsScreen } from '../screens/AnalyticsScreen';
-import { WalletsScreen } from '../screens/WalletsScreen';
-import { GroupsScreen } from '../screens/GroupsScreen';
-import { ImportDataScreen } from '../screens/ImportDataScreen';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { useTheme } from '../theme';
 import type { RootStackParamList, TabParamList } from '../types';
+
+const DashboardScreen = lazy(() =>
+  import('../screens/DashboardScreen').then((m) => ({ default: m.DashboardScreen })),
+);
+const MinerDetailScreen = lazy(() =>
+  import('../screens/MinerDetailScreen').then((m) => ({ default: m.MinerDetailScreen })),
+);
+const AddMinerScreen = lazy(() =>
+  import('../screens/AddMinerScreen').then((m) => ({ default: m.AddMinerScreen })),
+);
+const SettingsScreen = lazy(() =>
+  import('../screens/SettingsScreen').then((m) => ({ default: m.SettingsScreen })),
+);
+const SubscriptionScreen = lazy(() =>
+  import('../screens/SubscriptionScreen').then((m) => ({ default: m.SubscriptionScreen })),
+);
+const PoolsScreen = lazy(() =>
+  import('../screens/PoolsScreen').then((m) => ({ default: m.PoolsScreen })),
+);
+const AnalyticsScreen = lazy(() =>
+  import('../screens/AnalyticsScreen').then((m) => ({ default: m.AnalyticsScreen })),
+);
+const WalletsScreen = lazy(() =>
+  import('../screens/WalletsScreen').then((m) => ({ default: m.WalletsScreen })),
+);
+const GroupsScreen = lazy(() =>
+  import('../screens/GroupsScreen').then((m) => ({ default: m.GroupsScreen })),
+);
+const ImportDataScreen = lazy(() =>
+  import('../screens/ImportDataScreen').then((m) => ({ default: m.ImportDataScreen })),
+);
+
+function LoadingFallback() {
+  const theme = useTheme();
+  return (
+    <View style={[styles.loading, { backgroundColor: theme.bg }]}>
+      <ActivityIndicator size="large" color={theme.primary} />
+    </View>
+  );
+}
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -70,6 +100,14 @@ function MainTabs() {
   );
 }
 
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
 export function AppNavigator() {
   const theme = useTheme();
 
@@ -79,36 +117,42 @@ export function AppNavigator() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <OfflineBanner />
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: theme.bg },
-          headerTintColor: theme.text,
-          headerTitleStyle: { fontWeight: '700', fontSize: 17 },
-          contentStyle: { backgroundColor: theme.bg },
-        }}
-      >
-        <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-        <Stack.Screen
-          name="MinerDetail"
-          component={MinerDetailScreen}
-          options={{ title: 'Miner Details' }}
-        />
-        <Stack.Screen name="AddMiner" component={AddMinerScreen} options={{ title: 'Add Miner' }} />
-        <Stack.Screen
-          name="Subscription"
-          component={SubscriptionScreen}
-          options={{ title: 'HashWatch Pro' }}
-        />
-        <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
-        <Stack.Screen name="Groups" component={GroupsScreen} options={{ title: 'Groups' }} />
-        <Stack.Screen
-          name="ImportData"
-          component={ImportDataScreen}
-          options={{ title: 'Import Data' }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Suspense fallback={<LoadingFallback />}>
+      <NavigationContainer>
+        <OfflineBanner />
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+            contentStyle: { backgroundColor: theme.bg },
+          }}
+        >
+          <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="MinerDetail"
+            component={MinerDetailScreen}
+            options={{ title: 'Miner Details' }}
+          />
+          <Stack.Screen
+            name="AddMiner"
+            component={AddMinerScreen}
+            options={{ title: 'Add Miner' }}
+          />
+          <Stack.Screen
+            name="Subscription"
+            component={SubscriptionScreen}
+            options={{ title: 'HashWatch Pro' }}
+          />
+          <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
+          <Stack.Screen name="Groups" component={GroupsScreen} options={{ title: 'Groups' }} />
+          <Stack.Screen
+            name="ImportData"
+            component={ImportDataScreen}
+            options={{ title: 'Import Data' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Suspense>
   );
 }

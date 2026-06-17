@@ -82,7 +82,7 @@ jest.mock('../src/discovery/localNetwork', () => ({
   getLocalSubnet: jest.fn(),
 }));
 
-import { render, screen, act, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 import { AppNavigator } from '../src/navigation/AppNavigator';
 import { setTheme, darkTheme } from '../src/theme';
@@ -112,17 +112,13 @@ beforeEach(() => {
 
 it('shows main app when onboarding_complete is true', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
-  await act(async () => {
-    await render(<AppNavigator />);
-  });
+  await render(<AppNavigator />);
   expect(await screen.findByText('No Miners Yet')).toBeTruthy();
 });
 
 it('shows dashboard with tabs', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
-  await act(async () => {
-    await render(<AppNavigator />);
-  });
+  await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   expect(screen.getByText('Dashboard')).toBeTruthy();
 });
