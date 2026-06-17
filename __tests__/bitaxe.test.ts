@@ -91,6 +91,23 @@ describe('BitAxeClient', () => {
       const info = await client.getSystemInfo();
       expect(info.hostname).toBe('bitaxe-unknown');
     });
+
+    it('handles wifi fields', async () => {
+      const client = new BitAxeClient('192.168.1.100', 80);
+      mockAxiosInstance.get.mockResolvedValue({
+        data: {
+          version: '1.0.0',
+          chipType: 'BM1397',
+          macAddr: 'AA:BB:CC:DD:EE:FF',
+          ssid: 'DirectSSID',
+          wifiStatus: { signal: -70 },
+        },
+      });
+
+      const info = await client.getSystemInfo();
+      expect(info.ssid).toBe('DirectSSID');
+      expect(info.wifiSignal).toBe(-70);
+    });
   });
 
   describe('getMinerStatus', () => {
@@ -232,5 +249,62 @@ describe('BitAxeClient', () => {
       expect(result).not.toBeNull();
       expect(result?.infoPath).toBe('/api/system/info');
     });
+
+    it('returns infoPath even when no status path works', async () => {
+      const axios = require('axios').default;
+      axios.get.mockImplementation(async (url: string) => {
+        if (url.includes('/api/system/info')) {
+          return { data: { hostname: 'bitaxe', chipType: 'BM1397' } };
+        }
+        return { data: {} };
+      });
+
+      const result = await BitAxeClient.probe('192.168.1.100', 80);
+      expect(result?.infoPath).toBe('/api/system/info');
+      expect(result?.statusPath).toBeNull();
+    });
+
+    it('uses fallback status paths when derived path fails', async () => {
+      const axios = require('axios').default;
+      const mockData = jest.fn();
+      axios.get.mockImplementation(async (url: string) => {
+        if (url.includes('/api/system/info')) {
+          return { data: { hostname: 'bitaxe', chipType: 'BM1397' } };
+        }
+        if (url.includes('/api/system/status')) {
+          return { data: {} };
+        }
+        if (url.includes('/api/status')) {
+          return { data: { hashRate: 500 } };
+        }
+        mockData(url);
+        return { data: {} };
+      });
+
+      const result = await BitAxeClient.probe('192.168.1.100', 80);
+      expect(result?.infoPath).toBe('/api/system/info');
+      expect(result?.statusPath).toBe('/api/status');
+    });
+
+    it('finds info on non-primary paths', async () => {
+      const axios = require('axios').default;
+      const tried: string[] = [];
+      axios.get.mockImplementation(async (url: string) => {
+        tried.push(url);
+        if (url.includes('/api/info')) {
+          return { data: { hostname: 'alt', chipType: 'BM1397' } };
+        }
+        if (url.includes('/api/status')) {
+          return { data: { hashRate: 500 } };
+        }
+        return { data: {} };
+      });
+
+      const result = await BitAxeClient.probe('192.168.1.100', 80);
+      expect(result?.infoPath).toBe('/api/info');
+      expect(result?.statusPath).not.toBeNull();
+    });
   });
 });
+
+// Web platform tests are in bitaxe-web.test.ts
