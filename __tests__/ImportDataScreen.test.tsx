@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import { ImportDataScreen } from '../src/screens/ImportDataScreen';
 
 const mockImport = jest.fn();
@@ -34,4 +35,118 @@ beforeEach(() => {
 it('renders import screen', async () => {
   await render(<ImportDataScreen />);
   expect(screen.getAllByText('Import Data').length).toBeGreaterThanOrEqual(1);
+});
+
+it('shows alert when importing empty text', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('No Data', 'Paste exported JSON data first');
+  alertSpy.mockRestore();
+});
+
+it('shows Importing... text while import is in progress', async () => {
+  mockImport.mockImplementation(() => new Promise(() => {}));
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), '{"valid":"json"}');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  expect(screen.getByText('Importing...')).toBeTruthy();
+});
+
+it('disables button while importing', async () => {
+  mockImport.mockImplementation(() => new Promise(() => {}));
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), '{"valid":"json"}');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  expect(screen.getByLabelText('Import data').props.accessibilityState?.disabled).toBe(true);
+});
+
+it('shows success result after import', async () => {
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), '{"valid":"json"}');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText('✓ Import Successful')).toBeTruthy();
+    expect(screen.getByText('3 miners imported')).toBeTruthy();
+    expect(screen.getByText('50 snapshots imported')).toBeTruthy();
+    expect(screen.getByText('2 wallets imported')).toBeTruthy();
+  });
+});
+
+it('shows singular noun for single miner', async () => {
+  mockImport.mockResolvedValue({ miners: 1, snapshots: 1, wallets: 1 });
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), 'data');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText('1 miner imported')).toBeTruthy();
+    expect(screen.getByText('1 snapshot imported')).toBeTruthy();
+    expect(screen.getByText('1 wallet imported')).toBeTruthy();
+  });
+});
+
+it('shows alert when import fails', async () => {
+  mockImport.mockRejectedValue(new Error('Invalid JSON format'));
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), 'bad data');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  await waitFor(() => {
+    expect(alertSpy).toHaveBeenCalledWith('Import Failed', 'Invalid JSON format');
+  });
+  alertSpy.mockRestore();
+});
+
+it('shows generic error alert for non-Error throws', async () => {
+  mockImport.mockRejectedValue('string error');
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<ImportDataScreen />);
+
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('Paste JSON backup data'), 'data');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Import data'));
+  });
+
+  await waitFor(() => {
+    expect(alertSpy).toHaveBeenCalledWith('Import Failed', 'Invalid data');
+  });
+  alertSpy.mockRestore();
 });

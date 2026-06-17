@@ -29,13 +29,17 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/MinerDetailScreen.test.tsx`: 14 tests (rendering, share, delete, offline, not-found, goBack)
 - `__tests__/SettingsScreen.test.tsx`: 23 tests (theme, remote sync, auth, power cost, exports)
 - `__tests__/AddMinerScreen.test.tsx`: 14 tests (pro limit, add error, scan cancel, scan fail, discovered list, add discovered, scan progress)
+- `__tests__/AnalyticsScreen.test.tsx`: 10 tests (summary stats, range selectors, chart, Power Cost, static labels, empty state)
+- `__tests__/ImportDataScreen.test.tsx`: 8 tests (empty input, importing state, button disabled, success, singular, failure, non-Error throw)
+- `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
+- `__tests__/AppNavigator.test.tsx`: 5 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback)
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, deploy, e2e
 - `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 471 frontend (47 suites) + 37 backend (6 suites) = 508 total
+- Tests: 497 frontend (47 suites) + 37 backend (6 suites) = 534 total
 - Coverage: 84.17% stmts, 73.53% branches, 78.13% funcs, 86.87% lines (thresholds: 50/50/60/60)
 - miners.ts: 97.75% stmts, 79.62% branches, 96.15% funcs, 100% lines
 - networkStatus.ts: 100% stmts, 86.66% branches, 100% funcs, 100% lines (unref check only: Node.js-specific, untestable in Jest)
@@ -50,3 +54,10 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 - `networkStatus` unref check (line 35-41): Node.js-specific, `setInterval` in Jest returns number, not object with `.unref()`
 - `refreshMiner` probe recovery (lines 186-203): requires complex mock orchestration
+
+## Test Debugging Notes
+
+- **AnalyticsScreen duplicate-text**: "Not enough data yet. Keep miners running." appears twice (Hashrate History + Uptime History). Use `getAllByText`/`queryAllByText` to avoid "multiple elements" errors.
+- **AppNavigator miner card**: `DB.loadMiners` mock must return desired miners; the real `loadMiners()` in the store calls `DB.loadMiners()` internally and overwrites any `setState`-preset miners. Mock `refreshAll` to `jest.fn()` to prevent `refreshMiner` from crashing on incomplete mock miner data.
+- **BitAxeClient mock for navigator tests**: Must be a constructor mock (`jest.fn().mockImplementation(...)`) with `fetchAll`, not just `{ probe: jest.fn() }`, because `refreshMiner` calls `new BitAxeClient(...)`.
+- **Cross-test leak**: `jest.clearAllMocks()` preserves `mockResolvedValue`. Reset shared mocks explicitly in `beforeEach`.
