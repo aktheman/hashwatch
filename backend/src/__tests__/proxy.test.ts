@@ -19,7 +19,7 @@ app.use(express.json());
 app.use('/api/proxy', proxyRouter);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
 });
 
 describe('POST /api/proxy', () => {

@@ -22,7 +22,7 @@ app.use(express.json());
 app.use('/api/stats', statsRouter);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
 });
 
 describe('GET /api/stats/:minerId', () => {

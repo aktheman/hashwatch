@@ -46,4 +46,22 @@ describe('EfficiencyTrend', () => {
     await render(<EfficiencyTrend snapshots={snapshots} />);
     expect(screen.getByText(/Average/)).toBeTruthy();
   });
+
+  it('shows empty state when all snapshots have zero power', async () => {
+    const snapshots = [makeSnapshot(0, 500), makeSnapshot(0, 480), makeSnapshot(0, 510)];
+    await render(<EfficiencyTrend snapshots={snapshots} />);
+    expect(screen.getByText(/Not enough data/)).toBeTruthy();
+  });
+
+  it('shows empty state when all snapshots have zero hashrate', async () => {
+    const snapshots = [makeSnapshot(12, 0), makeSnapshot(12.5, 0)];
+    await render(<EfficiencyTrend snapshots={snapshots} />);
+    expect(screen.getByText(/Not enough data/)).toBeTruthy();
+  });
+
+  it('sets accessibility label with average efficiency', async () => {
+    const snapshots = [makeSnapshot(12, 500), makeSnapshot(12, 500), makeSnapshot(12, 500)];
+    await render(<EfficiencyTrend snapshots={snapshots} />);
+    expect(screen.getByLabelText(/Efficiency trend/)).toBeTruthy();
+  });
 });
