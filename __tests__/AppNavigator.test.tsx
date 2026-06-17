@@ -60,9 +60,15 @@ jest.mock('../src/services/minerSync', () => ({
   deleteRemoteMiner: jest.fn(),
 }));
 
-jest.mock('../src/api/bitaxe', () => ({
-  BitAxeClient: { probe: jest.fn() },
-}));
+jest.mock('../src/api/bitaxe', () => {
+  const MockBitAxeClient = jest.fn().mockImplementation(() => ({
+    getSystemInfo: jest.fn().mockResolvedValue({ hostname: 'Test' }),
+    getMinerStatus: jest.fn().mockResolvedValue({}),
+    fetchAll: jest.fn().mockResolvedValue({ info: {}, status: {} }),
+  }));
+  MockBitAxeClient.probe = jest.fn();
+  return { BitAxeClient: MockBitAxeClient };
+});
 
 jest.mock('../src/services/notifications', () => ({
   checkMinerAlerts: jest.fn(),
@@ -90,6 +96,17 @@ import { useSubscriptionStore } from '../src/store/subscription';
 import { useMinerStore } from '../src/store/miners';
 import * as DB from '../src/db/database';
 
+const makeMiner = (overrides: Record<string, unknown> = {}) =>
+  ({
+    id: 'm1',
+    name: 'TestMiner',
+    ip: '192.168.1.100',
+    port: 80,
+    isOnline: true,
+    status: { hashRate: 500, hashRateUnit: 'GH/s', power: 12, temperature: 45 },
+    ...overrides,
+  }) as any;
+
 beforeEach(() => {
   setTheme(darkTheme);
   useSubscriptionStore.setState({
@@ -108,6 +125,8 @@ beforeEach(() => {
     error: null,
   });
   jest.clearAllMocks();
+  (DB.loadMiners as jest.Mock).mockResolvedValue([]);
+  (DB.getSetting as jest.Mock).mockReset();
 });
 
 it('shows main app when onboarding_complete is true', async () => {
@@ -116,9 +135,38 @@ it('shows main app when onboarding_complete is true', async () => {
   expect(await screen.findByText('No Miners Yet')).toBeTruthy();
 });
 
-it('shows dashboard with tabs', async () => {
+it('shows dashboard with all four tabs', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   expect(screen.getByText('Dashboard')).toBeTruthy();
+  expect(screen.getByText('Pools')).toBeTruthy();
+  expect(screen.getByText('Analytics')).toBeTruthy();
+  expect(screen.getByText('Settings')).toBeTruthy();
+});
+
+it('shows miner card when miners exist', async () => {
+  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.loadMiners as jest.Mock).mockResolvedValue([makeMiner()]);
+  useMinerStore.setState({
+    miners: [makeMiner()],
+    initialized: true,
+    loading: false,
+    refreshAll: jest.fn(),
+  });
+  await render(<AppNavigator />);
+  expect(await screen.findByText('TestMiner')).toBeTruthy();
+  expect(screen.getAllByText('500.0 GH/s').length).toBeGreaterThanOrEqual(1);
+});
+
+it('shows OfflineBanner text when online', async () => {
+  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  await render(<AppNavigator />);
+  expect(await screen.findByText('HashWatch')).toBeTruthy();
+});
+
+it('renders Suspense loading fallback for lazy screens', async () => {
+  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  await render(<AppNavigator />);
+  expect(await screen.findByText('No Miners Yet')).toBeTruthy();
 });

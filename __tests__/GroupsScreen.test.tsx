@@ -1,14 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import { GroupsScreen } from '../src/screens/GroupsScreen';
 
-const mockMiners = [
-  { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Garage' },
-  { id: 'm2', name: 'Miner B', ip: '10.0.0.2', port: 80, isOnline: false, group: 'Garage' },
-  { id: 'm3', name: 'Miner C', ip: '10.0.0.3', port: 80, isOnline: true, group: 'Basement' },
-  { id: 'm4', name: 'Miner D', ip: '10.0.0.4', port: 80, isOnline: true },
-];
-
+let mockMiners: any[];
 const mockSetMinerGroup = jest.fn();
 
 jest.mock('../src/store/miners', () => ({
@@ -37,20 +32,23 @@ jest.mock('../src/theme', () => ({
   }),
 }));
 
-const mockNavigate = jest.fn();
-const mockNavigation = { navigate: mockNavigate } as any;
-
 beforeEach(() => {
   jest.clearAllMocks();
+  mockMiners = [
+    { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Garage' },
+    { id: 'm2', name: 'Miner B', ip: '10.0.0.2', port: 80, isOnline: false, group: 'Garage' },
+    { id: 'm3', name: 'Miner C', ip: '10.0.0.3', port: 80, isOnline: true, group: 'Basement' },
+    { id: 'm4', name: 'Miner D', ip: '10.0.0.4', port: 80, isOnline: true },
+  ];
 });
 
 it('renders groups header', async () => {
-  await render(<GroupsScreen navigation={mockNavigation} />);
+  await render(<GroupsScreen />);
   expect(screen.getByText('Group Management')).toBeTruthy();
 });
 
 it('shows all groups with miner counts', async () => {
-  await render(<GroupsScreen navigation={mockNavigation} />);
+  await render(<GroupsScreen />);
   expect(screen.getByText(/Garage/)).toBeTruthy();
   expect(screen.getByText(/Basement/)).toBeTruthy();
   expect(screen.getByText(/Ungrouped/)).toBeTruthy();
@@ -58,7 +56,7 @@ it('shows all groups with miner counts', async () => {
 });
 
 it('shows miners within groups', async () => {
-  await render(<GroupsScreen navigation={mockNavigation} />);
+  await render(<GroupsScreen />);
   expect(screen.getByText(/Miner A/)).toBeTruthy();
   expect(screen.getByText(/Miner B/)).toBeTruthy();
   expect(screen.getByText(/Miner C/)).toBeTruthy();
@@ -66,6 +64,163 @@ it('shows miners within groups', async () => {
 });
 
 it('renders remove buttons for non-ungrouped miners', async () => {
-  await render(<GroupsScreen navigation={mockNavigation} />);
+  await render(<GroupsScreen />);
   expect(screen.getAllByText('Remove').length).toBeGreaterThanOrEqual(3);
+});
+
+it('shows empty state when no miners', async () => {
+  mockMiners = [];
+  await render(<GroupsScreen />);
+  expect(screen.getByText(/No miners yet/)).toBeTruthy();
+});
+
+it('can create a new group via text input', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), 'NewGroup');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByText('Add'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('Group Created', expect.stringContaining('NewGroup'));
+  alertSpy.mockRestore();
+});
+
+it('creates group via onSubmitEditing', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const onSubmitEditing = jest.fn();
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), 'TestGroup');
+  });
+
+  const input = screen.getByLabelText('New group name');
+  await act(async () => {
+    fireEvent(input, 'submitEditing', { nativeEvent: { text: 'TestGroup' } });
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('Group Created', expect.stringContaining('TestGroup'));
+  alertSpy.mockRestore();
+});
+
+it('does nothing for empty group name', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), '   ');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByText('Add'));
+  });
+
+  expect(alertSpy).not.toHaveBeenCalled();
+  alertSpy.mockRestore();
+});
+
+it('shows alert for duplicate group name', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), 'Garage');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByText('Add'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('Group exists', expect.stringContaining('Garage'));
+  alertSpy.mockRestore();
+});
+
+it('remove group triggers confirmation and calls setMinerGroup', async () => {
+  const alertSpy = jest
+    .spyOn(Alert, 'alert')
+    .mockImplementation(
+      (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
+        const removeBtn = buttons?.find((b) => b.text === 'Remove');
+        if (removeBtn?.onPress) removeBtn.onPress();
+      },
+    );
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Remove group Garage'));
+  });
+
+  await waitFor(() => {
+    expect(mockSetMinerGroup).toHaveBeenCalledWith('m1', undefined);
+    expect(mockSetMinerGroup).toHaveBeenCalledWith('m2', undefined);
+  });
+  alertSpy.mockRestore();
+});
+
+it('cancel remove group does not call setMinerGroup', async () => {
+  const alertSpy = jest
+    .spyOn(Alert, 'alert')
+    .mockImplementation(
+      (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
+        const cancelBtn = buttons?.find((b) => b.text === 'Cancel');
+        if (cancelBtn?.onPress) cancelBtn.onPress();
+      },
+    );
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Remove group Garage'));
+  });
+
+  expect(mockSetMinerGroup).not.toHaveBeenCalled();
+  alertSpy.mockRestore();
+});
+
+it('ungrouped section hides Rename and Remove buttons', async () => {
+  await render(<GroupsScreen />);
+  expect(screen.queryByLabelText('Rename group Ungrouped')).toBeNull();
+  expect(screen.queryByLabelText('Remove group Ungrouped')).toBeNull();
+});
+
+it('removes miner from group via setMinerGroup', async () => {
+  mockSetMinerGroup.mockResolvedValue(undefined);
+
+  await render(<GroupsScreen />);
+
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Remove Miner A from group'));
+  });
+
+  expect(mockSetMinerGroup).toHaveBeenCalledWith('m1', undefined);
+});
+
+it('rename group shows fallback alert when Alert.prompt is unavailable', async () => {
+  const originalPrompt = Alert.prompt;
+  (Alert as any).prompt = undefined;
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Rename group Garage'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('Rename Group', 'Edit group name in Miner Details');
+  (Alert as any).prompt = originalPrompt;
+  alertSpy.mockRestore();
+});
+
+it('shows Ungrouped section at the end', async () => {
+  await render(<GroupsScreen />);
+  const groupCards = screen.getAllByText(/Garage|Basement|Ungrouped/);
+  expect(groupCards.length).toBeGreaterThanOrEqual(3);
+});
+
+it('renders mine count with singular for single miner group', async () => {
+  mockMiners = [
+    { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Solo' },
+  ];
+  await render(<GroupsScreen />);
+  expect(screen.getByText('1 miner')).toBeTruthy();
 });

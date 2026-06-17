@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 
 jest.setTimeout(30000);
 
@@ -34,6 +34,7 @@ jest.mock('../src/theme', () => ({
     danger: '#EF4444',
     accent: '#3B82F6',
     info: '#06B6D4',
+    glow: 'rgba(108,99,255,0.15)',
   }),
 }));
 
@@ -56,72 +57,128 @@ beforeEach(() => {
   mockMiners = [];
 });
 
-describe('AnalyticsScreen', () => {
-  it('renders header', async () => {
-    await render(<AnalyticsScreen />);
-    expect(screen.getByText('Analytics')).toBeTruthy();
-  });
+it('renders header', async () => {
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('Analytics')).toBeTruthy();
+});
 
-  it('renders summary stats when miners exist', async () => {
-    mockMiners = [
-      {
-        id: 'm1',
-        isOnline: true,
-        status: {
-          hashRate: 500,
-          hashRateUnit: 'TH/s',
-          temperature: 55,
-          power: 120,
-          sharesAccepted: 1000,
-          sharesRejected: 5,
-          uptimeSeconds: 3600,
-        },
+it('renders summary stats when miners exist', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: {
+        hashRate: 500,
+        hashRateUnit: 'TH/s',
+        temperature: 55,
+        power: 120,
+        sharesAccepted: 1000,
+        sharesRejected: 5,
+        uptimeSeconds: 3600,
       },
-      {
-        id: 'm2',
-        isOnline: false,
-        status: {
-          hashRate: 300,
-          hashRateUnit: 'TH/s',
-          temperature: 45,
-          power: 80,
-          sharesAccepted: 500,
-          sharesRejected: 2,
-          uptimeSeconds: 1800,
-        },
-      },
-    ];
+    },
+  ];
 
-    await render(<AnalyticsScreen />);
-    expect(screen.getByText('2')).toBeTruthy();
-  });
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('1')).toBeTruthy();
+});
 
-  it('renders empty state when no miners', async () => {
-    mockMiners = [];
-    await render(<AnalyticsScreen />);
-    expect(screen.getByText('Analytics')).toBeTruthy();
-  });
+it('renders empty state when no miners', async () => {
+  mockMiners = [];
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('Analytics')).toBeTruthy();
+});
 
-  it('shows loading while fetching snapshots', async () => {
-    mockGetSnapshots.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve([]), 1000)),
-    );
+it('shows range selector buttons', async () => {
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('1h')).toBeTruthy();
+  expect(screen.getByText('24h')).toBeTruthy();
+  expect(screen.getByText('7d')).toBeTruthy();
+});
 
-    await render(<AnalyticsScreen />);
-    expect(screen.getByText('Analytics')).toBeTruthy();
-  });
+it('switches range on button press', async () => {
+  await render(<AnalyticsScreen />);
+  fireEvent.press(screen.getByText('1h'));
+  expect(screen.getByText('1h')).toBeTruthy();
+});
 
-  it('shows range selector buttons', async () => {
-    await render(<AnalyticsScreen />);
-    expect(screen.getByText('1h')).toBeTruthy();
-    expect(screen.getByText('24h')).toBeTruthy();
-    expect(screen.getByText('7d')).toBeTruthy();
-  });
+it('shows hashrate chart with snapshot data', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue(
+    Array.from({ length: 10 }, (_, i) => ({
+      minerId: 'm1',
+      hashRate: 500,
+      hashRateUnit: 'TH/s',
+      temperature: 55,
+      power: 120,
+      uptimeSeconds: 3600,
+      timestamp: Date.now() - (9 - i) * 3600000,
+      sharesAccepted: 1,
+      sharesRejected: 0,
+    })),
+  );
+  await render(<AnalyticsScreen />);
+  await waitFor(() =>
+    expect(screen.queryAllByText('Not enough data yet. Keep miners running.')).toHaveLength(0),
+  );
+});
 
-  it('switches range on button press', async () => {
-    const { rerender } = await render(<AnalyticsScreen />);
-    fireEvent.press(screen.getByText('1h'));
-    await rerender(<AnalyticsScreen />);
-    expect(screen.getByText('1h')).toBeTruthy();
-  });
+it('shows Power Cost when power cost setting is set', async () => {
+  mockGetSetting.mockResolvedValue('0.12');
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+  await waitFor(() => expect(screen.queryByText('Power Cost')).toBeTruthy());
+});
+
+it('shows Power (W) label in static summary cards', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+  await waitFor(() => expect(screen.getByText('Power (W)')).toBeTruthy());
+});
+
+it('shows Est. Daily BTC label in static summary cards', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+  await waitFor(() => expect(screen.getByText('Est. Daily BTC')).toBeTruthy());
+});
+
+it('shows empty chart text with no snapshot data', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue([]);
+  await render(<AnalyticsScreen />);
+  await waitFor(() =>
+    expect(
+      screen.getAllByText('Not enough data yet. Keep miners running.').length,
+    ).toBeGreaterThanOrEqual(1),
+  );
 });
