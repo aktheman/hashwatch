@@ -1,6 +1,7 @@
 jest.mock('axios', () => {
   const reqInterceptors: Array<(config: any) => any> = [];
-  const resInterceptors: Array<(err: any) => any> = [];
+  const resSuccessInterceptors: Array<(res: any) => any> = [];
+  const resErrorInterceptors: Array<(err: any) => any> = [];
 
   const mockAxiosInstance = {
     get: jest.fn(),
@@ -15,8 +16,9 @@ jest.mock('axios', () => {
         }),
       },
       response: {
-        use: jest.fn((_: any, fn: (err: any) => any) => {
-          resInterceptors.push(fn);
+        use: jest.fn((success: any, error: any) => {
+          resSuccessInterceptors.push(success);
+          resErrorInterceptors.push(error);
         }),
       },
     },
@@ -27,8 +29,11 @@ jest.mock('axios', () => {
     get reqInterceptors() {
       return reqInterceptors;
     },
-    get resInterceptors() {
-      return resInterceptors;
+    get resSuccessInterceptors() {
+      return resSuccessInterceptors;
+    },
+    get resErrorInterceptors() {
+      return resErrorInterceptors;
     },
   };
 });
@@ -52,6 +57,7 @@ import {
   validateReceipt,
   getNotificationPrefs,
   setNotificationPref,
+  clearCache,
 } from '../src/api/client';
 
 const mockInstance = axios.create() as jest.Mocked<
@@ -232,12 +238,14 @@ describe('setBaseUrl', () => {
 
 describe('interceptors', () => {
   let reqInterceptor: (config: any) => any;
+  let successInterceptor: (res: any) => any;
   let errInterceptor: (err: any) => any;
 
   beforeAll(() => {
     const axiosMock = jest.requireMock('axios') as any;
     reqInterceptor = axiosMock.reqInterceptors[0];
-    errInterceptor = axiosMock.resInterceptors[0];
+    successInterceptor = axiosMock.resSuccessInterceptors[0];
+    errInterceptor = axiosMock.resErrorInterceptors[0];
   });
 
   it('adds Bearer token on requests when token is present', () => {
@@ -274,5 +282,101 @@ describe('interceptors', () => {
     const error = { response: { status: 500 }, config: { baseURL: 'http://test-api' } };
     await expect(errInterceptor(error)).rejects.toEqual(error);
     expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
+  describe('cache behavior', () => {
+    beforeEach(() => {
+      clearCache();
+    });
+
+    it('caches successful GET responses and returns cached on network error', async () => {
+      const minerData = [{ id: '1', name: 'Alpha' }];
+      const successRes = {
+        config: { method: 'get', url: '/api/miners', params: undefined },
+        data: minerData,
+        status: 200,
+      };
+      const result = successInterceptor(successRes);
+      expect(result).toBe(successRes);
+
+      const networkErr = {
+        config: { method: 'get', url: '/api/miners', params: undefined },
+        response: undefined,
+      };
+      const cached = await errInterceptor(networkErr);
+      expect(cached.data).toEqual(minerData);
+      expect(cached.status).toBe(200);
+    });
+
+    it('rejects network errors when no cache entry exists', async () => {
+      const networkErr = {
+        config: { method: 'get', url: '/api/unknown', params: undefined },
+        response: undefined,
+      };
+      await expect(errInterceptor(networkErr)).rejects.toEqual(networkErr);
+    });
+
+    it('does not cache POST responses', async () => {
+      const postRes = {
+        config: { method: 'post', url: '/api/miners', params: undefined },
+        data: { id: 'new' },
+      };
+      successInterceptor(postRes);
+
+      const networkErr = {
+        config: { method: 'get', url: '/api/miners', params: undefined },
+        response: undefined,
+      };
+      await expect(errInterceptor(networkErr)).rejects.toEqual(networkErr);
+    });
+
+    it('does not serve cached data for non-GET request errors', async () => {
+      const minerData = [{ id: '1', name: 'Alpha' }];
+      const successRes = {
+        config: { method: 'get', url: '/api/miners', params: undefined },
+        data: minerData,
+        status: 200,
+      };
+      successInterceptor(successRes);
+
+      const postErr = {
+        config: { method: 'post', url: '/api/miners', params: undefined },
+        response: undefined,
+      };
+      await expect(errInterceptor(postErr)).rejects.toEqual(postErr);
+    });
+
+    it('returns stale data if TTL has expired', async () => {
+      jest.useFakeTimers({ now: 0 });
+      const successRes = {
+        config: { method: 'get', url: '/api/ttl-test', params: undefined },
+        data: 'stale-data',
+      };
+      successInterceptor(successRes);
+
+      jest.advanceTimersByTime(61000);
+
+      const err = {
+        config: { method: 'get', url: '/api/ttl-test', params: undefined },
+        response: undefined,
+      };
+      await expect(errInterceptor(err)).rejects.toEqual(err);
+      jest.useRealTimers();
+    });
+
+    it('clearCache empties cache', async () => {
+      const successRes = {
+        config: { method: 'get', url: '/api/clear-test', params: undefined },
+        data: 'to-clear',
+      };
+      successInterceptor(successRes);
+      clearCache();
+
+      const err = {
+        config: { method: 'get', url: '/api/clear-test', params: undefined },
+        response: undefined,
+      };
+      await expect(errInterceptor(err)).rejects.toEqual(err);
+    });
   });
 });

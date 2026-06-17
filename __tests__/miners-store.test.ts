@@ -220,6 +220,110 @@ describe('refreshMiner', () => {
   });
 });
 
+describe('addMiner with auth', () => {
+  const mockInfoAuth = { hostname: 'axe-123' };
+
+  beforeEach(() => {
+    mockProbe.mockResolvedValue({ infoPath: '/api/info', statusPath: '/api/status' });
+  });
+
+  it('creates remote miner when authenticated', async () => {
+    mockAuthToken = 'test-token';
+    mockCreateRemoteMiner.mockResolvedValue('remote-123');
+    await useMinerStore.getState().addMiner('192.168.1.100');
+    expect(mockCreateRemoteMiner).toHaveBeenCalled();
+    const miner = useMinerStore.getState().miners.find((m) => m.ip === '192.168.1.100');
+    expect(miner?.remoteId).toBe('remote-123');
+    mockAuthToken = null;
+  });
+});
+
+describe('refreshMiner with auth', () => {
+  it('pushes stats when authenticated and has remoteId', async () => {
+    const miner = {
+      id: 'm1',
+      name: 'Test',
+      ip: '1.2.3.4',
+      port: 80,
+      apiPath: '/api/info',
+      statusPath: '/api/status',
+      remoteId: 'remote-1',
+      info: {},
+      status: {},
+      isOnline: true,
+    };
+    useMinerStore.setState({ miners: [miner as never] });
+    mockFetchAll.mockResolvedValue({
+      info: { hostname: 'test' },
+      status: { hashRate: 600, temperature: 60 },
+    });
+    mockAuthToken = 'test-token';
+
+    await useMinerStore.getState().refreshMiner('m1');
+
+    expect(mockPushStats).toHaveBeenCalled();
+    mockAuthToken = null;
+  });
+});
+
+describe('addMiner error edge cases', () => {
+  it('formats non-Error thrown during add as string', async () => {
+    mockProbe.mockRejectedValue('string error');
+    await expect(useMinerStore.getState().addMiner('192.168.1.100')).rejects.toBe('string error');
+    expect(useMinerStore.getState().error).toContain('192.168.1.100');
+  });
+});
+
+describe('refreshMiner probe recovery', () => {
+  it('recovers by probing when apiPath is missing', async () => {
+    const miner = {
+      id: 'm1',
+      name: 'Test',
+      ip: '1.2.3.4',
+      port: 80,
+      info: {},
+      status: {},
+    };
+    useMinerStore.setState({ miners: [miner as never] });
+    mockFetchAll.mockRejectedValue(new Error('fail'));
+    mockProbe.mockResolvedValue({ infoPath: '/api/new', statusPath: '/api/status' });
+
+    await useMinerStore.getState().refreshMiner('m1');
+
+    expect(mockProbe).toHaveBeenCalledWith('1.2.3.4', 80);
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.apiPath).toBe('/api/new');
+  });
+
+  it('stays offline when probe also fails', async () => {
+    const miner = {
+      id: 'm1',
+      name: 'Test',
+      ip: '1.2.3.4',
+      port: 80,
+      info: {},
+      status: {},
+    };
+    useMinerStore.setState({ miners: [miner as never] });
+    mockFetchAll.mockRejectedValue(new Error('fail'));
+    mockProbe.mockRejectedValue(new Error('probe fail'));
+
+    await useMinerStore.getState().refreshMiner('m1');
+
+    expect(mockProbe).toHaveBeenCalled();
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.isOnline).toBe(false);
+  });
+});
+
+describe('loadMiners catch edge case', () => {
+  it('handles non-Error thrown during load', async () => {
+    mockLoadMiners.mockRejectedValue('DB string error');
+    await useMinerStore.getState().loadMiners();
+    expect(useMinerStore.getState().error).toBe('DB string error');
+  });
+});
+
 describe('refreshAll', () => {
   it('refreshes all miners', async () => {
     const miners = [
@@ -487,6 +591,57 @@ describe('loadMiners with auth', () => {
     );
     const miner = useMinerStore.getState().miners.find((m) => m.id === 'm1');
     expect(miner?.group).toBe('Garage');
+  });
+
+  describe('setMinerGroup missing miner', () => {
+    it('does nothing when miner not found', async () => {
+      await useMinerStore.getState().setMinerGroup('nonexistent', 'Garage');
+      expect(mockSaveMiner).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getSnapshots merge logic', () => {
+    it('deduplicates remote snapshots by timestamp', async () => {
+      mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100, hashRate: 500 }]);
+      mockFetchStats.mockResolvedValue([
+        { minerId: 'm1', timestamp: 100, hashRate: 999 },
+        { minerId: 'm1', timestamp: 200, hashRate: 600 },
+      ]);
+      mockAuthToken = 'test-token';
+      useMinerStore.setState({
+        miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+      });
+
+      const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].timestamp).toBe(100);
+      expect((result[0] as (typeof result)[0] & { hashRate: number }).hashRate).toBe(500);
+      expect(result[1].timestamp).toBe(200);
+      mockAuthToken = null;
+    });
+
+    it('skips remote entries with timestamp 0', async () => {
+      mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100 }]);
+      mockFetchStats.mockResolvedValue([{ minerId: 'm1', timestamp: 0, hashRate: 600 }]);
+      mockAuthToken = 'test-token';
+      useMinerStore.setState({
+        miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+      });
+
+      const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].timestamp).toBe(100);
+      mockAuthToken = null;
+    });
+  });
+
+  describe('refreshAll with no miners', () => {
+    it('skips checkMinerAlerts when no miners exist', async () => {
+      await useMinerStore.getState().refreshAll();
+      expect(mockCheckMinerAlerts).not.toHaveBeenCalled();
+    });
   });
 
   it('setMinerGroup clears group when undefined', async () => {

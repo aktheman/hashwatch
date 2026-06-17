@@ -73,6 +73,9 @@ export async function fetchBTCPrice(): Promise<number> {
   _btcPricePromise = (async () => {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 5000);
+    if (typeof id === 'object' && id !== null && 'unref' in id) {
+      (id as { unref: () => void }).unref();
+    }
     try {
       const res = await fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
@@ -96,6 +99,9 @@ export async function fetchBTCPrice(): Promise<number> {
 export async function fetchNetworkHashrate(): Promise<number> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), 10000);
+  if (typeof id === 'object' && id !== null && 'unref' in id) {
+    (id as { unref: () => void }).unref();
+  }
   try {
     const res = await fetch('https://mempool.space/api/v1/mining/hashrate/24h', {
       signal: controller.signal,
@@ -119,6 +125,9 @@ export function startPricePolling(intervalMs: number = 300000): () => void {
     fetchBTCPrice();
     fetchNetworkHashrate();
   }, intervalMs);
+  if (_btcPriceTimer && typeof _btcPriceTimer === 'object' && 'unref' in _btcPriceTimer) {
+    (_btcPriceTimer as { unref: () => void }).unref();
+  }
   return () => {
     if (_btcPriceTimer) {
       clearInterval(_btcPriceTimer);

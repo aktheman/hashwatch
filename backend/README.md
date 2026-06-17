@@ -15,6 +15,8 @@ Backend server for the HashWatch Bitaxe miner monitoring app. Provides authentic
 
 ## API Routes
 
+> A full OpenAPI 3.0 specification is available at [openapi.json](openapi.json) with request/response schemas.
+
 | Route                                  | Description                                  |
 | -------------------------------------- | -------------------------------------------- |
 | `POST /api/auth/register`              | Create account                               |
@@ -90,6 +92,15 @@ Or deploy manually:
 ```bash
 npm run build
 node dist/index.js
+```
+
+## API Documentation
+
+An OpenAPI 3.0 specification is available at [openapi.json](openapi.json). View it in any OpenAPI-compatible tool (Swagger UI, Stoplight, etc.):
+
+```bash
+# Serve with Swagger UI via npx
+npx swagger-ui-cli openapi.json
 ```
 
 ## Testing

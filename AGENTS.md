@@ -1,3 +1,52 @@
 # Expo HAS CHANGED
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
+
+## Constraints & Preferences
+
+- Follow conventional commits style (feat:, fix:, test:, chore:)
+- All changes must pass TypeScript (`npx tsc --noEmit`) and ESLint (`npx eslint src/ --max-warnings=0`)
+- All tests must pass: frontend (`npx jest --no-coverage`) and backend (`cd backend && npx jest --no-coverage`)
+- Must use `@testing-library/react-native` v14 APIs (async render/renderHook, no UNSAFE_getAllByType)
+- Tests with accessibility-hidden elements must use `{ includeHiddenElements: true }` query option
+- Timers in modules must call `.unref()` to prevent Jest worker leaks
+- Do NOT run `npm audit fix --force` — it downgrades expo and breaks everything
+- `babel.config.js` exists (for Jest dynamic import support); Metro ignores it since expo/metro-config handles babel separately
+- `babel-plugin-dynamic-import-node` dev dep transforms `import()` → `require()` in Jest env
+
+## Key Files
+
+- `__tests__/miners-store.test.ts`: 38 tests covering load/add/remove/refresh/sync/snapshots/wallet/group
+- `__tests__/miners-store-edge.test.ts`: 6 tests — AppState pause/resume, interval tick (paused/not-paused), onAuthLogin callback, scanNetwork error/success
+- `__tests__/widget.test.tsx`: 3 tests (Android guard, native module call, missing module)
+- `__tests__/authToken.test.ts`: 6 tests (getter, setter, login callbacks)
+- `__tests__/networkStatus.test.ts`: 7 tests (online, offline, null fallback, catch, multi-listener, cleanup) + 1 untestable branch comment
+- `__tests__/version.test.ts`: 13 tests (parse, needsUpdate, fetch success/failure, changelog URL, fetchNetworkHashrate)
+- `__tests__/theme.test.ts`: 17 tests (all 5 themes, setThemeMode, mode tracking, custom themes)
+- `__tests__/api-client.test.ts`: 28 tests (auth, interceptors, caching, error handling)
+- `__tests__/DashboardScreen.test.tsx`: 27 tests (filtering, upgrade banner, error banner, scanning, wallet/group filters, temp display)
+- `__tests__/WalletsScreen.test.tsx`: 14 tests (CRUD, modal, color picker, validation)
+- `__tests__/MinerDetailScreen.test.tsx`: 14 tests (rendering, share, delete, offline, not-found, goBack)
+- `__tests__/SettingsScreen.test.tsx`: 23 tests (theme, remote sync, auth, power cost, exports)
+- `__tests__/AddMinerScreen.test.tsx`: 14 tests (pro limit, add error, scan cancel, scan fail, discovered list, add discovered, scan progress)
+- `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, deploy, e2e
+- `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
+
+## Current State
+
+- React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
+- Tests: 471 frontend (47 suites) + 37 backend (6 suites) = 508 total
+- Coverage: 84.17% stmts, 73.53% branches, 78.13% funcs, 86.87% lines (thresholds: 50/50/60/60)
+- miners.ts: 97.75% stmts, 79.62% branches, 96.15% funcs, 100% lines
+- networkStatus.ts: 100% stmts, 86.66% branches, 100% funcs, 100% lines (unref check only: Node.js-specific, untestable in Jest)
+- AddMinerScreen.tsx: 95.16% stmts, 80.55% branches, 100% funcs, 96.49% lines (uncovered: line 47 goBack in handleAddByIP happy path)
+- web bundle: 2.0MB / 781 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
+- AppNavigator code-split: all 10 screens use `React.lazy(() => import(...).then(m => ({ default: m.ScreenName })))` wrapped in `<Suspense>` — enables Metro to create separate chunks per screen
+- `formatTemperature` now accepts `number | undefined | null`, returns `'--'` for nullish
+- Timer `unref()` calls added in `hashrate.ts` (fetchBTCPrice, fetchNetworkHashrate, startPricePolling) to prevent Jest worker leaks
+- Security: 24→6 vulns via `overrides` (node-forge 1.4.0, tar 7.5.16); remaining 6 require `--force` (downgrades eas-cli)
+
+## Hard-to-test (skipped)
+
+- `networkStatus` unref check (line 35-41): Node.js-specific, `setInterval` in Jest returns number, not object with `.unref()`
+- `refreshMiner` probe recovery (lines 186-203): requires complex mock orchestration

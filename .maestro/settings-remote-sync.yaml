@@ -1,0 +1,20 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- tapOn: "Settings"
+- assertVisible: "Remote Sync"
+- assertVisible: "Off"
+# Open auth panel
+- tapOn: "Remote Sync"
+- assertVisible: "Email"
+- assertVisible: "Create Account"
+- assertVisible: "No account? Create one"
+# Toggle to sign in mode
+- tapOn: "No account? Create one"
+- assertVisible: "Sign In"
+- assertVisible: "Already have an account?"
+- assertVisible: "Switch to create account"
+# Close auth panel
+- tapOn: "Remote Sync"
+- assertNotVisible: "Email"

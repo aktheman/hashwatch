@@ -4,6 +4,7 @@ import {
   LATEST_FIRMWARE,
   getFirmwareUrl,
   fetchLatestFirmware,
+  getFirmwareChangelogUrl,
 } from '../src/utils/version';
 
 describe('parseVersion', () => {
@@ -33,11 +34,24 @@ describe('needsUpdate', () => {
   it('uses LATEST_FIRMWARE by default', () => {
     expect(LATEST_FIRMWARE).toBe('v2.2.1');
   });
+
+  it('handles partial version strings (missing patch/minor)', () => {
+    expect(needsUpdate('v2', 'v2.2.1')).toBe(true);
+    expect(needsUpdate('v3', 'v3.0.0')).toBe(false);
+  });
 });
 
 describe('getFirmwareUrl', () => {
   it('returns the releases URL', () => {
     expect(getFirmwareUrl()).toBe('https://github.com/skot/bitaxe/releases/latest');
+  });
+});
+
+describe('getFirmwareChangelogUrl', () => {
+  it('returns the tag URL for a version', () => {
+    expect(getFirmwareChangelogUrl('v2.0.0')).toBe(
+      'https://github.com/skot/bitaxe/releases/tag/v2.0.0',
+    );
   });
 });
 
@@ -54,6 +68,33 @@ describe('fetchLatestFirmware', () => {
 
   it('returns null when response not ok', async () => {
     global.fetch = jest.fn().mockResolvedValue({ ok: false });
+    const result = await fetchLatestFirmware();
+    expect(result).toBeNull();
+  });
+
+  it('returns parsed version when fetch succeeds', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ tag_name: 'v2.2.1' }),
+    });
+    const result = await fetchLatestFirmware();
+    expect(result).toBe('v2.2.1');
+  });
+
+  it('returns null when tag_name is empty', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ tag_name: '' }),
+    });
+    const result = await fetchLatestFirmware();
+    expect(result).toBeNull();
+  });
+
+  it('returns null when tag_name is not parseable', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ tag_name: 'invalid' }),
+    });
     const result = await fetchLatestFirmware();
     expect(result).toBeNull();
   });
