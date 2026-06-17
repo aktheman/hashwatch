@@ -109,4 +109,17 @@ describe('POST /api/stats/:minerId', () => {
     expect(res.body.error).toBe('miner not found');
     expect(mockBroadcast).not.toHaveBeenCalled();
   });
+
+  it('returns 400 when snapshot data is invalid', async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ id: 'm1', name: 'TestMiner', ip: '192.168.1.100' }],
+    });
+
+    const res = await request(app).post('/api/stats/m1').send({
+      hashRate: 'not-a-number',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid snapshot data');
+  });
 });

@@ -54,6 +54,17 @@ describe('POST /api/auth/register', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('returns 500 on unexpected database error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB connection lost'));
+
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'test@test.com', password: 'password123' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
 });
 
 describe('POST /api/auth/login', () => {
@@ -94,5 +105,24 @@ describe('POST /api/auth/login', () => {
       .send({ email: 'nobody@test.com', password: 'password123' });
 
     expect(res.status).toBe(401);
+  });
+
+  it('returns 400 for invalid login input', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'bad', password: 'short' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 500 on unexpected login error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB connection lost'));
+
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'test@test.com', password: 'password123' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
   });
 });
