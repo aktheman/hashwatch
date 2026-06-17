@@ -109,6 +109,40 @@ describe('connectWebSocket', () => {
     connectWebSocket('new-token');
     expect(mockWsClose).toHaveBeenCalled();
   });
+
+  it('clears reconnect timer when reconnecting after disconnect', () => {
+    jest.useFakeTimers();
+    connectWebSocket('test-token');
+    mockWsOnclose?.();
+    jest.advanceTimersByTime(1000);
+    connectWebSocket('new-token');
+    jest.advanceTimersByTime(6000);
+    expect(global.WebSocket).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+    disconnectWebSocket();
+  });
+});
+
+describe('WebSocket error handling', () => {
+  it('closes WebSocket on error', () => {
+    connectWebSocket('test-token');
+    mockWsOnerror?.();
+    expect(mockWsClose).toHaveBeenCalled();
+  });
+
+  it('schedules reconnect when WebSocket constructor throws', () => {
+    jest.useFakeTimers();
+    (global as any).WebSocket = jest.fn().mockImplementation(() => {
+      throw new Error('constructor failed');
+    });
+
+    connectWebSocket('test-token');
+    jest.advanceTimersByTime(5000);
+    expect(global.WebSocket).toHaveBeenCalled();
+
+    disconnectWebSocket();
+    jest.useRealTimers();
+  });
 });
 
 describe('disconnectWebSocket', () => {
@@ -116,5 +150,16 @@ describe('disconnectWebSocket', () => {
     connectWebSocket('test-token');
     disconnectWebSocket();
     expect(mockWsClose).toHaveBeenCalled();
+  });
+
+  it('clears reconnect timer if active', () => {
+    jest.useFakeTimers();
+    connectWebSocket('test-token');
+    mockWsOnclose?.();
+    jest.advanceTimersByTime(1000);
+    disconnectWebSocket();
+    jest.advanceTimersByTime(5000);
+    expect(global.WebSocket).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
   });
 });

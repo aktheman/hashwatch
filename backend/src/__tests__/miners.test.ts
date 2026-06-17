@@ -74,6 +74,15 @@ describe('POST /api/miners', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('returns 500 on unexpected database error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB connection lost'));
+
+    const res = await request(app).post('/api/miners').send({ name: 'Miner', ip: '192.168.1.1' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
 });
 
 describe('DELETE /api/miners/:id', () => {
@@ -158,5 +167,14 @@ describe('PUT /api/miners/:id', () => {
     const res = await request(app).put('/api/miners/m1').send({ name: '' });
 
     expect(res.status).toBe(400);
+  });
+
+  it('returns 500 on unexpected update error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB connection lost'));
+
+    const res = await request(app).put('/api/miners/m1').send({ name: 'Miner' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
   });
 });

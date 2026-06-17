@@ -10,11 +10,19 @@ import {
   getBTCPrice,
   setBTCPrice,
   fetchBTCPrice,
+  fetchNetworkHashrate,
+  startPricePolling,
+  setNetworkHashrate as _sn,
 } from '../src/utils/hashrate';
 
 beforeEach(() => {
   setNetworkHashrate(750_000_000_000_000_000_000);
   setBTCPrice(85000);
+});
+
+afterEach(() => {
+  const stop = startPricePolling(999999);
+  stop();
 });
 
 describe('toHashesPerSecond', () => {
@@ -76,5 +84,73 @@ describe('fetchBTCPrice', () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('network error'));
     const price = await fetchBTCPrice();
     expect(price).toBe(85000);
+  });
+
+  it('falls back when API response has missing fields', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+    const price = await fetchBTCPrice();
+    expect(price).toBe(85000);
+  });
+
+  it('returns fetched BTC price from API', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ bitcoin: { usd: 50000 } }),
+    });
+    const price = await fetchBTCPrice();
+    expect(price).toBe(50000);
+    expect(getBTCPrice()).toBe(50000);
+  });
+});
+
+describe('fetchNetworkHashrate', () => {
+  it('falls back on fetch failure', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('network error'));
+    const hps = await fetchNetworkHashrate();
+    expect(hps).toBe(750_000_000_000_000_000_000);
+  });
+
+  it('falls back on non-ok response', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false });
+    const hps = await fetchNetworkHashrate();
+    expect(hps).toBe(750_000_000_000_000_000_000);
+  });
+
+  it('updates network hashrate on success', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ currentHashrate: 500_000_000_000_000_000_000 }),
+    });
+    const hps = await fetchNetworkHashrate();
+    expect(hps).toBe(500_000_000_000_000_000_000);
+    expect(getNetworkHashrate()).toBe(500_000_000_000_000_000_000);
+  });
+
+  it('falls back to current hashrate when data fields missing', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+    const hps = await fetchNetworkHashrate();
+    expect(hps).toBe(750_000_000_000_000_000_000);
+  });
+});
+
+describe('startPricePolling', () => {
+  it('starts polling interval and returns stop function', () => {
+    jest.useFakeTimers();
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ bitcoin: { usd: 50000 } }),
+    });
+    const stop = startPricePolling(999999);
+    expect(typeof stop).toBe('function');
+    jest.advanceTimersByTime(999999);
+    expect(global.fetch).toHaveBeenCalled();
+    stop();
+    jest.useRealTimers();
   });
 });

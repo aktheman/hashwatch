@@ -37,6 +37,20 @@ describe('POST /api/proxy', () => {
     expect(res.body).toEqual({ hostname: 'bitaxe-test', hashRate: 500 });
   });
 
+  it('defaults to GET method when method is not provided', async () => {
+    mockAxios.mockResolvedValueOnce({
+      status: 200,
+      data: { hostname: 'bitaxe-test' },
+    });
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://192.168.1.100/api/system/info' });
+
+    expect(res.status).toBe(200);
+    expect(mockAxios).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }));
+  });
+
   it('rejects public URLs', async () => {
     const res = await request(app)
       .post('/api/proxy')
@@ -63,6 +77,45 @@ describe('POST /api/proxy', () => {
   it('returns 502 when miner times out', async () => {
     const err: any = new Error('Timeout');
     err.code = 'ETIMEDOUT';
+    mockAxios.mockRejectedValueOnce(err);
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://192.168.1.100/api/info' });
+
+    expect(res.status).toBe(502);
+    expect(res.body.message).toContain('timeout');
+  });
+
+  it('returns 502 on ENETUNREACH', async () => {
+    const err: any = new Error('Network unreachable');
+    err.code = 'ENETUNREACH';
+    mockAxios.mockRejectedValueOnce(err);
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://192.168.1.100/api/info' });
+
+    expect(res.status).toBe(502);
+    expect(res.body.message).toContain('timeout');
+  });
+
+  it('returns 502 on ENETDOWN', async () => {
+    const err: any = new Error('Network down');
+    err.code = 'ENETDOWN';
+    mockAxios.mockRejectedValueOnce(err);
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://192.168.1.100/api/info' });
+
+    expect(res.status).toBe(502);
+    expect(res.body.message).toContain('timeout');
+  });
+
+  it('returns 502 on EINVAL', async () => {
+    const err: any = new Error('Invalid argument');
+    err.code = 'EINVAL';
     mockAxios.mockRejectedValueOnce(err);
 
     const res = await request(app)
@@ -105,5 +158,89 @@ describe('POST /api/proxy', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('url is required');
+  });
+
+  it('returns 500 on generic error', async () => {
+    mockAxios.mockRejectedValueOnce(new Error('Something unexpected'));
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({ url: 'http://192.168.1.100/api/info' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('proxy_error');
+  });
+
+  it('passes custom headers and sanitizes blocked ones', async () => {
+    mockAxios.mockResolvedValueOnce({ status: 200, data: { ok: true } });
+
+    const res = await request(app)
+      .post('/api/proxy')
+      .send({
+        url: 'http://192.168.1.100/api/info',
+        headers: {
+          'X-Custom': 'value',
+          host: 'evil.com',
+          authorization: 'Bearer hack',
+          cookie: 'session=steal',
+        },
+      });
+
+    expect(res.status).toBe(200);
+    expect(mockAxios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-Custom': 'value',
+          Connection: 'close',
+        }),
+      }),
+    );
+    expect(mockAxios).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ host: expect.anything() }),
+      }),
+    );
+  });
+});
+
+describe('POST /api/proxy/restart', () => {
+  it('restarts a miner', async () => {
+    mockAxios.mockResolvedValueOnce({ status: 200, data: {} });
+
+    const res = await request(app)
+      .post('/api/proxy/restart')
+      .send({ url: 'http://192.168.1.100/api/system/restart' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true });
+  });
+
+  it('returns 400 when no url provided', async () => {
+    const res = await request(app).post('/api/proxy/restart').send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('url is required');
+  });
+
+  it('returns 403 for public URLs', async () => {
+    const res = await request(app)
+      .post('/api/proxy/restart')
+      .send({ url: 'http://example.com/api/restart' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('forbidden');
+  });
+
+  it('returns 502 when restart fails', async () => {
+    const err: any = new Error('Unreachable');
+    err.code = 'ECONNREFUSED';
+    mockAxios.mockRejectedValueOnce(err);
+
+    const res = await request(app)
+      .post('/api/proxy/restart')
+      .send({ url: 'http://192.168.1.100/api/system/restart' });
+
+    expect(res.status).toBe(502);
+    expect(res.body.error).toBe('restart_failed');
   });
 });
