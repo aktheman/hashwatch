@@ -25,6 +25,7 @@ export default {
     },
     plugins: [
       'expo-sqlite',
+      'expo-localization',
       [
         'expo-notifications',
         {

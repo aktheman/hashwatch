@@ -1,0 +1,31 @@
+{
+  "common": {
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "dashboard": {
+    "title": "HashWatch",
+    "subtitle": "Live Monitor",
+    "noMiners": "No Miners Yet",
+    "addMiner": "Add Miner",
+    "scanNetwork": "Scan Network"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "account": "Account",
+    "power": "Power",
+    "miners": "Miners",
+    "about": "About"
+  },
+  "themes": {
+    "dark": "Dark",
+    "light": "Light",
+    "neon": "Neon",
+    "matrix": "Matrix",
+    "5tratum": "5tratum"
+  }
+}
