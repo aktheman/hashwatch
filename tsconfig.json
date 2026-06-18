@@ -3,5 +3,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "exclude": ["__tests__", "node_modules", "backend"]
+  "exclude": ["__tests__", "node_modules", "backend", "e2e", "playwright.config.ts"]
 }

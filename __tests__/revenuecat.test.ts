@@ -210,17 +210,17 @@ describe('revenuecat', () => {
   });
 
   describe('listenForProChanges', () => {
-    it('adds listener and returns unsubscribe function', () => {
+    it('adds listener and returns unsubscribe function', async () => {
       const callback = jest.fn();
-      const unsubscribe = listenForProChanges(callback);
+      const unsubscribe = await listenForProChanges(callback);
 
       expect(Purchases.addCustomerInfoUpdateListener).toHaveBeenCalled();
       expect(typeof unsubscribe).toBe('function');
     });
 
-    it('calls callback with pro status', () => {
+    it('calls callback with pro status', async () => {
       const callback = jest.fn();
-      listenForProChanges(callback);
+      await listenForProChanges(callback);
 
       const listener = (Purchases.addCustomerInfoUpdateListener as jest.Mock).mock.calls[0][0];
       listener({ entitlements: { active: { pro: {} } } });
@@ -228,9 +228,9 @@ describe('revenuecat', () => {
       expect(callback).toHaveBeenCalledWith(true);
     });
 
-    it('removes listener on unsubscribe', () => {
+    it('removes listener on unsubscribe', async () => {
       const callback = jest.fn();
-      const unsubscribe = listenForProChanges(callback);
+      const unsubscribe = await listenForProChanges(callback);
       unsubscribe();
 
       expect(Purchases.removeCustomerInfoUpdateListener).toHaveBeenCalled();

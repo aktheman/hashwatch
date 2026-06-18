@@ -1,0 +1,16 @@
+appId: com.hashwatch.app
+---
+- launchApp
+- tapOn: "Skip"
+- tapOn: "Settings"
+- assertVisible: "Appearance"
+- tapOn: "Nord"
+- assertVisible: "Nord"
+- tapOn: "Dracula"
+- assertVisible: "Dracula"
+- tapOn: "Catppuccin"
+- assertVisible: "Catppuccin"
+- tapOn: "Rose Pine"
+- assertVisible: "Rose Pine"
+- tapOn: "Dark"
+- assertVisible: "Dark"

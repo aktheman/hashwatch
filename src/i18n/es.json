@@ -1,0 +1,31 @@
+{
+  "common": {
+    "add": "Agregar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar"
+  },
+  "dashboard": {
+    "title": "HashWatch",
+    "subtitle": "Monitor en Vivo",
+    "noMiners": "Sin Mineros",
+    "addMiner": "Agregar Minero",
+    "scanNetwork": "Escanear Red"
+  },
+  "settings": {
+    "title": "Configuración",
+    "appearance": "Apariencia",
+    "account": "Cuenta",
+    "power": "Energía",
+    "miners": "Mineros",
+    "about": "Acerca de"
+  },
+  "themes": {
+    "dark": "Oscuro",
+    "light": "Claro",
+    "neon": "Neón",
+    "matrix": "Matrix",
+    "5tratum": "5tratum"
+  }
+}
