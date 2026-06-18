@@ -8,6 +8,10 @@ const TIMEOUT = 5000;
 const PROBE_TIMEOUT = 3000;
 const isWeb = Platform.OS === 'web';
 
+function formatIp(ip: string): string {
+  return ip.includes(':') ? `[${ip}]` : ip;
+}
+
 const INFO_PATHS = ['/api/system/info', '/api/info', '/system/info', '/api/miner/getall'];
 
 const STATUS_PATHS = ['/api/system/status', '/api/status', '/system/status', '/api/miner/getall'];
@@ -66,7 +70,8 @@ export interface FoundPaths {
 }
 
 async function findPaths(ip: string, port: number): Promise<FoundPaths> {
-  const infoUrls = INFO_PATHS.map((path) => `http://${ip}:${port}${path}`);
+  const base = `http://${formatIp(ip)}:${port}`;
+  const infoUrls = INFO_PATHS.map((path) => `${base}${path}`);
   const infoResults = await Promise.all(infoUrls.map((url) => fetchUrl(url)));
 
   for (let i = 0; i < infoResults.length; i++) {
@@ -74,12 +79,12 @@ async function findPaths(ip: string, port: number): Promise<FoundPaths> {
       const infoPath = INFO_PATHS[i];
 
       const derived = infoPath.replace(/\/info$/, '/status');
-      const data = derived !== infoPath ? await fetchUrl(`http://${ip}:${port}${derived}`) : null;
+      const data = derived !== infoPath ? await fetchUrl(`${base}${derived}`) : null;
       if (data && isStatusResponse(data)) {
         return { infoPath, statusPath: derived };
       }
 
-      const statusUrls = STATUS_PATHS.map((p) => `http://${ip}:${port}${p}`);
+      const statusUrls = STATUS_PATHS.map((p) => `${base}${p}`);
       const statusResults = await Promise.all(statusUrls.map((url) => fetchUrl(url)));
       for (let j = 0; j < statusResults.length; j++) {
         if (isStatusResponse(statusResults[j])) {
@@ -108,7 +113,7 @@ export class BitAxeClient {
     this.apiPath = apiPath || '/api/system/info';
     this.statusPath = statusPath || this.apiPath;
     this.client = axios.create({
-      baseURL: `http://${ip}:${port}`,
+      baseURL: `http://${formatIp(ip)}:${port}`,
       timeout: TIMEOUT,
     });
   }
@@ -124,7 +129,7 @@ export class BitAxeClient {
       const { data } = await axios.post(
         `${getProxyUrl()}/api/proxy`,
         {
-          url: `http://${this.ip}:${this.port}${path}`,
+          url: `http://${formatIp(this.ip)}:${this.port}${path}`,
           method: 'GET',
         },
         { timeout: TIMEOUT + 3000, headers },
@@ -206,7 +211,7 @@ export class BitAxeClient {
         }
         const { data } = await axios.post(
           `${getProxyUrl()}/api/proxy/restart`,
-          { url: `http://${this.ip}:${this.port}${path}` },
+          { url: `http://${formatIp(this.ip)}:${this.port}${path}` },
           { timeout: 8000, headers, validateStatus: () => true },
         );
         return data?.success === true;

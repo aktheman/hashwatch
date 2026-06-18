@@ -34,7 +34,7 @@ export function isAllowedProxyUrl(rawUrl: string): boolean {
     const parsed = new URL(rawUrl);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
 
-    const host = parsed.hostname.toLowerCase();
+    const host = parsed.hostname.toLowerCase().replace(/^\[(.+)\]$/, '$1');
     if (BLOCKED_HOSTNAMES.has(host)) return false;
 
     const ipv4 = parseIPv4(host);

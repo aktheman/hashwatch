@@ -50,4 +50,21 @@ describe('isAllowedProxyUrl', () => {
     expect(isAllowedProxyUrl('not-a-url')).toBe(false);
     expect(isAllowedProxyUrl('')).toBe(false);
   });
+
+  it('allows IPv6 unique local address (fd00::/8)', () => {
+    expect(isAllowedProxyUrl('http://[fd00::1]/api/info')).toBe(true);
+    expect(isAllowedProxyUrl('http://[fc00::1]/api/info')).toBe(true);
+  });
+
+  it('allows IPv6 link-local (fe80::)', () => {
+    expect(isAllowedProxyUrl('http://[fe80::1]/api/info')).toBe(true);
+  });
+
+  it('allows IPv6 loopback (::1)', () => {
+    expect(isAllowedProxyUrl('http://[::1]/api/info')).toBe(true);
+  });
+
+  it('blocks public IPv6 addresses', () => {
+    expect(isAllowedProxyUrl('http://[2001:db8::1]/api/info')).toBe(false);
+  });
 });

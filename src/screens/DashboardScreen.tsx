@@ -43,7 +43,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   const groups = useMemo(() => {
     const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
-    return Array.from(gs).sort();
+    const sorted = Array.from(gs).sort();
+    if (miners.some((m) => !m.group)) {
+      sorted.push('Ungrouped');
+    }
+    return sorted;
   }, [miners]);
 
   useEffect(() => {
@@ -54,7 +58,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     () =>
       miners.filter((m) => {
         if (walletFilter && m.walletId !== walletFilter) return false;
-        if (groupFilter && m.group !== groupFilter) return false;
+        if (groupFilter === 'Ungrouped' && m.group) return false;
+        if (groupFilter && groupFilter !== 'Ungrouped' && m.group !== groupFilter) return false;
         return true;
       }),
     [miners, walletFilter, groupFilter],
@@ -100,19 +105,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   const { onlineCount, totalHashrate, totalPower, avgTemp } = useMemo(() => {
-    const on = miners.filter((m) => m.isOnline).length;
-    const hr = miners.reduce(
+    const on = filteredMiners.filter((m) => m.isOnline).length;
+    const hr = filteredMiners.reduce(
       (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
       0,
     );
-    const pw = miners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
-    const withTemp = miners.filter((m) => m.status?.temperature);
+    const pw = filteredMiners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
+    const withTemp = filteredMiners.filter((m) => m.status?.temperature);
     const at =
       withTemp.length > 0
         ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
         : 0;
     return { onlineCount: on, totalHashrate: hr, totalPower: pw, avgTemp: at };
-  }, [miners]);
+  }, [filteredMiners]);
 
   const canAdd = canAddMiner(miners.length);
 
