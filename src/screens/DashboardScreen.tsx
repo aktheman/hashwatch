@@ -8,11 +8,13 @@ import {
   RefreshControl,
   StyleSheet,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
+import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner, Wallet, NavigationProp } from '../types';
 import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
@@ -24,6 +26,7 @@ interface DashboardScreenProps {
 }
 
 export function DashboardScreen({ navigation }: DashboardScreenProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const loading = useMinerStore((s) => s.loading);
@@ -347,9 +350,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View>
-          <Text style={styles.headerTitle}>HashWatch</Text>
+          <Text style={styles.headerTitle}>{t('dashboard.title')}</Text>
           <Text style={styles.headerSub}>
-            <Text style={styles.liveDot}>●</Text> Live Monitor
+            <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
           </Text>
         </View>
         <TouchableOpacity
@@ -366,19 +369,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View style={styles.summaryCard}>
           <Text style={styles.summaryIcon}>⬡</Text>
           <Text style={styles.summaryValue}>{miners.length}</Text>
-          <Text style={styles.summaryLabel}>Miners</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.miners')}</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryIcon}>🟢</Text>
           <Text style={[styles.summaryValue, { color: theme.success }]}>{onlineCount}</Text>
-          <Text style={styles.summaryLabel}>Online</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.online')}</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryIcon}>⚡</Text>
           <Text style={[styles.summaryValue, { color: theme.primary }]}>
             {formatTotal(totalHashrate)}
           </Text>
-          <Text style={styles.summaryLabel}>Hashrate</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.hashrate')}</Text>
         </View>
       </View>
       <View style={styles.summaryRow}>
@@ -387,7 +390,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={[styles.summaryValue, { color: theme.warning }]}>
             {totalPower.toFixed(1)}
           </Text>
-          <Text style={styles.summaryLabel}>Power (W)</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.power')}</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryIcon}>🌡</Text>
@@ -396,14 +399,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           >
             {avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°
           </Text>
-          <Text style={styles.summaryLabel}>Avg Temp</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.avgTemp')}</Text>
         </View>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryIcon}>📊</Text>
           <Text style={[styles.summaryValue, { color: theme.accent }]}>
             {formatWTHs(totalPower, totalHashrate / 1e12, 'TH/s')}
           </Text>
-          <Text style={styles.summaryLabel}>Efficiency</Text>
+          <Text style={styles.summaryLabel}>{t('dashboard.efficiency')}</Text>
         </View>
       </View>
 
@@ -440,7 +443,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 { color: !walletFilter && !groupFilter ? '#FFF' : theme.text },
               ]}
             >
-              All
+              {t('common.all')}
             </Text>
           </TouchableOpacity>
           {wallets.map((w) => (
@@ -484,7 +487,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Text
                 style={[styles.walletChipText, { color: groupFilter === g ? '#FFF' : theme.text }]}
               >
-                📁 {g}
+                📁 {g === 'Ungrouped' ? t('dashboard.ungrouped') : g}
               </Text>
             </TouchableOpacity>
           ))}
@@ -498,7 +501,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={styles.upgradeBanner}
           onPress={() => navigation.navigate('Subscription')}
         >
-          <Text style={styles.upgradeBannerText}>🔒 Upgrade to Pro to add more miners</Text>
+          <Text style={styles.upgradeBannerText}>🔒 {t('dashboard.upgradePro')}</Text>
         </TouchableOpacity>
       )}
 
@@ -508,25 +511,29 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View style={styles.scanningBanner}>
           <ActivityIndicator size="small" color={theme.primary} />
           <Text style={styles.scanningText}>
-            Scanning {scanProgress?.scanned || 0}/{scanProgress?.total || 254}...
+            {t('dashboard.scanning', {
+              scanned: scanProgress?.scanned || 0,
+              total: scanProgress?.total || 254,
+            })}
           </Text>
         </View>
       )}
 
       {!initialized || (loading && miners.length === 0) ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.primary} />
-          <Text style={styles.loadingText}>Loading miners...</Text>
+        <View style={{ paddingTop: 8 }}>
+          <SkeletonCard rows={4} />
+          <SkeletonCard rows={4} />
+          <SkeletonCard rows={4} />
         </View>
       ) : miners.length === 0 ? (
         <View style={styles.center}>
           <Text style={styles.emptyIcon}>⬡</Text>
-          <Text style={styles.emptyTitle}>No Miners Yet</Text>
-          <Text style={styles.emptyText}>Add your first BitAxe miner to start monitoring</Text>
+          <Text style={styles.emptyTitle}>{t('dashboard.noMiners')}</Text>
+          <Text style={styles.emptyText}>{t('dashboard.noMinersBody')}</Text>
           <View style={styles.emptySteps}>
-            <Text style={styles.stepText}>1. Know your miner's IP address</Text>
-            <Text style={styles.stepText}>2. Tap the + button below</Text>
-            <Text style={styles.stepText}>3. Enter the IP and a name</Text>
+            <Text style={styles.stepText}>{t('dashboard.step1')}</Text>
+            <Text style={styles.stepText}>{t('dashboard.step2')}</Text>
+            <Text style={styles.stepText}>{t('dashboard.step3')}</Text>
           </View>
           <View style={styles.emptyActions}>
             <TouchableOpacity
@@ -535,7 +542,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               style={styles.primaryBtn}
               onPress={handleAddMiner}
             >
-              <Text style={styles.primaryBtnText}>Add Miner</Text>
+              <Text style={styles.primaryBtnText}>{t('dashboard.addMiner')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               accessibilityRole="button"
@@ -543,7 +550,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               style={styles.secondaryBtn}
               onPress={scanNetwork}
             >
-              <Text style={styles.secondaryBtnText}>Scan Network</Text>
+              <Text style={styles.secondaryBtnText}>{t('dashboard.scanNetwork')}</Text>
             </TouchableOpacity>
           </View>
         </View>

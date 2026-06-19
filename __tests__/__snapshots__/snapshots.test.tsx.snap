@@ -32,7 +32,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Analytics
+        analytics.title
       </Text>
       <Text
         style={
@@ -43,7 +43,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Portfolio performance
+        analytics.subtitle
       </Text>
     </View>
   </View>
@@ -119,7 +119,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Total Hashrate
+            analytics.totalHashrate
           </Text>
         </View>
         <View
@@ -174,7 +174,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Est. Daily BTC
+            analytics.estDailyBTC
           </Text>
         </View>
         <View
@@ -229,7 +229,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Power (W)
+            analytics.power
           </Text>
         </View>
       </View>
@@ -291,7 +291,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Miners
+            analytics.miners
           </Text>
         </View>
         <View
@@ -347,7 +347,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Avg Temp
+            analytics.avgTemp
           </Text>
         </View>
         <View
@@ -397,7 +397,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
               }
             }
           >
-            Total Shares
+            analytics.totalShares
           </Text>
         </View>
       </View>
@@ -424,7 +424,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
             }
           }
         >
-          Hashrate History
+          analytics.hashrateHistory
         </Text>
         <View
           style={
@@ -625,7 +625,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
             ]
           }
         >
-          Not enough data yet. Keep miners running.
+          analytics.notEnoughData
         </Text>
       </View>
       <View
@@ -651,7 +651,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
             }
           }
         >
-          Uptime History
+          analytics.uptimeHistory
         </Text>
         <Text
           style={
@@ -668,7 +668,7 @@ exports[`AnalyticsScreen empty state matches snapshot 1`] = `
             ]
           }
         >
-          Not enough data yet. Keep miners running.
+          analytics.notEnoughData
         </Text>
       </View>
     </View>
@@ -708,7 +708,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        HashWatch
+        dashboard.title
       </Text>
       <Text
         style={
@@ -732,7 +732,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         >
           ●
         </Text>
-         Live Monitor
+         
+        dashboard.subtitle
       </Text>
     </View>
     <View
@@ -847,7 +848,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Miners
+        dashboard.miners
       </Text>
     </View>
     <View
@@ -902,7 +903,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Online
+        dashboard.online
       </Text>
     </View>
     <View
@@ -957,7 +958,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Hashrate
+        dashboard.hashrate
       </Text>
     </View>
   </View>
@@ -1023,7 +1024,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Power (W)
+        dashboard.power
       </Text>
     </View>
     <View
@@ -1079,7 +1080,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Avg Temp
+        dashboard.avgTemp
       </Text>
     </View>
     <View
@@ -1134,7 +1135,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Efficiency
+        dashboard.efficiency
       </Text>
     </View>
   </View>
@@ -1169,7 +1170,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       }
     >
-      No Miners Yet
+      dashboard.noMiners
     </Text>
     <Text
       style={
@@ -1182,7 +1183,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       }
     >
-      Add your first BitAxe miner to start monitoring
+      dashboard.noMinersBody
     </Text>
     <View
       style={
@@ -1201,7 +1202,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        1. Know your miner's IP address
+        dashboard.step1
       </Text>
       <Text
         style={
@@ -1212,7 +1213,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        2. Tap the + button below
+        dashboard.step2
       </Text>
       <Text
         style={
@@ -1223,7 +1224,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        3. Enter the IP and a name
+        dashboard.step3
       </Text>
     </View>
     <View
@@ -1283,7 +1284,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
             }
           }
         >
-          Add Miner
+          dashboard.addMiner
         </Text>
       </View>
       <View
@@ -1337,7 +1338,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
             }
           }
         >
-          Scan Network
+          dashboard.scanNetwork
         </Text>
       </View>
     </View>
@@ -1438,7 +1439,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Pools
+        pools.title
       </Text>
       <Text
         style={
@@ -1449,7 +1450,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
           }
         }
       >
-        Mining wallet overview
+        pools.subtitle
       </Text>
     </View>
   </View>
@@ -1484,7 +1485,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
         }
       }
     >
-      No Pools Yet
+      pools.noPools
     </Text>
     <Text
       style={
@@ -1495,7 +1496,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
         }
       }
     >
-      Add miners with pool connections to see them grouped here
+      pools.noPoolsBody
     </Text>
   </View>
 </View>
@@ -1524,7 +1525,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
         }
       }
     >
-      Settings
+      settings.title
     </Text>
     <View
       style={
@@ -1546,7 +1547,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         }
       >
-        Account
+        settings.account
       </Text>
       <View
         accessibilityLabel="Wallets"
@@ -1602,7 +1603,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Wallets
+          settings.wallets
         </Text>
         <View
           style={
@@ -1680,7 +1681,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Plan
+          settings.plan
         </Text>
         <View
           style={
@@ -1718,7 +1719,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 ]
               }
             >
-              Free
+              settings.free
             </Text>
           </View>
           <Text
@@ -1788,7 +1789,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Remote Sync
+          settings.remoteSync
         </Text>
         <View
           style={
@@ -1810,7 +1811,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
               ]
             }
           >
-            Off
+            settings.off
           </Text>
           <Text
             style={
@@ -1846,7 +1847,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         }
       >
-        Appearance
+        settings.appearance
       </Text>
       <View
         style={
@@ -1872,7 +1873,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Theme
+          settings.theme
         </Text>
         <View
           style={
@@ -1939,7 +1940,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               🔄
                
-              System
+              themes.system
             </Text>
           </View>
           <View
@@ -1999,7 +2000,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               🌙
                
-              Dark
+              themes.dark
             </Text>
           </View>
           <View
@@ -2059,7 +2060,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               ☀
                
-              Light
+              themes.light
             </Text>
           </View>
           <View
@@ -2119,7 +2120,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               💜
                
-              Neon
+              themes.neon
             </Text>
           </View>
           <View
@@ -2179,7 +2180,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               💚
                
-              Matrix
+              themes.matrix
             </Text>
           </View>
           <View
@@ -2239,7 +2240,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             >
               🔶
                
-              5tratum
+              themes.5tratum
             </Text>
           </View>
         </View>
@@ -2265,7 +2266,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         }
       >
-        Power
+        settings.power
       </Text>
       <Text
         style={
@@ -2281,7 +2282,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ]
         }
       >
-        Enter your electricity rate to see power cost and net profit.
+        settings.powerCostHelp
       </Text>
       <View
         style={
@@ -2307,7 +2308,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          $/kWh
+          settings.perKwh
         </Text>
         <TextInput
           accessibilityLabel="Power cost input"
@@ -2359,7 +2360,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         }
       >
-        Miners
+        settings.miners
       </Text>
       <View
         style={
@@ -2385,7 +2386,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Total Miners
+          settings.totalMiners
         </Text>
         <Text
           style={
@@ -2422,7 +2423,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Online
+          settings.online
         </Text>
         <Text
           style={
@@ -2464,7 +2465,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Auto-Scan Network
+          settings.autoScan
         </Text>
         <RCTSwitch
           accessibilityLabel="Auto-scan network"
@@ -2536,7 +2537,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Refresh All
+          settings.refreshAll
         </Text>
         <Text
           style={
@@ -2547,7 +2548,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Refresh
+          settings.refresh
         </Text>
       </View>
       <View
@@ -2603,7 +2604,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Scan Network
+          settings.scanNetwork
         </Text>
         <Text
           style={
@@ -2614,7 +2615,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Scan
+          settings.scan
         </Text>
       </View>
       <View
@@ -2671,7 +2672,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Groups
+          settings.groups
         </Text>
         <View
           style={
@@ -2691,7 +2692,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
               }
             }
           >
-            Manage
+            settings.manage
           </Text>
           <Text
             style={
@@ -2760,7 +2761,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Export CSV
+          settings.exportCsv
         </Text>
         <Text
           style={
@@ -2771,7 +2772,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Snapshots
+          settings.snapshots
         </Text>
       </View>
       <View
@@ -2828,7 +2829,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Export JSON
+          settings.exportJson
         </Text>
         <Text
           style={
@@ -2839,7 +2840,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Full Backup
+          settings.fullBackup
         </Text>
       </View>
       <View
@@ -2896,7 +2897,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Import Data
+          settings.importData
         </Text>
         <View
           style={
@@ -2916,7 +2917,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
               }
             }
           >
-            Restore
+            settings.restore
           </Text>
           <Text
             style={
@@ -2952,7 +2953,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         }
       >
-        About
+        settings.about
       </Text>
       <View
         style={
@@ -2978,7 +2979,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Version
+          settings.version
         </Text>
         <Text
           style={
@@ -3015,7 +3016,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          Made for
+          settings.madeFor
         </Text>
         <Text
           style={
@@ -3025,7 +3026,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
             }
           }
         >
-          BitAxe Miners
+          settings.bitaxeMiners
         </Text>
       </View>
     </View>

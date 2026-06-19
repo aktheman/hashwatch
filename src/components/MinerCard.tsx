@@ -1,5 +1,6 @@
 import { memo, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Miner } from '../types';
 import {
   formatHashrate,
@@ -18,6 +19,7 @@ interface MinerCardProps {
 
 export const MinerCard = memo(function MinerCard({ miner, onPress, onDelete }: MinerCardProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const accentColor = miner.isOnline ? theme.success : theme.danger;
   const styles = useMemo(
     () =>
@@ -185,15 +187,15 @@ export const MinerCard = memo(function MinerCard({ miner, onPress, onDelete }: M
 
   const handleLongPress = useCallback(() => {
     if (!onDelete) return;
-    Alert.alert('Remove Miner', `Remove ${miner.name}? All history will be deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('minerCard.removeMiner'), t('minerCard.removeConfirm', { name: miner.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Remove',
+        text: t('minerCard.remove'),
         style: 'destructive',
         onPress: () => onDelete(miner),
       },
     ]);
-  }, [miner, onDelete]);
+  }, [miner, onDelete, t]);
 
   return (
     <TouchableOpacity
@@ -224,12 +226,12 @@ export const MinerCard = memo(function MinerCard({ miner, onPress, onDelete }: M
 
       <View style={styles.stats}>
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Hashrate</Text>
+          <Text style={styles.statLabel}>{t('minerCard.hashrate')}</Text>
           <Text style={[styles.statValue, { color: theme.primary }]}>{hashrate}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statLabel}>Temp</Text>
+          <Text style={styles.statLabel}>{t('minerCard.temp')}</Text>
           <Text style={[styles.statValue, { color: tempColor }]}>
             {status ? formatTemperature(status.temperature) : '---'}
           </Text>
@@ -238,7 +240,7 @@ export const MinerCard = memo(function MinerCard({ miner, onPress, onDelete }: M
           <>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>Fan</Text>
+              <Text style={styles.statLabel}>{t('minerCard.fan')}</Text>
               <Text style={[styles.statValue, { color: theme.info }]}>
                 {status.fanRpm > 0 ? `${status.fanRpm}` : `${status.fanSpeed}%`}
               </Text>

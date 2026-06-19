@@ -19,15 +19,17 @@ import { exportAllData, exportJSON } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
+import { useTranslation } from 'react-i18next';
 
 export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const miners = useMinerStore((s) => s.miners);
   const [proxyUrl, setProxyUrlState] = useState(getProxyUrl());
 
   const saveProxyUrl = async () => {
     await setProxyUrl(proxyUrl);
-    Alert.alert('Proxy URL Updated', `Proxy URL set to ${proxyUrl}`);
+    Alert.alert(t('settings.proxyUrlUpdated'), `Proxy URL set to ${proxyUrl}`);
   };
   const loadMiners = useMinerStore((s) => s.loadMiners);
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
@@ -59,7 +61,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       setAuthEmail('');
       setAuthPassword('');
     } else {
-      setAuthError(isRegister ? 'Registration failed' : 'Login failed');
+      setAuthError(isRegister ? t('settings.registrationFailed') : t('settings.loginFailed'));
     }
   };
 
@@ -228,17 +230,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.title}>{t('settings.title')}</Text>
 
       {Platform.OS === 'web' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Connection</Text>
+          <Text style={styles.sectionTitle}>{t('settings.connection')}</Text>
           <Text style={[styles.sectionSub, { marginBottom: 10 }]}>
-            On web, a local proxy is needed to reach miners on your network. Run{' '}
-            <Text style={{ fontFamily: 'monospace', color: theme.primary }}>
-              node local-proxy.js
-            </Text>{' '}
-            on this machine and enter the URL below.
+            {t('settings.proxyUrlHelp')}
           </Text>
           <TextInput
             style={styles.input}
@@ -252,24 +250,24 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           />
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Save Proxy URL"
+            accessibilityLabel={t('settings.saveProxyUrl')}
             style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
             onPress={saveProxyUrl}
           >
-            <Text style={styles.proxyBtnText}>Save Proxy URL</Text>
+            <Text style={styles.proxyBtnText}>{t('settings.saveProxyUrl')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel="Wallets"
           style={styles.row}
           onPress={() => navigation.navigate('Wallets')}
         >
-          <Text style={styles.rowLabel}>Wallets</Text>
+          <Text style={styles.rowLabel}>{t('settings.wallets')}</Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
@@ -280,7 +278,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => navigation.navigate('Subscription')}
         >
-          <Text style={styles.rowLabel}>Plan</Text>
+          <Text style={styles.rowLabel}>{t('settings.plan')}</Text>
           <View style={styles.rowRight}>
             <View
               style={[
@@ -289,7 +287,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               ]}
             >
               <Text style={[styles.badgeText, { color: isPro ? theme.success : theme.textDim }]}>
-                {isPro ? 'Pro' : 'Free'}
+                {isPro ? t('settings.pro') : t('settings.free')}
               </Text>
             </View>
             <Text style={styles.chevron}>›</Text>
@@ -302,10 +300,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => setShowAuth(!showAuth)}
         >
-          <Text style={styles.rowLabel}>Remote Sync</Text>
+          <Text style={styles.rowLabel}>{t('settings.remoteSync')}</Text>
           <View style={styles.rowRight}>
             <Text style={[styles.rowValue, token && { color: theme.success }]}>
-              {token ? email || 'Connected' : 'Off'}
+              {token ? email || t('settings.connected') : t('settings.off')}
             </Text>
             <Text style={styles.chevron}>{showAuth ? 'v' : '›'}</Text>
           </View>
@@ -320,13 +318,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 style={styles.logoutBtn}
                 onPress={logout}
               >
-                <Text style={styles.logoutBtnText}>Disconnect</Text>
+                <Text style={styles.logoutBtnText}>{t('settings.disconnect')}</Text>
               </TouchableOpacity>
             ) : (
               <>
                 <TextInput
                   style={styles.authInput}
-                  placeholder="Email"
+                  placeholder={t('settings.emailPlaceholder')}
                   placeholderTextColor={theme.textMuted}
                   value={authEmail}
                   onChangeText={setAuthEmail}
@@ -336,7 +334,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 />
                 <TextInput
                   style={styles.authInput}
-                  placeholder="Password (min 8 chars)"
+                  placeholder={t('settings.passwordPlaceholder')}
                   placeholderTextColor={theme.textMuted}
                   value={authPassword}
                   onChangeText={setAuthPassword}
@@ -351,7 +349,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   onPress={handleAuth}
                 >
                   <Text style={styles.authBtnText}>
-                    {isRegister ? 'Create Account' : 'Sign In'}
+                    {isRegister ? t('settings.createAccount') : t('settings.signIn')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -360,7 +358,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   onPress={() => setIsRegister(!isRegister)}
                 >
                   <Text style={styles.authToggle}>
-                    {isRegister ? 'Already have an account? Sign In' : 'No account? Create one'}
+                    {isRegister ? t('settings.switchToSignIn') : t('settings.switchToCreate')}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -370,9 +368,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Appearance</Text>
+        <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Theme</Text>
+          <Text style={styles.rowLabel}>{t('settings.theme')}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {(['system', 'dark', 'light', 'neon', 'matrix', '5tratum'] as const).map((mode) => (
               <TouchableOpacity
@@ -410,7 +408,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                           : mode === '5tratum'
                             ? '🔶'
                             : '🔄'}{' '}
-                  {mode === '5tratum' ? '5tratum' : mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {t(`themes.${mode}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -419,12 +417,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Power</Text>
-        <Text style={[styles.sectionSub, { marginBottom: 10 }]}>
-          Enter your electricity rate to see power cost and net profit.
-        </Text>
+        <Text style={styles.sectionTitle}>{t('settings.power')}</Text>
+        <Text style={[styles.sectionSub, { marginBottom: 10 }]}>{t('settings.powerCostHelp')}</Text>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>$/kWh</Text>
+          <Text style={styles.rowLabel}>{t('settings.perKwh')}</Text>
           <TextInput
             style={[styles.input, { flex: 1, marginLeft: 12, maxWidth: 120, textAlign: 'right' }]}
             value={powerCost}
@@ -445,19 +441,19 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Miners</Text>
+        <Text style={styles.sectionTitle}>{t('settings.miners')}</Text>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Total Miners</Text>
+          <Text style={styles.rowLabel}>{t('settings.totalMiners')}</Text>
           <Text style={styles.rowValue}>{miners.length}</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Online</Text>
+          <Text style={styles.rowLabel}>{t('settings.online')}</Text>
           <Text style={[styles.rowValue, { color: theme.success }]}>
             {miners.filter((m) => m.isOnline).length}
           </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Auto-Scan Network</Text>
+          <Text style={styles.rowLabel}>{t('settings.autoScan')}</Text>
           <Switch
             value={autoScan}
             onValueChange={(v) => {
@@ -476,8 +472,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => loadMiners()}
         >
-          <Text style={styles.rowLabel}>Refresh All</Text>
-          <Text style={styles.actionText}>Refresh</Text>
+          <Text style={styles.rowLabel}>{t('settings.refreshAll')}</Text>
+          <Text style={styles.actionText}>{t('settings.refresh')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
@@ -485,8 +481,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           onPress={scanNetwork}
           disabled={scanning}
         >
-          <Text style={styles.rowLabel}>Scan Network</Text>
-          <Text style={styles.actionText}>{scanning ? 'Scanning...' : 'Scan'}</Text>
+          <Text style={styles.rowLabel}>{t('settings.scanNetwork')}</Text>
+          <Text style={styles.actionText}>
+            {scanning ? t('settings.scanning') : t('settings.scan')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
@@ -494,9 +492,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => navigation.navigate('Groups')}
         >
-          <Text style={styles.rowLabel}>Groups</Text>
+          <Text style={styles.rowLabel}>{t('settings.groups')}</Text>
           <View style={styles.rowRight}>
-            <Text style={styles.actionText}>Manage</Text>
+            <Text style={styles.actionText}>{t('settings.manage')}</Text>
             <Text style={styles.chevron}>›</Text>
           </View>
         </TouchableOpacity>
@@ -506,12 +504,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => {
             exportAllData().catch(() => {
-              Alert.alert('Export Failed', 'Could not export miner data');
+              Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
             });
           }}
         >
-          <Text style={styles.rowLabel}>Export CSV</Text>
-          <Text style={styles.actionText}>Snapshots</Text>
+          <Text style={styles.rowLabel}>{t('settings.exportCsv')}</Text>
+          <Text style={styles.actionText}>{t('settings.snapshots')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
@@ -519,12 +517,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => {
             exportJSON().catch(() => {
-              Alert.alert('Export Failed', 'Could not export data');
+              Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
             });
           }}
         >
-          <Text style={styles.rowLabel}>Export JSON</Text>
-          <Text style={styles.actionText}>Full Backup</Text>
+          <Text style={styles.rowLabel}>{t('settings.exportJson')}</Text>
+          <Text style={styles.actionText}>{t('settings.fullBackup')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
@@ -532,23 +530,23 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => navigation.navigate('ImportData')}
         >
-          <Text style={styles.rowLabel}>Import Data</Text>
+          <Text style={styles.rowLabel}>{t('settings.importData')}</Text>
           <View style={styles.rowRight}>
-            <Text style={styles.actionText}>Restore</Text>
+            <Text style={styles.actionText}>{t('settings.restore')}</Text>
             <Text style={styles.chevron}>›</Text>
           </View>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Version</Text>
+          <Text style={styles.rowLabel}>{t('settings.version')}</Text>
           <Text style={styles.rowValue}>1.0.0</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Made for</Text>
-          <Text style={styles.rowValue}>BitAxe Miners</Text>
+          <Text style={styles.rowLabel}>{t('settings.madeFor')}</Text>
+          <Text style={styles.rowValue}>{t('settings.bitaxeMiners')}</Text>
         </View>
       </View>
     </ScrollView>

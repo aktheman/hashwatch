@@ -172,11 +172,11 @@ it('shows delete alert on long press when onDelete provided', async () => {
   await render(<MinerCard miner={miner} onPress={jest.fn()} onDelete={onDelete} />);
   fireEvent(screen.getByText('Test Miner'), 'onLongPress');
   expect(alertSpy).toHaveBeenCalledWith(
-    'Remove Miner',
-    'Remove Test Miner? All history will be deleted.',
+    'minerCard.removeMiner',
+    'minerCard.removeConfirm',
     expect.arrayContaining([
-      expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
-      expect.objectContaining({ text: 'Remove', style: 'destructive' }),
+      expect.objectContaining({ text: 'common.cancel', style: 'cancel' }),
+      expect.objectContaining({ text: 'minerCard.remove', style: 'destructive' }),
     ]),
   );
   alertSpy.mockRestore();
@@ -184,7 +184,7 @@ it('shows delete alert on long press when onDelete provided', async () => {
 
 it('executes onDelete when Remove is pressed in alert', async () => {
   const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
-    const removeBtn = (buttons as any[])?.find((b: any) => b.text === 'Remove');
+    const removeBtn = (buttons as any[])?.find((b: any) => b.text === 'minerCard.remove');
     if (removeBtn?.onPress) removeBtn.onPress();
   });
   const onDelete = jest.fn();

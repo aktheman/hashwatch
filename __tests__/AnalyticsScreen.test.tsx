@@ -59,7 +59,7 @@ beforeEach(() => {
 
 it('renders header', async () => {
   await render(<AnalyticsScreen />);
-  expect(screen.getByText('Analytics')).toBeTruthy();
+  expect(screen.getByText('analytics.title')).toBeTruthy();
 });
 
 it('renders summary stats when miners exist', async () => {
@@ -86,7 +86,7 @@ it('renders summary stats when miners exist', async () => {
 it('renders empty state when no miners', async () => {
   mockMiners = [];
   await render(<AnalyticsScreen />);
-  expect(screen.getByText('Analytics')).toBeTruthy();
+  expect(screen.getByText('analytics.title')).toBeTruthy();
 });
 
 it('shows range selector buttons', async () => {
@@ -124,9 +124,7 @@ it('shows hashrate chart with snapshot data', async () => {
     })),
   );
   await render(<AnalyticsScreen />);
-  await waitFor(() =>
-    expect(screen.queryAllByText('Not enough data yet. Keep miners running.')).toHaveLength(0),
-  );
+  await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
 });
 
 it('shows Power Cost when power cost setting is set', async () => {
@@ -139,7 +137,7 @@ it('shows Power Cost when power cost setting is set', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await waitFor(() => expect(screen.queryByText('Power Cost')).toBeTruthy());
+  await waitFor(() => expect(screen.queryByText('analytics.powerCost')).toBeTruthy());
 });
 
 it('shows Power (W) label in static summary cards', async () => {
@@ -151,7 +149,7 @@ it('shows Power (W) label in static summary cards', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await waitFor(() => expect(screen.getByText('Power (W)')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText('analytics.power')).toBeTruthy());
 });
 
 it('shows Est. Daily BTC label in static summary cards', async () => {
@@ -163,7 +161,7 @@ it('shows Est. Daily BTC label in static summary cards', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await waitFor(() => expect(screen.getByText('Est. Daily BTC')).toBeTruthy());
+  await waitFor(() => expect(screen.getByText('analytics.estDailyBTC')).toBeTruthy());
 });
 
 it('shows empty chart text with no snapshot data', async () => {
@@ -177,8 +175,6 @@ it('shows empty chart text with no snapshot data', async () => {
   mockGetSnapshots.mockResolvedValue([]);
   await render(<AnalyticsScreen />);
   await waitFor(() =>
-    expect(
-      screen.getAllByText('Not enough data yet. Keep miners running.').length,
-    ).toBeGreaterThanOrEqual(1),
+    expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1),
   );
 });

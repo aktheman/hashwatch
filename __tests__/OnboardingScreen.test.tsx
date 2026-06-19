@@ -21,23 +21,23 @@ beforeEach(() => {
 
 it('renders first slide title', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
-  expect(screen.getByText('Monitor Your BitAxe')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide1Title')).toBeTruthy();
 });
 
 it('renders Next button', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
-  expect(screen.getByText('Next')).toBeTruthy();
+  expect(screen.getByText('onboarding.next')).toBeTruthy();
 });
 
 it('renders Skip button', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
-  expect(screen.getByText('Skip')).toBeTruthy();
+  expect(screen.getByText('onboarding.skip')).toBeTruthy();
 });
 
 it('calls onComplete when Skip is pressed', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Skip'));
+    fireEvent.press(screen.getByText('onboarding.skip'));
   });
   expect(onComplete).toHaveBeenCalled();
 });
@@ -45,20 +45,20 @@ it('calls onComplete when Skip is pressed', async () => {
 it('saves onboarding_complete setting when skipped', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Skip'));
+    fireEvent.press(screen.getByText('onboarding.skip'));
   });
   expect(setSetting).toHaveBeenCalledWith('onboarding_complete', 'true');
 });
 
 it('renders all slide titles in flatlist', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
-  expect(screen.getByText('Monitor Your BitAxe')).toBeTruthy();
-  expect(screen.getByText('Auto-Discovery')).toBeTruthy();
-  expect(screen.getByText('Instant Alerts')).toBeTruthy();
-  expect(screen.getByText('Ready to Mine')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide1Title')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide2Title')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide3Title')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide4Title')).toBeTruthy();
 });
 
 it('renders dot indicators', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
-  expect(screen.getByText('Monitor Your BitAxe')).toBeTruthy();
+  expect(screen.getByText('onboarding.slide1Title')).toBeTruthy();
 });

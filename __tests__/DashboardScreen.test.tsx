@@ -137,25 +137,25 @@ beforeEach(() => {
 
 it('renders HashWatch title', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('HashWatch')).toBeTruthy();
+  expect(screen.getByText('dashboard.title')).toBeTruthy();
 }, 20000);
 
 it('shows empty state when no miners', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('No Miners Yet')).toBeTruthy();
-  expect(screen.getByText('Add Miner')).toBeTruthy();
-  expect(screen.getByText('Scan Network')).toBeTruthy();
+  expect(screen.getByText('dashboard.noMiners')).toBeTruthy();
+  expect(screen.getByText('dashboard.addMiner')).toBeTruthy();
+  expect(screen.getByText('dashboard.scanNetwork')).toBeTruthy();
 });
 
 it('shows loading state', async () => {
   useMinerStore.setState({ loading: true, initialized: false });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('Loading miners...')).toBeTruthy();
+  expect(screen.queryByText('dashboard.noMiners')).toBeNull();
 });
 
 it('navigates to AddMiner from empty state', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Add Miner'));
+  fireEvent.press(screen.getByText('dashboard.addMiner'));
   expect(navigation.navigate).toHaveBeenCalledWith('AddMiner');
 });
 
@@ -179,12 +179,12 @@ it('shows summary stats with miners', async () => {
     ] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('Miners')).toBeTruthy();
-  expect(screen.getByText('Online')).toBeTruthy();
-  expect(screen.getAllByText('Hashrate').length).toBeGreaterThan(0);
-  expect(screen.getByText('Power (W)')).toBeTruthy();
-  expect(screen.getByText('Avg Temp')).toBeTruthy();
-  expect(screen.getByText('Efficiency')).toBeTruthy();
+  expect(screen.getByText('dashboard.miners')).toBeTruthy();
+  expect(screen.getByText('dashboard.online')).toBeTruthy();
+  expect(screen.getAllByText('dashboard.hashrate').length).toBeGreaterThan(0);
+  expect(screen.getByText('dashboard.power')).toBeTruthy();
+  expect(screen.getByText('dashboard.avgTemp')).toBeTruthy();
+  expect(screen.getByText('dashboard.efficiency')).toBeTruthy();
 }, 15000);
 
 it('shows miner card when miners exist', async () => {
@@ -255,7 +255,7 @@ it('shows upgrade banner when at limit', async () => {
     miners: [makeMiner()],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText(/Upgrade to Pro/)).toBeTruthy();
+  expect(screen.getByText(/dashboard.upgradePro/)).toBeTruthy();
 });
 
 it('upgrade banner navigates to Subscription', async () => {
@@ -293,13 +293,13 @@ it('error banner dismiss calls clearError', async () => {
 it('shows scanning banner when scanning', async () => {
   useMinerStore.setState({ scanning: true, scanProgress: { scanned: 50, total: 254, found: 3 } });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText(/Scanning 50\/254/)).toBeTruthy();
+  expect(screen.getByText('dashboard.scanning')).toBeTruthy();
 });
 
 it('shows scanning banner with default values when scanProgress is null', async () => {
   useMinerStore.setState({ scanning: true, scanProgress: null });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText(/Scanning 0\/254/)).toBeTruthy();
+  expect(screen.getByText('dashboard.scanning')).toBeTruthy();
 });
 
 it('shows wallet filter chips', async () => {
@@ -309,7 +309,7 @@ it('shows wallet filter chips', async () => {
     miners: [makeMiner({ walletId: 'w1' })],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('All')).toBeTruthy();
+  expect(screen.getByText('common.all')).toBeTruthy();
   expect(screen.getByText('My Wallet')).toBeTruthy();
 });
 

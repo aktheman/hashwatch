@@ -132,17 +132,17 @@ beforeEach(() => {
 it('shows main app when onboarding_complete is true', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('No Miners Yet')).toBeTruthy();
+  expect(await screen.findByText('dashboard.noMiners')).toBeTruthy();
 });
 
 it('shows dashboard with all four tabs', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  expect(screen.getByText('Dashboard')).toBeTruthy();
-  expect(screen.getByText('Pools')).toBeTruthy();
-  expect(screen.getByText('Analytics')).toBeTruthy();
-  expect(screen.getByText('Settings')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  expect(screen.getByText('tabs.dashboard')).toBeTruthy();
+  expect(screen.getByText('tabs.pools')).toBeTruthy();
+  expect(screen.getByText('tabs.analytics')).toBeTruthy();
+  expect(screen.getByText('tabs.settings')).toBeTruthy();
 });
 
 it('shows miner card when miners exist', async () => {
@@ -162,73 +162,73 @@ it('shows miner card when miners exist', async () => {
 it('shows OfflineBanner text when online', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
 });
 
 it('renders Suspense loading fallback for lazy screens', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('No Miners Yet')).toBeTruthy();
+  expect(await screen.findByText('dashboard.noMiners')).toBeTruthy();
 });
 
 it('navigates to Pools tab', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Pools'));
-  expect(await screen.findByText('No Pools Yet')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.pools'));
+  expect(await screen.findByText('pools.noPools')).toBeTruthy();
 });
 
 it('navigates to Analytics tab', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Analytics'));
-  expect(await screen.findByText('Analytics')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.analytics'));
+  expect(await screen.findByText('analytics.title')).toBeTruthy();
 });
 
 it('navigates to Settings tab', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Settings'));
-  expect(await screen.findByText('Settings')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.settings'));
+  expect(await screen.findByText('settings.title')).toBeTruthy();
 });
 
 it('navigates to Subscription screen from Settings', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Settings'));
-  await screen.findByText('Settings');
-  fireEvent.press(screen.getByText('Plan'));
-  expect(await screen.findByText('HashWatch Pro')).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.settings'));
+  await screen.findByText('settings.title');
+  fireEvent.press(screen.getByText('settings.plan'));
+  expect(await screen.findByText('subscription.title')).toBeTruthy();
 });
 
 it('navigates to AddMiner screen', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Add Miner'));
-  expect(await screen.findByText(/Add Miner/i)).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('dashboard.addMiner'));
+  expect(await screen.findByText(/addMiner/i)).toBeTruthy();
 });
 
 it('navigates to Wallets screen from Settings', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Settings'));
-  await screen.findByText('Settings');
-  fireEvent.press(screen.getByText('Wallets'));
-  expect(await screen.findByText(/Wallets/i)).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.settings'));
+  await screen.findByText('settings.title');
+  fireEvent.press(screen.getByText('settings.wallets'));
+  expect(await screen.findByText('wallets.title')).toBeTruthy();
 });
 
 it('navigates to Groups screen from Settings', async () => {
   (DB.getSetting as jest.Mock).mockResolvedValue('true');
   await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('Settings'));
-  await screen.findByText('Settings');
-  fireEvent.press(screen.getByText('Groups'));
-  expect(await screen.findByText(/Groups/i)).toBeTruthy();
+  expect(await screen.findByText('dashboard.title')).toBeTruthy();
+  fireEvent.press(screen.getByText('tabs.settings'));
+  await screen.findByText('settings.title');
+  fireEvent.press(screen.getByText('settings.groups'));
+  expect(await screen.findByText(/groups.title/)).toBeTruthy();
 });

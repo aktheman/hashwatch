@@ -52,7 +52,7 @@ describe('WalletsScreen', () => {
   it('shows empty state when no wallets', async () => {
     mockLoadWallets.mockResolvedValue([]);
     await render(<WalletsScreen />);
-    expect(await screen.findByText('No Wallets')).toBeTruthy();
+    expect(await screen.findByText('wallets.noWallets')).toBeTruthy();
   });
 
   it('renders list of wallets', async () => {
@@ -61,7 +61,7 @@ describe('WalletsScreen', () => {
     ]);
     await render(<WalletsScreen />);
     expect(await screen.findByText('Main Wallet')).toBeTruthy();
-    expect(screen.getByText('1 wallet')).toBeTruthy();
+    expect(screen.getByText('wallets.walletCount')).toBeTruthy();
   });
 
   it('shows plural wallet count', async () => {
@@ -70,16 +70,16 @@ describe('WalletsScreen', () => {
       { id: 'w2', name: 'W2', address: 'bc1q...', color: '#10B981', createdAt: 2000 },
     ]);
     await render(<WalletsScreen />);
-    expect(await screen.findByText('2 wallets')).toBeTruthy();
+    expect(await screen.findByText('wallets.walletCount')).toBeTruthy();
   });
 
   it('can open create wallet modal', async () => {
     mockLoadWallets.mockResolvedValue([]);
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
   });
 
   it('shows Add Wallet button when list is visible', async () => {
@@ -87,7 +87,7 @@ describe('WalletsScreen', () => {
       { id: 'w1', name: 'Existing', address: 'bc1q...', color: '#6C63FF', createdAt: 1000 },
     ]);
     await render(<WalletsScreen />);
-    expect(await screen.findByText('+ Add Wallet')).toBeTruthy();
+    expect(await screen.findByText('wallets.addWallet')).toBeTruthy();
   });
 
   it('saves a new wallet with valid inputs', async () => {
@@ -101,9 +101,9 @@ describe('WalletsScreen', () => {
     await render(<WalletsScreen />);
 
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     await act(async () => {
       fireEvent.changeText(screen.getByLabelText('Wallet name input'), 'Test Wallet');
@@ -115,7 +115,7 @@ describe('WalletsScreen', () => {
       );
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {
@@ -130,19 +130,19 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     await act(async () => {
       fireEvent.changeText(screen.getByLabelText('Bitcoin address input'), 'bc1q...');
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Validation', 'Name and address are required');
+      expect(alertSpy).toHaveBeenCalledWith('wallets.validation', 'wallets.validationBody');
     });
     alertSpy.mockRestore();
   });
@@ -153,19 +153,19 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     await act(async () => {
       fireEvent.changeText(screen.getByLabelText('Wallet name input'), 'Test');
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Validation', 'Name and address are required');
+      expect(alertSpy).toHaveBeenCalledWith('wallets.validation', 'wallets.validationBody');
     });
     alertSpy.mockRestore();
   });
@@ -177,9 +177,9 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     await act(async () => {
       fireEvent.changeText(screen.getByLabelText('Wallet name input'), 'Test');
@@ -188,11 +188,11 @@ describe('WalletsScreen', () => {
       fireEvent.changeText(screen.getByLabelText('Bitcoin address input'), 'invalid');
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Invalid Address', expect.any(String));
+      expect(alertSpy).toHaveBeenCalledWith('wallets.invalidAddress', expect.any(String));
     });
     alertSpy.mockRestore();
   });
@@ -216,12 +216,12 @@ describe('WalletsScreen', () => {
     await act(async () => {
       fireEvent.press(screen.getByLabelText('Edit wallet: Old Name'));
     });
-    await waitFor(() => expect(screen.getByText('Edit Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.editWallet')).toBeTruthy());
     await act(async () => {
       fireEvent.changeText(screen.getByLabelText('Wallet name input'), 'Updated Name');
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {
@@ -246,7 +246,7 @@ describe('WalletsScreen', () => {
       .spyOn(Alert, 'alert')
       .mockImplementation(
         (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
-          const deleteBtn = buttons?.find((b) => b.text === 'Delete');
+          const deleteBtn = buttons?.find((b) => b.text === 'common.delete');
           if (deleteBtn?.onPress) deleteBtn.onPress();
         },
       );
@@ -259,7 +259,7 @@ describe('WalletsScreen', () => {
     });
     await waitFor(() => expect(mockDeleteWallet).toHaveBeenCalledWith('w1'));
     await waitFor(() => expect(screen.queryByText('Delete Me')).toBeNull());
-    expect(screen.getByText('No Wallets')).toBeTruthy();
+    expect(screen.getByText('wallets.noWallets')).toBeTruthy();
     alertSpy.mockRestore();
   });
 
@@ -268,15 +268,15 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     await act(async () => {
       fireEvent.press(screen.getByLabelText('Cancel'));
     });
     await waitFor(() => {
-      expect(screen.queryByText('New Wallet')).toBeNull();
+      expect(screen.queryByText('wallets.newWallet')).toBeNull();
     });
   });
 
@@ -294,7 +294,7 @@ describe('WalletsScreen', () => {
       .spyOn(Alert, 'alert')
       .mockImplementation(
         (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
-          const cancelBtn = buttons?.find((b) => b.text === 'Cancel');
+          const cancelBtn = buttons?.find((b) => b.text === 'common.cancel');
           if (cancelBtn?.onPress) cancelBtn.onPress();
         },
       );
@@ -316,9 +316,9 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('Create Wallet'));
+      fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
-    await waitFor(() => expect(screen.getByText('New Wallet')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
     const colorCircles = screen.getAllByLabelText('Select color');
     expect(colorCircles.length).toBe(8);
@@ -332,7 +332,7 @@ describe('WalletsScreen', () => {
       fireEvent.changeText(screen.getByLabelText('Bitcoin address input'), 'bc1qcolor');
     });
     await act(async () => {
-      fireEvent.press(screen.getByText('Save'));
+      fireEvent.press(screen.getByText('common.save'));
     });
 
     await waitFor(() => {

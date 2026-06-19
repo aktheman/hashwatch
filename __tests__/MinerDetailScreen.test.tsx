@@ -102,7 +102,7 @@ it('renders miner name and IP', async () => {
 
 it('shows LIVE badge', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText('LIVE')).toBeTruthy();
+  expect(screen.getByText('minerDetail.live')).toBeTruthy();
 });
 
 it('shows hostname when available', async () => {
@@ -113,20 +113,20 @@ it('shows hostname when available', async () => {
 it('renders stat widgets', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
   const sections = [
-    'Hashrate',
-    'Frequency',
-    'Best Diff',
-    'Best Session',
-    'Board Temp',
-    'Voltage',
-    'Current',
-    'Power',
-    'Efficiency',
-    'Core V',
-    'Fan',
-    'Accepted',
-    'Rejected',
-    'Uptime',
+    'minerDetail.hashrate',
+    'minerDetail.frequency',
+    'minerDetail.bestDiff',
+    'minerDetail.bestSession',
+    'minerDetail.boardTemp',
+    'minerDetail.voltage',
+    'minerDetail.current',
+    'minerDetail.power',
+    'minerDetail.efficiency',
+    'minerDetail.coreV',
+    'minerDetail.fan',
+    'minerDetail.accepted',
+    'minerDetail.rejected',
+    'minerDetail.uptime',
   ];
   for (const s of sections) {
     expect(screen.getByText(s)).toBeTruthy();
@@ -142,19 +142,19 @@ it('shows pool information', async () => {
 
 it('shows hashrate history section', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText(/Hashrate History/)).toBeTruthy();
+  expect(screen.getByText(/minerDetail.hashrateHistory/)).toBeTruthy();
 });
 
 it('shows Danger Zone with remove button', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText('Remove Miner')).toBeTruthy();
+  expect(screen.getByText('minerDetail.removeMiner')).toBeTruthy();
 });
 
 it('shows confirm dialog when remove is tapped', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByText('Remove Miner'));
-  expect(await screen.findByText(/This permanently deletes/)).toBeTruthy();
-  expect(screen.getByText('Yes, Remove')).toBeTruthy();
+  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  expect(await screen.findByText(/minerDetail.removeConfirm/)).toBeTruthy();
+  expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy();
 });
 
 it('shows offline state when miner has no status', async () => {
@@ -168,21 +168,21 @@ it('shows offline state when miner has no status', async () => {
   useMinerStore.setState({ miners: [offlineMiner] });
   const offlineRoute = { params: { minerId: 'm2' } };
   await render(<MinerDetailScreen route={offlineRoute} navigation={navigation} />);
-  expect(screen.getByText('Miner Offline')).toBeTruthy();
-  expect(screen.getByText('Retry')).toBeTruthy();
+  expect(screen.getByText('minerDetail.offline')).toBeTruthy();
+  expect(screen.getByText('common.retry')).toBeTruthy();
 });
 
 it('shows not found state for unknown miner', async () => {
   const badRoute = { params: { minerId: 'nonexistent' } };
   await render(<MinerDetailScreen route={badRoute} navigation={navigation} />);
-  expect(screen.getByText('Miner Not Found')).toBeTruthy();
-  expect(screen.getByText('Go Back')).toBeTruthy();
+  expect(screen.getByText('minerDetail.notFound')).toBeTruthy();
+  expect(screen.getByText('common.goBack')).toBeTruthy();
 });
 
 it('calls goBack when Go Back is pressed in not found state', async () => {
   const badRoute = { params: { minerId: 'nonexistent' } };
   await render(<MinerDetailScreen route={badRoute} navigation={navigation} />);
-  fireEvent.press(screen.getByText('Go Back'));
+  fireEvent.press(screen.getByText('common.goBack'));
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
@@ -200,14 +200,14 @@ it('calls refreshMiner when Retry is pressed in offline state', async () => {
   useMinerStore.setState({ miners: [offlineMiner] });
   const offlineRoute = { params: { minerId: 'm3' } };
   await render(<MinerDetailScreen route={offlineRoute} navigation={navigation} />);
-  fireEvent.press(screen.getByText('Retry'));
+  fireEvent.press(screen.getByText('common.retry'));
   expect(refreshMinerSpy).toHaveBeenCalledWith('m3');
   refreshMinerSpy.mockRestore();
 });
 
 it('shows Share Stats button and calls Share.share on press', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText('Share Stats')).toBeTruthy();
+  expect(screen.getByText('minerDetail.shareStats')).toBeTruthy();
   fireEvent.press(screen.getByLabelText('Share Stats'));
   await waitFor(() => {
     expect(Share.share).toHaveBeenCalledWith(
@@ -219,8 +219,8 @@ it('shows Share Stats button and calls Share.share on press', async () => {
 it('navigates back after confirming remove', async () => {
   useMinerStore.setState({ removeMiner: jest.fn().mockResolvedValue(undefined) } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByText('Remove Miner'));
-  await waitFor(() => expect(screen.getByText('Yes, Remove')).toBeTruthy());
+  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  await waitFor(() => expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy());
   fireEvent.press(screen.getByLabelText('Yes, Remove'));
   await waitFor(() => expect(navigation.goBack).toHaveBeenCalled());
 });

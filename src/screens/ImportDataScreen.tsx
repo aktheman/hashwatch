@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme';
 import { importFromJSON } from '../utils/export';
+import { useTranslation } from 'react-i18next';
 
 interface ImportResult {
   miners: number;
@@ -19,6 +20,7 @@ interface ImportResult {
 }
 
 export function ImportDataScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [jsonText, setJsonText] = useState('');
   const [importing, setImporting] = useState(false);
@@ -26,7 +28,7 @@ export function ImportDataScreen() {
 
   const handleImport = async () => {
     if (!jsonText.trim()) {
-      Alert.alert('No Data', 'Paste exported JSON data first');
+      Alert.alert(t('import.noData'), t('import.noDataBody'));
       return;
     }
     setImporting(true);
@@ -35,11 +37,15 @@ export function ImportDataScreen() {
       const res = await importFromJSON(jsonText);
       setResult(res);
       Alert.alert(
-        'Import Complete',
-        `Imported: ${res.miners} miners, ${res.snapshots} snapshots, ${res.wallets} wallets`,
+        t('import.complete'),
+        t('import.completeBody', {
+          miners: res.miners,
+          snapshots: res.snapshots,
+          wallets: res.wallets,
+        }),
       );
     } catch (e: unknown) {
-      Alert.alert('Import Failed', e instanceof Error ? e.message : 'Invalid data');
+      Alert.alert(t('import.failed'), e instanceof Error ? e.message : 'Invalid data');
     } finally {
       setImporting(false);
     }
@@ -110,18 +116,14 @@ export function ImportDataScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Import Data</Text>
-      <Text style={styles.subtitle}>
-        Export JSON from another device or backup and paste it below to restore your miners,
-        wallets, settings, and historical data.{'\n\n'}
-        Existing data with the same IDs will be overwritten.
-      </Text>
+      <Text style={styles.title}>{t('import.title')}</Text>
+      <Text style={styles.subtitle}>{t('import.description')}</Text>
 
       <TextInput
         style={styles.input}
         value={jsonText}
         onChangeText={setJsonText}
-        placeholder={'Paste JSON backup here...'}
+        placeholder={t('import.placeholder')}
         placeholderTextColor={theme.textMuted}
         multiline
         accessibilityLabel="Paste JSON backup data"
@@ -134,20 +136,22 @@ export function ImportDataScreen() {
         onPress={handleImport}
         disabled={importing}
       >
-        <Text style={styles.importBtnText}>{importing ? 'Importing...' : 'Import Data'}</Text>
+        <Text style={styles.importBtnText}>
+          {importing ? t('import.importing') : t('import.title')}
+        </Text>
       </TouchableOpacity>
 
       {result && (
         <View style={styles.resultBox}>
-          <Text style={styles.resultTitle}>✓ Import Successful</Text>
+          <Text style={styles.resultTitle}>{t('import.success')}</Text>
           <Text style={styles.resultText}>
-            {result.miners} miner{result.miners !== 1 ? 's' : ''} imported
+            {t('import.minersImported', { count: result.miners })}
           </Text>
           <Text style={styles.resultText}>
-            {result.snapshots} snapshot{result.snapshots !== 1 ? 's' : ''} imported
+            {t('import.snapshotsImported', { count: result.snapshots })}
           </Text>
           <Text style={styles.resultText}>
-            {result.wallets} wallet{result.wallets !== 1 ? 's' : ''} imported
+            {t('import.walletsImported', { count: result.wallets })}
           </Text>
         </View>
       )}

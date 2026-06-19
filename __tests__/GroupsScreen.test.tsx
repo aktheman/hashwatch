@@ -44,15 +44,15 @@ beforeEach(() => {
 
 it('renders groups header', async () => {
   await render(<GroupsScreen />);
-  expect(screen.getByText('Group Management')).toBeTruthy();
+  expect(screen.getByText('groups.title')).toBeTruthy();
 });
 
 it('shows all groups with miner counts', async () => {
   await render(<GroupsScreen />);
   expect(screen.getByText(/Garage/)).toBeTruthy();
   expect(screen.getByText(/Basement/)).toBeTruthy();
-  expect(screen.getByText(/Ungrouped/)).toBeTruthy();
-  expect(screen.getByText(/2 miners/)).toBeTruthy();
+  expect(screen.getByText(/groups.ungrouped/)).toBeTruthy();
+  expect(screen.getAllByText(/groups.minerCount/).length).toBeGreaterThanOrEqual(1);
 });
 
 it('shows miners within groups', async () => {
@@ -65,13 +65,13 @@ it('shows miners within groups', async () => {
 
 it('renders remove buttons for non-ungrouped miners', async () => {
   await render(<GroupsScreen />);
-  expect(screen.getAllByText('Remove').length).toBeGreaterThanOrEqual(3);
+  expect(screen.getAllByText('groups.remove').length).toBeGreaterThanOrEqual(3);
 });
 
 it('shows empty state when no miners', async () => {
   mockMiners = [];
   await render(<GroupsScreen />);
-  expect(screen.getByText(/No miners yet/)).toBeTruthy();
+  expect(screen.getByText(/groups.noMiners/)).toBeTruthy();
 });
 
 it('can create a new group via text input', async () => {
@@ -82,10 +82,10 @@ it('can create a new group via text input', async () => {
     fireEvent.changeText(screen.getByLabelText('New group name'), 'NewGroup');
   });
   await act(async () => {
-    fireEvent.press(screen.getByText('Add'));
+    fireEvent.press(screen.getByText('common.add'));
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('Group Created', expect.stringContaining('NewGroup'));
+  expect(alertSpy).toHaveBeenCalledWith('groups.groupCreated', 'groups.groupCreatedBody');
   alertSpy.mockRestore();
 });
 
@@ -103,7 +103,7 @@ it('creates group via onSubmitEditing', async () => {
     fireEvent(input, 'submitEditing', { nativeEvent: { text: 'TestGroup' } });
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('Group Created', expect.stringContaining('TestGroup'));
+  expect(alertSpy).toHaveBeenCalledWith('groups.groupCreated', 'groups.groupCreatedBody');
   alertSpy.mockRestore();
 });
 
@@ -115,7 +115,7 @@ it('does nothing for empty group name', async () => {
     fireEvent.changeText(screen.getByLabelText('New group name'), '   ');
   });
   await act(async () => {
-    fireEvent.press(screen.getByText('Add'));
+    fireEvent.press(screen.getByText('common.add'));
   });
 
   expect(alertSpy).not.toHaveBeenCalled();
@@ -130,10 +130,10 @@ it('shows alert for duplicate group name', async () => {
     fireEvent.changeText(screen.getByLabelText('New group name'), 'Garage');
   });
   await act(async () => {
-    fireEvent.press(screen.getByText('Add'));
+    fireEvent.press(screen.getByText('common.add'));
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('Group exists', expect.stringContaining('Garage'));
+  expect(alertSpy).toHaveBeenCalledWith('groups.groupExists', 'groups.groupExistsBody');
   alertSpy.mockRestore();
 });
 
@@ -142,7 +142,7 @@ it('remove group triggers confirmation and calls setMinerGroup', async () => {
     .spyOn(Alert, 'alert')
     .mockImplementation(
       (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
-        const removeBtn = buttons?.find((b) => b.text === 'Remove');
+        const removeBtn = buttons?.find((b) => b.text === 'groups.remove');
         if (removeBtn?.onPress) removeBtn.onPress();
       },
     );
@@ -164,7 +164,7 @@ it('cancel remove group does not call setMinerGroup', async () => {
     .spyOn(Alert, 'alert')
     .mockImplementation(
       (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
-        const cancelBtn = buttons?.find((b) => b.text === 'Cancel');
+        const cancelBtn = buttons?.find((b) => b.text === 'common.cancel');
         if (cancelBtn?.onPress) cancelBtn.onPress();
       },
     );
@@ -206,14 +206,14 @@ it('rename group shows fallback alert when Alert.prompt is unavailable', async (
     fireEvent.press(screen.getByLabelText('Rename group Garage'));
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('Rename Group', 'Edit group name in Miner Details');
+  expect(alertSpy).toHaveBeenCalledWith('groups.renameGroup', 'groups.editInDetails');
   (Alert as any).prompt = originalPrompt;
   alertSpy.mockRestore();
 });
 
 it('shows Ungrouped section at the end', async () => {
   await render(<GroupsScreen />);
-  const groupCards = screen.getAllByText(/Garage|Basement|Ungrouped/);
+  const groupCards = screen.getAllByText(/Garage|Basement|groups.ungrouped/);
   expect(groupCards.length).toBeGreaterThanOrEqual(3);
 });
 
@@ -222,5 +222,5 @@ it('renders mine count with singular for single miner group', async () => {
     { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Solo' },
   ];
   await render(<GroupsScreen />);
-  expect(screen.getByText('1 miner')).toBeTruthy();
+  expect(screen.getByText('groups.minerCount')).toBeTruthy();
 });

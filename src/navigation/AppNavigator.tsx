@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { startPricePolling } from '../utils/hashrate';
 
+import { useTranslation } from 'react-i18next';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 import { useTheme } from '../theme';
@@ -95,6 +96,7 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 
 function MainTabs() {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -116,10 +118,26 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Dashboard" component={WrappedDashboard} options={{ headerShown: false }} />
-      <Tab.Screen name="Pools" component={WrappedPools} options={{ headerShown: false }} />
-      <Tab.Screen name="Analytics" component={WrappedAnalytics} options={{ headerShown: false }} />
-      <Tab.Screen name="Settings" component={WrappedSettings} options={{ headerShown: false }} />
+      <Tab.Screen
+        name="Dashboard"
+        component={WrappedDashboard}
+        options={{ headerShown: false, tabBarLabel: t('tabs.dashboard') }}
+      />
+      <Tab.Screen
+        name="Pools"
+        component={WrappedPools}
+        options={{ headerShown: false, tabBarLabel: t('tabs.pools') }}
+      />
+      <Tab.Screen
+        name="Analytics"
+        component={WrappedAnalytics}
+        options={{ headerShown: false, tabBarLabel: t('tabs.analytics') }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={WrappedSettings}
+        options={{ headerShown: false, tabBarLabel: t('tabs.settings') }}
+      />
     </Tab.Navigator>
   );
 }
@@ -134,6 +152,7 @@ const styles = StyleSheet.create({
 
 export function AppNavigator() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const stop = startPricePolling();
@@ -155,24 +174,32 @@ export function AppNavigator() {
         <Stack.Screen
           name="MinerDetail"
           component={WrappedMinerDetail}
-          options={{ title: 'Miner Details' }}
+          options={{ title: t('navigator.minerDetail') }}
         />
         <Stack.Screen
           name="AddMiner"
           component={WrappedAddMiner}
-          options={{ title: 'Add Miner' }}
+          options={{ title: t('navigator.addMiner') }}
         />
         <Stack.Screen
           name="Subscription"
           component={WrappedSubscription}
-          options={{ title: 'HashWatch Pro' }}
+          options={{ title: t('navigator.subscription') }}
         />
-        <Stack.Screen name="Wallets" component={WrappedWallets} options={{ title: 'Wallets' }} />
-        <Stack.Screen name="Groups" component={WrappedGroups} options={{ title: 'Groups' }} />
+        <Stack.Screen
+          name="Wallets"
+          component={WrappedWallets}
+          options={{ title: t('navigator.wallets') }}
+        />
+        <Stack.Screen
+          name="Groups"
+          component={WrappedGroups}
+          options={{ title: t('navigator.groups') }}
+        />
         <Stack.Screen
           name="ImportData"
           component={WrappedImportData}
-          options={{ title: 'Import Data' }}
+          options={{ title: t('navigator.importData') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

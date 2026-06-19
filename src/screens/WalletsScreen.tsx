@@ -9,7 +9,9 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
+import { SkeletonCard } from '../components/SkeletonCard';
 import { Wallet } from '../types';
 import * as DB from '../db/database';
 import { useMinerStore } from '../store/miners';
@@ -27,9 +29,11 @@ const WALLET_COLORS = [
 ];
 
 export function WalletsScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
   const [name, setName] = useState('');
@@ -37,7 +41,10 @@ export function WalletsScreen() {
   const [color, setColor] = useState(WALLET_COLORS[0]);
 
   useEffect(() => {
-    DB.loadWallets().then(setWallets);
+    DB.loadWallets().then((w) => {
+      setWallets(w);
+      setLoading(false);
+    });
   }, []);
 
   const loadWallets = async () => {
@@ -63,11 +70,11 @@ export function WalletsScreen() {
 
   const save = async () => {
     if (!name.trim() || !address.trim()) {
-      Alert.alert('Validation', 'Name and address are required');
+      Alert.alert(t('wallets.validation'), t('wallets.validationBody'));
       return;
     }
     if (!isValidBitcoinAddress(address.trim())) {
-      Alert.alert('Invalid Address', 'Enter a valid Bitcoin address (bc1..., 1..., or 3...)');
+      Alert.alert(t('wallets.invalidAddress'), t('wallets.invalidAddressBody'));
       return;
     }
     const w: Wallet = editingWallet
@@ -85,10 +92,10 @@ export function WalletsScreen() {
   };
 
   const remove = (id: string) => {
-    Alert.alert('Delete Wallet', 'Miners assigned to this wallet will become unassigned.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('wallets.deleteWallet'), t('wallets.deleteWalletBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await DB.deleteWallet(id);
@@ -226,27 +233,30 @@ export function WalletsScreen() {
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View>
-          <Text style={styles.headerTitle}>Wallets</Text>
+          <Text style={styles.headerTitle}>{t('wallets.title')}</Text>
           <Text style={styles.headerSub}>
-            {wallets.length} wallet{wallets.length !== 1 ? 's' : ''}
+            {t('wallets.walletCount', { count: wallets.length })}
           </Text>
         </View>
       </View>
 
-      {wallets.length === 0 ? (
+      {loading ? (
+        <View style={{ paddingTop: 8 }}>
+          <SkeletonCard rows={2} />
+          <SkeletonCard rows={2} />
+        </View>
+      ) : wallets.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>💼</Text>
-          <Text style={styles.emptyTitle}>No Wallets</Text>
-          <Text style={styles.emptyText}>
-            Create wallets to organize your miners by payout address
-          </Text>
+          <Text style={styles.emptyTitle}>{t('wallets.noWallets')}</Text>
+          <Text style={styles.emptyText}>{t('wallets.noWalletsBody')}</Text>
           <TouchableOpacity
             accessibilityRole="button"
             accessibilityLabel="Create Wallet"
             style={styles.addBtn}
             onPress={openCreate}
           >
-            <Text style={styles.addBtnText}>Create Wallet</Text>
+            <Text style={styles.addBtnText}>{t('wallets.createWallet')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -262,7 +272,7 @@ export function WalletsScreen() {
               style={styles.addBtn}
               onPress={openCreate}
             >
-              <Text style={styles.addBtnText}>+ Add Wallet</Text>
+              <Text style={styles.addBtnText}>{t('wallets.addWallet')}</Text>
             </TouchableOpacity>
           }
           renderItem={({ item }) => (
@@ -276,7 +286,7 @@ export function WalletsScreen() {
                 </View>
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>
-                    {minerCount(item.id)} miner{minerCount(item.id) !== 1 ? 's' : ''}
+                    {t('wallets.minerCount', { count: minerCount(item.id) })}
                   </Text>
                 </View>
               </View>
@@ -290,7 +300,7 @@ export function WalletsScreen() {
                   style={[styles.actionBtn, styles.actionBtnEdit]}
                   onPress={() => openEdit(item)}
                 >
-                  <Text style={[styles.actionText, styles.actionTextEdit]}>Edit</Text>
+                  <Text style={[styles.actionText, styles.actionTextEdit]}>{t('common.edit')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   accessibilityRole="button"
@@ -298,7 +308,9 @@ export function WalletsScreen() {
                   style={[styles.actionBtn, styles.actionBtnDelete]}
                   onPress={() => remove(item.id)}
                 >
-                  <Text style={[styles.actionText, styles.actionTextDelete]}>Delete</Text>
+                  <Text style={[styles.actionText, styles.actionTextDelete]}>
+                    {t('common.delete')}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -309,28 +321,30 @@ export function WalletsScreen() {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{editingWallet ? 'Edit Wallet' : 'New Wallet'}</Text>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.modalTitle}>
+              {editingWallet ? t('wallets.editWallet') : t('wallets.newWallet')}
+            </Text>
+            <Text style={styles.label}>{t('wallets.name')}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="My Mining Wallet"
+              placeholder={t('wallets.namePlaceholder')}
               placeholderTextColor={theme.textMuted}
               accessibilityLabel="Wallet name input"
             />
-            <Text style={styles.label}>Bitcoin Address</Text>
+            <Text style={styles.label}>{t('wallets.bitcoinAddress')}</Text>
             <TextInput
               style={styles.input}
               value={address}
               onChangeText={setAddress}
-              placeholder="bc1q..."
+              placeholder={t('wallets.addressPlaceholder')}
               placeholderTextColor={theme.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
               accessibilityLabel="Bitcoin address input"
             />
-            <Text style={styles.label}>Color</Text>
+            <Text style={styles.label}>{t('wallets.color')}</Text>
             <View style={styles.colorRow}>
               {WALLET_COLORS.map((c) => (
                 <TouchableOpacity
@@ -353,7 +367,7 @@ export function WalletsScreen() {
                 style={styles.modalCancel}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
@@ -361,7 +375,7 @@ export function WalletsScreen() {
                 style={styles.modalSave}
                 onPress={save}
               >
-                <Text style={styles.modalSaveText}>Save</Text>
+                <Text style={styles.modalSaveText}>{t('common.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>

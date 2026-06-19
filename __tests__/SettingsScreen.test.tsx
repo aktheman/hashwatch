@@ -129,43 +129,43 @@ beforeEach(() => {
 
 it('renders settings title', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Settings')).toBeTruthy();
+  expect(screen.getByText('settings.title')).toBeTruthy();
 });
 
 it('shows plan as Free by default', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Free')).toBeTruthy();
+  expect(screen.getByText('settings.free')).toBeTruthy();
 });
 
 it('navigates to Subscription on plan press', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Plan'));
+  fireEvent.press(screen.getByText('settings.plan'));
   expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
 });
 
 it('shows Pro badge when subscribed', async () => {
   useSubscriptionStore.getState().setPro();
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Pro')).toBeTruthy();
+  expect(screen.getByText('settings.pro')).toBeTruthy();
 });
 
 it('shows Remote Sync section', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Remote Sync')).toBeTruthy();
+  expect(screen.getByText('settings.remoteSync')).toBeTruthy();
 });
 
 it('shows Theme selector', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Theme')).toBeTruthy();
-  expect(screen.getByText(/System/)).toBeTruthy();
-  expect(screen.getByText(/Dark/)).toBeTruthy();
-  expect(screen.getByText(/Light/)).toBeTruthy();
+  expect(screen.getByText('settings.theme')).toBeTruthy();
+  expect(screen.getByText(/themes.system/)).toBeTruthy();
+  expect(screen.getByText(/themes.dark/)).toBeTruthy();
+  expect(screen.getByText(/themes.light/)).toBeTruthy();
 });
 
 it('shows miner count', async () => {
   useMinerStore.setState({ miners: [{ id: 'm1', name: 'T' }] as any[] });
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Total Miners')).toBeTruthy();
+  expect(screen.getByText('settings.totalMiners')).toBeTruthy();
 });
 
 it('shows version', async () => {
@@ -175,26 +175,26 @@ it('shows version', async () => {
 
 it('navigates to Wallets', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Wallets'));
+  fireEvent.press(screen.getByText('settings.wallets'));
   expect(navigation.navigate).toHaveBeenCalledWith('Wallets');
 });
 
 it('navigates to Groups', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Groups'));
+  fireEvent.press(screen.getByText('settings.groups'));
   expect(navigation.navigate).toHaveBeenCalledWith('Groups');
 });
 
 it('navigates to ImportData', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Import Data'));
+  fireEvent.press(screen.getByText('settings.importData'));
   expect(navigation.navigate).toHaveBeenCalledWith('ImportData');
 });
 
 it('shows Export CSV and Export JSON buttons', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Export CSV')).toBeTruthy();
-  expect(screen.getByText('Export JSON')).toBeTruthy();
+  expect(screen.getByText('settings.exportCsv')).toBeTruthy();
+  expect(screen.getByText('settings.exportJson')).toBeTruthy();
 });
 
 it('shows online miner count', async () => {
@@ -205,19 +205,19 @@ it('shows online miner count', async () => {
     ],
   });
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Online')).toBeTruthy();
+  expect(screen.getByText('settings.online')).toBeTruthy();
   expect(screen.getByText('1')).toBeTruthy();
 });
 
 it('shows auto-scan toggle', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Auto-Scan Network')).toBeTruthy();
+  expect(screen.getByText('settings.autoScan')).toBeTruthy();
 });
 
 it('shows Refresh All and Scan Network buttons', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('Refresh All')).toBeTruthy();
-  expect(screen.getByText('Scan Network')).toBeTruthy();
+  expect(screen.getByText('settings.refreshAll')).toBeTruthy();
+  expect(screen.getByText('settings.scanNetwork')).toBeTruthy();
 });
 
 it('toggles auth form when Remote Sync row is pressed', async () => {
@@ -233,7 +233,7 @@ it('calls login when auth form is submitted', async () => {
   mockLogin.mockResolvedValueOnce(true);
   render(<SettingsScreen navigation={navigation} />);
   await waitFor(() => {
-    expect(screen.getByText('Remote Sync')).toBeTruthy();
+    expect(screen.getByText('settings.remoteSync')).toBeTruthy();
   });
   await fireEvent.press(screen.getByLabelText('Remote Sync'));
   const emailInput = await screen.findByLabelText('Email input');
@@ -249,7 +249,7 @@ it('shows error on failed login', async () => {
   mockLogin.mockResolvedValueOnce(false);
   render(<SettingsScreen navigation={navigation} />);
   await waitFor(() => {
-    expect(screen.getByText('Remote Sync')).toBeTruthy();
+    expect(screen.getByText('settings.remoteSync')).toBeTruthy();
   });
   await fireEvent.press(screen.getByLabelText('Remote Sync'));
   const emailInput = await screen.findByLabelText('Email input');
@@ -257,7 +257,7 @@ it('shows error on failed login', async () => {
   await fireEvent.changeText(screen.getByLabelText('Password input'), 'wrong');
   await fireEvent.press(screen.getByLabelText('Sign In'));
   await waitFor(() => {
-    expect(screen.getByText('Login failed')).toBeTruthy();
+    expect(screen.getByText('settings.loginFailed')).toBeTruthy();
   });
 });
 
@@ -307,6 +307,6 @@ it('calls loadMiners on Refresh All press', async () => {
   const mockLoadMiners = jest.fn().mockResolvedValue(undefined);
   useMinerStore.setState({ loadMiners: mockLoadMiners } as any);
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Refresh All'));
+  fireEvent.press(screen.getByText('settings.refreshAll'));
   expect(mockLoadMiners).toHaveBeenCalled();
 });

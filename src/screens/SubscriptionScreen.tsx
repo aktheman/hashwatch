@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
 
 export function SubscriptionScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { isPro, tier, loading, purchase, restore } = useSubscriptionStore();
 
@@ -156,14 +158,14 @@ export function SubscriptionScreen() {
     <View style={styles.container}>
       <View style={styles.hero}>
         <Text style={styles.heroIcon}>⭐</Text>
-        <Text style={styles.heroTitle}>HashWatch Pro</Text>
-        <Text style={styles.heroSub}>Unlimited miners, 30-day charts, and push alerts</Text>
+        <Text style={styles.heroTitle}>{t('subscription.title')}</Text>
+        <Text style={styles.heroSub}>{t('subscription.subtitle')}</Text>
       </View>
 
       <View style={[styles.planCard, tier === 'free' && styles.planCardActive]}>
         <View style={styles.planHeader}>
-          <Text style={styles.planName}>Free</Text>
-          <Text style={styles.planPrice}>$0</Text>
+          <Text style={styles.planName}>{t('subscription.free')}</Text>
+          <Text style={styles.planPrice}>{t('subscription.freePrice')}</Text>
         </View>
         <View style={styles.featureList}>
           <Text style={styles.featureItem}>
@@ -181,20 +183,20 @@ export function SubscriptionScreen() {
         </View>
         {tier === 'free' && (
           <View style={styles.currentBadge}>
-            <Text style={styles.currentBadgeText}>Current</Text>
+            <Text style={styles.currentBadgeText}>{t('subscription.current')}</Text>
           </View>
         )}
       </View>
 
       <View style={[styles.planCard, styles.proCard]}>
         <View style={styles.proBadge}>
-          <Text style={styles.proBadgeText}>BEST VALUE</Text>
+          <Text style={styles.proBadgeText}>{t('subscription.bestValue')}</Text>
         </View>
         <View style={styles.planHeader}>
-          <Text style={styles.planName}>Pro</Text>
+          <Text style={styles.planName}>{t('subscription.pro')}</Text>
           <View style={styles.priceRow}>
-            <Text style={styles.planPrice}>$4.99</Text>
-            <Text style={styles.planPeriod}>/month</Text>
+            <Text style={styles.planPrice}>{t('subscription.proPrice')}</Text>
+            <Text style={styles.planPeriod}>{t('subscription.perMonth')}</Text>
           </View>
         </View>
         <View style={styles.featureList}>
@@ -206,7 +208,9 @@ export function SubscriptionScreen() {
         </View>
         {isPro ? (
           <View style={[styles.currentBadge, styles.activeBadge]}>
-            <Text style={[styles.currentBadgeText, { color: theme.success }]}>Active</Text>
+            <Text style={[styles.currentBadgeText, { color: theme.success }]}>
+              {t('subscription.active')}
+            </Text>
           </View>
         ) : (
           <TouchableOpacity
@@ -219,7 +223,7 @@ export function SubscriptionScreen() {
             {loading ? (
               <ActivityIndicator size="small" color="#FFF" />
             ) : (
-              <Text style={styles.upgradeBtnText}>Upgrade to Pro</Text>
+              <Text style={styles.upgradeBtnText}>{t('subscription.upgradeToPro')}</Text>
             )}
           </TouchableOpacity>
         )}
@@ -232,7 +236,7 @@ export function SubscriptionScreen() {
         onPress={restore}
         disabled={loading}
       >
-        <Text style={styles.restoreBtnText}>Restore Purchases</Text>
+        <Text style={styles.restoreBtnText}>{t('subscription.restorePurchases')}</Text>
       </TouchableOpacity>
     </View>
   );
