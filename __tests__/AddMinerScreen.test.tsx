@@ -108,20 +108,20 @@ beforeEach(() => {
 
 it('renders Add by IP section', async () => {
   await render(<AddMinerScreen navigation={navigation} />);
-  expect(screen.getByText('Add by IP')).toBeTruthy();
-  expect(screen.getByPlaceholderText('192.168.1.100')).toBeTruthy();
-  expect(screen.getByPlaceholderText('Name (optional)')).toBeTruthy();
+  expect(screen.getByText('addMiner.addByIp')).toBeTruthy();
+  expect(screen.getByPlaceholderText('addMiner.ipPlaceholder')).toBeTruthy();
+  expect(screen.getByPlaceholderText('addMiner.namePlaceholder')).toBeTruthy();
 });
 
 it('renders Scan Network section', async () => {
   await render(<AddMinerScreen navigation={navigation} />);
-  expect(screen.getByText('Scan Network')).toBeTruthy();
-  expect(screen.getByText('Find Miners')).toBeTruthy();
+  expect(screen.getByText('addMiner.scanNetwork')).toBeTruthy();
+  expect(screen.getByText('addMiner.findMiners')).toBeTruthy();
 });
 
 it('shows "or" divider', async () => {
   await render(<AddMinerScreen navigation={navigation} />);
-  expect(screen.getByText('or')).toBeTruthy();
+  expect(screen.getByText('addMiner.or')).toBeTruthy();
 });
 
 it('shows Cancel Scan button while scanning', async () => {
@@ -135,9 +135,9 @@ it('shows Cancel Scan button while scanning', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
-  expect(await screen.findByText('Cancel Scan')).toBeTruthy();
+  expect(await screen.findByText('addMiner.cancelScan')).toBeTruthy();
 
   resolveScan!();
 });
@@ -148,10 +148,10 @@ it('hides Cancel Scan after scan completes', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
-  expect(screen.queryByText('Cancel Scan')).toBeNull();
-  expect(await screen.findByText('Find Miners')).toBeTruthy();
+  expect(screen.queryByText('addMiner.cancelScan')).toBeNull();
+  expect(await screen.findByText('addMiner.findMiners')).toBeTruthy();
 });
 
 it('disables Add Miner button when IP is empty', async () => {
@@ -170,7 +170,7 @@ it('shows pro limit error when adding beyond maxMiners', async () => {
   await act(async () => {
     fireEvent.press(screen.getByLabelText('Add Miner'));
   });
-  expect(await screen.findByText(/Upgrade to Pro/)).toBeTruthy();
+  expect(await screen.findByText(/addMiner.upgradePro/)).toBeTruthy();
 });
 
 it('shows error when addMiner throws', async () => {
@@ -203,12 +203,12 @@ it('cancels an active scan', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
   await act(async () => {
-    fireEvent.press(await screen.findByText('Cancel Scan'));
+    fireEvent.press(await screen.findByText('addMiner.cancelScan'));
   });
-  expect(await screen.findByText('Find Miners')).toBeTruthy();
+  expect(await screen.findByText('addMiner.findMiners')).toBeTruthy();
 });
 
 it('shows error when scan fails', async () => {
@@ -217,7 +217,7 @@ it('shows error when scan fails', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
   expect(await screen.findByText(/Network error/)).toBeTruthy();
 });
@@ -231,9 +231,9 @@ it('displays discovered miners list', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
-  expect(await screen.findByText('Found 2 miners')).toBeTruthy();
+  expect(await screen.findByText('addMiner.foundMiners')).toBeTruthy();
   expect(screen.getByLabelText('Add miner: 192.168.1.10')).toBeTruthy();
   expect(screen.getByLabelText('Add miner: 192.168.1.20')).toBeTruthy();
 });
@@ -246,7 +246,7 @@ it('adds a discovered miner', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
   await act(async () => {
     fireEvent.press(await screen.findByLabelText('Add miner: 192.168.1.10'));
@@ -264,12 +264,12 @@ it('shows pro limit error when adding discovered miner beyond max', async () => 
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
   await act(async () => {
     fireEvent.press(await screen.findByLabelText('Add miner: 192.168.1.10'));
   });
-  expect(await screen.findByText(/Upgrade to Pro/)).toBeTruthy();
+  expect(await screen.findByText(/addMiner.upgradePro/)).toBeTruthy();
   expect(addMinerMock).not.toHaveBeenCalled();
 });
 
@@ -284,8 +284,7 @@ it('shows scan progress bar during scan', async () => {
 
   await render(<AddMinerScreen navigation={navigation} />);
   await act(async () => {
-    fireEvent.press(screen.getByText('Find Miners'));
+    fireEvent.press(screen.getByText('addMiner.findMiners'));
   });
-  expect(await screen.findByText(/Scanned 50\/254/)).toBeTruthy();
-  expect(await screen.findByText(/3 found/)).toBeTruthy();
+  expect(await screen.findByText(/addMiner.scanProgress/)).toBeTruthy();
 });

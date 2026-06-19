@@ -3,8 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, StyleSheet } 
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
+import { useTranslation } from 'react-i18next';
 
 export function GroupsScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
@@ -28,19 +30,19 @@ export function GroupsScreen() {
     const name = newGroupName.trim();
     if (!name) return;
     if (miners.some((m) => m.group === name)) {
-      Alert.alert('Group exists', `Group "${name}" already exists`);
+      Alert.alert(t('groups.groupExists'), t('groups.groupExistsBody', { name }));
       return;
     }
     setNewGroupName('');
-    Alert.alert('Group Created', `Group "${name}" is ready. Assign miners in Miner Details.`);
+    Alert.alert(t('groups.groupCreated'), t('groups.groupCreatedBody', { name }));
   }, [newGroupName, miners, setNewGroupName]);
 
   const removeGroup = useCallback(
     (groupName: string) => {
-      Alert.alert('Remove Group', `Clear group "${groupName}" from all its miners?`, [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert(t('groups.removeGroup'), t('groups.removeGroupBody', { groupName }), [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('groups.remove'),
           style: 'destructive',
           onPress: async () => {
             const inGroup = miners.filter((m) => m.group === groupName);
@@ -57,7 +59,7 @@ export function GroupsScreen() {
   const renameGroup = useCallback(
     (oldName: string) => {
       if (typeof Alert.prompt === 'function') {
-        Alert.prompt('Rename Group', 'New name:', async (newName: string) => {
+        Alert.prompt(t('groups.renameGroup'), t('groups.renamePrompt'), async (newName: string) => {
           const trimmed = newName.trim();
           if (!trimmed || trimmed === oldName) return;
           const inGroup = miners.filter((m) => m.group === oldName);
@@ -66,7 +68,7 @@ export function GroupsScreen() {
           }
         });
       } else {
-        Alert.alert('Rename Group', 'Edit group name in Miner Details');
+        Alert.alert(t('groups.renameGroup'), t('groups.editInDetails'));
       }
     },
     [miners, setMinerGroup],
@@ -163,14 +165,14 @@ export function GroupsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Group Management</Text>
+      <Text style={styles.title}>{t('groups.title')}</Text>
 
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
           value={newGroupName}
           onChangeText={setNewGroupName}
-          placeholder="New group name"
+          placeholder={t('groups.namePlaceholder')}
           placeholderTextColor={theme.textMuted}
           onSubmitEditing={addGroup}
           returnKeyType="done"
@@ -182,7 +184,7 @@ export function GroupsScreen() {
           style={styles.addBtn}
           onPress={addGroup}
         >
-          <Text style={styles.addBtnText}>Add</Text>
+          <Text style={styles.addBtnText}>{t('common.add')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -193,9 +195,11 @@ export function GroupsScreen() {
           <View style={styles.groupCard}>
             <View style={styles.groupHeader}>
               <View>
-                <Text style={styles.groupName}>📁 {name}</Text>
+                <Text style={styles.groupName}>
+                  📁 {name === 'Ungrouped' ? t('groups.ungrouped') : name}
+                </Text>
                 <Text style={styles.groupCount}>
-                  {members.length} miner{members.length !== 1 ? 's' : ''}
+                  {t('groups.minerCount', { count: members.length })}
                 </Text>
               </View>
               {name !== 'Ungrouped' && (
@@ -206,7 +210,9 @@ export function GroupsScreen() {
                     style={[styles.actionBtn, { borderColor: theme.primary }]}
                     onPress={() => renameGroup(name)}
                   >
-                    <Text style={[styles.actionBtnText, { color: theme.primary }]}>Rename</Text>
+                    <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+                      {t('groups.rename')}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     accessibilityRole="button"
@@ -214,7 +220,9 @@ export function GroupsScreen() {
                     style={[styles.actionBtn, { borderColor: theme.danger }]}
                     onPress={() => removeGroup(name)}
                   >
-                    <Text style={[styles.actionBtnText, { color: theme.danger }]}>Remove</Text>
+                    <Text style={[styles.actionBtnText, { color: theme.danger }]}>
+                      {t('groups.remove')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -233,7 +241,7 @@ export function GroupsScreen() {
                         style={styles.ungroupBtn}
                         onPress={() => setMinerGroup(m.id, undefined)}
                       >
-                        <Text style={styles.ungroupBtnText}>Remove</Text>
+                        <Text style={styles.ungroupBtnText}>{t('groups.remove')}</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -242,9 +250,7 @@ export function GroupsScreen() {
             )}
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No miners yet. Add miners to start grouping.</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyText}>{t('groups.noMiners')}</Text>}
       />
     </View>
   );

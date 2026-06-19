@@ -14,6 +14,7 @@ import { useSubscriptionStore } from '../store/subscription';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
 import { useTheme } from '../theme';
 import { NavigationProp } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface AddMinerScreenProps {
   navigation: NavigationProp;
@@ -21,6 +22,7 @@ interface AddMinerScreenProps {
 
 export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [ip, setIp] = useState('');
   const [name, setName] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -37,7 +39,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   const handleAddByIP = async () => {
     if (!ip.trim()) return;
     if (!canAddMiner(miners.length)) {
-      setError('Upgrade to Pro to add more miners');
+      setError(t('addMiner.upgradePro'));
       return;
     }
     setConnecting(true);
@@ -46,7 +48,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       await addMiner(ip.trim(), 80, name.trim() || undefined);
       navigation.goBack();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to connect');
+      setError(e instanceof Error ? e.message : t('addMiner.failedToConnect'));
     } finally {
       setConnecting(false);
     }
@@ -68,7 +70,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       setFoundMiners(found);
     } catch (e: unknown) {
       if ((e as Error)?.name === 'AbortError') return;
-      setError(e instanceof Error ? e.message : 'Scan failed');
+      setError(e instanceof Error ? e.message : t('addMiner.scanFailed'));
     } finally {
       setScanning(false);
       scanAbortRef.current = null;
@@ -81,7 +83,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
 
   const handleAddDiscovered = async (m: DiscoveredMiner) => {
     if (!canAddMiner(miners.length)) {
-      setError('Upgrade to Pro to add more miners');
+      setError(t('addMiner.upgradePro'));
       return;
     }
     setConnecting(true);
@@ -90,7 +92,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       await addMiner(m.ip, m.port);
       navigation.goBack();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to connect');
+      setError(e instanceof Error ? e.message : t('addMiner.failedToConnect'));
     } finally {
       setConnecting(false);
     }
@@ -245,10 +247,10 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Add by IP</Text>
+        <Text style={styles.sectionTitle}>{t('addMiner.addByIp')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="192.168.1.100"
+          placeholder={t('addMiner.ipPlaceholder')}
           placeholderTextColor={theme.textMuted}
           value={ip}
           onChangeText={setIp}
@@ -258,7 +260,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         />
         <TextInput
           style={styles.input}
-          placeholder="Name (optional)"
+          placeholder={t('addMiner.namePlaceholder')}
           placeholderTextColor={theme.textMuted}
           value={name}
           onChangeText={setName}
@@ -274,19 +276,19 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           {connecting ? (
             <ActivityIndicator size="small" color="#FFF" />
           ) : (
-            <Text style={styles.primaryBtnText}>Add Miner</Text>
+            <Text style={styles.primaryBtnText}>{t('addMiner.addMiner')}</Text>
           )}
         </TouchableOpacity>
       </View>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
+        <Text style={styles.dividerText}>{t('addMiner.or')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Scan Network</Text>
+        <Text style={styles.sectionTitle}>{t('addMiner.scanNetwork')}</Text>
         {scanning && scanProgress.total > 0 && (
           <View style={{ marginBottom: 10 }}>
             <View
@@ -306,7 +308,11 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
               />
             </View>
             <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 4 }}>
-              Scanned {scanProgress.scanned}/{scanProgress.total} · {scanProgress.found} found
+              {t('addMiner.scanProgress', {
+                scanned: scanProgress.scanned,
+                total: scanProgress.total,
+                found: scanProgress.found,
+              })}
             </Text>
           </View>
         )}
@@ -317,7 +323,9 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
             style={[styles.secondaryBtn, { borderColor: theme.danger }]}
             onPress={handleCancelScan}
           >
-            <Text style={[styles.secondaryBtnText, { color: theme.danger }]}>Cancel Scan</Text>
+            <Text style={[styles.secondaryBtnText, { color: theme.danger }]}>
+              {t('addMiner.cancelScan')}
+            </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -326,7 +334,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
             style={styles.secondaryBtn}
             onPress={handleScan}
           >
-            <Text style={styles.secondaryBtnText}>Find Miners</Text>
+            <Text style={styles.secondaryBtnText}>{t('addMiner.findMiners')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -334,7 +342,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
       {foundMiners.length > 0 && (
         <View style={styles.foundSection}>
           <Text style={styles.foundTitle}>
-            Found {foundMiners.length} miner{foundMiners.length > 1 ? 's' : ''}
+            {t('addMiner.foundMiners', { count: foundMiners.length })}
           </Text>
           {foundMiners.map((m) => (
             <TouchableOpacity
@@ -349,7 +357,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
                 <Text style={styles.foundIP}>{m.ip}</Text>
               </View>
               <View style={styles.foundAddBadge}>
-                <Text style={styles.foundAdd}>Add</Text>
+                <Text style={styles.foundAdd}>{t('common.add')}</Text>
               </View>
             </TouchableOpacity>
           ))}

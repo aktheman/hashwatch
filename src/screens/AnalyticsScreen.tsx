@@ -1,14 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
+import { Skeleton } from '../components/Skeleton';
 import { MinerSnapshot } from '../types';
 import {
   toHashesPerSecond,
@@ -26,6 +21,7 @@ import { Dimensions } from 'react-native';
 const screenWidth = Dimensions.get('window').width;
 
 export function AnalyticsScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
@@ -269,8 +265,8 @@ export function AnalyticsScreen() {
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View>
-          <Text style={styles.headerTitle}>Analytics</Text>
-          <Text style={styles.headerSub}>Portfolio performance</Text>
+          <Text style={styles.headerTitle}>{t('analytics.title')}</Text>
+          <Text style={styles.headerSub}>{t('analytics.subtitle')}</Text>
         </View>
       </View>
 
@@ -281,21 +277,21 @@ export function AnalyticsScreen() {
             <Text style={[styles.summaryValue, { color: theme.primary }]}>
               {formatHashrateValue(totalHashrate)}
             </Text>
-            <Text style={styles.summaryLabel}>Total Hashrate</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.totalHashrate')}</Text>
           </View>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>💰</Text>
             <Text style={[styles.summaryValue, { color: theme.success }]}>
               {totalEarnings > 0 ? formatBTC(totalEarnings) : '—'}
             </Text>
-            <Text style={styles.summaryLabel}>Est. Daily BTC</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.estDailyBTC')}</Text>
           </View>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>🔌</Text>
             <Text style={[styles.summaryValue, { color: theme.warning }]}>
               {totalPower.toFixed(0)}
             </Text>
-            <Text style={styles.summaryLabel}>Power (W)</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.power')}</Text>
           </View>
         </View>
 
@@ -303,7 +299,7 @@ export function AnalyticsScreen() {
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>⬡</Text>
             <Text style={styles.summaryValue}>{miners.length}</Text>
-            <Text style={styles.summaryLabel}>Miners</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.miners')}</Text>
           </View>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>🌡</Text>
@@ -312,32 +308,32 @@ export function AnalyticsScreen() {
             >
               {avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°
             </Text>
-            <Text style={styles.summaryLabel}>Avg Temp</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.avgTemp')}</Text>
           </View>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>📦</Text>
             <Text style={styles.summaryValue}>{totalShares}</Text>
-            <Text style={styles.summaryLabel}>Total Shares</Text>
+            <Text style={styles.summaryLabel}>{t('analytics.totalShares')}</Text>
           </View>
         </View>
 
         {powerCost > 0 && (
           <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Power Cost</Text>
+            <Text style={styles.chartTitle}>{t('analytics.powerCost')}</Text>
             <View style={styles.summaryRow}>
               <View style={[styles.summaryCard, { flex: 1 }]}>
                 <Text style={styles.summaryIcon}>🔌</Text>
                 <Text style={[styles.summaryValue, { color: theme.warning }]}>
                   {totalPower.toFixed(0)}
                 </Text>
-                <Text style={styles.summaryLabel}>Watts</Text>
+                <Text style={styles.summaryLabel}>{t('analytics.watts')}</Text>
               </View>
               <View style={[styles.summaryCard, { flex: 1 }]}>
                 <Text style={styles.summaryIcon}>💵</Text>
                 <Text style={[styles.summaryValue, { color: theme.danger }]}>
                   ${((totalPower / 1000) * 24 * powerCost).toFixed(2)}
                 </Text>
-                <Text style={styles.summaryLabel}>Cost/Day</Text>
+                <Text style={styles.summaryLabel}>{t('analytics.costDay')}</Text>
               </View>
               <View style={[styles.summaryCard, { flex: 1 }]}>
                 <Text style={styles.summaryIcon}>📈</Text>
@@ -356,14 +352,14 @@ export function AnalyticsScreen() {
                     ? `$${(totalEarnings * btcPrice - (totalPower / 1000) * 24 * powerCost).toFixed(2)}`
                     : '—'}
                 </Text>
-                <Text style={styles.summaryLabel}>Net/Day</Text>
+                <Text style={styles.summaryLabel}>{t('analytics.netDay')}</Text>
               </View>
             </View>
           </View>
         )}
 
         <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Hashrate History</Text>
+          <Text style={styles.chartTitle}>{t('analytics.hashrateHistory')}</Text>
           <View style={styles.rangeRow}>
             {(['1h', '24h', '7d'] as const).map((r) => (
               <TouchableOpacity
@@ -386,8 +382,10 @@ export function AnalyticsScreen() {
             ))}
           </View>
           {loading ? (
-            <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="small" color={theme.primary} />
+            <View style={{ height: 200, justifyContent: 'center', gap: 12 }}>
+              <Skeleton height={20} borderRadius={10} />
+              <Skeleton height={80} borderRadius={8} />
+              <Skeleton height={14} borderRadius={7} width="60%" />
             </View>
           ) : chartData ? (
             <LineChart
@@ -403,16 +401,18 @@ export function AnalyticsScreen() {
             />
           ) : (
             <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
-              Not enough data yet. Keep miners running.
+              {t('analytics.notEnoughData')}
             </Text>
           )}
         </View>
 
         <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Uptime History</Text>
+          <Text style={styles.chartTitle}>{t('analytics.uptimeHistory')}</Text>
           {loading ? (
-            <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="small" color={theme.primary} />
+            <View style={{ height: 200, justifyContent: 'center', gap: 12 }}>
+              <Skeleton height={20} borderRadius={10} />
+              <Skeleton height={80} borderRadius={8} />
+              <Skeleton height={14} borderRadius={7} width="60%" />
             </View>
           ) : uptimeChartData ? (
             <LineChart
@@ -428,7 +428,7 @@ export function AnalyticsScreen() {
             />
           ) : (
             <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
-              Not enough data yet. Keep miners running.
+              {t('analytics.notEnoughData')}
             </Text>
           )}
         </View>

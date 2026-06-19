@@ -9,6 +9,7 @@ import {
   estimateBTCPerDay,
   formatBTC,
 } from '../utils/hashrate';
+import { useTranslation } from 'react-i18next';
 
 interface PoolGroup {
   pool: string;
@@ -23,6 +24,7 @@ interface PoolsScreenProps {
 }
 
 export function PoolsScreen({ navigation }: PoolsScreenProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
 
@@ -115,16 +117,14 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
       <View style={styles.container}>
         <View style={styles.headerBar}>
           <View>
-            <Text style={styles.headerTitle}>Pools</Text>
-            <Text style={styles.headerSub}>Mining wallet overview</Text>
+            <Text style={styles.headerTitle}>{t('pools.title')}</Text>
+            <Text style={styles.headerSub}>{t('pools.subtitle')}</Text>
           </View>
         </View>
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>🌊</Text>
-          <Text style={styles.emptyTitle}>No Pools Yet</Text>
-          <Text style={styles.emptyText}>
-            Add miners with pool connections to see them grouped here
-          </Text>
+          <Text style={styles.emptyTitle}>{t('pools.noPools')}</Text>
+          <Text style={styles.emptyText}>{t('pools.noPoolsBody')}</Text>
         </View>
       </View>
     );
@@ -134,10 +134,9 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View>
-          <Text style={styles.headerTitle}>Pools</Text>
+          <Text style={styles.headerTitle}>{t('pools.title')}</Text>
           <Text style={styles.headerSub}>
-            {poolGroups.length} pool{poolGroups.length !== 1 ? 's' : ''} · {miners.length} miner
-            {miners.length !== 1 ? 's' : ''}
+            {t('pools.poolCount', { pools: poolGroups.length, miners: miners.length })}
           </Text>
         </View>
       </View>
@@ -166,7 +165,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
             <View style={styles.statRow}>
               <View style={styles.stat}>
                 <Text style={styles.statValue}>{formatRate(item.totalHashrate)}</Text>
-                <Text style={styles.statLabel}>Hashrate</Text>
+                <Text style={styles.statLabel}>{t('pools.hashrate')}</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={styles.statValue}>
@@ -174,11 +173,11 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
                     ? formatBTC(estimateBTCPerDay(item.totalHashrate))
                     : '—'}
                 </Text>
-                <Text style={styles.statLabel}>Est. Daily</Text>
+                <Text style={styles.statLabel}>{t('pools.estDaily')}</Text>
               </View>
               <View style={styles.stat}>
                 <Text style={styles.statValue}>{item.miners.length}</Text>
-                <Text style={styles.statLabel}>Miners</Text>
+                <Text style={styles.statLabel}>{t('pools.miners')}</Text>
               </View>
             </View>
             <View style={styles.minerList}>

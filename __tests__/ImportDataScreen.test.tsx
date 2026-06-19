@@ -34,7 +34,7 @@ beforeEach(() => {
 
 it('renders import screen', async () => {
   await render(<ImportDataScreen />);
-  expect(screen.getAllByText('Import Data').length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText('import.title').length).toBeGreaterThanOrEqual(1);
 });
 
 it('shows alert when importing empty text', async () => {
@@ -45,7 +45,7 @@ it('shows alert when importing empty text', async () => {
     fireEvent.press(screen.getByLabelText('Import data'));
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('No Data', 'Paste exported JSON data first');
+  expect(alertSpy).toHaveBeenCalledWith('import.noData', 'import.noDataBody');
   alertSpy.mockRestore();
 });
 
@@ -60,7 +60,7 @@ it('shows Importing... text while import is in progress', async () => {
     fireEvent.press(screen.getByLabelText('Import data'));
   });
 
-  expect(screen.getByText('Importing...')).toBeTruthy();
+  expect(screen.getByText('import.importing')).toBeTruthy();
 });
 
 it('disables button while importing', async () => {
@@ -88,10 +88,10 @@ it('shows success result after import', async () => {
   });
 
   await waitFor(() => {
-    expect(screen.getByText('✓ Import Successful')).toBeTruthy();
-    expect(screen.getByText('3 miners imported')).toBeTruthy();
-    expect(screen.getByText('50 snapshots imported')).toBeTruthy();
-    expect(screen.getByText('2 wallets imported')).toBeTruthy();
+    expect(screen.getByText('import.success')).toBeTruthy();
+    expect(screen.getByText('import.minersImported')).toBeTruthy();
+    expect(screen.getByText('import.snapshotsImported')).toBeTruthy();
+    expect(screen.getByText('import.walletsImported')).toBeTruthy();
   });
 });
 
@@ -107,9 +107,9 @@ it('shows singular noun for single miner', async () => {
   });
 
   await waitFor(() => {
-    expect(screen.getByText('1 miner imported')).toBeTruthy();
-    expect(screen.getByText('1 snapshot imported')).toBeTruthy();
-    expect(screen.getByText('1 wallet imported')).toBeTruthy();
+    expect(screen.getByText('import.minersImported')).toBeTruthy();
+    expect(screen.getByText('import.snapshotsImported')).toBeTruthy();
+    expect(screen.getByText('import.walletsImported')).toBeTruthy();
   });
 });
 
@@ -127,7 +127,7 @@ it('shows alert when import fails', async () => {
   });
 
   await waitFor(() => {
-    expect(alertSpy).toHaveBeenCalledWith('Import Failed', 'Invalid JSON format');
+    expect(alertSpy).toHaveBeenCalledWith('import.failed', 'Invalid JSON format');
   });
   alertSpy.mockRestore();
 });
@@ -146,7 +146,7 @@ it('shows generic error alert for non-Error throws', async () => {
   });
 
   await waitFor(() => {
-    expect(alertSpy).toHaveBeenCalledWith('Import Failed', 'Invalid data');
+    expect(alertSpy).toHaveBeenCalledWith('import.failed', 'Invalid data');
   });
   alertSpy.mockRestore();
 });

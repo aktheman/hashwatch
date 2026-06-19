@@ -30,6 +30,7 @@ import {
   formatDifficulty,
 } from '../utils/formatters';
 import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
@@ -38,6 +39,7 @@ interface MinerDetailScreenProps {
 
 export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -341,14 +343,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     return (
       <View style={styles.center}>
         <Text style={styles.offlineIcon}>⬡</Text>
-        <Text style={styles.offlineText}>Miner Not Found</Text>
+        <Text style={styles.offlineText}>{t('minerDetail.notFound')}</Text>
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel="Go back"
           style={styles.retryBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.retryBtnText}>Go Back</Text>
+          <Text style={styles.retryBtnText}>{t('common.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -358,15 +360,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     return (
       <View style={styles.center}>
         <Text style={styles.offlineIcon}>📡</Text>
-        <Text style={styles.offlineText}>Miner Offline</Text>
-        <Text style={styles.offlineSubtext}>Unable to reach {miner.ip}</Text>
+        <Text style={styles.offlineText}>{t('minerDetail.offline')}</Text>
+        <Text style={styles.offlineSubtext}>{t('minerDetail.offlineBody', { ip: miner.ip })}</Text>
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel="Retry"
           style={styles.retryBtn}
           onPress={() => refreshMiner(minerId)}
         >
-          <Text style={styles.retryBtnText}>Retry</Text>
+          <Text style={styles.retryBtnText}>{t('common.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -427,7 +429,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text
               style={[styles.badgeText, { color: miner.isOnline ? theme.success : theme.danger }]}
             >
-              {miner.isOnline ? 'LIVE' : 'OFFLINE'}
+              {miner.isOnline ? t('minerDetail.live') : t('minerDetail.offlineBadge')}
             </Text>
           </View>
         </View>
@@ -449,11 +451,12 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.walletRowIcon}>💼</Text>
             <Text style={styles.walletRowText}>
               {miner.walletId
-                ? wallets.find((w) => w.id === miner.walletId)?.name || 'Unknown Wallet'
-                : 'No Wallet'}
+                ? wallets.find((w) => w.id === miner.walletId)?.name ||
+                  t('minerDetail.unknownWallet')
+                : t('minerDetail.noWallet')}
             </Text>
           </View>
-          <Text style={styles.walletRowArrow}>Assign ›</Text>
+          <Text style={styles.walletRowArrow}>{t('minerDetail.assign')}</Text>
         </TouchableOpacity>
         {showWalletPicker && (
           <View style={styles.walletPicker}>
@@ -469,7 +472,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 setShowWalletPicker(false);
               }}
             >
-              <Text style={styles.walletName}>None</Text>
+              <Text style={styles.walletName}>{t('common.none')}</Text>
             </TouchableOpacity>
             {wallets.map((w) => (
               <TouchableOpacity
@@ -500,15 +503,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <TextInput
           style={styles.groupTagInput}
           value={miner.group || ''}
-          onChangeText={(t) => {
+          onChangeText={(text) => {
             if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
             groupDebounceRef.current = setTimeout(() => {
-              const updated = { ...miner, group: t || undefined };
+              const updated = { ...miner, group: text || undefined };
               DB.saveMiner(updated);
-              useMinerStore.getState().setMinerGroup(minerId, t || undefined);
+              useMinerStore.getState().setMinerGroup(minerId, text || undefined);
             }, 500);
           }}
-          placeholder="Group tag (e.g. Garage)"
+          placeholder={t('minerDetail.groupPlaceholder')}
           placeholderTextColor={theme.textMuted}
           accessibilityLabel="Group tag input"
         />
@@ -516,25 +519,30 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <Text style={styles.sectionIcon}>⚡</Text> Mining
+          <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.mining')}
         </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             icon="⚡"
-            label="Hashrate"
+            label={t('minerDetail.hashrate')}
             value={formatHashrate(s.hashRate, s.hashRateUnit)}
             color={theme.primary}
           />
-          <StatWidget icon="〰" label="Frequency" value={`${s.frequency} MHz`} color={theme.info} />
+          <StatWidget
+            icon="〰"
+            label={t('minerDetail.frequency')}
+            value={`${s.frequency} MHz`}
+            color={theme.info}
+          />
           <StatWidget
             icon="🎯"
-            label="Best Diff"
+            label={t('minerDetail.bestDiff')}
             value={formatDifficulty(s.bestDiff)}
             color={theme.warning}
           />
           <StatWidget
             icon="🏆"
-            label="Best Session"
+            label={t('minerDetail.bestSession')}
             value={formatDifficulty(s.bestSessionDiff)}
             color={theme.warning}
           />
@@ -543,46 +551,56 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <Text style={styles.sectionIcon}>🔧</Text> Hardware
+          <Text style={styles.sectionIcon}>🔧</Text> {t('minerDetail.hardware')}
         </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             icon="🌡"
-            label="Board Temp"
+            label={t('minerDetail.boardTemp')}
             value={formatTemperature(s.temperature)}
             color={s.temperature > 70 ? theme.danger : theme.success}
           />
           {s.vrTemp > 0 && (
             <StatWidget
               icon="🔌"
-              label="VR Temp"
+              label={t('minerDetail.vrTemp')}
               value={formatTemperature(s.vrTemp)}
               color={theme.warningLight}
             />
           )}
           <StatWidget
             icon="⚡"
-            label="Voltage"
+            label={t('minerDetail.voltage')}
             value={formatVoltage(s.voltage)}
             color={theme.primary}
           />
-          <StatWidget icon="🔀" label="Current" value={`${s.current} mA`} color={theme.accent} />
-          <StatWidget icon="🔋" label="Power" value={formatPower(s.power)} color={theme.warning} />
+          <StatWidget
+            icon="🔀"
+            label={t('minerDetail.current')}
+            value={`${s.current} mA`}
+            color={theme.accent}
+          />
+          <StatWidget
+            icon="🔋"
+            label={t('minerDetail.power')}
+            value={formatPower(s.power)}
+            color={theme.warning}
+          />
           <StatWidget
             icon="📊"
-            label="Efficiency"
+            label={t('minerDetail.efficiency')}
             value={formatWTHs(s.power, s.hashRate, s.hashRateUnit)}
             color={theme.successLight}
           />
           <StatWidget
             icon="🔬"
-            label="Core V"
+            label={t('minerDetail.coreV')}
             value={`${s.coreVoltage} mV`}
             color={theme.primaryLight}
           />
           <StatWidget
             icon="🌀"
-            label="Fan"
+            label={t('minerDetail.fan')}
             value={s.fanRpm > 0 ? `${s.fanRpm} RPM (${s.fanSpeed}%)` : `${s.fanSpeed}%`}
             color={theme.info}
           />
@@ -591,24 +609,24 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <Text style={styles.sectionIcon}>📦</Text> Shares
+          <Text style={styles.sectionIcon}>📦</Text> {t('minerDetail.shares')}
         </Text>
         <View style={styles.statsGrid}>
           <StatWidget
             icon="✓"
-            label="Accepted"
+            label={t('minerDetail.accepted')}
             value={formatNumber(s.sharesAccepted)}
             color={theme.success}
           />
           <StatWidget
             icon="✗"
-            label="Rejected"
+            label={t('minerDetail.rejected')}
             value={formatNumber(s.sharesRejected)}
             color={theme.danger}
           />
           <StatWidget
             icon="⏱"
-            label="Uptime"
+            label={t('minerDetail.uptime')}
             value={formatUptime(s.uptimeSeconds)}
             color={theme.primary}
           />
@@ -617,27 +635,27 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <Text style={styles.sectionIcon}>🌊</Text> Pool
+          <Text style={styles.sectionIcon}>🌊</Text> {t('minerDetail.pool')}
         </Text>
         <View style={styles.poolCard}>
           <View style={styles.poolRow}>
-            <Text style={styles.poolLabel}>URL</Text>
+            <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
             <Text style={styles.poolValue}>
-              {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || 'N/A'}
+              {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || t('common.na')}
             </Text>
           </View>
           <View style={styles.poolDivider} />
           <View style={styles.poolRow}>
-            <Text style={styles.poolLabel}>User</Text>
+            <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
             <Text style={styles.poolValue} selectable>
-              {s.poolUser || 'N/A'}
+              {s.poolUser || t('common.na')}
             </Text>
           </View>
           <View style={styles.poolDivider} />
           <View style={styles.poolRow}>
-            <Text style={styles.poolLabel}>Response Time</Text>
+            <Text style={styles.poolLabel}>{t('minerDetail.responseTime')}</Text>
             <Text style={styles.poolValue}>
-              {s.poolResponseTime > 0 ? `${s.poolResponseTime.toFixed(0)} ms` : 'N/A'}
+              {s.poolResponseTime > 0 ? `${s.poolResponseTime.toFixed(0)} ms` : t('common.na')}
             </Text>
           </View>
         </View>
@@ -645,7 +663,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          <Text style={styles.sectionIcon}>📈</Text> Hashrate History
+          <Text style={styles.sectionIcon}>📈</Text> {t('minerDetail.hashrateHistory')}
         </Text>
         <SubscriptionGate feature="30-day charts">
           <HashrateChart snapshots={snapshots} />
@@ -655,7 +673,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       {snapshots.length > 1 && (
         <View style={[styles.section, { paddingTop: 0 }]}>
           <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>📊</Text> Efficiency Trend
+            <Text style={styles.sectionIcon}>📊</Text> {t('minerDetail.efficiencyTrend')}
           </Text>
           <SubscriptionGate feature="30-day charts">
             <EfficiencyTrend snapshots={snapshots} />
@@ -674,13 +692,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           onPress={handleShare}
         >
           <Text style={styles.actionBtnIcon}>📤</Text>
-          <Text style={[styles.actionBtnText, { color: theme.primary }]}>Share Stats</Text>
+          <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+            {t('minerDetail.shareStats')}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.warning }]}>
-          <Text style={styles.sectionIcon}>⚡</Text> Actions
+          <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.actions')}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
@@ -702,16 +722,18 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             );
             const ok = await client.restart();
             Alert.alert(
-              ok ? 'Restart Sent' : 'Restart Failed',
-              ok ? 'Miner should reboot shortly.' : 'Could not restart this miner.',
+              ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
+              ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
             );
           }}
         >
           <Text style={styles.actionBtnIcon}>🔄</Text>
-          <Text style={[styles.actionBtnText, { color: theme.warning }]}>Restart Miner</Text>
+          <Text style={[styles.actionBtnText, { color: theme.warning }]}>
+            {t('minerDetail.restartMiner')}
+          </Text>
         </TouchableOpacity>
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
-          <Text style={styles.sectionIcon}>⚠</Text> Danger Zone
+          <Text style={styles.sectionIcon}>⚠</Text> {t('minerDetail.dangerZone')}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
@@ -719,12 +741,12 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           style={styles.deleteBtn}
           onPress={() => setShowConfirm(!showConfirm)}
         >
-          <Text style={styles.deleteBtnText}>Remove Miner</Text>
+          <Text style={styles.deleteBtnText}>{t('minerDetail.removeMiner')}</Text>
         </TouchableOpacity>
         {showConfirm && (
           <View style={styles.confirmBox}>
             <Text style={styles.confirmText}>
-              This permanently deletes {miner.name} and all its history.
+              {t('minerDetail.removeConfirm', { name: miner.name })}
             </Text>
             <TouchableOpacity
               accessibilityRole="button"
@@ -732,7 +754,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               style={styles.confirmBtn}
               onPress={handleDelete}
             >
-              <Text style={styles.confirmBtnText}>Yes, Remove</Text>
+              <Text style={styles.confirmBtnText}>{t('minerDetail.yesRemove')}</Text>
             </TouchableOpacity>
           </View>
         )}

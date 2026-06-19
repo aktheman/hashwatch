@@ -119,8 +119,8 @@ beforeEach(() => {
 
 it('renders empty state when no miners', async () => {
   await render(<PoolsScreen navigation={navigation} />);
-  expect(screen.getByText('Pools')).toBeTruthy();
-  expect(screen.getByText('No Pools Yet')).toBeTruthy();
+  expect(screen.getByText('pools.title')).toBeTruthy();
+  expect(screen.getByText('pools.noPools')).toBeTruthy();
 });
 
 it('renders pool groups when miners have pool data', async () => {

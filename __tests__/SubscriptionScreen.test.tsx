@@ -24,32 +24,32 @@ beforeEach(() => {
 
 it('renders free and pro plans', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getByText('Free')).toBeTruthy();
-  expect(screen.getByText('Pro')).toBeTruthy();
-  expect(screen.getByText('$0')).toBeTruthy();
-  expect(screen.getByText('$4.99')).toBeTruthy();
+  expect(screen.getByText('subscription.free')).toBeTruthy();
+  expect(screen.getByText('subscription.pro')).toBeTruthy();
+  expect(screen.getByText('subscription.freePrice')).toBeTruthy();
+  expect(screen.getByText('subscription.proPrice')).toBeTruthy();
 });
 
 it('shows upgrade button for free users', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getByText('Upgrade to Pro')).toBeTruthy();
+  expect(screen.getByText('subscription.upgradeToPro')).toBeTruthy();
 });
 
 it('shows restore purchases button', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getByText('Restore Purchases')).toBeTruthy();
+  expect(screen.getByText('subscription.restorePurchases')).toBeTruthy();
 });
 
 it('shows Active badge for pro users', async () => {
   useSubscriptionStore.getState().setPro();
 
   await render(<SubscriptionScreen />);
-  expect(screen.getByText('Active')).toBeTruthy();
-  expect(screen.queryByText('Upgrade to Pro')).toBeNull();
+  expect(screen.getByText('subscription.active')).toBeTruthy();
+  expect(screen.queryByText('subscription.upgradeToPro')).toBeNull();
 });
 
 it('displays feature list', async () => {
   await render(<SubscriptionScreen />);
   expect(screen.getByText(/Up to 4 miners/)).toBeTruthy();
-  expect(screen.getAllByText(/30-day charts/).length).toBe(2);
+  expect(screen.getAllByText(/30-day charts/).length).toBe(1);
 });

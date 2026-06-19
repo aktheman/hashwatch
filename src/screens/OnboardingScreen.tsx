@@ -11,38 +11,24 @@ import {
 import { setSetting } from '../db/database';
 import { useTheme } from '../theme';
 import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
-
-const slides = [
-  {
-    icon: '⬡',
-    title: 'Monitor Your BitAxe',
-    subtitle: 'Track hashrate, temperature, and pool stats for all your miners in real-time.',
-  },
-  {
-    icon: '📡',
-    title: 'Auto-Discovery',
-    subtitle: 'Scan your local network to find miners automatically, or add them manually by IP.',
-  },
-  {
-    icon: '🔔',
-    title: 'Instant Alerts',
-    subtitle: 'Get notified when a miner goes offline or runs too hot — never miss an issue.',
-  },
-  {
-    icon: '⭐',
-    title: 'Ready to Mine',
-    subtitle: 'Monitor all your miners for free. Upgrade to Pro for extra features.',
-  },
-];
 
 interface Props {
   onComplete: () => void;
 }
 
 export function OnboardingScreen({ onComplete }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
+
+  const slides = [
+    { icon: '⬡', title: t('onboarding.slide1Title'), subtitle: t('onboarding.slide1Body') },
+    { icon: '📡', title: t('onboarding.slide2Title'), subtitle: t('onboarding.slide2Body') },
+    { icon: '🔔', title: t('onboarding.slide3Title'), subtitle: t('onboarding.slide3Body') },
+    { icon: '⭐', title: t('onboarding.slide4Title'), subtitle: t('onboarding.slide4Body') },
+  ];
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -170,7 +156,7 @@ export function OnboardingScreen({ onComplete }: Props) {
   return (
     <View style={styles.container}>
       <TouchableOpacity accessibilityRole="button" style={styles.skipBtn} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
       </TouchableOpacity>
 
       <FlatList
@@ -201,7 +187,9 @@ export function OnboardingScreen({ onComplete }: Props) {
         </View>
 
         <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={handleNext}>
-          <Text style={styles.btnText}>{isLast ? 'Get Started' : 'Next'}</Text>
+          <Text style={styles.btnText}>
+            {isLast ? t('onboarding.getStarted') : t('onboarding.next')}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
