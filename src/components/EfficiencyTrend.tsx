@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
@@ -17,6 +18,7 @@ function calcJperTH(snap: MinerSnapshot): number | null {
 }
 
 export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
 
@@ -45,7 +47,7 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
       <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
         <Text style={styles.emptyIcon}>📉</Text>
         <Text style={[styles.emptyText, { color: theme.textDim }]}>
-          Not enough data for efficiency trend
+          {t('efficiencyTrend.notEnoughData')}
         </Text>
       </View>
     );
@@ -53,7 +55,7 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
 
   return (
     <View
-      accessibilityLabel={`Efficiency trend, average ${avg.toFixed(1)} J/TH`}
+      accessibilityLabel={t('efficiencyTrend.average', { avg: avg.toFixed(1) })}
       style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
     >
       <LineChart
@@ -80,7 +82,9 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
         style={{ borderRadius: 12 }}
       />
       {avg > 0 && (
-        <Text style={[styles.avg, { color: theme.textDim }]}>Average: {avg.toFixed(1)} J/TH</Text>
+        <Text style={[styles.avg, { color: theme.textDim }]}>
+          {t('efficiencyTrend.average', { avg: avg.toFixed(1) })}
+        </Text>
       )}
     </View>
   );

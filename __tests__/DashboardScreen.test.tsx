@@ -278,15 +278,15 @@ it('error banner retry calls loadMiners', async () => {
   const loadMinersMock = jest.fn().mockResolvedValue(undefined);
   useMinerStore.setState({ error: 'Failed', loadMiners: loadMinersMock });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('Retry'));
+  fireEvent.press(screen.getByText('common.retry'));
   expect(loadMinersMock).toHaveBeenCalled();
 });
 
 it('error banner dismiss calls clearError', async () => {
   const clearErrorMock = jest.fn();
   useMinerStore.setState({ error: 'Failed', clearError: clearErrorMock });
-  await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Dismiss error'));
+  await render(<DashboardScreen />);
+  fireEvent.press(screen.getByLabelText('errorBoundary.unexpectedError'));
   expect(clearErrorMock).toHaveBeenCalled();
 });
 

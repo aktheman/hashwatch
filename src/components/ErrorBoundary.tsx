@@ -1,8 +1,9 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { theme } from '../theme';
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
 }
 
@@ -11,7 +12,7 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInternal extends Component<Props, State> {
   state: State = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): State {
@@ -28,21 +29,24 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      const t = theme;
+      const t = this.props.t!;
+      const tTheme = theme;
       return (
-        <View style={[styles.container, { backgroundColor: t.bg }]}>
-          <Text style={[styles.icon, { color: t.danger }]}>⚠</Text>
-          <Text style={[styles.title, { color: t.text }]}>Something went wrong</Text>
-          <Text style={[styles.message, { color: t.textDim }]}>
-            {this.state.error?.message || 'An unexpected error occurred'}
+        <View style={[styles.container, { backgroundColor: tTheme.bg }]}>
+          <Text style={[styles.icon, { color: tTheme.danger }]}>⚠</Text>
+          <Text style={[styles.title, { color: tTheme.text }]}>
+            {t('errorBoundary.somethingWentWrong')}
+          </Text>
+          <Text style={[styles.message, { color: tTheme.textDim }]}>
+            {this.state.error?.message || t('errorBoundary.unexpectedError')}
           </Text>
           <TouchableOpacity
-            style={[styles.retryBtn, { backgroundColor: t.primary }]}
+            style={[styles.retryBtn, { backgroundColor: tTheme.primary }]}
             onPress={this.handleRetry}
-            accessibilityLabel="Try again"
+            accessibilityLabel={t('errorBoundary.tryAgain')}
             accessibilityRole="button"
           >
-            <Text style={[styles.retryText, { color: '#FFF' }]}>Try Again</Text>
+            <Text style={[styles.retryText, { color: '#FFF' }]}>{t('errorBoundary.tryAgain')}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -50,6 +54,8 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryInternal);
 
 const styles = StyleSheet.create({
   container: {

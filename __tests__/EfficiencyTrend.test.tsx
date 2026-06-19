@@ -38,30 +38,30 @@ function makeSnapshot(power: number, hashRate: number): MinerSnapshot {
 describe('EfficiencyTrend', () => {
   it('shows empty state with < 2 snapshots', async () => {
     await render(<EfficiencyTrend snapshots={[makeSnapshot(12, 500)]} />);
-    expect(screen.getByText(/Not enough data/)).toBeTruthy();
+    expect(screen.getByText('efficiencyTrend.notEnoughData')).toBeTruthy();
   });
 
   it('renders chart with sufficient snapshots', async () => {
     const snapshots = [makeSnapshot(12, 500), makeSnapshot(12.5, 480), makeSnapshot(11.8, 510)];
     await render(<EfficiencyTrend snapshots={snapshots} />);
-    expect(screen.getByText(/Average/)).toBeTruthy();
+    expect(screen.getByText(/efficiencyTrend\.average/)).toBeTruthy();
   });
 
   it('shows empty state when all snapshots have zero power', async () => {
     const snapshots = [makeSnapshot(0, 500), makeSnapshot(0, 480), makeSnapshot(0, 510)];
     await render(<EfficiencyTrend snapshots={snapshots} />);
-    expect(screen.getByText(/Not enough data/)).toBeTruthy();
+    expect(screen.getByText('efficiencyTrend.notEnoughData')).toBeTruthy();
   });
 
   it('shows empty state when all snapshots have zero hashrate', async () => {
     const snapshots = [makeSnapshot(12, 0), makeSnapshot(12.5, 0)];
     await render(<EfficiencyTrend snapshots={snapshots} />);
-    expect(screen.getByText(/Not enough data/)).toBeTruthy();
+    expect(screen.getByText('efficiencyTrend.notEnoughData')).toBeTruthy();
   });
 
   it('sets accessibility label with average efficiency', async () => {
     const snapshots = [makeSnapshot(12, 500), makeSnapshot(12, 500), makeSnapshot(12, 500)];
     await render(<EfficiencyTrend snapshots={snapshots} />);
-    expect(screen.getByLabelText(/Efficiency trend/)).toBeTruthy();
+    expect(screen.getByLabelText(/average/)).toBeTruthy();
   });
 });

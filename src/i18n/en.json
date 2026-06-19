@@ -285,5 +285,42 @@
     "removeMiner": "Remove Miner",
     "removeConfirm": "Remove {{name}}? All history will be deleted.",
     "remove": "Remove"
+  },
+  "earningsCard": {
+    "title": "Estimated Earnings",
+    "perDay": "per day",
+    "perDayEst": "per day (est.)",
+    "satDay": "~{{sats}} sat/day"
+  },
+  "efficiencyTrend": {
+    "notEnoughData": "Not enough data for efficiency trend",
+    "average": "Average: {{avg}} J/TH"
+  },
+  "errorBoundary": {
+    "somethingWentWrong": "Something went wrong",
+    "unexpectedError": "An unexpected error occurred",
+    "tryAgain": "Try Again",
+    "screenError": "Screen Error"
+  },
+  "firmwareBanner": {
+    "updateAvailable": "Firmware Update Available"
+  },
+  "hashrateChart": {
+    "notEnoughData": "Not enough data for chart"
+  },
+  "notificationPrefs": {
+    "title": "Notifications",
+    "offline": "Offline",
+    "online": "Reconnected",
+    "hot": "High Temperature",
+    "hashrateDrop": "Hashrate Drop",
+    "poolLost": "Pool Lost",
+    "longUptime": "Long Uptime"
+  },
+  "offlineBanner": {
+    "offline": "You are offline \u2014 showing cached data"
+  },
+  "subscriptionGate": {
+    "upgradeToUnlock": "Upgrade to Pro to unlock"
   }
 }

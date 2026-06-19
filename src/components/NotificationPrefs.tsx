@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useAuthStore } from '../store/auth';
 import { getNotificationPrefs, setNotificationPref } from '../api/client';
@@ -9,13 +10,13 @@ interface NotificationPrefsProps {
   minerId: string;
 }
 
-const ALERT_LABELS: Record<string, string> = {
-  offline: 'Offline',
-  online: 'Reconnected',
-  hot: 'High Temperature',
-  hashrate_drop: 'Hashrate Drop',
-  pool_lost: 'Pool Lost',
-  long_uptime: 'Long Uptime',
+const ALERT_LABELS_MAP: Record<string, string> = {
+  offline: 'notificationPrefs.offline',
+  online: 'notificationPrefs.online',
+  hot: 'notificationPrefs.hot',
+  hashrate_drop: 'notificationPrefs.hashrateDrop',
+  pool_lost: 'notificationPrefs.poolLost',
+  long_uptime: 'notificationPrefs.longUptime',
 };
 
 async function getLocalPrefs(minerId: string): Promise<Record<string, boolean>> {
@@ -30,6 +31,7 @@ async function setLocalPref(minerId: string, alertType: string, enabled: boolean
 }
 
 export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const token = useAuthStore((s) => s.token);
   const [prefs, setPrefs] = useState<Record<string, boolean> | null>(null);
@@ -58,16 +60,16 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-      <Text style={[styles.title, { color: theme.textDim }]}>Notifications</Text>
-      {Object.entries(ALERT_LABELS).map(([key, label]) => (
+      <Text style={[styles.title, { color: theme.textDim }]}>{t('notificationPrefs.title')}</Text>
+      {Object.entries(ALERT_LABELS_MAP).map(([key, label]) => (
         <View key={key} style={styles.row}>
-          <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
+          <Text style={[styles.label, { color: theme.text }]}>{t(label)}</Text>
           <Switch
             value={prefs[key] ?? true}
             onValueChange={(v) => toggle(key, v)}
             trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
             thumbColor={prefs[key] ? theme.primary : theme.textMuted}
-            accessibilityLabel={`${label} notification`}
+            accessibilityLabel={`${t(label)} notification`}
           />
         </View>
       ))}

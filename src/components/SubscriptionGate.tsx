@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
 
@@ -9,6 +10,7 @@ interface SubscriptionGateProps {
 }
 
 export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
+  const { t } = useTranslation();
   const { isPro } = useSubscriptionStore();
   const theme = useTheme();
   const styles = useMemo(
@@ -62,7 +64,7 @@ export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
       >
         <Text style={styles.lockIcon}>🔒</Text>
         {feature && <Text style={styles.text}>{feature}</Text>}
-        <Text style={styles.subtext}>Upgrade to Pro to unlock</Text>
+        <Text style={styles.subtext}>{t('subscriptionGate.upgradeToUnlock')}</Text>
       </View>
     </View>
   );

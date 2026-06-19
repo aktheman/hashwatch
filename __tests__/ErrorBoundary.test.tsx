@@ -37,7 +37,7 @@ it('renders Try Again button after error', async () => {
   );
 
   await waitFor(() => {
-    expect(screen.getByText('Try Again')).toBeTruthy();
+    expect(screen.getByText('errorBoundary.tryAgain')).toBeTruthy();
   });
 
   expect(consoleSpy).toHaveBeenCalled();

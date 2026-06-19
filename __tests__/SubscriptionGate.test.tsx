@@ -37,7 +37,7 @@ describe('SubscriptionGate', () => {
     );
     expect(getAllByText('🔒', { includeHiddenElements: true }).length).toBeGreaterThanOrEqual(1);
     expect(
-      getAllByText('Upgrade to Pro to unlock', { includeHiddenElements: true }).length,
+      getAllByText('subscriptionGate.upgradeToUnlock', { includeHiddenElements: true }).length,
     ).toBeGreaterThanOrEqual(1);
     expect(
       getAllByText('Advanced Charts', { includeHiddenElements: true }).length,
@@ -53,7 +53,7 @@ describe('SubscriptionGate', () => {
     );
     expect(getAllByText('🔒', { includeHiddenElements: true }).length).toBeGreaterThanOrEqual(1);
     expect(
-      getAllByText('Upgrade to Pro to unlock', { includeHiddenElements: true }).length,
+      getAllByText('subscriptionGate.upgradeToUnlock', { includeHiddenElements: true }).length,
     ).toBeGreaterThanOrEqual(1);
   });
 });

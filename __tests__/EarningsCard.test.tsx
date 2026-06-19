@@ -49,7 +49,7 @@ function makeMiner(hashRate: number, unit = 'GH/s'): Miner {
 describe('EarningsCard', () => {
   it('renders title', async () => {
     await render(<EarningsCard miners={[makeMiner(500)]} />);
-    expect(await screen.findByText('Estimated Earnings')).toBeTruthy();
+    expect(await screen.findByText('earningsCard.title')).toBeTruthy();
   });
 
   it('renders custom title', async () => {
@@ -73,6 +73,6 @@ describe('EarningsCard', () => {
 
   it('aggregates multiple miners', async () => {
     await render(<EarningsCard miners={[makeMiner(500), makeMiner(500)]} />);
-    expect(await screen.findByText(/sat\/day/)).toBeTruthy();
+    expect(await screen.findByText(/earningsCard\.satDay/)).toBeTruthy();
   });
 });

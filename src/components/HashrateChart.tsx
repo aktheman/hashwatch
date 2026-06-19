@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
@@ -11,6 +12,7 @@ interface HashrateChartProps {
 }
 
 export function HashrateChart({ snapshots, title }: HashrateChartProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
   const styles = useMemo(
@@ -70,7 +72,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>📊</Text>
-        <Text style={styles.emptyText}>Not enough data for chart</Text>
+        <Text style={styles.emptyText}>{t('hashrateChart.notEnoughData')}</Text>
       </View>
     );
   }
@@ -92,10 +94,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const unit = 'GH/s';
 
   return (
-    <View
-      style={styles.container}
-      accessibilityLabel={`Hashrate chart with ${snapshots.length} data points`}
-    >
+    <View style={styles.container} accessibilityLabel={t('hashrateChart.notEnoughData')}>
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartWrapper}>
         <Text style={styles.yLabel}>{unit}</Text>

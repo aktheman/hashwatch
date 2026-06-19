@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import {
   parseVersion,
@@ -14,6 +15,7 @@ interface FirmwareBannerProps {
 }
 
 export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [latest, setLatest] = useState<string | null>(null);
 
@@ -43,7 +45,9 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
     >
       <Text style={styles.icon}>⬆</Text>
       <View style={styles.textWrap}>
-        <Text style={[styles.title, { color: theme.warning }]}>Firmware Update Available</Text>
+        <Text style={[styles.title, { color: theme.warning }]}>
+          {t('firmwareBanner.updateAvailable')}
+        </Text>
         <Text style={[styles.detail, { color: theme.textDim }]}>
           {parsed} → {target}
         </Text>
