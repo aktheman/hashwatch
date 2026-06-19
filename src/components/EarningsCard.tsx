@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { toHashesPerSecond, estimateBTCPerDay, formatBTC, formatUSD } from '../utils/hashrate';
 import { Miner } from '../types';
@@ -9,7 +10,8 @@ interface EarningsCardProps {
   title?: string;
 }
 
-export function EarningsCard({ miners, title = 'Estimated Earnings' }: EarningsCardProps) {
+export function EarningsCard({ miners, title }: EarningsCardProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   const { btcPerDay, sats } = useMemo(() => {
@@ -23,24 +25,28 @@ export function EarningsCard({ miners, title = 'Estimated Earnings' }: EarningsC
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-      <Text style={[styles.title, { color: theme.textDim }]}>{title}</Text>
+      <Text style={[styles.title, { color: theme.textDim }]}>
+        {title ?? t('earningsCard.title')}
+      </Text>
       <View style={styles.row}>
         <View style={styles.stat}>
           <Text style={[styles.value, { color: theme.accent }]}>
             {sats > 0 ? formatBTC(btcPerDay) : '—'}
           </Text>
-          <Text style={[styles.label, { color: theme.textDim }]}>per day</Text>
+          <Text style={[styles.label, { color: theme.textDim }]}>{t('earningsCard.perDay')}</Text>
         </View>
         <View style={styles.stat}>
           <Text style={[styles.value, { color: theme.text }]}>
             {sats > 0 ? formatUSD(sats) : '—'}
           </Text>
-          <Text style={[styles.label, { color: theme.textDim }]}>per day (est.)</Text>
+          <Text style={[styles.label, { color: theme.textDim }]}>
+            {t('earningsCard.perDayEst')}
+          </Text>
         </View>
       </View>
       {sats > 0 && (
         <Text style={[styles.sats, { color: theme.textMuted }]}>
-          ~{sats.toLocaleString()} sat/day
+          {t('earningsCard.satDay', { sats: sats.toLocaleString() })}
         </Text>
       )}
     </View>

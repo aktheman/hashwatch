@@ -295,5 +295,42 @@
     "removeMiner": "Eliminar Minero",
     "removeConfirm": "¿Eliminar {{name}}? Todo el historial será borrado.",
     "remove": "Eliminar"
+  },
+  "earningsCard": {
+    "title": "Ganancias Estimadas",
+    "perDay": "por día",
+    "perDayEst": "por día (est.)",
+    "satDay": "~{{sats}} sat/día"
+  },
+  "efficiencyTrend": {
+    "notEnoughData": "Datos insuficientes para tendencia de eficiencia",
+    "average": "Promedio: {{avg}} J/TH"
+  },
+  "errorBoundary": {
+    "somethingWentWrong": "Algo salió mal",
+    "unexpectedError": "Ocurrió un error inesperado",
+    "tryAgain": "Reintentar",
+    "screenError": "Error de Pantalla"
+  },
+  "firmwareBanner": {
+    "updateAvailable": "Actualización de Firmware Disponible"
+  },
+  "hashrateChart": {
+    "notEnoughData": "Datos insuficientes para el gráfico"
+  },
+  "notificationPrefs": {
+    "title": "Notificaciones",
+    "offline": "Desconectado",
+    "online": "Reconectado",
+    "hot": "Temperatura Alta",
+    "hashrateDrop": "Caída de Hashrate",
+    "poolLost": "Pool Perdido",
+    "longUptime": "Uptime Largo"
+  },
+  "offlineBanner": {
+    "offline": "Estás desconectado \u2014 mostrando datos en caché"
+  },
+  "subscriptionGate": {
+    "upgradeToUnlock": "Actualiza a Pro para desbloquear"
   }
 }

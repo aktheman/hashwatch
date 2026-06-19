@@ -1,20 +1,30 @@
 require('@testing-library/jest-native/extend-expect');
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key, opts) => {
-      if (opts) {
-        return Object.entries(opts).reduce(
-          (s, [k, v]) => s.replace(`{{${k}}}`, String(v)),
-          key,
-        );
-      }
-      return key;
+jest.mock('react-i18next', () => {
+  const mockT = (key, opts) => {
+    if (opts) {
+      return Object.entries(opts).reduce(
+        (s, [k, v]) => s.replace(`{{${k}}}`, String(v)),
+        key,
+      );
+    }
+    return key;
+  };
+  return {
+    useTranslation: () => ({
+      t: mockT,
+      i18n: { changeLanguage: jest.fn(), language: 'en' },
+    }),
+    withTranslation: () => (Component) => {
+      const Wrapped = (props) => {
+        const { createElement } = require('react');
+        return createElement(Component, { ...props, t: mockT });
+      };
+      return Wrapped;
     },
-    i18n: { changeLanguage: jest.fn(), language: 'en' },
-  }),
-  initReactI18next: { type: '3rdParty', init: jest.fn() },
-}));
+    initReactI18next: { type: '3rdParty', init: jest.fn() },
+  };
+});
 
 jest.mock('expo-constants', () => ({
   __esModule: true,

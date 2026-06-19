@@ -40,7 +40,7 @@ it('renders notifications title when local prefs loaded', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({}));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByText('Notifications')).toBeTruthy();
+    expect(screen.getByText('notificationPrefs.title')).toBeTruthy();
   });
 });
 
@@ -48,40 +48,44 @@ it('renders all alert labels', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({}));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByText('Offline')).toBeTruthy();
+    expect(screen.getByText('notificationPrefs.offline')).toBeTruthy();
   });
-  expect(screen.getByText('Reconnected')).toBeTruthy();
-  expect(screen.getByText('High Temperature')).toBeTruthy();
-  expect(screen.getByText('Hashrate Drop')).toBeTruthy();
-  expect(screen.getByText('Pool Lost')).toBeTruthy();
-  expect(screen.getByText('Long Uptime')).toBeTruthy();
+  expect(screen.getByText('notificationPrefs.online')).toBeTruthy();
+  expect(screen.getByText('notificationPrefs.hot')).toBeTruthy();
+  expect(screen.getByText('notificationPrefs.hashrateDrop')).toBeTruthy();
+  expect(screen.getByText('notificationPrefs.poolLost')).toBeTruthy();
+  expect(screen.getByText('notificationPrefs.longUptime')).toBeTruthy();
 });
 
 it('defaults switches to true when prefs are empty', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({}));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByText('Offline')).toBeTruthy();
+    expect(screen.getByText('notificationPrefs.offline')).toBeTruthy();
   });
-  expect(screen.getByLabelText('Offline notification').props.value).toBe(true);
+  expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
 });
 
 it('reads persisted prefs from local DB', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({ offline: false, hot: true }));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByLabelText('Offline notification').props.value).toBe(false);
+    expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(false);
   });
-  expect(screen.getByLabelText('High Temperature notification').props.value).toBe(true);
+  expect(screen.getByLabelText('notificationPrefs.hot notification').props.value).toBe(true);
 });
 
 it('toggles a local pref and persists to DB', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({ offline: true }));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByLabelText('Offline notification')).toBeTruthy();
+    expect(screen.getByLabelText('notificationPrefs.offline notification')).toBeTruthy();
   });
-  fireEvent(screen.getByLabelText('Offline notification'), 'onValueChange', false);
+  fireEvent(
+    screen.getByLabelText('notificationPrefs.offline notification'),
+    'onValueChange',
+    false,
+  );
   await waitFor(() => {
     expect(mockSetSetting).toHaveBeenCalledWith(
       'notify_m1',
@@ -95,13 +99,17 @@ it('reverts switch on local persist failure', async () => {
   mockGetSetting.mockResolvedValue(JSON.stringify({ offline: true }));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByLabelText('Offline notification').props.value).toBe(true);
+    expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
   });
-  fireEvent(screen.getByLabelText('Offline notification'), 'onValueChange', false);
+  fireEvent(
+    screen.getByLabelText('notificationPrefs.offline notification'),
+    'onValueChange',
+    false,
+  );
   await waitFor(() => {
     expect(mockSetSetting).toHaveBeenCalled();
   });
-  expect(screen.getByLabelText('Offline notification').props.value).toBe(true);
+  expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
 });
 
 it('loads prefs from remote when authed', async () => {
@@ -118,9 +126,13 @@ it('toggles remote pref when authed', async () => {
   mockGetNotificationPrefs.mockResolvedValue({});
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByText('Offline')).toBeTruthy();
+    expect(screen.getByText('notificationPrefs.offline')).toBeTruthy();
   });
-  fireEvent(screen.getByLabelText('Offline notification'), 'onValueChange', false);
+  fireEvent(
+    screen.getByLabelText('notificationPrefs.offline notification'),
+    'onValueChange',
+    false,
+  );
   await waitFor(() => {
     expect(mockSetNotificationPref).toHaveBeenCalledWith('m1', 'offline', false);
   });
@@ -132,13 +144,17 @@ it('reverts remote toggle on failure', async () => {
   mockGetNotificationPrefs.mockResolvedValue({ offline: true });
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
-    expect(screen.getByLabelText('Offline notification').props.value).toBe(true);
+    expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
   });
-  fireEvent(screen.getByLabelText('Offline notification'), 'onValueChange', false);
+  fireEvent(
+    screen.getByLabelText('notificationPrefs.offline notification'),
+    'onValueChange',
+    false,
+  );
   await waitFor(() => {
     expect(mockSetNotificationPref).toHaveBeenCalled();
   });
-  expect(screen.getByLabelText('Offline notification').props.value).toBe(true);
+  expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
 });
 
 it('handles remote fetch error gracefully', async () => {
@@ -148,5 +164,5 @@ it('handles remote fetch error gracefully', async () => {
   await waitFor(() => {
     expect(mockGetNotificationPrefs).toHaveBeenCalledWith('m1');
   });
-  expect(screen.queryByText('Notifications')).toBeNull();
+  expect(screen.queryByText('notificationPrefs.title')).toBeNull();
 });

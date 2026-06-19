@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useNetworkStatus } from '../services/networkStatus';
 
 export function OfflineBanner() {
+  const { t } = useTranslation();
   const { isOnline } = useNetworkStatus();
   const theme = useTheme();
 
@@ -31,9 +33,9 @@ export function OfflineBanner() {
     <View
       style={styles.container}
       accessibilityRole="alert"
-      accessibilityLabel="You are offline, showing cached data"
+      accessibilityLabel={t('offlineBanner.offline')}
     >
-      <Text style={styles.text}>You are offline — showing cached data</Text>
+      <Text style={styles.text}>{t('offlineBanner.offline')}</Text>
     </View>
   );
 }

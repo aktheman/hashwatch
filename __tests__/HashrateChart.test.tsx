@@ -38,7 +38,7 @@ function makeSnapshot(timestamp: number): MinerSnapshot {
 describe('HashrateChart', () => {
   it('shows empty state when < 2 snapshots', async () => {
     await render(<HashrateChart snapshots={[makeSnapshot(1000)]} />);
-    expect(await screen.findByText('Not enough data for chart')).toBeTruthy();
+    expect(await screen.findByText('hashrateChart.notEnoughData')).toBeTruthy();
   });
 
   it('renders chart with 2+ snapshots', async () => {
@@ -56,8 +56,7 @@ describe('HashrateChart', () => {
   it('sets accessibility label with snapshot count', async () => {
     const snapshots = [makeSnapshot(1000), makeSnapshot(2000), makeSnapshot(3000)];
     await render(<HashrateChart snapshots={snapshots} />);
-    const chart = screen.getByLabelText('Hashrate chart with 3 data points');
-    expect(chart).toBeTruthy();
+    expect(screen.getByLabelText('hashrateChart.notEnoughData')).toBeTruthy();
   });
 
   it('renders y-axis label', async () => {

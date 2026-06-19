@@ -1,5 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useTheme } from '../theme';
 import { buttonText } from '../utils/design';
 
@@ -8,15 +10,17 @@ interface Props {
   onGoBack?: () => void;
 }
 
+interface InnerProps extends Props {
+  theme: ReturnType<typeof useTheme>;
+  t: TFunction;
+}
+
 interface State {
   hasError: boolean;
   error: Error | null;
 }
 
-class ScreenErrorBoundaryInner extends Component<
-  Props & { theme: ReturnType<typeof useTheme> },
-  State
-> {
+class ScreenErrorBoundaryInner extends Component<InnerProps, State> {
   state: State = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): State {
@@ -38,28 +42,33 @@ class ScreenErrorBoundaryInner extends Component<
   render() {
     if (this.state.hasError) {
       const t = this.props.theme;
+      const { t: translate } = this.props;
       return (
         <View style={[styles.container, { backgroundColor: t.bg }]}>
           <Text style={[styles.icon, { color: t.danger }]}>⚠</Text>
-          <Text style={[styles.title, { color: t.text }]}>Screen Error</Text>
+          <Text style={[styles.title, { color: t.text }]}>
+            {translate('errorBoundary.screenError')}
+          </Text>
           <Text style={[styles.message, { color: t.textDim }]}>
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {this.state.error?.message || translate('errorBoundary.unexpectedError')}
           </Text>
           <TouchableOpacity
             style={[styles.retryBtn, { backgroundColor: t.primary }]}
             onPress={this.handleRetry}
-            accessibilityLabel="Try again"
+            accessibilityLabel={translate('errorBoundary.tryAgain')}
             accessibilityRole="button"
           >
-            <Text style={[styles.retryText, { color: buttonText }]}>Try Again</Text>
+            <Text style={[styles.retryText, { color: buttonText }]}>
+              {translate('errorBoundary.tryAgain')}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.goBackBtn, { borderColor: t.border }]}
             onPress={this.handleGoBack}
-            accessibilityLabel="Go back"
+            accessibilityLabel={translate('common.goBack')}
             accessibilityRole="button"
           >
-            <Text style={[styles.goBackText, { color: t.text }]}>Go Back</Text>
+            <Text style={[styles.goBackText, { color: t.text }]}>{translate('common.goBack')}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -69,9 +78,10 @@ class ScreenErrorBoundaryInner extends Component<
 }
 
 export function ScreenErrorBoundary({ children, onGoBack }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   return (
-    <ScreenErrorBoundaryInner theme={theme} onGoBack={onGoBack}>
+    <ScreenErrorBoundaryInner theme={theme} t={t} onGoBack={onGoBack}>
       {children}
     </ScreenErrorBoundaryInner>
   );

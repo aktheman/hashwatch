@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 
 interface ErrorBannerProps {
@@ -9,6 +10,7 @@ interface ErrorBannerProps {
 }
 
 export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(
     () =>
@@ -71,13 +73,13 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
       <View style={styles.actions}>
         {onRetry && (
           <TouchableOpacity accessibilityRole="button" onPress={onRetry} style={styles.btn}>
-            <Text style={styles.btnText}>Retry</Text>
+            <Text style={styles.btnText}>{t('common.retry')}</Text>
           </TouchableOpacity>
         )}
         {onDismiss && (
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Dismiss error"
+            accessibilityLabel={t('errorBoundary.unexpectedError')}
             onPress={onDismiss}
           >
             <Text style={styles.dismiss}>✕</Text>

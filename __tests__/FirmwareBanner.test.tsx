@@ -28,17 +28,17 @@ jest.mock('../src/utils/version', () => ({
 describe('FirmwareBanner', () => {
   it('renders nothing when no version', async () => {
     await render(<FirmwareBanner rawVersion={null} />);
-    expect(screen.queryByText('Firmware Update Available')).toBeNull();
+    expect(screen.queryByText('firmwareBanner.updateAvailable')).toBeNull();
   });
 
   it('renders nothing when version is up to date', async () => {
     await render(<FirmwareBanner rawVersion="v2.2.1" />);
-    expect(screen.queryByText('Firmware Update Available')).toBeNull();
+    expect(screen.queryByText('firmwareBanner.updateAvailable')).toBeNull();
   });
 
   it('shows banner when update is available', async () => {
     await render(<FirmwareBanner rawVersion="v2.0.0" />);
-    expect(screen.getByText('Firmware Update Available')).toBeTruthy();
+    expect(screen.getByText('firmwareBanner.updateAvailable')).toBeTruthy();
   });
 
   it('shows version details on banner', async () => {
@@ -61,6 +61,6 @@ describe('FirmwareBanner', () => {
 
   it('renders nothing when version cannot be parsed', async () => {
     await render(<FirmwareBanner rawVersion="invalid" />);
-    expect(screen.queryByText('Firmware Update Available')).toBeNull();
+    expect(screen.queryByText('firmwareBanner.updateAvailable')).toBeNull();
   });
 });

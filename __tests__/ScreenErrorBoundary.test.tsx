@@ -33,7 +33,7 @@ it('renders error UI when child throws', async () => {
       <BadChild />
     </ScreenErrorBoundary>,
   );
-  expect(screen.getByText('Screen Error')).toBeTruthy();
+  expect(screen.getByText('errorBoundary.screenError')).toBeTruthy();
   expect(screen.getByText('Boom')).toBeTruthy();
   spy.mockRestore();
 });
@@ -45,8 +45,8 @@ it('retry button exists and is pressable', async () => {
       <BadChild />
     </ScreenErrorBoundary>,
   );
-  expect(screen.getByText('Screen Error')).toBeTruthy();
-  const retryBtn = screen.getByLabelText('Try again');
+  expect(screen.getByText('errorBoundary.screenError')).toBeTruthy();
+  const retryBtn = screen.getByLabelText('errorBoundary.tryAgain');
   expect(retryBtn).toBeTruthy();
   fireEvent.press(retryBtn);
   spy.mockRestore();
@@ -60,7 +60,7 @@ it('go back button calls onGoBack', async () => {
       <BadChild />
     </ScreenErrorBoundary>,
   );
-  fireEvent.press(screen.getByLabelText('Go back'));
+  fireEvent.press(screen.getByLabelText('common.goBack'));
   expect(onGoBack).toHaveBeenCalled();
   spy.mockRestore();
 });
