@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
-import { useAuthStore } from '../store/auth';
+import { useAuthStore, queueSetting } from '../store/auth';
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { getSetting, setSetting } from '../db/database';
 import { exportAllData, exportJSON } from '../utils/export';
@@ -20,6 +20,7 @@ import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
+import { useNetworkStatus } from '../services/networkStatus';
 
 function formatLastSync(ts: number): string {
   const diff = Date.now() - ts;
@@ -47,6 +48,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const { isPro } = useSubscriptionStore();
   const { token, email, login, register, logout, syncNow, syncing, lastSyncTimestamp } =
     useAuthStore();
+  const { isOnline } = useNetworkStatus();
 
   const [showAuth, setShowAuth] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -419,7 +421,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setThemeMode(mode);
                   const val = mode === 'system' ? 'system' : mode;
                   setSetting('theme_mode', val);
-                  if (token) putRemoteSetting('theme_mode', val).catch(() => {});
+                  if (token) {
+                    if (isOnline) {
+                      putRemoteSetting('theme_mode', val).catch(() => {});
+                    } else {
+                      queueSetting('theme_mode', val);
+                    }
+                  }
                 }}
               >
                 <Text
@@ -460,7 +468,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               if (powerCostDebounceRef.current) clearTimeout(powerCostDebounceRef.current);
               powerCostDebounceRef.current = setTimeout(() => {
                 setSetting('power_cost', t);
-                if (token) putRemoteSetting('power_cost', t).catch(() => {});
+                if (token) {
+                  if (isOnline) {
+                    putRemoteSetting('power_cost', t).catch(() => {});
+                  } else {
+                    queueSetting('power_cost', t);
+                  }
+                }
               }, 500);
             }}
             placeholder="0.12"
@@ -491,7 +505,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               setAutoScan(v);
               const val = String(v);
               setSetting('auto_scan', val);
-              if (token) putRemoteSetting('auto_scan', val).catch(() => {});
+              if (token) {
+                if (isOnline) {
+                  putRemoteSetting('auto_scan', val).catch(() => {});
+                } else {
+                  queueSetting('auto_scan', val);
+                }
+              }
             }}
             trackColor={{ false: theme.border, true: theme.primary + '60' }}
             thumbColor={autoScan ? theme.primary : theme.textMuted}

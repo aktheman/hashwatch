@@ -8,6 +8,7 @@ interface NetworkStatus {
 
 let _listeners: Array<(status: NetworkStatus) => void> = [];
 let _currentStatus: NetworkStatus = { isOnline: true, type: null };
+let _onReconnect: (() => void) | null = null;
 
 async function checkNetwork(): Promise<NetworkStatus> {
   try {
@@ -22,7 +23,13 @@ async function checkNetwork(): Promise<NetworkStatus> {
 }
 
 async function pollNetwork() {
+  const prev = _currentStatus;
   _currentStatus = await checkNetwork();
+
+  if (!prev.isOnline && _currentStatus.isOnline && _onReconnect) {
+    _onReconnect();
+  }
+
   _listeners.forEach((fn) => fn(_currentStatus));
 }
 
@@ -59,4 +66,13 @@ export function useNetworkStatus(): NetworkStatus {
   }, []);
 
   return status;
+}
+
+export function onNetworkReconnect(callback: () => void): () => void {
+  _onReconnect = callback;
+  return () => {
+    if (_onReconnect === callback) {
+      _onReconnect = null;
+    }
+  };
 }
