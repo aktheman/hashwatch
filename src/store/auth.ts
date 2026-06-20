@@ -8,6 +8,59 @@ import { setTokenGetter, notifyAuthLogin } from './authToken';
 
 const SYNCED_SETTINGS = ['theme_mode', 'power_cost', 'auto_scan'];
 
+interface QueuedSetting {
+  key: string;
+  value: string;
+  timestamp: number;
+}
+
+let _settingsQueue: QueuedSetting[] = [];
+
+async function loadQueue(): Promise<void> {
+  try {
+    const stored = await DB.getSetting('settings_queue');
+    if (stored) {
+      _settingsQueue = JSON.parse(stored);
+    }
+  } catch {
+    _settingsQueue = [];
+  }
+}
+
+async function saveQueue(): Promise<void> {
+  try {
+    await DB.setSetting('settings_queue', JSON.stringify(_settingsQueue));
+  } catch {
+    // best-effort
+  }
+}
+
+export async function queueSetting(key: string, value: string): Promise<void> {
+  _settingsQueue.push({ key, value, timestamp: Date.now() });
+  await saveQueue();
+}
+
+async function processQueue(): Promise<void> {
+  if (_settingsQueue.length === 0) return;
+
+  const toProcess = [..._settingsQueue];
+  _settingsQueue = [];
+  await saveQueue();
+
+  for (const item of toProcess) {
+    try {
+      await API.putSetting(item.key, item.value);
+    } catch {
+      // Re-queue on failure
+      _settingsQueue.push(item);
+    }
+  }
+
+  if (_settingsQueue.length > 0) {
+    await saveQueue();
+  }
+}
+
 async function syncSettingsFromBackend() {
   try {
     const remote = await API.getSettings();
@@ -24,6 +77,7 @@ async function syncSettingsFromBackend() {
 }
 
 async function pushSettingsToBackend() {
+  await processQueue();
   for (const key of SYNCED_SETTINGS) {
     const value = await DB.getSetting(key);
     if (value) {
@@ -100,6 +154,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   restoreSession: async () => {
+    await loadQueue();
     const token = await DB.getSetting('auth_token');
     const email = await DB.getSetting('auth_email');
     if (token) {
@@ -131,3 +186,12 @@ configureClient({
 });
 
 setTokenGetter(() => useAuthStore.getState().token);
+
+import { onNetworkReconnect } from '../services/networkStatus';
+
+onNetworkReconnect(() => {
+  const { token, syncNow } = useAuthStore.getState();
+  if (token) {
+    syncNow();
+  }
+});
