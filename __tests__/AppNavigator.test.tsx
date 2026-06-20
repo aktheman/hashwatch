@@ -74,6 +74,19 @@ jest.mock('../src/services/notifications', () => ({
   checkMinerAlerts: jest.fn(),
 }));
 
+const mockShowUndo = jest.fn();
+jest.mock('../src/store/toast', () => ({
+  useToastStore: Object.assign(
+    (selector: any) =>
+      selector({
+        undo: null,
+        showUndo: mockShowUndo,
+        dismissUndo: jest.fn(),
+      }),
+    { getState: () => ({ showUndo: mockShowUndo, dismissUndo: jest.fn(), undo: null }) },
+  ),
+}));
+
 jest.mock('../src/services/pushRegistration', () => ({
   registerPushToken: jest.fn(),
 }));
@@ -126,7 +139,10 @@ beforeEach(() => {
   });
   jest.clearAllMocks();
   (DB.loadMiners as jest.Mock).mockResolvedValue([]);
-  (DB.getSetting as jest.Mock).mockReset();
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'empty_groups') return null;
+    return 'true';
+  });
 });
 
 it('shows main app when onboarding_complete is true', async () => {

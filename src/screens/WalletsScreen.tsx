@@ -15,6 +15,7 @@ import { SkeletonCard } from '../components/SkeletonCard';
 import { Wallet } from '../types';
 import * as DB from '../db/database';
 import { useMinerStore } from '../store/miners';
+import { useToastStore } from '../store/toast';
 import { isValidBitcoinAddress } from '../utils/bitcoin';
 
 const WALLET_COLORS = [
@@ -91,15 +92,22 @@ export function WalletsScreen() {
     await loadWallets();
   };
 
-  const remove = (id: string) => {
+  const remove = (id: string, name: string) => {
     Alert.alert(t('wallets.deleteWallet'), t('wallets.deleteWalletBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('common.delete'),
         style: 'destructive',
-        onPress: async () => {
-          await DB.deleteWallet(id);
-          await loadWallets();
+        onPress: () => {
+          useToastStore.getState().showUndo({
+            id: `wallet-${id}`,
+            message: t('wallets.walletRemoved', { name }),
+            onUndo: () => {},
+            onConfirm: async () => {
+              await DB.deleteWallet(id);
+              await loadWallets();
+            },
+          });
         },
       },
     ]);
@@ -306,7 +314,7 @@ export function WalletsScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`Delete wallet: ${item.name}`}
                   style={[styles.actionBtn, styles.actionBtnDelete]}
-                  onPress={() => remove(item.id)}
+                  onPress={() => remove(item.id, item.name)}
                 >
                   <Text style={[styles.actionText, styles.actionTextDelete]}>
                     {t('common.delete')}

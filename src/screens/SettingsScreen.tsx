@@ -21,6 +21,16 @@ import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
 
+function formatLastSync(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'now';
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
 export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -35,7 +45,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const scanning = useMinerStore((s) => s.scanning);
   const { isPro } = useSubscriptionStore();
-  const { token, email, login, register, logout } = useAuthStore();
+  const { token, email, login, register, logout, syncNow, syncing, lastSyncTimestamp } =
+    useAuthStore();
 
   const [showAuth, setShowAuth] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
@@ -312,14 +323,34 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         {showAuth && (
           <View style={styles.authBox}>
             {token ? (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Disconnect"
-                style={styles.logoutBtn}
-                onPress={logout}
-              >
-                <Text style={styles.logoutBtnText}>{t('settings.disconnect')}</Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Disconnect"
+                  style={styles.logoutBtn}
+                  onPress={logout}
+                >
+                  <Text style={styles.logoutBtnText}>{t('settings.disconnect')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Sync Now"
+                  style={[styles.authBtn, { marginTop: 8 }]}
+                  onPress={syncNow}
+                  disabled={syncing}
+                >
+                  <Text style={styles.authBtnText}>
+                    {syncing ? t('settings.syncing') : t('settings.syncNow')}
+                  </Text>
+                </TouchableOpacity>
+                {lastSyncTimestamp && (
+                  <Text style={[styles.sectionSub, { textAlign: 'center', marginTop: 6 }]}>
+                    {t('settings.lastSync', {
+                      time: formatLastSync(lastSyncTimestamp),
+                    })}
+                  </Text>
+                )}
+              </>
             ) : (
               <>
                 <TextInput

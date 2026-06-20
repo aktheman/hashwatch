@@ -1,4 +1,5 @@
 process.env.JWT_SECRET = 'test-secret-for-testing';
+process.env.REVENUECAT_API_KEY = 'test-revenuecat-key';
 
 jest.mock('expo-server-sdk', () => {
   const mockSendPushNotificationsAsync = jest.fn().mockResolvedValue([{ status: 'ok' }]);

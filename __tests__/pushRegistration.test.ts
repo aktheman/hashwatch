@@ -17,7 +17,7 @@ jest.mock('../src/store/auth', () => {
   };
 });
 
-import { registerPushToken } from '../src/services/pushRegistration';
+import { registerPushToken, unregisterPushToken } from '../src/services/pushRegistration';
 import { getExpoPushTokenAsync } from 'expo-notifications';
 import { requestNotificationPermissions } from '../src/services/notifications';
 
@@ -96,4 +96,45 @@ it('does not crash on failure', async () => {
   );
 
   await expect(registerPushToken()).resolves.toBeUndefined();
+});
+
+describe('unregisterPushToken', () => {
+  it('sends DELETE request to backend', async () => {
+    mockGetToken.mockResolvedValueOnce({ data: 'expo-token' });
+    const authMock = jest.requireMock('../src/store/auth') as {
+      useAuthStore: { getState: () => { token: string | null } };
+    };
+    authMock.useAuthStore.getState = () => ({ token: 'auth-token' });
+
+    await unregisterPushToken();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://example.com/api/push/unregister',
+      expect.objectContaining({
+        method: 'DELETE',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer auth-token',
+        }),
+        body: JSON.stringify({ token: 'expo-token' }),
+      }),
+    );
+  });
+
+  it('skips when no auth token', async () => {
+    mockGetToken.mockResolvedValueOnce({ data: 'expo-token' });
+    const authMock = jest.requireMock('../src/store/auth') as {
+      useAuthStore: { getState: () => { token: string | null } };
+    };
+    authMock.useAuthStore.getState = () => ({ token: null });
+
+    await unregisterPushToken();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('does not crash on failure', async () => {
+    mockGetToken.mockRejectedValueOnce(new Error('token error'));
+
+    await expect(unregisterPushToken()).resolves.toBeUndefined();
+  });
 });

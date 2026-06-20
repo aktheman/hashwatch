@@ -5,6 +5,7 @@ import {
   purchasePro,
   restorePurchases,
   checkProStatus,
+  listenForProChanges,
 } from '../services/revenuecat';
 import { validateReceipt } from '../api/client';
 import { getAuthToken } from './authToken';
@@ -43,6 +44,13 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
         tier: pro ? 'pro' : 'free',
         maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
         initialized: true,
+      });
+      await listenForProChanges((isPro) => {
+        set({
+          isPro,
+          tier: isPro ? 'pro' : 'free',
+          maxMiners: isPro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+        });
       });
     } catch {
       set({ initialized: true });

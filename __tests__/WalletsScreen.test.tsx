@@ -37,6 +37,21 @@ jest.mock('../src/theme', () => ({
   }),
 }));
 
+const mockShowUndo = jest.fn(({ onConfirm }: any) => {
+  onConfirm();
+});
+jest.mock('../src/store/toast', () => ({
+  useToastStore: Object.assign(
+    (selector: any) =>
+      selector({
+        undo: null,
+        showUndo: mockShowUndo,
+        dismissUndo: jest.fn(),
+      }),
+    { getState: () => ({ showUndo: mockShowUndo, dismissUndo: jest.fn(), undo: null }) },
+  ),
+}));
+
 jest.mock('../src/utils/bitcoin', () => ({
   isValidBitcoinAddress: (...args: unknown[]) => mockIsValid(...args),
 }));

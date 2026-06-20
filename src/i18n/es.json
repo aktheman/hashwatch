@@ -9,7 +9,8 @@
     "goBack": "Volver",
     "all": "Todos",
     "none": "Ninguno",
-    "na": "N/D"
+    "na": "N/D",
+    "undo": "Deshacer"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -30,7 +31,8 @@
     "power": "Potencia (W)",
     "avgTemp": "Temp. Prom.",
     "efficiency": "Eficiencia",
-    "ungrouped": "Sin Grupo"
+    "ungrouped": "Sin Grupo",
+    "minerRemoved": "{{name}} eliminado"
   },
   "pools": {
     "title": "Pools",
@@ -155,6 +157,7 @@
     "removeMiner": "Eliminar Minero",
     "removeConfirm": "Esto elimina permanentemente {{name}} y todo su historial.",
     "yesRemove": "Sí, Eliminar",
+    "minerRemoved": "{{name}} eliminado",
     "shareStats": "Compartir Estadísticas",
     "sharedVia": "Compartido vía HashWatch"
   },
@@ -193,7 +196,8 @@
     "invalidAddress": "Dirección Inválida",
     "invalidAddressBody": "Ingresa una dirección Bitcoin válida (bc1..., 1..., o 3...)",
     "deleteWallet": "Eliminar Billetera",
-    "deleteWalletBody": "Los mineros asignados a esta billetera quedarán sin asignar."
+    "deleteWalletBody": "Los mineros asignados a esta billetera quedarán sin asignar.",
+    "walletRemoved": "{{name}} eliminada"
   },
   "groups": {
     "title": "Gestión de Grupos",
@@ -209,6 +213,7 @@
     "groupCreatedBody": "El grupo \"{{name}}\" está listo. Asigna mineros en Detalles del Minero.",
     "removeGroup": "Eliminar Grupo",
     "removeGroupBody": "¿Quitar grupo \"{{groupName}}\" de todos sus mineros?",
+    "groupRemoved": "{{groupName}} eliminado",
     "renameGroup": "Renombrar Grupo",
     "renamePrompt": "Nuevo nombre:",
     "editInDetails": "Editar nombre de grupo en Detalles del Minero"

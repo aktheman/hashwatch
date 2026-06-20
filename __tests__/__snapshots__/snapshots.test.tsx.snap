@@ -1,681 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AnalyticsScreen empty state matches snapshot 1`] = `
-<View
-  style={
-    {
-      "backgroundColor": "#0A0A1A",
-      "flex": 1,
-    }
-  }
->
-  <View
-    style={
-      {
-        "alignItems": "center",
-        "flexDirection": "row",
-        "justifyContent": "space-between",
-        "paddingBottom": 8,
-        "paddingHorizontal": 20,
-        "paddingTop": 16,
-      }
-    }
-  >
-    <View>
-      <Text
-        style={
-          {
-            "color": "#FFFFFF",
-            "fontSize": 26,
-            "fontWeight": "800",
-            "letterSpacing": -0.5,
-          }
-        }
-      >
-        analytics.title
-      </Text>
-      <Text
-        style={
-          {
-            "color": "#8B8FA3",
-            "fontSize": 12,
-            "marginTop": 2,
-          }
-        }
-      >
-        analytics.subtitle
-      </Text>
-    </View>
-  </View>
-  <RCTScrollView
-    showsVerticalScrollIndicator={false}
-    style={
-      {
-        "paddingBottom": 40,
-      }
-    }
-  >
-    <View>
-      <View
-        style={
-          {
-            "flexDirection": "row",
-            "gap": 8,
-            "marginBottom": 8,
-            "marginTop": 4,
-            "paddingHorizontal": 16,
-          }
-        }
-      >
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            ⚡
-          </Text>
-          <Text
-            style={
-              [
-                {
-                  "color": "#FFFFFF",
-                  "fontSize": 22,
-                  "fontWeight": "800",
-                },
-                {
-                  "color": "#6C63FF",
-                },
-              ]
-            }
-          >
-            0
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.totalHashrate
-          </Text>
-        </View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            💰
-          </Text>
-          <Text
-            style={
-              [
-                {
-                  "color": "#FFFFFF",
-                  "fontSize": 22,
-                  "fontWeight": "800",
-                },
-                {
-                  "color": "#10B981",
-                },
-              ]
-            }
-          >
-            —
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.estDailyBTC
-          </Text>
-        </View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            🔌
-          </Text>
-          <Text
-            style={
-              [
-                {
-                  "color": "#FFFFFF",
-                  "fontSize": 22,
-                  "fontWeight": "800",
-                },
-                {
-                  "color": "#F59E0B",
-                },
-              ]
-            }
-          >
-            0
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.power
-          </Text>
-        </View>
-      </View>
-      <View
-        style={
-          {
-            "flexDirection": "row",
-            "gap": 8,
-            "marginBottom": 8,
-            "marginTop": 4,
-            "paddingHorizontal": 16,
-          }
-        }
-      >
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            ⬡
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#FFFFFF",
-                "fontSize": 22,
-                "fontWeight": "800",
-              }
-            }
-          >
-            0
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.miners
-          </Text>
-        </View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            🌡
-          </Text>
-          <Text
-            style={
-              [
-                {
-                  "color": "#FFFFFF",
-                  "fontSize": 22,
-                  "fontWeight": "800",
-                },
-                {
-                  "color": "#10B981",
-                },
-              ]
-            }
-          >
-            —
-            °
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.avgTemp
-          </Text>
-        </View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#13132B",
-              "borderColor": "#1E1E42",
-              "borderRadius": 16,
-              "borderWidth": 1,
-              "boxShadow": "0 2px 12px rgba(108, 99, 255, 0.3)",
-              "flex": 1,
-              "padding": 14,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "fontSize": 16,
-                "marginBottom": 4,
-              }
-            }
-          >
-            📦
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#FFFFFF",
-                "fontSize": 22,
-                "fontWeight": "800",
-              }
-            }
-          >
-            0
-          </Text>
-          <Text
-            style={
-              {
-                "color": "#8B8FA3",
-                "fontSize": 10,
-                "fontWeight": "600",
-                "letterSpacing": 0.5,
-                "marginTop": 2,
-                "textTransform": "uppercase",
-              }
-            }
-          >
-            analytics.totalShares
-          </Text>
-        </View>
-      </View>
-      <View
-        style={
-          {
-            "backgroundColor": "#13132B",
-            "borderColor": "#1E1E42",
-            "borderRadius": 16,
-            "borderWidth": 1,
-            "marginBottom": 16,
-            "marginHorizontal": 16,
-            "padding": 16,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "#FFFFFF",
-              "fontSize": 16,
-              "fontWeight": "700",
-              "marginBottom": 12,
-            }
-          }
-        >
-          analytics.hashrateHistory
-        </Text>
-        <View
-          style={
-            {
-              "flexDirection": "row",
-              "gap": 6,
-              "marginBottom": 12,
-            }
-          }
-        >
-          <View
-            accessibilityLabel="Show 1 hour"
-            accessibilityRole="button"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "backgroundColor": "#1A1A3E",
-                "borderColor": "#1E1E42",
-                "borderRadius": 8,
-                "borderWidth": 1,
-                "opacity": 1,
-                "paddingHorizontal": 12,
-                "paddingVertical": 6,
-              }
-            }
-          >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 12,
-                    "fontWeight": "600",
-                  },
-                  {
-                    "color": "#FFFFFF",
-                  },
-                ]
-              }
-            >
-              1h
-            </Text>
-          </View>
-          <View
-            accessibilityLabel="Show 24 hours"
-            accessibilityRole="button"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "backgroundColor": "#6C63FF",
-                "borderColor": "#6C63FF",
-                "borderRadius": 8,
-                "borderWidth": 1,
-                "opacity": 1,
-                "paddingHorizontal": 12,
-                "paddingVertical": 6,
-              }
-            }
-          >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 12,
-                    "fontWeight": "600",
-                  },
-                  {
-                    "color": "#FFF",
-                  },
-                ]
-              }
-            >
-              24h
-            </Text>
-          </View>
-          <View
-            accessibilityLabel="Show 7 days"
-            accessibilityRole="button"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "backgroundColor": "#1A1A3E",
-                "borderColor": "#1E1E42",
-                "borderRadius": 8,
-                "borderWidth": 1,
-                "opacity": 1,
-                "paddingHorizontal": 12,
-                "paddingVertical": 6,
-              }
-            }
-          >
-            <Text
-              style={
-                [
-                  {
-                    "fontSize": 12,
-                    "fontWeight": "600",
-                  },
-                  {
-                    "color": "#FFFFFF",
-                  },
-                ]
-              }
-            >
-              7d
-            </Text>
-          </View>
-        </View>
-        <Text
-          style={
-            [
-              {
-                "color": "#8B8FA3",
-                "fontSize": 14,
-                "lineHeight": 20,
-                "textAlign": "center",
-              },
-              {
-                "paddingVertical": 40,
-              },
-            ]
-          }
-        >
-          analytics.notEnoughData
-        </Text>
-      </View>
-      <View
-        style={
-          {
-            "backgroundColor": "#13132B",
-            "borderColor": "#1E1E42",
-            "borderRadius": 16,
-            "borderWidth": 1,
-            "marginBottom": 16,
-            "marginHorizontal": 16,
-            "padding": 16,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "#FFFFFF",
-              "fontSize": 16,
-              "fontWeight": "700",
-              "marginBottom": 12,
-            }
-          }
-        >
-          analytics.uptimeHistory
-        </Text>
-        <Text
-          style={
-            [
-              {
-                "color": "#8B8FA3",
-                "fontSize": 14,
-                "lineHeight": 20,
-                "textAlign": "center",
-              },
-              {
-                "paddingVertical": 40,
-              },
-            ]
-          }
-        >
-          analytics.notEnoughData
-        </Text>
-      </View>
-    </View>
-  </RCTScrollView>
-</View>
-`;
-
 exports[`DashboardScreen empty state matches snapshot 1`] = `
 <View
   style={
@@ -734,6 +58,61 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         </Text>
          
         dashboard.subtitle
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="Compare miners"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#13132B",
+          "borderColor": "#1E1E42",
+          "borderRadius": 12,
+          "borderWidth": 1,
+          "height": 38,
+          "justifyContent": "center",
+          "marginRight": 8,
+          "opacity": 1,
+          "width": 38,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        ⇄
       </Text>
     </View>
     <View
@@ -944,7 +323,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           ]
         }
       >
-        0
+        0 H/s
       </Text>
       <Text
         style={

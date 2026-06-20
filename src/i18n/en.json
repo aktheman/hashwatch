@@ -9,7 +9,8 @@
     "goBack": "Go Back",
     "all": "All",
     "none": "None",
-    "na": "N/A"
+    "na": "N/A",
+    "undo": "Undo"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -30,7 +31,8 @@
     "power": "Power (W)",
     "avgTemp": "Avg Temp",
     "efficiency": "Efficiency",
-    "ungrouped": "Ungrouped"
+    "ungrouped": "Ungrouped",
+    "minerRemoved": "{{name}} removed"
   },
   "pools": {
     "title": "Pools",
@@ -155,6 +157,7 @@
     "removeMiner": "Remove Miner",
     "removeConfirm": "This permanently deletes {{name}} and all its history.",
     "yesRemove": "Yes, Remove",
+    "minerRemoved": "{{name}} removed",
     "shareStats": "Share Stats",
     "sharedVia": "Shared via HashWatch"
   },
@@ -193,7 +196,8 @@
     "invalidAddress": "Invalid Address",
     "invalidAddressBody": "Enter a valid Bitcoin address (bc1..., 1..., or 3...)",
     "deleteWallet": "Delete Wallet",
-    "deleteWalletBody": "Miners assigned to this wallet will become unassigned."
+    "deleteWalletBody": "Miners assigned to this wallet will become unassigned.",
+    "walletRemoved": "{{name}} removed"
   },
   "groups": {
     "title": "Group Management",
@@ -209,6 +213,7 @@
     "groupCreatedBody": "Group \"{{name}}\" is ready. Assign miners in Miner Details.",
     "removeGroup": "Remove Group",
     "removeGroupBody": "Clear group \"{{groupName}}\" from all its miners?",
+    "groupRemoved": "{{groupName}} removed",
     "renameGroup": "Rename Group",
     "renamePrompt": "New name:",
     "editInDetails": "Edit group name in Miner Details"
