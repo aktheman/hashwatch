@@ -37,6 +37,21 @@ jest.mock('../src/db/database', () => ({
   deleteWallet: jest.fn().mockResolvedValue(undefined),
 }));
 
+const mockShowUndo = jest.fn(({ onConfirm }: any) => {
+  onConfirm();
+});
+jest.mock('../src/store/toast', () => ({
+  useToastStore: Object.assign(
+    (selector: any) =>
+      selector({
+        undo: null,
+        showUndo: mockShowUndo,
+        dismissUndo: jest.fn(),
+      }),
+    { getState: () => ({ showUndo: mockShowUndo, dismissUndo: jest.fn(), undo: null }) },
+  ),
+}));
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { Share } from 'react-native';
@@ -216,11 +231,28 @@ it('shows Share Stats button and calls Share.share on press', async () => {
   });
 });
 
-it('navigates back after confirming remove', async () => {
-  useMinerStore.setState({ removeMiner: jest.fn().mockResolvedValue(undefined) } as any);
+it('navigates back and removes miner after confirming remove', async () => {
+  const removeMiner = jest.fn().mockResolvedValue(undefined);
+  useMinerStore.setState({ removeMiner } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
   fireEvent.press(screen.getByText('minerDetail.removeMiner'));
   await waitFor(() => expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy());
   fireEvent.press(screen.getByLabelText('Yes, Remove'));
   await waitFor(() => expect(navigation.goBack).toHaveBeenCalled());
+  expect(removeMiner).toHaveBeenCalledWith('m1');
+});
+
+it('shows undo toast after removing miner', async () => {
+  useMinerStore.setState({ removeMiner: jest.fn().mockResolvedValue(undefined) } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  await waitFor(() => expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy());
+  fireEvent.press(screen.getByLabelText('Yes, Remove'));
+  await waitFor(() =>
+    expect(mockShowUndo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'minerDetail.minerRemoved',
+      }),
+    ),
+  );
 });

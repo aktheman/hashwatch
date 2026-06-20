@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
@@ -19,6 +19,8 @@ import { LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
+type Range = '1h' | '24h' | '7d' | '30d';
+const ranges: Range[] = ['1h', '24h', '7d', '30d'];
 
 export function AnalyticsScreen() {
   const { t } = useTranslation();
@@ -26,7 +28,8 @@ export function AnalyticsScreen() {
   const miners = useMinerStore((s) => s.miners);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<'1h' | '24h' | '7d'>('24h');
+  const [refreshing, setRefreshing] = useState(false);
+  const [range, setRange] = useState<Range>('24h');
   const [powerCost, setPowerCost] = useState(0);
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
 
@@ -45,7 +48,13 @@ export function AnalyticsScreen() {
     const all: MinerSnapshot[] = [];
     const now = Date.now();
     const cutoff =
-      range === '1h' ? now - 3600000 : range === '24h' ? now - 86400000 : now - 604800000;
+      range === '1h'
+        ? now - 3600000
+        : range === '24h'
+          ? now - 86400000
+          : range === '7d'
+            ? now - 604800000
+            : now - 2592000000;
     for (const m of miners) {
       const ss = await DB.getSnapshots(m.id, 500);
       all.push(...ss.filter((s) => s.timestamp >= cutoff));
@@ -53,6 +62,13 @@ export function AnalyticsScreen() {
     all.sort((a, b) => a.timestamp - b.timestamp);
     setSnapshots(all);
     setLoading(false);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadSnapshots();
+    await fetchBTCPrice().then(setBtcPrice);
+    setRefreshing(false);
   };
 
   const { totalHashrate, totalEarnings, totalPower, avgTemp, totalShares } = useMemo(() => {
@@ -82,7 +98,8 @@ export function AnalyticsScreen() {
   const chartData = useMemo(() => {
     if (snapshots.length < 2) return null;
     const buckets: { time: number; hashRate: number }[] = [];
-    const interval = range === '1h' ? 60000 : range === '24h' ? 3600000 : 3600000 * 4;
+    const interval =
+      range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
     const grouped: Record<number, number[]> = {};
     for (const s of snapshots) {
       const bucket = Math.floor(s.timestamp / interval) * interval;
@@ -99,7 +116,8 @@ export function AnalyticsScreen() {
       return {
         labels: sampled.map((b) => {
           const d = new Date(b.time);
-          return range === '7d'
+          const showDate = range === '7d' || range === '30d';
+          return showDate
             ? `${d.getMonth() + 1}/${d.getDate()}`
             : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
         }),
@@ -115,7 +133,8 @@ export function AnalyticsScreen() {
     return {
       labels: buckets.map((b) => {
         const d = new Date(b.time);
-        return range === '7d'
+        const showDate = range === '7d' || range === '30d';
+        return showDate
           ? `${d.getMonth() + 1}/${d.getDate()}`
           : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
       }),
@@ -132,7 +151,8 @@ export function AnalyticsScreen() {
   const uptimeChartData = useMemo(() => {
     if (snapshots.length < 2) return null;
     const buckets: { time: number; uptime: number }[] = [];
-    const interval = range === '1h' ? 60000 : range === '24h' ? 3600000 : 3600000 * 4;
+    const interval =
+      range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
     const grouped: Record<number, number[]> = {};
     for (const s of snapshots) {
       const bucket = Math.floor(s.timestamp / interval) * interval;
@@ -149,7 +169,7 @@ export function AnalyticsScreen() {
       return {
         labels: sampled.map((b) => {
           const d = new Date(b.time);
-          return range === '7d'
+          return range === '7d' || range === '30d'
             ? `${d.getMonth() + 1}/${d.getDate()}`
             : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
         }),
@@ -165,7 +185,8 @@ export function AnalyticsScreen() {
     return {
       labels: buckets.map((b) => {
         const d = new Date(b.time);
-        return range === '7d'
+        const showDate = range === '7d' || range === '30d';
+        return showDate
           ? `${d.getMonth() + 1}/${d.getDate()}`
           : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
       }),
@@ -270,7 +291,19 @@ export function AnalyticsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+            progressBackgroundColor={theme.surface}
+          />
+        }
+      >
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>
             <Text style={styles.summaryIcon}>⚡</Text>
@@ -361,11 +394,11 @@ export function AnalyticsScreen() {
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>{t('analytics.hashrateHistory')}</Text>
           <View style={styles.rangeRow}>
-            {(['1h', '24h', '7d'] as const).map((r) => (
+            {ranges.map((r) => (
               <TouchableOpacity
                 accessibilityRole="button"
                 key={r}
-                accessibilityLabel={`Show ${r === '1h' ? '1 hour' : r === '24h' ? '24 hours' : '7 days'}`}
+                accessibilityLabel={`Show ${r === '1h' ? '1 hour' : r === '24h' ? '24 hours' : r === '7d' ? '7 days' : '30 days'}`}
                 style={[
                   styles.rangeBtn,
                   {

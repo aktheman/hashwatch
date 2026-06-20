@@ -11,10 +11,12 @@ jest.mock('../src/db/database', () => ({
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
 const mockGetSettings = jest.fn();
+const mockPutSetting = jest.fn();
 jest.mock('../src/api/client', () => ({
   login: (e: string, p: string) => mockLogin(e, p),
   register: (e: string, p: string) => mockRegister(e, p),
   getSettings: (...args: unknown[]) => mockGetSettings(...args),
+  putSetting: (key: string, value: string) => mockPutSetting(key, value),
   configureClient: jest.fn(),
 }));
 
@@ -27,9 +29,11 @@ jest.mock('../src/services/websocket', () => ({
 }));
 
 const mockRegisterPush = jest.fn();
+const mockUnregisterPush = jest.fn();
 
 jest.mock('../src/services/pushRegistration', () => ({
   registerPushToken: () => mockRegisterPush(),
+  unregisterPushToken: () => mockUnregisterPush(),
 }));
 
 const mockNotifyAuthLogin = jest.fn();
@@ -48,6 +52,7 @@ beforeEach(() => {
     email: null,
     syncing: false,
     synced: false,
+    lastSyncTimestamp: null,
   });
   jest.clearAllMocks();
 });
@@ -114,6 +119,7 @@ describe('logout', () => {
     expect(state.userId).toBeNull();
     expect(state.email).toBeNull();
     expect(state.synced).toBe(false);
+    expect(mockUnregisterPush).toHaveBeenCalled();
     expect(mockDisconnectWS).toHaveBeenCalled();
     expect(mockSetSetting).toHaveBeenCalledWith('auth_token', '');
     expect(mockSetSetting).toHaveBeenCalledWith('auth_email', '');
@@ -178,5 +184,67 @@ describe('syncSettingsFromBackend', () => {
     await Promise.resolve();
 
     expect(mockGetSettings).toHaveBeenCalled();
+  });
+});
+
+describe('syncNow', () => {
+  beforeEach(() => {
+    useAuthStore.setState({
+      token: 't1',
+      userId: 'u1',
+      email: 'a@b.com',
+      syncing: false,
+      synced: false,
+      lastSyncTimestamp: null,
+    });
+  });
+
+  it('pushes settings to backend, pulls from backend, and sets synced', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'theme_mode') return 'dark';
+      if (k === 'power_cost') return '0.15';
+      if (k === 'auto_scan') return 'true';
+      return null;
+    });
+    mockGetSettings.mockResolvedValue({
+      theme_mode: 'dark',
+      power_cost: '0.15',
+      auto_scan: 'true',
+    });
+
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalledWith('theme_mode', 'dark');
+    expect(mockPutSetting).toHaveBeenCalledWith('power_cost', '0.15');
+    expect(mockPutSetting).toHaveBeenCalledWith('auto_scan', 'true');
+    expect(mockGetSettings).toHaveBeenCalled();
+    const state = useAuthStore.getState();
+    expect(state.syncing).toBe(false);
+    expect(state.synced).toBe(true);
+    expect(state.lastSyncTimestamp).not.toBeNull();
+  });
+
+  it('skips backend push when no local settings exist', async () => {
+    mockGetSetting.mockResolvedValue(null);
+    mockGetSettings.mockResolvedValue({});
+
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).not.toHaveBeenCalled();
+    const state = useAuthStore.getState();
+    expect(state.synced).toBe(true);
+  });
+
+  it('handles push failure gracefully and still pulls from backend', async () => {
+    mockGetSetting.mockResolvedValue('dark');
+    mockPutSetting.mockRejectedValue(new Error('network error'));
+    mockGetSettings.mockResolvedValue({ theme_mode: 'dark' });
+
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalled();
+    expect(mockGetSettings).toHaveBeenCalled();
+    const state = useAuthStore.getState();
+    expect(state.synced).toBe(true);
   });
 });

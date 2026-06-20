@@ -1,9 +1,26 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
+import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
 import { useTranslation } from 'react-i18next';
+import * as DB from '../db/database';
+
+async function loadEmptyGroups(): Promise<string[]> {
+  const raw = await DB.getSetting('empty_groups');
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveEmptyGroups(groups: string[]): Promise<void> {
+  await DB.setSetting('empty_groups', JSON.stringify(groups));
+}
 
 export function GroupsScreen() {
   const { t } = useTranslation();
@@ -12,6 +29,11 @@ export function GroupsScreen() {
   const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
 
   const [newGroupName, setNewGroupName] = useState('');
+  const [emptyGroups, setEmptyGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadEmptyGroups().then(setEmptyGroups);
+  }, []);
 
   const groups = useMemo(() => {
     const map = new Map<string, Miner[]>();
@@ -20,22 +42,27 @@ export function GroupsScreen() {
       if (!map.has(g)) map.set(g, []);
       map.get(g)!.push(m);
     }
+    for (const g of emptyGroups) {
+      if (!map.has(g)) map.set(g, []);
+    }
     const arr = Array.from(map.entries()).sort(([a], [b]) =>
       a === 'Ungrouped' ? 1 : b === 'Ungrouped' ? -1 : a.localeCompare(b),
     );
     return arr;
-  }, [miners]);
+  }, [miners, emptyGroups]);
 
-  const addGroup = useCallback(() => {
+  const addGroup = useCallback(async () => {
     const name = newGroupName.trim();
     if (!name) return;
-    if (miners.some((m) => m.group === name)) {
+    if (miners.some((m) => m.group === name) || emptyGroups.includes(name)) {
       Alert.alert(t('groups.groupExists'), t('groups.groupExistsBody', { name }));
       return;
     }
+    const updated = [...emptyGroups, name];
+    await saveEmptyGroups(updated);
+    setEmptyGroups(updated);
     setNewGroupName('');
-    Alert.alert(t('groups.groupCreated'), t('groups.groupCreatedBody', { name }));
-  }, [newGroupName, miners, setNewGroupName]);
+  }, [newGroupName, miners, emptyGroups, setNewGroupName]);
 
   const removeGroup = useCallback(
     (groupName: string) => {
@@ -44,16 +71,28 @@ export function GroupsScreen() {
         {
           text: t('groups.remove'),
           style: 'destructive',
-          onPress: async () => {
-            const inGroup = miners.filter((m) => m.group === groupName);
-            for (const m of inGroup) {
-              await setMinerGroup(m.id, undefined);
-            }
+          onPress: () => {
+            useToastStore.getState().showUndo({
+              id: `group-${groupName}`,
+              message: t('groups.groupRemoved', { groupName }),
+              onUndo: () => {},
+              onConfirm: async () => {
+                const inGroup = miners.filter((m) => m.group === groupName);
+                for (const m of inGroup) {
+                  await setMinerGroup(m.id, undefined);
+                }
+                if (emptyGroups.includes(groupName)) {
+                  const updated = emptyGroups.filter((g) => g !== groupName);
+                  await saveEmptyGroups(updated);
+                  setEmptyGroups(updated);
+                }
+              },
+            });
           },
         },
       ]);
     },
-    [miners, setMinerGroup],
+    [miners, emptyGroups, setMinerGroup, t],
   );
 
   const renameGroup = useCallback(

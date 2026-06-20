@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
+import { useToastStore } from '../store/toast';
 import { MinerSnapshot, Wallet, NavigationProp } from '../types';
 import * as DB from '../db/database';
 import { StatWidget } from '../components/StatWidget';
@@ -396,9 +397,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     await Share.share({ message: msg }).catch(() => {});
   };
 
-  const handleDelete = async () => {
-    await removeMiner(minerId);
+  const handleDelete = () => {
     navigation.goBack();
+    useToastStore.getState().showUndo({
+      id: `delete-${minerId}`,
+      message: t('minerDetail.minerRemoved', { name: miner.name }),
+      onUndo: () => {},
+      onConfirm: () => removeMiner(minerId),
+    });
   };
 
   return (

@@ -8,6 +8,7 @@ import { startPricePolling } from '../utils/hashrate';
 import { useTranslation } from 'react-i18next';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
+import { UndoToast } from '../components/UndoToast';
 import { useTheme } from '../theme';
 import type { RootStackParamList, TabParamList } from '../types';
 
@@ -41,6 +42,9 @@ const GroupsScreen = lazy(() =>
 const ImportDataScreen = lazy(() =>
   import('../screens/ImportDataScreen').then((m) => ({ default: m.ImportDataScreen })),
 );
+const MinerComparisonScreen = lazy(() =>
+  import('../screens/MinerComparisonScreen').then((m) => ({ default: m.MinerComparisonScreen })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -73,6 +77,7 @@ const WrappedSubscription = withScreenBoundary(SubscriptionScreen);
 const WrappedWallets = withScreenBoundary(WalletsScreen);
 const WrappedGroups = withScreenBoundary(GroupsScreen);
 const WrappedImportData = withScreenBoundary(ImportDataScreen);
+const WrappedMinerComparison = withScreenBoundary(MinerComparisonScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -162,6 +167,7 @@ export function AppNavigator() {
   return (
     <NavigationContainer>
       <OfflineBanner />
+      <UndoToast />
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: theme.bg },
@@ -200,6 +206,11 @@ export function AppNavigator() {
           name="ImportData"
           component={WrappedImportData}
           options={{ title: t('navigator.importData') }}
+        />
+        <Stack.Screen
+          name="MinerComparison"
+          component={WrappedMinerComparison}
+          options={{ title: t('navigator.minerComparison') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

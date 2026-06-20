@@ -3,8 +3,10 @@ import * as DB from '../db/database';
 import * as API from '../api/client';
 import { configureClient } from '../api/client';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
-import { registerPushToken } from '../services/pushRegistration';
+import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import { setTokenGetter, notifyAuthLogin } from './authToken';
+
+const SYNCED_SETTINGS = ['theme_mode', 'power_cost', 'auto_scan'];
 
 async function syncSettingsFromBackend() {
   try {
@@ -21,17 +23,32 @@ async function syncSettingsFromBackend() {
   }
 }
 
+async function pushSettingsToBackend() {
+  for (const key of SYNCED_SETTINGS) {
+    const value = await DB.getSetting(key);
+    if (value) {
+      try {
+        await API.putSetting(key, value);
+      } catch {
+        // best-effort per setting
+      }
+    }
+  }
+}
+
 interface AuthState {
   token: string | null;
   userId: string | null;
   email: string | null;
   syncing: boolean;
   synced: boolean;
+  lastSyncTimestamp: number | null;
 
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   restoreSession: () => Promise<void>;
+  syncNow: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -40,6 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   email: null,
   syncing: false,
   synced: false,
+  lastSyncTimestamp: null,
 
   login: async (email: string, password: string) => {
     try {
@@ -74,6 +92,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    unregisterPushToken();
     disconnectWebSocket();
     set({ token: null, userId: null, email: null, synced: false });
     await DB.setSetting('auth_token', '');
@@ -94,6 +113,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       registerPushToken();
       syncSettingsFromBackend();
     }
+  },
+
+  syncNow: async () => {
+    set({ syncing: true });
+    await pushSettingsToBackend();
+    await syncSettingsFromBackend();
+    set({ syncing: false, synced: true, lastSyncTimestamp: Date.now() });
   },
 }));
 

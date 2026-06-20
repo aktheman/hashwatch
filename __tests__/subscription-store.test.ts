@@ -15,6 +15,7 @@ jest.mock('../src/services/revenuecat', () => ({
   checkProStatus: jest.fn().mockResolvedValue(false),
   purchasePro: jest.fn(),
   restorePurchases: jest.fn(),
+  listenForProChanges: jest.fn().mockResolvedValue(jest.fn()),
 }));
 
 import * as revenuecat from '../src/services/revenuecat';
@@ -107,6 +108,32 @@ describe('initialize', () => {
   it('calls configureRevenueCat on init', async () => {
     await useSubscriptionStore.getState().initialize();
     expect(mockRC.configureRevenueCat).toHaveBeenCalled();
+  });
+
+  it('calls listenForProChanges on init', async () => {
+    await useSubscriptionStore.getState().initialize();
+    expect(mockRC.listenForProChanges).toHaveBeenCalled();
+  });
+
+  it('listenForProChanges callback upgrades to pro when called with true', async () => {
+    await useSubscriptionStore.getState().initialize();
+    const callback = mockRC.listenForProChanges.mock.calls[0][0];
+    callback(true);
+    const state = useSubscriptionStore.getState();
+    expect(state.isPro).toBe(true);
+    expect(state.tier).toBe('pro');
+    expect(state.maxMiners).toBe(999);
+  });
+
+  it('listenForProChanges callback downgrades to free when called with false', async () => {
+    useSubscriptionStore.getState().setPro();
+    await useSubscriptionStore.getState().initialize();
+    const callback = mockRC.listenForProChanges.mock.calls[0][0];
+    callback(false);
+    const state = useSubscriptionStore.getState();
+    expect(state.isPro).toBe(false);
+    expect(state.tier).toBe('free');
+    expect(state.maxMiners).toBe(4);
   });
 });
 

@@ -86,6 +86,7 @@ jest.mock('../src/services/websocket', () => ({
 
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import { DashboardScreen } from '../src/screens/DashboardScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -441,4 +442,174 @@ it('shows dash when no temperature data', async () => {
   });
   await render(<DashboardScreen navigation={navigation} />);
   expect(screen.getByText('—°')).toBeTruthy();
+});
+
+describe('comparison selection mode', () => {
+  it('shows Compare button in header when miners exist', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    expect(screen.getByLabelText('Compare miners')).toBeTruthy();
+  });
+
+  it('enters selection mode when Compare is pressed', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    expect(await screen.findByLabelText('Cancel selection')).toBeTruthy();
+  });
+
+  it('shows selection count in action bar', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    expect(await screen.findByText('comparison.nSelected')).toBeTruthy();
+  });
+
+  it('toggles miner selection on press in selection mode', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    const miner1 = await screen.findByText('Miner1');
+    fireEvent.press(miner1);
+    expect(await screen.findByText('comparison.compare')).toBeTruthy();
+  });
+
+  it('Compare button is disabled with fewer than 2 miners selected', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    const compareBtn = await screen.findByLabelText('Compare');
+    await waitFor(() => {
+      expect(compareBtn.props.accessibilityState.disabled).toBe(true);
+    });
+  });
+
+  it('navigates to MinerComparison with selected miner ids', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    const miner1 = await screen.findByText('Miner1');
+    fireEvent.press(miner1);
+    const miner2 = await screen.findByText('Miner2');
+    fireEvent.press(miner2);
+    const compareAction = await screen.findByText('comparison.compare');
+    fireEvent.press(compareAction);
+    await waitFor(() => {
+      expect(navigation.navigate).toHaveBeenCalledWith('MinerComparison', {
+        minerIds: ['m1', 'm2'],
+      });
+    });
+  });
+
+  it('Cancel clears selection and exits selection mode', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    const btn = await screen.findByLabelText('Compare miners');
+    fireEvent.press(btn);
+    const miner1 = await screen.findByText('Miner1');
+    fireEvent.press(miner1);
+    expect(await screen.findByLabelText('Cancel selection')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Cancel selection'));
+    expect(await screen.findByLabelText('Compare miners')).toBeTruthy();
+  });
+});
+
+describe('batch operations', () => {
+  it('shows batch action buttons in selection mode', async () => {
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    fireEvent.press(await screen.findByLabelText('Compare miners'));
+    expect(await screen.findByLabelText('Batch group')).toBeTruthy();
+    expect(await screen.findByLabelText('Batch wallet')).toBeTruthy();
+    expect(await screen.findByLabelText('Batch delete')).toBeTruthy();
+  });
+
+  it('calls setMinerGroup when group is assigned via batch', async () => {
+    const mockSetGroup = jest.fn();
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+      setMinerGroup: mockSetGroup,
+    });
+    const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation(() => {});
+    await render(<DashboardScreen navigation={navigation} />);
+    fireEvent.press(await screen.findByLabelText('Compare miners'));
+    fireEvent.press(await screen.findByText('Miner1'));
+    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press(await screen.findByLabelText('Batch group'));
+    const promptArgs = promptSpy.mock.calls[0];
+    const okButton = promptArgs?.[2]?.find((b: any) => b.text === 'common.ok');
+    okButton?.onPress?.('Rack-A');
+    await waitFor(() => {
+      expect(mockSetGroup).toHaveBeenCalledTimes(2);
+    });
+    promptSpy.mockRestore();
+  });
+
+  it('calls setMinerWallet when wallet is assigned via batch picker', async () => {
+    const mockSetWallet = jest.fn();
+    const { loadWallets } = require('../src/db/database');
+    (loadWallets as jest.Mock).mockResolvedValue([
+      { id: 'w1', name: 'Test Wallet', color: '#f00' },
+    ]);
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+      setMinerWallet: mockSetWallet,
+    });
+    await render(<DashboardScreen navigation={navigation} />);
+    fireEvent.press(await screen.findByLabelText('Compare miners'));
+    fireEvent.press(await screen.findByText('Miner1'));
+    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press(await screen.findByLabelText('Batch wallet'));
+    expect(await screen.findByLabelText('Assign wallet: Test Wallet')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Assign wallet: Test Wallet'));
+    await waitFor(() => {
+      expect(mockSetWallet).toHaveBeenNthCalledWith(1, 'm1', 'w1');
+      expect(mockSetWallet).toHaveBeenNthCalledWith(2, 'm2', 'w1');
+    });
+  });
+
+  it('calls removeMiner for each selected miner on batch delete', async () => {
+    const mockRemoveMiner = jest.fn();
+    const mockShowUndo = jest.fn();
+    useMinerStore.setState({
+      miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+      removeMiner: mockRemoveMiner,
+    });
+    const { useToastStore } = require('../src/store/toast');
+    useToastStore.setState({ showUndo: mockShowUndo });
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    await render(<DashboardScreen navigation={navigation} />);
+    fireEvent.press(await screen.findByLabelText('Compare miners'));
+    fireEvent.press(await screen.findByText('Miner1'));
+    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press(await screen.findByLabelText('Batch delete'));
+    const alertArgs = alertSpy.mock.calls[0];
+    const deleteButton = alertArgs?.[2]?.find((b: any) => b.text === 'common.delete');
+    deleteButton?.onPress?.();
+    await waitFor(() => {
+      expect(mockShowUndo).toHaveBeenCalledTimes(2);
+    });
+    alertSpy.mockRestore();
+  });
 });

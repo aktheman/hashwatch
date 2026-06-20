@@ -5,6 +5,16 @@ import { GroupsScreen } from '../src/screens/GroupsScreen';
 
 let mockMiners: any[];
 const mockSetMinerGroup = jest.fn();
+let mockEmptyGroups: string[] = [];
+
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn(async (key: string) => {
+    if (key === 'empty_groups')
+      return mockEmptyGroups.length > 0 ? JSON.stringify(mockEmptyGroups) : null;
+    return null;
+  }),
+  setSetting: jest.fn(async () => {}),
+}));
 
 jest.mock('../src/store/miners', () => ({
   useMinerStore: (selector: any) =>
@@ -12,6 +22,21 @@ jest.mock('../src/store/miners', () => ({
       miners: mockMiners,
       setMinerGroup: (id: string, group: string | undefined) => mockSetMinerGroup(id, group),
     }),
+}));
+
+const mockShowUndo = jest.fn(({ onConfirm }: any) => {
+  onConfirm();
+});
+jest.mock('../src/store/toast', () => ({
+  useToastStore: Object.assign(
+    (selector: any) =>
+      selector({
+        undo: null,
+        showUndo: mockShowUndo,
+        dismissUndo: jest.fn(),
+      }),
+    { getState: () => ({ showUndo: mockShowUndo, dismissUndo: jest.fn(), undo: null }) },
+  ),
 }));
 
 jest.mock('../src/theme', () => ({
@@ -34,6 +59,7 @@ jest.mock('../src/theme', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockEmptyGroups = [];
   mockMiners = [
     { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Garage' },
     { id: 'm2', name: 'Miner B', ip: '10.0.0.2', port: 80, isOnline: false, group: 'Garage' },
@@ -75,7 +101,7 @@ it('shows empty state when no miners', async () => {
 });
 
 it('can create a new group via text input', async () => {
-  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { getSetting, setSetting } = require('../src/db/database');
 
   await render(<GroupsScreen />);
   await act(async () => {
@@ -85,13 +111,12 @@ it('can create a new group via text input', async () => {
     fireEvent.press(screen.getByText('common.add'));
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('groups.groupCreated', 'groups.groupCreatedBody');
-  alertSpy.mockRestore();
+  expect(setSetting).toHaveBeenCalledWith('empty_groups', JSON.stringify(['NewGroup']));
+  expect(getSetting).toHaveBeenCalledWith('empty_groups');
 });
 
 it('creates group via onSubmitEditing', async () => {
-  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const onSubmitEditing = jest.fn();
+  const { setSetting } = require('../src/db/database');
 
   await render(<GroupsScreen />);
   await act(async () => {
@@ -103,8 +128,7 @@ it('creates group via onSubmitEditing', async () => {
     fireEvent(input, 'submitEditing', { nativeEvent: { text: 'TestGroup' } });
   });
 
-  expect(alertSpy).toHaveBeenCalledWith('groups.groupCreated', 'groups.groupCreatedBody');
-  alertSpy.mockRestore();
+  expect(setSetting).toHaveBeenCalledWith('empty_groups', JSON.stringify(['TestGroup']));
 });
 
 it('does nothing for empty group name', async () => {
@@ -119,6 +143,37 @@ it('does nothing for empty group name', async () => {
   });
 
   expect(alertSpy).not.toHaveBeenCalled();
+  alertSpy.mockRestore();
+});
+
+it('shows alert for duplicate with existing miner group', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), 'Garage');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByText('common.add'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('groups.groupExists', 'groups.groupExistsBody');
+  alertSpy.mockRestore();
+});
+
+it('shows alert for duplicate with empty group', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  mockEmptyGroups = ['ExistingEmpty'];
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.changeText(screen.getByLabelText('New group name'), 'ExistingEmpty');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByText('common.add'));
+  });
+
+  expect(alertSpy).toHaveBeenCalledWith('groups.groupExists', 'groups.groupExistsBody');
   alertSpy.mockRestore();
 });
 

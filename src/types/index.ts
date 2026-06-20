@@ -84,6 +84,7 @@ export type RootStackParamList = {
   Wallets: undefined;
   Groups: undefined;
   ImportData: undefined;
+  MinerComparison: { minerIds: string[] };
 };
 
 export type TabParamList = {

@@ -89,11 +89,12 @@ it('renders empty state when no miners', async () => {
   expect(screen.getByText('analytics.title')).toBeTruthy();
 });
 
-it('shows range selector buttons', async () => {
+it('shows range selector buttons including 30d', async () => {
   await render(<AnalyticsScreen />);
   expect(screen.getByText('1h')).toBeTruthy();
   expect(screen.getByText('24h')).toBeTruthy();
   expect(screen.getByText('7d')).toBeTruthy();
+  expect(screen.getByText('30d')).toBeTruthy();
 });
 
 it('switches range on button press', async () => {

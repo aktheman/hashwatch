@@ -71,8 +71,11 @@ jest.mock('../src/utils/export', () => ({
   exportJSON: jest.fn().mockResolvedValue(undefined),
 }));
 
+let mockAuthToken: string | null = null;
+let mockAuthSyncing = false;
 const mockRestoreSession = jest.fn().mockResolvedValue(undefined);
 const mockLogout = jest.fn().mockResolvedValue(undefined);
+const mockSyncNow = jest.fn().mockResolvedValue(undefined);
 
 const mockLogin = jest.fn().mockResolvedValue(false);
 const mockRegister = jest.fn().mockResolvedValue(false);
@@ -80,15 +83,17 @@ const mockRegister = jest.fn().mockResolvedValue(false);
 jest.mock('../src/store/auth', () => ({
   useAuthStore: (selector?: (state: any) => any) => {
     const state = {
-      token: null,
-      userId: null,
-      email: null,
-      syncing: false,
+      token: mockAuthToken,
+      userId: mockAuthToken ? 'u1' : null,
+      email: mockAuthToken ? 'a@b.com' : null,
+      syncing: mockAuthSyncing,
       synced: false,
+      lastSyncTimestamp: mockAuthToken ? 1000000 : null,
       login: mockLogin,
       register: mockRegister,
       logout: mockLogout,
       restoreSession: mockRestoreSession,
+      syncNow: mockSyncNow,
     };
     return selector ? selector(state) : state;
   },
@@ -105,6 +110,8 @@ const navigation = { navigate: jest.fn() };
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthToken = null;
+  mockAuthSyncing = false;
   setTheme(darkTheme);
   useMinerStore.setState({
     miners: [],
@@ -309,4 +316,28 @@ it('calls loadMiners on Refresh All press', async () => {
   await render(<SettingsScreen navigation={navigation} />);
   fireEvent.press(screen.getByText('settings.refreshAll'));
   expect(mockLoadMiners).toHaveBeenCalled();
+});
+
+it('shows Sync Now button when authenticated', async () => {
+  mockAuthToken = 't1';
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  expect(screen.getByLabelText('Sync Now')).toBeTruthy();
+});
+
+it('calls syncNow when Sync Now button is pressed', async () => {
+  mockAuthToken = 't1';
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  await fireEvent.press(screen.getByLabelText('Sync Now'));
+  expect(mockSyncNow).toHaveBeenCalled();
+});
+
+it('disables Sync Now button while syncing', async () => {
+  mockAuthToken = 't1';
+  mockAuthSyncing = true;
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Remote Sync'));
+  const btn = screen.getByLabelText('Sync Now');
+  expect(btn.props.accessibilityState.disabled).toBe(true);
 });

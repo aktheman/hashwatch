@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
+  Modal,
   StyleSheet,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
+import { useToastStore } from '../store/toast';
 import { useSubscriptionStore } from '../store/subscription';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
@@ -38,11 +41,17 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const startPolling = useMinerStore((s) => s.startPolling);
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const clearError = useMinerStore((s) => s.clearError);
+  const removeMiner = useMinerStore((s) => s.removeMiner);
+  const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
+  const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
   const canAddMiner = useSubscriptionStore((s) => s.canAddMiner);
   const initSubscription = useSubscriptionStore((s) => s.initialize);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [walletFilter, setWalletFilter] = useState<string | null>(null);
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
 
   const groups = useMemo(() => {
     const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
@@ -86,10 +95,93 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   const handleMinerPress = useCallback(
     (miner: Miner) => {
-      navigation.navigate('MinerDetail', { minerId: miner.id });
+      if (selectionMode) {
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          if (next.has(miner.id)) {
+            next.delete(miner.id);
+          } else {
+            next.add(miner.id);
+          }
+          return next;
+        });
+      } else {
+        navigation.navigate('MinerDetail', { minerId: miner.id });
+      }
     },
-    [navigation],
+    [navigation, selectionMode],
   );
+
+  const clearSelection = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBatchGroup = useCallback(() => {
+    const selected = miners.filter((m) => selectedIds.has(m.id));
+    if (selected.length === 0) return;
+    Alert.prompt(
+      t('dashboard.assignGroup'),
+      t('dashboard.assignGroupBody'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('dashboard.removeGroup'),
+          style: 'destructive',
+          onPress: () => {
+            selected.forEach((m) => setMinerGroup(m.id, undefined));
+          },
+        },
+        {
+          text: t('common.ok'),
+          onPress: (name?: string) => {
+            if (name?.trim()) {
+              selected.forEach((m) => setMinerGroup(m.id, name.trim()));
+            }
+          },
+        },
+      ],
+      'plain-text',
+      '',
+    );
+  }, [miners, selectedIds, setMinerGroup, t]);
+
+  const handleBatchWallet = useCallback(
+    (walletId: string | undefined) => {
+      const selected = miners.filter((m) => selectedIds.has(m.id));
+      selected.forEach((m) => setMinerWallet(m.id, walletId));
+      setShowWalletPicker(false);
+    },
+    [miners, selectedIds, setMinerWallet, setShowWalletPicker],
+  );
+
+  const handleBatchDelete = useCallback(() => {
+    const selected = miners.filter((m) => selectedIds.has(m.id));
+    if (selected.length === 0) return;
+    const names = selected.map((m) => m.name).join(', ');
+    Alert.alert(
+      t('dashboard.batchDeleteTitle', { count: selected.length }),
+      t('dashboard.batchDeleteBody', { names }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            selected.forEach((m) =>
+              useToastStore.getState().showUndo({
+                id: `batch-delete-${m.id}`,
+                message: t('dashboard.minerRemoved', { name: m.name }),
+                onUndo: () => {},
+                onConfirm: () => removeMiner(m.id),
+              }),
+            );
+            clearSelection();
+          },
+        },
+      ],
+    );
+  }, [miners, selectedIds, removeMiner, clearSelection, t]);
 
   const handleAddMiner = useCallback(() => {
     if (!canAddMiner(miners.length)) {
@@ -326,6 +418,103 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         fabDisabled: {
           backgroundColor: theme.textMuted,
         },
+        selectionBar: {
+          position: 'absolute',
+          bottom: 24,
+          left: 20,
+          right: 20,
+          backgroundColor: theme.surface,
+          borderRadius: 18,
+          padding: 12,
+          borderWidth: 1,
+          borderColor: theme.primary + '40',
+          boxShadow: `0 4px 24px ${theme.glow}`,
+          gap: 8,
+        },
+        selectionCount: {
+          color: theme.text,
+          fontSize: 15,
+          fontWeight: '600',
+          textAlign: 'center',
+        },
+        selectionActions: {
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: 6,
+        },
+        batchBtn: {
+          backgroundColor: theme.surfaceLight,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        batchBtnText: {
+          color: theme.text,
+          fontWeight: '600',
+          fontSize: 13,
+        },
+        batchDeleteBtn: {
+          backgroundColor: theme.danger + '1A',
+          borderColor: theme.danger + '4D',
+        },
+        batchDeleteText: {
+          color: theme.danger,
+        },
+        compareBtn: {
+          backgroundColor: theme.primary,
+          paddingHorizontal: 14,
+          paddingVertical: 8,
+          borderRadius: 10,
+        },
+        compareBtnDisabled: {
+          opacity: 0.4,
+        },
+        compareBtnText: {
+          color: '#FFF',
+          fontWeight: '700',
+          fontSize: 13,
+        },
+        modalOverlay: {
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        modalContent: {
+          backgroundColor: theme.surface,
+          borderRadius: 18,
+          padding: 20,
+          width: '80%',
+          maxWidth: 320,
+          borderWidth: 1,
+          borderColor: theme.border,
+          gap: 4,
+        },
+        modalTitle: {
+          color: theme.text,
+          fontSize: 18,
+          fontWeight: '700',
+          marginBottom: 8,
+        },
+        modalOption: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 12,
+          borderRadius: 10,
+          gap: 10,
+        },
+        modalOptionText: {
+          color: theme.text,
+          fontSize: 15,
+          fontWeight: '500',
+        },
+        walletDot: {
+          width: 12,
+          height: 12,
+          borderRadius: 6,
+        },
         fabText: {
           color: '#FFF',
           fontSize: 28,
@@ -355,14 +544,38 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
           </Text>
         </View>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Settings"
-          style={styles.settingsBtn}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Text style={styles.settingsIcon}>⚙</Text>
-        </TouchableOpacity>
+        {selectionMode ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Cancel selection"
+            style={styles.settingsBtn}
+            onPress={() => {
+              setSelectionMode(false);
+              setSelectedIds(new Set());
+            }}
+          >
+            <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Compare miners"
+              style={[styles.settingsBtn, { marginRight: 8 }]}
+              onPress={() => setSelectionMode(true)}
+            >
+              <Text style={styles.settingsIcon}>⇄</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Settings"
+              style={styles.settingsBtn}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Text style={styles.settingsIcon}>⚙</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <View style={styles.summaryRow}>
@@ -562,7 +775,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <MinerCard
               miner={item}
               onPress={handleMinerPress}
-              onDelete={() => useMinerStore.getState().removeMiner(item.id)}
+              onDelete={() =>
+                useToastStore.getState().showUndo({
+                  id: `delete-${item.id}`,
+                  message: t('dashboard.minerRemoved', { name: item.name }),
+                  onUndo: () => {},
+                  onConfirm: () => useMinerStore.getState().removeMiner(item.id),
+                })
+              }
             />
           )}
           refreshControl={
@@ -581,6 +801,93 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           removeClippedSubviews
         />
       )}
+
+      {selectionMode && (
+        <View style={styles.selectionBar}>
+          <Text style={styles.selectionCount}>
+            {t('comparison.nSelected', { count: selectedIds.size })}
+          </Text>
+          <View style={styles.selectionActions}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Batch group"
+              style={styles.batchBtn}
+              onPress={handleBatchGroup}
+            >
+              <Text style={styles.batchBtnText}>{t('dashboard.group')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Batch wallet"
+              style={styles.batchBtn}
+              onPress={() => setShowWalletPicker(true)}
+            >
+              <Text style={styles.batchBtnText}>{t('dashboard.wallet')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Batch delete"
+              style={[styles.batchBtn, styles.batchDeleteBtn]}
+              onPress={handleBatchDelete}
+            >
+              <Text style={[styles.batchBtnText, styles.batchDeleteText]}>
+                {t('common.delete')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Compare"
+              style={[styles.compareBtn, selectedIds.size < 2 && styles.compareBtnDisabled]}
+              disabled={selectedIds.size < 2}
+              onPress={() => {
+                navigation.navigate('MinerComparison', {
+                  minerIds: Array.from(selectedIds),
+                });
+                clearSelection();
+              }}
+            >
+              <Text style={styles.compareBtnText}>{t('comparison.compare')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      <Modal
+        visible={showWalletPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowWalletPicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowWalletPicker(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('dashboard.assignWallet')}</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="No wallet"
+              style={styles.modalOption}
+              onPress={() => handleBatchWallet(undefined)}
+            >
+              <Text style={styles.modalOptionText}>{t('dashboard.noWallet')}</Text>
+            </TouchableOpacity>
+            {wallets.map((w) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={w.id}
+                accessibilityLabel={`Assign wallet: ${w.name}`}
+                style={styles.modalOption}
+                onPress={() => handleBatchWallet(w.id)}
+              >
+                <View style={[styles.walletDot, { backgroundColor: w.color }]} />
+                <Text style={styles.modalOptionText}>{w.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <TouchableOpacity
         accessibilityRole="button"
