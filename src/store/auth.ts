@@ -159,22 +159,30 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token = await DB.getSetting('auth_token');
     const email = await DB.getSetting('auth_email');
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1])) as { userId?: string; exp?: number };
-        const userId = payload.userId || null;
-        if (payload.exp && Date.now() >= payload.exp * 1000) {
-          await DB.setSetting('auth_token', '');
-          set({ token: '', email: null, userId: null });
-          return;
+      const parts = String(token).split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1])) as { userId?: string; exp?: number };
+          const userId = payload.userId || null;
+          if (payload.exp && Date.now() >= payload.exp * 1000) {
+            await DB.setSetting('auth_token', '');
+            set({ token: null, email: null, userId: null });
+            return;
+          }
+          set({ token, email, userId });
+        } catch {
+          // keep token available
+          set({ token, email: email ?? null, userId: null });
         }
-        set({ token, email, userId });
-      } catch {
-        await DB.setSetting('auth_token', '');
-        set({ token: '', email: null, userId: null });
+      } else {
+        // Legacy token format
+        set({ token, email: email ?? null, userId: null });
       }
-      connectWebSocket(token);
-      registerPushToken(token);
-      syncSettingsFromBackend();
+      if (useAuthStore.getState().token) {
+        connectWebSocket(token);
+        registerPushToken(token);
+        syncSettingsFromBackend();
+      }
     }
   },
 
