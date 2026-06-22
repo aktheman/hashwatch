@@ -1,111 +1,159 @@
 # HashWatch
 
-Real-time Bitaxe miner monitoring app. Track hashrate, temperature, pool stats, power cost, and more across all your miners from one dashboard.
+Real-time Bitaxe miner monitoring app for iOS, Android, and Web.
+
+## What it does
+
+HashWatch tracks your Bitaxe miners from one place: hashrate, temperature, power, efficiency, uptime, shares, pool stats, and basic wallet-level portfolio tagging. It targets two use cases:
+
+- **LAN monitoring**: discover and manage miners directly on your private network
+- **Remote monitoring**: sync miners across devices through the HashWatch backend
 
 ## Features
 
-- **Live Dashboard** — Monitor all miners at a glance with hashrate, temperature, power, and efficiency
-- **Network Discovery** — Scan your local network to find miners automatically, or add by IP
-- **Per-Miner Detail** — Deep stats: hash charts, efficiency trends, pool info, firmware version, restart control
-- **Pools Overview** — Group miners by mining pool with aggregated hashrate and estimated daily earnings
-- **Analytics** — Historical hashrate charts over 1h/24h/7d ranges
-- **Wallets** — Organize miners into wallet groups for portfolio tracking
-- **Push Alerts** — Get notified on offline, high temp, hashrate drops, pool disconnects, and long uptime
-- **Power Cost** — Enter your $/kWh rate to see power cost and net profit estimates
-- **Multiple Themes** — Dark, Light, Neon, and Matrix themes
-- **Data Export** — Export all miner snapshots to CSV
-- **Remote Sync** — Sign in to sync miners across devices via the backend
-- **Android Widget** — Home screen widget showing total hashrate and online count
-- **Auto-Scan** — Periodically scan the network for new miners
-- **Group Tags** — Tag and filter miners by group
-- **Cross-Platform** — iOS, Android, and Web
+- Live dashboard with per-miner status
+- Local network miner discovery
+- Per-miner detail views including historical charts and efficiency trends
+- Pools overview with aggregated hashrate and estimated earnings
+- Analytics over 1h/24h/7d ranges
+- Wallet/group tagging
+- Push alerts for offline, high temp, hashrate drop, and pool disconnect
+- Power cost input and net profit estimates
+- Android home screen widget
+- Remote sync across devices
+- Multiple themes
+- Data export
+- iOS and Android builds via EAS; web export support
 
 ## Tech Stack
 
-- **Frontend:** React Native / Expo SDK 56, TypeScript, Zustand
-- **Navigation:** React Navigation (native stack + bottom tabs)
-- **Backend:** Node.js, Express, PostgreSQL, WebSockets
-- **Charts:** react-native-chart-kit
-- **Subscriptions:** RevenueCat
-- **Database:** expo-sqlite (mobile), localStorage (web)
-- **CI:** GitHub Actions, Husky, lint-staged
-- **Build:** EAS Build
+**Frontend**
 
-## Getting Started
+- Expo SDK 56
+- React 19.2.3
+- React Native 0.85.3
+- TypeScript
+- Zustand
+- React Navigation
 
-### Prerequisites
+**Backend**
 
-- Node.js 22+
-- npm or yarn
+- Node.js 22
+- Express
+- PostgreSQL
+- JSON Web Tokens
+- WebSockets
+- Expo push notifications
 
-### Frontend
+## Repository Layout
+
+```
+hashwatch/
+  App.tsx
+  src/                 # frontend app logic, screens, services, store
+  backend/
+    src/
+      routes/          # REST endpoints
+      services/        # business logic
+      ws.ts            # WebSocket server
+      db.ts            # Postgres access
+      models/          # schema and initialization
+    openapi.json       # API spec
+  .maestro/            # E2E flows
+  local-proxy.js       # optional local web proxy for LAN miner access
+```
+
+## Prerequisites
+
+- Node.js 22
+- npm
+- PostgreSQL 14+
+- EAS CLI if you want to build iOS/Android
+- Expo Go or a custom dev build for mobile testing
+
+## Frontend Setup
 
 ```bash
-git clone https://github.com/your-org/hashwatch.git
+git clone https://github.com/aktheman/hashwatch.git
 cd hashwatch
 cp .env.example .env
 npm install
 npx expo start
 ```
 
-### Environment Variables
+## Frontend Environment Variables
 
-| Variable                             | Description                                        |
-| ------------------------------------ | -------------------------------------------------- |
-| `EXPO_PUBLIC_API_URL`                | Backend API URL (default: `http://localhost:4000`) |
-| `EXPO_PUBLIC_MINER_PROXY_URL`        | Proxy URL for web builds                           |
-| `EXPO_PUBLIC_REVENUECAT_IOS_KEY`     | RevenueCat iOS SDK key                             |
-| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat Android SDK key                         |
+| Variable                             | Description                    |
+| ------------------------------------ | ------------------------------ |
+| `EXPO_PUBLIC_API_URL`                | Backend API URL                |
+| `EXPO_PUBLIC_PROJECT_ID`             | Expo project ID                |
+| `EXPO_PUBLIC_REVENUECAT_IOS_KEY`     | RevenueCat iOS key             |
+| `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY` | RevenueCat Android key         |
+| `EXPO_PUBLIC_MINER_PROXY_URL`        | Miner proxy URL for web builds |
 
-### Web Proxy
-
-On web, browsers cannot directly connect to miners on your local network. Run the proxy:
-
-```bash
-cp .env.example .env
-node local-proxy.js
-```
-
-Then set the proxy URL in Settings → Connection.
-
-## Backend
+## Backend Setup
 
 ```bash
 cd backend
 cp .env.example .env
 npm install
+npm run db:init
 npm run dev
 ```
 
-See [backend/README.md](backend/README.md) for full setup (PostgreSQL, auth, WebSocket sync).
+## Backend Environment Variables
 
-## Building
+| Variable                                                  | Description                                     |
+| --------------------------------------------------------- | ----------------------------------------------- |
+| `PORT`                                                    | Server port, default `4000`                     |
+| `DATABASE_URL`                                            | PostgreSQL connection string                    |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | fallback DB config if `DATABASE_URL` is omitted |
+| `JWT_SECRET`                                              | signing secret for auth tokens                  |
+| `REVENUECAT_API_KEY`                                      | RevenueCat API key                              |
+| `EXPO_PUBLIC_API_URL`                                     | public API URL for CORS                         |
+
+OpenAPI documentation for the backend is at `backend/openapi.json`.
+
+## Web and LAN Access
+
+Web builds cannot reach local miner IPs directly. For web or cross-origin LAN use, run the local proxy:
 
 ```bash
-# Android APK
-eas build --platform android --profile preview
-
-# iOS
-eas build --platform ios --profile preview
-
-# Web
-npm run build:web
-npm run deploy:web
+node local-proxy.js
 ```
+
+Then configure the proxy URL in the app's connection settings.
 
 ## Testing
 
 ```bash
-# Unit tests (471 frontend + 37 backend passing)
+# frontend
 npm test
 
-# Backend
+# backend
 cd backend && npm test
 
-# E2E (Maestro — requires iOS simulator or Maestro Cloud)
-maestro test .maestro/onboarding.yaml
+# typecheck and lint
+npm run typecheck
+npm run lint
 ```
 
-## License
+## Building
 
-MIT
+```bash
+# web
+npm run build:web
+
+# mobile through EAS
+eas build --platform android --profile preview
+eas build --platform ios --profile preview
+```
+
+Husky and lint-staged are configured in this repo.
+
+## Notes for Contributors
+
+- Follow conventional commits
+- Keep tests passing
+- Update docs and `.env.example` when behavior/config changes
+- If you change auth, proxy, remote sync, or miner-data flows, update the corresponding tests and README sections

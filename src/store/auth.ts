@@ -160,10 +160,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     const email = await DB.getSetting('auth_email');
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1])) as { userId: string };
-        set({ token, email, userId: payload.userId || null });
+        const payload = JSON.parse(atob(token.split('.')[1])) as { userId?: string; exp?: number };
+        const userId = payload.userId || null;
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+          await DB.setSetting('auth_token', '');
+          set({ token: '', email: null, userId: null });
+          return;
+        }
+        set({ token, email, userId });
       } catch {
-        set({ token, email, userId: null });
+        await DB.setSetting('auth_token', '');
+        set({ token: '', email: null, userId: null });
       }
       connectWebSocket(token);
       registerPushToken(token);

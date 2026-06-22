@@ -136,7 +136,7 @@ beforeEach(() => {
 
 it('renders settings title', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.getByText('settings.title')).toBeTruthy();
+  expect(await screen.findByText('settings.title')).toBeTruthy();
 });
 
 it('shows plan as Free by default', async () => {
