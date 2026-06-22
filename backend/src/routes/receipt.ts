@@ -2,6 +2,7 @@ import { Router } from 'express';
 import axios from 'axios';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { query } from '../db';
+import { captureException } from '../services/sentry';
 
 export const receiptRouter = Router();
 receiptRouter.use(authMiddleware);
@@ -56,7 +57,7 @@ receiptRouter.post('/validate', async (req: AuthRequest, res) => {
       expiresDate: rcResponse.data?.entitlements?.pro?.expires_date ?? null,
     });
   } catch (e: any) {
-    console.error('Receipt validation error:', e);
+    captureException(e, { route: 'receipt.validate' });
     res.status(400).json({
       error: 'receipt validation failed',
     });

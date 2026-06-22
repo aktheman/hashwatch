@@ -3,6 +3,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { query } from '../db';
 import { generateToken } from '../middleware/auth';
+import { captureException } from '../services/sentry';
 
 export const authRouter = Router();
 
@@ -32,7 +33,7 @@ authRouter.post('/register', async (req, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    console.error('Register error:', e);
+    captureException(e);
     res.status(500).json({ error: 'internal server error' });
   }
 });
@@ -55,7 +56,7 @@ authRouter.post('/login', async (req, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    console.error('Login error:', e);
+    captureException(e);
     res.status(500).json({ error: 'internal server error' });
   }
 });
