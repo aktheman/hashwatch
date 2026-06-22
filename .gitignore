@@ -48,3 +48,6 @@ coverage/
 
 # test artifacts
 test-results/
+
+# local env - backend
+backend/.jwt-env
