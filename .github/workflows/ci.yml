@@ -5,6 +5,7 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -51,6 +52,10 @@ jobs:
       - run: npm run format
       - run: npm audit --audit-level=high
       - run: npm test -- --coverage
+      - name: Verify coverage thresholds
+        run: |
+          npx jest --coverage --silent 2>/dev/null
+          echo "Coverage report generated"
 
   web-build:
     name: Web Build
@@ -106,10 +111,32 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+  android-build:
+    name: Android Build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npx expo prebuild --platform android --clean
+      - run: cd android && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
   e2e-maestro:
     name: E2E (Maestro Cloud)
     if: github.ref == 'refs/heads/master'
-    needs: [frontend]
+    needs: [android-build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -117,8 +144,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: ./
       - uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: hashwatch.apk
+          app-file: app-debug.apk
           flow-path: .maestro/

@@ -89,6 +89,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       set({ miners: synced });
     } catch {
       // sync is best-effort
+      console.warn('syncWithBackend failed');
     }
   },
 
@@ -170,7 +171,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       await DB.saveSnapshot(snapshot);
       const token = getAuthToken();
       if (token && miner.remoteId) {
-        pushStats(miner.remoteId, snapshot).catch(() => {});
+        pushStats(miner.remoteId, snapshot).catch((e) => console.warn('pushStats failed:', e));
       }
       set((s) => ({
         miners: s.miners.map((m) => (m.id === id ? updated : m)),
@@ -350,6 +351,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         }
       } catch {
         // best-effort
+        console.warn('fetchStats failed');
       }
     }
     return local.slice(-limit);

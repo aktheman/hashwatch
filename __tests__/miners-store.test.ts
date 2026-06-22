@@ -58,9 +58,12 @@ jest.mock('../src/api/client', () => ({
 }));
 
 let mockAuthToken: string | null = null;
+let onAuthLoginCb: (() => void) | null = null;
 jest.mock('../src/store/authToken', () => ({
   getAuthToken: () => mockAuthToken,
-  onAuthLogin: jest.fn(),
+  onAuthLogin: (cb: () => void) => {
+    onAuthLoginCb = cb;
+  },
 }));
 
 beforeEach(() => {
@@ -658,5 +661,62 @@ describe('loadMiners with auth', () => {
     );
     const miner = useMinerStore.getState().miners.find((m) => m.id === 'm1');
     expect(miner?.group).toBeUndefined();
+  });
+});
+
+describe('refreshMiner missing ID', () => {
+  it('returns early when miner is not found', async () => {
+    const saveMinerBefore = mockSaveMiner.mock.calls.length;
+    await useMinerStore.getState().refreshMiner('nonexistent');
+    expect(mockSaveMiner).toHaveBeenCalledTimes(saveMinerBefore);
+  });
+});
+
+describe('addMiner statusPath null', () => {
+  beforeEach(() => {
+    mockProbe.mockResolvedValue({ infoPath: '/api/info', statusPath: null });
+    jest.useFakeTimers({ now: 1000000 });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates miner with undefined statusPath when probe returns null', async () => {
+    mockFetchAll.mockResolvedValue({ info: { hostname: 'test' }, status: {} });
+    await useMinerStore.getState().addMiner('192.168.1.100');
+    const miner = useMinerStore.getState().miners[0];
+    expect(miner.statusPath).toBeUndefined();
+    expect(miner.ip).toBe('192.168.1.100');
+  });
+});
+
+describe('getSnapshots edge cases', () => {
+  it('handles non-array remote response gracefully', async () => {
+    mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100 }]);
+    mockFetchStats.mockResolvedValue({ notArray: true });
+    mockAuthToken = 'test-token';
+    useMinerStore.setState({
+      miners: [{ id: 'm1', remoteId: 'remote-1', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+    expect(result).toEqual([{ minerId: 'm1', timestamp: 100 }]);
+    mockAuthToken = null;
+  });
+
+  it('skips remote fetch when authenticated but no remoteId', async () => {
+    mockGetSnapshots.mockResolvedValue([{ minerId: 'm1', timestamp: 100 }]);
+    mockAuthToken = 'test-token';
+    useMinerStore.setState({
+      miners: [{ id: 'm1', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    const result = await useMinerStore.getState().getSnapshots('m1', 100);
+
+    expect(mockFetchStats).not.toHaveBeenCalled();
+    expect(result).toEqual([{ minerId: 'm1', timestamp: 100 }]);
+    mockAuthToken = null;
   });
 });

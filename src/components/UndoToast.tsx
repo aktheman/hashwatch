@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Animated, Platform, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
@@ -15,7 +15,7 @@ export function UndoToast() {
     Animated.timing(opacity, {
       toValue: undo ? 1 : 0,
       duration: 200,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [undo, opacity]);
 
@@ -58,10 +58,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
     elevation: 6,
   },
   message: {

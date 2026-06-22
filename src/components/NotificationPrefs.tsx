@@ -37,13 +37,26 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
   const [prefs, setPrefs] = useState<Record<string, boolean> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     if (token) {
       getNotificationPrefs(minerId)
-        .then(setPrefs)
-        .catch(() => {});
+        .then((p) => {
+          if (cancelled) return;
+          setPrefs(p);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          console.warn('getNotificationPrefs failed');
+        });
     } else {
-      getLocalPrefs(minerId).then(setPrefs);
+      getLocalPrefs(minerId).then((p) => {
+        if (cancelled) return;
+        setPrefs(p);
+      });
     }
+    return () => {
+      cancelled = true;
+    };
   }, [minerId, token]);
 
   if (!prefs) return null;

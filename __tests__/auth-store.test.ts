@@ -1,4 +1,4 @@
-import { useAuthStore } from '../src/store/auth';
+import { useAuthStore, queueSetting } from '../src/store/auth';
 
 const mockSetSetting = jest.fn();
 const mockGetSetting = jest.fn();
@@ -32,8 +32,8 @@ const mockRegisterPush = jest.fn();
 const mockUnregisterPush = jest.fn();
 
 jest.mock('../src/services/pushRegistration', () => ({
-  registerPushToken: () => mockRegisterPush(),
-  unregisterPushToken: () => mockUnregisterPush(),
+  registerPushToken: (token: string | null) => mockRegisterPush(token),
+  unregisterPushToken: (token: string | null) => mockUnregisterPush(token),
 }));
 
 const mockNotifyAuthLogin = jest.fn();
@@ -246,5 +246,214 @@ describe('syncNow', () => {
     expect(mockGetSettings).toHaveBeenCalled();
     const state = useAuthStore.getState();
     expect(state.synced).toBe(true);
+  });
+});
+
+describe('queueSetting', () => {
+  beforeEach(async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'settings_queue') return '[]';
+      return null;
+    });
+    await useAuthStore.getState().restoreSession();
+  });
+
+  it('adds a setting to the queue and persists to DB', async () => {
+    await queueSetting('theme_mode', 'dark');
+
+    const lastCall = mockSetSetting.mock.calls.find(([k]) => k === 'settings_queue');
+    expect(lastCall).toBeDefined();
+    const parsed = JSON.parse(lastCall![1] as string);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].key).toBe('theme_mode');
+    expect(parsed[0].value).toBe('dark');
+    expect(parsed[0].timestamp).toBeGreaterThan(0);
+  });
+
+  it('appends to existing queue', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'settings_queue')
+        return JSON.stringify([{ key: 'power_cost', value: '0.15', timestamp: 100 }]);
+      return null;
+    });
+    await useAuthStore.getState().restoreSession();
+
+    await queueSetting('theme_mode', 'dark');
+
+    const lastCall = mockSetSetting.mock.calls.find(([k]) => k === 'settings_queue');
+    expect(lastCall).toBeDefined();
+    const parsed = JSON.parse(lastCall![1] as string);
+    expect(parsed).toHaveLength(2);
+    expect(parsed[0].key).toBe('power_cost');
+    expect(parsed[1].key).toBe('theme_mode');
+  });
+
+  it('handles multiple queue items', async () => {
+    await queueSetting('theme_mode', 'dark');
+    await queueSetting('power_cost', '0.15');
+
+    const calls = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+    const lastParsed = JSON.parse(calls[calls.length - 1][1] as string);
+    expect(lastParsed).toHaveLength(2);
+  });
+});
+
+describe('processQueue (via syncNow)', () => {
+  beforeEach(async () => {
+    useAuthStore.setState({
+      token: 't1',
+      userId: 'u1',
+      email: 'a@b.com',
+      syncing: false,
+      synced: false,
+      lastSyncTimestamp: null,
+    });
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'theme_mode') return 'dark';
+      if (k === 'power_cost') return '0.15';
+      if (k === 'auto_scan') return 'true';
+      if (k === 'settings_queue') return '[]';
+      return null;
+    });
+    mockGetSettings.mockResolvedValue({});
+    mockPutSetting.mockResolvedValue(undefined);
+    await useAuthStore.getState().restoreSession();
+  });
+
+  it('processes queued settings during syncNow', async () => {
+    await queueSetting('theme_mode', 'dark');
+    await queueSetting('power_cost', '0.15');
+
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalledWith('theme_mode', 'dark');
+    expect(mockPutSetting).toHaveBeenCalledWith('power_cost', '0.15');
+  });
+
+  it('re-queues items when processing fails', async () => {
+    mockPutSetting.mockRejectedValueOnce(new Error('network error'));
+
+    await queueSetting('theme_mode', 'dark');
+    await queueSetting('power_cost', '0.15');
+
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalledWith('theme_mode', 'dark');
+    expect(mockPutSetting).toHaveBeenCalledWith('power_cost', '0.15');
+    const lastCall = mockSetSetting.mock.calls.find(([k]) => k === 'settings_queue');
+    expect(lastCall).toBeDefined();
+    const parsed = JSON.parse(lastCall![1] as string);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].key).toBe('theme_mode');
+  });
+
+  it('processes queue before syncing SYNCED_SETTINGS', async () => {
+    mockPutSetting.mockResolvedValue(undefined);
+
+    await queueSetting('auto_scan', 'false');
+
+    await useAuthStore.getState().syncNow();
+
+    const putSettingCalls = mockPutSetting.mock.calls.map(([k]) => k);
+    expect(putSettingCalls.filter((k) => k === 'auto_scan').length).toBe(2);
+  });
+
+  it('handles empty queue gracefully during syncNow', async () => {
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalledWith('theme_mode', 'dark');
+    expect(mockPutSetting).toHaveBeenCalledWith('power_cost', '0.15');
+    expect(mockPutSetting).toHaveBeenCalledWith('auto_scan', 'true');
+  });
+});
+
+describe('restoreSession with queue', () => {
+  beforeEach(() => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return 't1';
+      if (k === 'auth_email') return 'a@b.com';
+      if (k === 'settings_queue')
+        return JSON.stringify([{ key: 'theme_mode', value: 'dark', timestamp: Date.now() }]);
+      return null;
+    });
+  });
+
+  it('loads queue from DB during restoreSession', async () => {
+    await useAuthStore.getState().restoreSession();
+
+    mockPutSetting.mockResolvedValue(undefined);
+    mockGetSettings.mockResolvedValue({});
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).toHaveBeenCalledWith('theme_mode', 'dark');
+  });
+
+  it('starts with empty queue when no stored queue', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return 't1';
+      if (k === 'auth_email') return 'a@b.com';
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    mockPutSetting.mockResolvedValue(undefined);
+    mockGetSettings.mockResolvedValue({});
+    await useAuthStore.getState().syncNow();
+
+    expect(mockPutSetting).not.toHaveBeenCalledWith('theme_mode', 'dark');
+  });
+});
+
+describe('loadQueue edge cases', () => {
+  it('handles loadQueue failure when getSetting throws', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'settings_queue') throw new Error('DB error');
+      return null;
+    });
+    await expect(useAuthStore.getState().restoreSession()).resolves.toBeUndefined();
+  });
+
+  it('handles loadQueue failure when JSON is invalid', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'settings_queue') return 'not-json';
+      return null;
+    });
+    await expect(useAuthStore.getState().restoreSession()).resolves.toBeUndefined();
+  });
+});
+
+describe('restoreSession JWT decode', () => {
+  it('decodes userId from valid JWT token', async () => {
+    const header = btoa(JSON.stringify({ alg: 'HS256' }));
+    const payload = btoa(JSON.stringify({ userId: 'u42' }));
+    const validJwt = `${header}.${payload}.signature`;
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return validJwt;
+      if (k === 'auth_email') return 'a@b.com';
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    const state = useAuthStore.getState();
+    expect(state.token).toBe(validJwt);
+    expect(state.userId).toBe('u42');
+  });
+
+  it('sets userId to null when JWT has no userId claim', async () => {
+    const header = btoa(JSON.stringify({ alg: 'HS256' }));
+    const payload = btoa(JSON.stringify({ sub: 'u42' }));
+    const jwt = `${header}.${payload}.signature`;
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return jwt;
+      if (k === 'auth_email') return 'a@b.com';
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
   });
 });

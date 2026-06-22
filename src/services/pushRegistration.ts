@@ -1,17 +1,15 @@
 import { Platform } from 'react-native';
 import { getExpoPushTokenAsync } from 'expo-notifications';
 import { BASE_URL } from '../api/client';
-import { useAuthStore } from '../store/auth';
 import { requestNotificationPermissions } from './notifications';
 
-export async function registerPushToken() {
+export async function registerPushToken(authToken: string | null) {
   if (Platform.OS === 'web') return;
   try {
     const granted = await requestNotificationPermissions();
     if (!granted) return;
 
     const { data: token } = await getExpoPushTokenAsync();
-    const authToken = useAuthStore.getState().token;
     if (!authToken || !token) return;
     await fetch(`${BASE_URL}/api/push/register`, {
       method: 'POST',
@@ -26,11 +24,10 @@ export async function registerPushToken() {
   }
 }
 
-export async function unregisterPushToken() {
+export async function unregisterPushToken(authToken: string | null) {
   if (Platform.OS === 'web') return;
   try {
     const { data: token } = await getExpoPushTokenAsync();
-    const authToken = useAuthStore.getState().token;
     if (!authToken || !token) return;
     await fetch(`${BASE_URL}/api/push/unregister`, {
       method: 'DELETE',
