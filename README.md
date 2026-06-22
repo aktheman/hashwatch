@@ -114,7 +114,25 @@ npm run dev
 
 OpenAPI documentation for the backend is at `backend/openapi.json`.
 
-## Web and LAN Access
+## Deploy
+
+### Railway
+
+1. Create a new Railway project
+2. Connect this repository
+3. Add a PostgreSQL plugin
+4. Copy `backend/.env.example` to Railway environment variables
+
+### Minimal Environment
+
+Set these variables in Railway or your host:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `PORT=4000`
+- `EXPO_PUBLIC_API_URL`
+
+### Web and LAN Access
 
 Web builds cannot reach local miner IPs directly. For web or cross-origin LAN use, run the local proxy:
 
