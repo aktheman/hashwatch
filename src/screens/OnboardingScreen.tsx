@@ -4,16 +4,14 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   Animated,
   FlatList,
+  useWindowDimensions,
 } from 'react-native';
 import { setSetting } from '../db/database';
 import { useTheme } from '../theme';
 import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
-
-const { width } = Dimensions.get('window');
 
 interface Props {
   onComplete: () => void;
@@ -22,6 +20,7 @@ interface Props {
 export function OnboardingScreen({ onComplete }: Props) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { width } = useWindowDimensions();
 
   const slides = [
     { icon: '⬡', title: t('onboarding.slide1Title'), subtitle: t('onboarding.slide1Body') },
@@ -160,6 +159,7 @@ export function OnboardingScreen({ onComplete }: Props) {
       </TouchableOpacity>
 
       <FlatList
+        testID="onboarding-flatlist"
         ref={flatListRef}
         data={slides}
         keyExtractor={(_, i) => i.toString()}

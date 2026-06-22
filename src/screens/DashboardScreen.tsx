@@ -63,7 +63,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, [miners]);
 
   useEffect(() => {
-    DB.loadWallets().then(setWallets);
+    let cancelled = false;
+    DB.loadWallets().then((w) => {
+      if (cancelled) return;
+      setWallets(w);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredMiners = useMemo(

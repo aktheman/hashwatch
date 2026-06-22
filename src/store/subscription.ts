@@ -76,7 +76,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       if (pro && getAuthToken()) {
         const ent = customerInfo.entitlements.active['pro'];
         validateReceipt(ent?.originalPurchaseDate ?? productIdentifier, productIdentifier).catch(
-          () => {},
+          (e) => console.warn('Receipt validation failed (purchase):', e),
         );
       }
       return pro;
@@ -104,7 +104,9 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       if (pro && getAuthToken()) {
         const pid = customerInfo.allPurchasedProductIdentifiers[0] || 'hashwatch_pro';
         const ent = customerInfo.entitlements.active['pro'];
-        validateReceipt(ent?.originalPurchaseDate ?? pid, pid).catch(() => {});
+        validateReceipt(ent?.originalPurchaseDate ?? pid, pid).catch((e) =>
+          console.warn('Receipt validation failed (restore):', e),
+        );
       }
       return pro;
     } catch {

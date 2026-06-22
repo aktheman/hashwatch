@@ -87,3 +87,8 @@ it('cancels timer on dismissUndo', () => {
   jest.advanceTimersByTime(5000);
   expect(onConfirm).not.toHaveBeenCalled();
 });
+
+it('dismissUndo is safe when no undo is active', () => {
+  expect(() => useToastStore.getState().dismissUndo()).not.toThrow();
+  expect(useToastStore.getState().undo).toBeNull();
+});

@@ -120,7 +120,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
-      registerPushToken();
+      registerPushToken(res.token);
       notifyAuthLogin();
       syncSettingsFromBackend();
       return true;
@@ -136,7 +136,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
-      registerPushToken();
+      registerPushToken(res.token);
       notifyAuthLogin();
       syncSettingsFromBackend();
       return true;
@@ -146,7 +146,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    unregisterPushToken();
+    const token = useAuthStore.getState().token;
+    unregisterPushToken(token);
     disconnectWebSocket();
     set({ token: null, userId: null, email: null, synced: false });
     await DB.setSetting('auth_token', '');
@@ -165,7 +166,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ token, email, userId: null });
       }
       connectWebSocket(token);
-      registerPushToken();
+      registerPushToken(token);
       syncSettingsFromBackend();
     }
   },
@@ -187,11 +188,15 @@ configureClient({
 
 setTokenGetter(() => useAuthStore.getState().token);
 
-import { onNetworkReconnect } from '../services/networkStatus';
-
-onNetworkReconnect(() => {
-  const { token, syncNow } = useAuthStore.getState();
-  if (token) {
-    syncNow();
-  }
-});
+import('../services/networkStatus')
+  .then(({ onNetworkReconnect }) => {
+    onNetworkReconnect(() => {
+      const { token, syncNow } = useAuthStore.getState();
+      if (token) {
+        syncNow();
+      }
+    });
+  })
+  .catch(() => {
+    // networkStatus not available (e.g. web)
+  });

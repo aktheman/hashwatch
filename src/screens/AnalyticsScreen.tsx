@@ -16,15 +16,15 @@ import {
 } from '../utils/hashrate';
 import * as DB from '../db/database';
 import { LineChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 
-const screenWidth = Dimensions.get('window').width;
 type Range = '1h' | '24h' | '7d' | '30d';
 const ranges: Range[] = ['1h', '24h', '7d', '30d'];
 
 export function AnalyticsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
   const miners = useMinerStore((s) => s.miners);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,9 +34,19 @@ export function AnalyticsScreen() {
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
 
   useEffect(() => {
-    DB.getSetting('power_cost').then((v) => setPowerCost(parseFloat(v || '0') || 0));
-    fetchBTCPrice().then(setBtcPrice);
+    let cancelled = false;
+    DB.getSetting('power_cost').then((v) => {
+      if (cancelled) return;
+      setPowerCost(parseFloat(v || '0') || 0);
+    });
+    fetchBTCPrice().then((price) => {
+      if (cancelled) return;
+      setBtcPrice(price);
+    });
     fetchNetworkHashrate();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

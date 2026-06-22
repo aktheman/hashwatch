@@ -423,7 +423,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setSetting('theme_mode', val);
                   if (token) {
                     if (isOnline) {
-                      putRemoteSetting('theme_mode', val).catch(() => {});
+                      putRemoteSetting('theme_mode', val).catch(() =>
+                        console.warn('Failed to sync theme_mode'),
+                      );
                     } else {
                       queueSetting('theme_mode', val);
                     }
@@ -470,7 +472,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 setSetting('power_cost', t);
                 if (token) {
                   if (isOnline) {
-                    putRemoteSetting('power_cost', t).catch(() => {});
+                    putRemoteSetting('power_cost', t).catch(() =>
+                      console.warn('Failed to sync power_cost'),
+                    );
                   } else {
                     queueSetting('power_cost', t);
                   }
@@ -507,7 +511,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               setSetting('auto_scan', val);
               if (token) {
                 if (isOnline) {
-                  putRemoteSetting('auto_scan', val).catch(() => {});
+                  putRemoteSetting('auto_scan', val).catch(() =>
+                    console.warn('Failed to sync auto_scan'),
+                  );
                 } else {
                   queueSetting('auto_scan', val);
                 }

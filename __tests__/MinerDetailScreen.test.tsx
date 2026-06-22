@@ -18,6 +18,13 @@ jest.mock('react-native-purchases', () => ({
   restorePurchases: jest.fn(),
   getCustomerInfo: jest.fn().mockResolvedValue({ entitlements: { active: {} } }),
   addCustomerInfoUpdateListener: jest.fn(),
+  removeCustomerInfoUpdateListener: jest.fn(),
+}));
+
+jest.mock('../src/api/bitaxe', () => ({
+  BitAxeClient: jest.fn().mockImplementation(() => ({
+    restart: jest.fn().mockResolvedValue(true),
+  })),
 }));
 
 jest.mock('expo-sqlite', () => ({
@@ -54,7 +61,7 @@ jest.mock('../src/store/toast', () => ({
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { Share } from 'react-native';
+import { Share, Alert } from 'react-native';
 import { MinerDetailScreen } from '../src/screens/MinerDetailScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -255,4 +262,53 @@ it('shows undo toast after removing miner', async () => {
       }),
     ),
   );
+});
+
+it('shows wallet picker with No wallet option and selects none', async () => {
+  const mockSetMinerWallet = jest.fn();
+  useMinerStore.setState({ setMinerWallet: mockSetMinerWallet } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  const assignButton = screen.getByLabelText('Assign wallet');
+  fireEvent.press(assignButton);
+  expect(await screen.findByText('common.none')).toBeTruthy();
+  fireEvent.press(screen.getByLabelText('No wallet'));
+  expect(mockSetMinerWallet).toHaveBeenCalledWith('m1', undefined);
+});
+
+it('shows group tag input and updates on change', async () => {
+  jest.useFakeTimers();
+  const mockSetMinerGroup = jest.fn();
+  useMinerStore.setState({ setMinerGroup: mockSetMinerGroup } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  const input = screen.getByLabelText('Group tag input');
+  fireEvent.changeText(input, 'lab-1');
+  jest.advanceTimersByTime(600);
+  expect(mockSetMinerGroup).toHaveBeenCalledWith('m1', 'lab-1');
+  jest.useRealTimers();
+});
+
+it('shows efficiency trend when snapshots exist', async () => {
+  useMinerStore.setState({
+    getSnapshots: jest.fn().mockResolvedValue([
+      { hashRate: 100, hashRateUnit: 'GH/s', timestamp: Date.now() - 60000 },
+      { hashRate: 200, hashRateUnit: 'GH/s', timestamp: Date.now() },
+    ] as any),
+  } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await waitFor(() => {
+    expect(screen.getByText(/minerDetail\.efficiencyTrend/)).toBeTruthy();
+  });
+});
+
+it('shows restart miner button and calls restart API', async () => {
+  const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  fireEvent.press(screen.getByLabelText('Restart Miner'));
+  await waitFor(() => {
+    expect(mockAlert).toHaveBeenCalledWith(
+      'minerDetail.restartSent',
+      'minerDetail.restartSentBody',
+    );
+  });
+  mockAlert.mockRestore();
 });

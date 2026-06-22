@@ -329,15 +329,29 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    DB.loadWallets().then(setWallets);
+    let cancelled = false;
+    DB.loadWallets().then((w) => {
+      if (cancelled) return;
+      setWallets(w);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const miner = miners.find((m) => m.id === minerId);
 
   useEffect(() => {
+    let cancelled = false;
     if (minerId) {
-      getSnapshots(minerId, 50).then(setSnapshots);
+      getSnapshots(minerId, 50).then((s) => {
+        if (cancelled) return;
+        setSnapshots(s);
+      });
     }
+    return () => {
+      cancelled = true;
+    };
   }, [minerId, miner?.lastSeen]);
 
   if (!miner) {
@@ -394,7 +408,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     ]
       .filter(Boolean)
       .join('\n');
-    await Share.share({ message: msg }).catch(() => {});
+    await Share.share({ message: msg }).catch((e) => console.warn('Share failed:', e));
   };
 
   const handleDelete = () => {

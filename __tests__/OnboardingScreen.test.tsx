@@ -62,3 +62,19 @@ it('renders dot indicators', async () => {
   await render(<OnboardingScreen onComplete={onComplete} />);
   expect(screen.getByText('onboarding.slide1Title')).toBeTruthy();
 });
+
+it('calls onComplete when Get Started is pressed on last slide', async () => {
+  await render(<OnboardingScreen onComplete={onComplete} />);
+  const { width: screenWidth } = require('react-native').Dimensions.get('window');
+  const flatList = screen.getByTestId('onboarding-flatlist');
+  fireEvent(flatList, 'onMomentumScrollEnd', {
+    nativeEvent: {
+      contentOffset: { x: screenWidth * 3, y: 0 },
+    },
+  });
+  await act(async () => {
+    fireEvent.press(await screen.findByText('onboarding.getStarted'));
+  });
+  expect(setSetting).toHaveBeenCalledWith('onboarding_complete', 'true');
+  expect(onComplete).toHaveBeenCalled();
+});

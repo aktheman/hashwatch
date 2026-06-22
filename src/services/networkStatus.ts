@@ -76,3 +76,11 @@ export function onNetworkReconnect(callback: () => void): () => void {
     }
   };
 }
+
+/** @internal only for testing */
+export function __resetNetworkStatus() {
+  _listeners = [];
+  _currentStatus = { isOnline: true, type: null };
+  _onReconnect = null;
+  stopPolling();
+}

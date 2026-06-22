@@ -33,7 +33,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
 
   const handlePress = () => {
     const url = getFirmwareUrl();
-    Linking.openURL(url).catch(() => {});
+    Linking.openURL(url).catch((e) => console.warn('Failed to open firmware URL:', e));
   };
 
   return (

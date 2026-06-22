@@ -40,7 +40,9 @@ function doConnect() {
       try {
         const msg = JSON.parse(event.data);
         handleMessage(msg);
-      } catch {}
+      } catch (e) {
+        console.warn('WebSocket message parse error:', e);
+      }
     };
     ws.onclose = () => {
       ws = null;

@@ -20,19 +20,21 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/miners-store-edge.test.ts`: 6 tests — AppState pause/resume, interval tick (paused/not-paused), onAuthLogin callback, scanNetwork error/success
 - `__tests__/widget.test.tsx`: 3 tests (Android guard, native module call, missing module)
 - `__tests__/authToken.test.ts`: 6 tests (getter, setter, login callbacks)
-- `__tests__/networkStatus.test.ts`: 7 tests (online, offline, null fallback, catch, multi-listener, cleanup) + 1 untestable branch comment
+- `__tests__/networkStatus.test.ts`: 11 tests (online, offline, null fallback, catch, multi-listener, cleanup, onNetworkReconnect staying-online, staying-offline, override) + 1 untestable branch comment
 - `__tests__/version.test.ts`: 13 tests (parse, needsUpdate, fetch success/failure, changelog URL, fetchNetworkHashrate)
 - `__tests__/theme.test.ts`: 17 tests (all 5 themes, setThemeMode, mode tracking, custom themes)
 - `__tests__/api-client.test.ts`: 28 tests (auth, interceptors, caching, error handling)
 - `__tests__/DashboardScreen.test.tsx`: 38 tests (filtering, upgrade banner, error banner, scanning, wallet/group filters, temp display, comparison selection mode, batch operations)
 - `__tests__/WalletsScreen.test.tsx`: 14 tests (CRUD, modal, color picker, validation)
-- `__tests__/MinerDetailScreen.test.tsx`: 14 tests (rendering, share, delete, offline, not-found, goBack)
+- `__tests__/MinerDetailScreen.test.tsx`: 19 tests (rendering, share, delete, offline, not-found, goBack, wallet picker, group tag input, efficiency trend, restart miner)
 - `__tests__/SettingsScreen.test.tsx`: 26 tests (theme, remote sync, auth, power cost, exports, Sync Now button, syncing disabled)
-- `__tests__/auth-store.test.ts`: 13 tests (login, register, logout, restoreSession, syncSettingsFromBackend, syncNow)
+- `__tests__/auth-store.test.ts`: 26 tests (login, register, logout, restoreSession, syncSettingsFromBackend, syncNow, loadQueue, JWT decode)
 - `__tests__/AddMinerScreen.test.tsx`: 14 tests (pro limit, add error, scan cancel, scan fail, discovered list, add discovered, scan progress)
 - `__tests__/AnalyticsScreen.test.tsx`: 11 tests (summary stats, range selectors including 30d, chart, Power Cost, static labels, empty state)
 - `__tests__/ImportDataScreen.test.tsx`: 8 tests (empty input, importing state, button disabled, success, singular, failure, non-Error throw)
-- `__tests__/toast.test.ts`: 7 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss)
+- `__tests__/bitcoin.test.ts`: 13 tests (mainnet P2PKH/P2SH/Bech32, testnet Bech32/legacy, invalid checksums, mixed case, invalid charset)
+- `__tests__/OnboardingScreen.test.tsx`: 8 tests (swipe slides, get-started on last slide)
+- `__tests__/toast.test.ts`: 7 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss, safe dismissUndo when null)
 - `__tests__/UndoToast.test.tsx`: 4 tests (null state, renders message+undo, tap calls onUndo, accessibility label)
 - `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
 - `__tests__/AppNavigator.test.tsx`: 12 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback, navigation)
@@ -47,20 +49,22 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/ScreenErrorBoundary.test.tsx`: 4 tests (render children, error UI, retry, goBack)
 - `__tests__/SummaryCard.test.tsx`: 4 tests (icon/value/label, custom color, accent bar)
 - `__tests__/design.test.ts`: 23 tests (tokens, cardShadow, cardStyle, layout constants, inputStyle)
-- `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, deploy, e2e
+- `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, Android build, deploy, e2e, coverage threshold verification, `workflow_dispatch` trigger
 - `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 711 frontend (62 suites) + 105 backend (12 suites) = 816 total
-- Coverage: thresholds: 75/80/85/85 (global branches/funcs/lines/stmts)
-  - constants.ts: 100% stmts/funcs/branches/lines
+- Tests: 741 frontend (62 suites) + 105 backend (12 suites) = 846 total
+- Coverage: thresholds: 75/80/85/85 (global branches/funcs/lines/stmts) — all met
+  - bitcoin.ts: 97.38% stmts, 87.17% branches, 100% funcs, 100% lines
   - bitaxe.ts: 94.84% stmts, 93.49% branches, 84.21% funcs, 97.61% lines
   - miners.ts: 97.75% stmts, 79.62% branches, 96.15% funcs, 100% lines
   - networkStatus.ts: 100% stmts, 86.66% branches, 100% funcs, 100% lines
-  - toast.ts: 100% stmts/funcs/lines, 62.5% branches (timer lines)
-- web bundle: 2.0MB / 781 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
+  - toast.ts: 100% stmts/funcs/lines, 75% branches
+  - constants.ts: 100% stmts/funcs/branches/lines
+  - auth.ts: 100% stmts/funcs/lines, 90% branches
+- web bundle: 2.2MB / 820 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
 - AppNavigator code-split: all 10 screens use `React.lazy(() => import(...).then(m => ({ default: m.ScreenName })))` wrapped in `<Suspense>` with `ScreenErrorBoundary` — enables Metro to create separate chunks per screen
 - `formatTemperature` now accepts `number | undefined | null`, returns `'--'` for nullish
 - Timer `unref()` calls added in `hashrate.ts` (fetchBTCPrice, fetchNetworkHashrate, startPricePolling) to prevent Jest worker leaks
@@ -80,6 +84,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 - `networkStatus` unref check (line 35-41): Node.js-specific, `setInterval` in Jest returns number, not object with `.unref()`
 - `refreshMiner` probe recovery (lines 186-203): requires complex mock orchestration
+- `onNetworkReconnect` offline→online integration test: cannot reliably test with fake timers due to async polling timing vs React act() infrastructure
 
 ## Test Debugging Notes
 
