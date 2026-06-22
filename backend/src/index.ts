@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { initSentry } from './services/sentry';
 import { authRouter } from './routes/auth';
 import { minersRouter } from './routes/miners';
 import { statsRouter } from './routes/stats';
@@ -84,6 +85,7 @@ async function initSchema() {
 }
 
 const PORT = process.env.PORT || 4000;
+initSentry();
 initSchema().then(() => {
   server.listen(PORT, () => {
     console.log(`HashWatch API running on :${PORT}`);

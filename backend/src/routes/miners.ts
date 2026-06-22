@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { captureException } from '../services/sentry';
 
 export const minersRouter = Router();
 minersRouter.use(authMiddleware);
@@ -33,7 +34,7 @@ minersRouter.post('/', async (req: AuthRequest, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    console.error('Create miner error:', e);
+    captureException(e, { route: 'miners.create' });
     res.status(500).json({ error: 'internal server error' });
   }
 });
@@ -78,7 +79,7 @@ minersRouter.put('/:id', async (req: AuthRequest, res) => {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    console.error('Update miner error:', e);
+    captureException(e, { route: 'miners.update' });
     res.status(500).json({ error: 'internal server error' });
   }
 });
