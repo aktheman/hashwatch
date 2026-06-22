@@ -37,59 +37,76 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
   return db!;
 }
 
+const CURRENT_SCHEMA_VERSION = 2;
+
 async function initTables(d: SQLite.SQLiteDatabase): Promise<void> {
-  await d.execAsync(`
-    CREATE TABLE IF NOT EXISTS miners (
-      id TEXT PRIMARY KEY NOT NULL,
-      name TEXT NOT NULL,
-      ip TEXT NOT NULL,
-      port INTEGER NOT NULL DEFAULT 80,
-      addedAt INTEGER NOT NULL,
-      lastSeen INTEGER NOT NULL DEFAULT 0,
-      apiPath TEXT DEFAULT NULL,
-      statusPath TEXT DEFAULT NULL,
-      info TEXT DEFAULT NULL,
-      status TEXT DEFAULT NULL
-    );
-    CREATE TABLE IF NOT EXISTS miner_snapshots (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      minerId TEXT NOT NULL,
-      timestamp INTEGER NOT NULL,
-      hashRate REAL NOT NULL,
-      hashRateUnit TEXT DEFAULT 'GH/s',
-      temperature REAL NOT NULL,
-      voltage REAL NOT NULL,
-      current REAL NOT NULL,
-      power REAL NOT NULL,
-      sharesAccepted INTEGER NOT NULL,
-      sharesRejected INTEGER NOT NULL,
-      uptimeSeconds INTEGER NOT NULL,
-      frequency REAL NOT NULL,
-      FOREIGN KEY (minerId) REFERENCES miners(id)
-    );
-    CREATE INDEX IF NOT EXISTS idx_snapshots_minerid
-      ON miner_snapshots(minerId, timestamp);
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY NOT NULL,
-      value TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS wallets (
-      id TEXT PRIMARY KEY NOT NULL,
-      name TEXT NOT NULL,
-      address TEXT NOT NULL,
-      color TEXT NOT NULL DEFAULT '#6C63FF',
-      createdAt INTEGER NOT NULL
-    );
-  `);
-  const cols = ['apiPath', 'statusPath', 'info', 'status', 'remoteId', 'walletId', 'group'];
-  for (const col of cols) {
-    try {
-      await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
-    } catch {}
+  const row = await d.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  let version = row?.user_version ?? 0;
+
+  if (version >= CURRENT_SCHEMA_VERSION) return;
+
+  if (version < 1) {
+    await d.execAsync(`
+      CREATE TABLE IF NOT EXISTS miners (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        ip TEXT NOT NULL,
+        port INTEGER NOT NULL DEFAULT 80,
+        addedAt INTEGER NOT NULL,
+        lastSeen INTEGER NOT NULL DEFAULT 0,
+        apiPath TEXT DEFAULT NULL,
+        statusPath TEXT DEFAULT NULL,
+        info TEXT DEFAULT NULL,
+        status TEXT DEFAULT NULL
+      );
+      CREATE TABLE IF NOT EXISTS miner_snapshots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        minerId TEXT NOT NULL,
+        timestamp INTEGER NOT NULL,
+        hashRate REAL NOT NULL,
+        hashRateUnit TEXT DEFAULT 'GH/s',
+        temperature REAL NOT NULL,
+        voltage REAL NOT NULL,
+        current REAL NOT NULL,
+        power REAL NOT NULL,
+        sharesAccepted INTEGER NOT NULL,
+        sharesRejected INTEGER NOT NULL,
+        uptimeSeconds INTEGER NOT NULL,
+        frequency REAL NOT NULL,
+        FOREIGN KEY (minerId) REFERENCES miners(id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_snapshots_minerid
+        ON miner_snapshots(minerId, timestamp);
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY NOT NULL,
+        value TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS wallets (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        address TEXT NOT NULL,
+        color TEXT NOT NULL DEFAULT '#6C63FF',
+        createdAt INTEGER NOT NULL
+      );
+    `);
+    version = 1;
+    await d.execAsync('PRAGMA user_version = 1');
   }
-  try {
-    await d.execAsync(`ALTER TABLE miner_snapshots ADD COLUMN hashRateUnit TEXT DEFAULT 'GH/s'`);
-  } catch {}
+
+  if (version < 2) {
+    const cols = ['remoteId', 'walletId', 'group'];
+    for (const col of cols) {
+      try {
+        await d.execAsync(`ALTER TABLE miners ADD COLUMN ${col} TEXT DEFAULT NULL`);
+      } catch {}
+    }
+    try {
+      await d.execAsync(`ALTER TABLE miner_snapshots ADD COLUMN hashRateUnit TEXT DEFAULT 'GH/s'`);
+    } catch {}
+    version = 2;
+    await d.execAsync('PRAGMA user_version = 2');
+  }
+
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   await d.runAsync('DELETE FROM miner_snapshots WHERE timestamp < ?', [cutoff]);
 }
