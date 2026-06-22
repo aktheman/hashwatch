@@ -322,10 +322,13 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const removeMiner = useMinerStore((s) => s.removeMiner);
   const getSnapshots = useMinerStore((s) => s.getSnapshots);
   const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
+  const setMinerIp = useMinerStore((s) => s.setMinerIp);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
+  const [editingIP, setEditingIP] = useState(false);
+  const [editIPValue, setEditIPValue] = useState('');
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -453,7 +456,52 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Text>
           </View>
         </View>
-        <Text style={styles.ip}>{miner.ip}</Text>
+        {editingIP ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TextInput
+              style={[
+                styles.ip,
+                { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.primary },
+              ]}
+              value={editIPValue}
+              onChangeText={setEditIPValue}
+              autoFocus
+              onSubmitEditing={() => {
+                if (editIPValue.trim()) {
+                  setMinerIp(minerId, editIPValue.trim());
+                }
+                setEditingIP(false);
+              }}
+              returnKeyType="done"
+              accessibilityLabel="Edit IP address"
+            />
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Save IP"
+              onPress={() => {
+                if (editIPValue.trim()) {
+                  setMinerIp(minerId, editIPValue.trim());
+                }
+                setEditingIP(false);
+              }}
+            >
+              <Text style={{ fontSize: 16, color: theme.success, marginLeft: 8 }}>✓</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Edit IP address"
+            onPress={() => {
+              setEditIPValue(miner.ip);
+              setEditingIP(true);
+            }}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Text style={styles.ip}>{miner.ip}</Text>
+            <Text style={{ fontSize: 12, color: theme.primary, marginLeft: 6 }}>✏️</Text>
+          </TouchableOpacity>
+        )}
         {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
         {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
       </View>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
@@ -33,6 +33,14 @@ export function AnalyticsScreen() {
   const [powerCost, setPowerCost] = useState(0);
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
 
+  const snapshotCache = useRef<Map<string, MinerSnapshot[]>>(new Map());
+  const primaryColorRef = useRef(theme.primary);
+  const successColorRef = useRef(theme.success);
+  primaryColorRef.current = theme.primary;
+  successColorRef.current = theme.success;
+
+  const minersCacheKey = miners.map((m) => `${m.id}:${m.lastSeen || 0}`).join(',');
+
   useEffect(() => {
     let cancelled = false;
     DB.getSetting('power_cost').then((v) => {
@@ -55,7 +63,13 @@ export function AnalyticsScreen() {
 
   const loadSnapshots = async () => {
     setLoading(true);
-    const all: MinerSnapshot[] = [];
+    const cacheKey = `${minersCacheKey}-${range}`;
+    const cached = snapshotCache.current.get(cacheKey);
+    if (cached) {
+      setSnapshots(cached);
+      setLoading(false);
+      return;
+    }
     const now = Date.now();
     const cutoff =
       range === '1h'
@@ -65,11 +79,11 @@ export function AnalyticsScreen() {
           : range === '7d'
             ? now - 604800000
             : now - 2592000000;
-    for (const m of miners) {
-      const ss = await DB.getSnapshots(m.id, 500);
-      all.push(...ss.filter((s) => s.timestamp >= cutoff));
-    }
+    const all = (await Promise.all(miners.map((m) => DB.getSnapshots(m.id, 500))))
+      .flat()
+      .filter((s) => s.timestamp >= cutoff);
     all.sort((a, b) => a.timestamp - b.timestamp);
+    snapshotCache.current.set(cacheKey, all);
     setSnapshots(all);
     setLoading(false);
   };
@@ -134,7 +148,7 @@ export function AnalyticsScreen() {
         datasets: [
           {
             data: sampled.map((b) => Number((b.hashRate / 1e12).toFixed(2))),
-            color: () => theme.primary,
+            color: () => primaryColorRef.current,
             strokeWidth: 2,
           },
         ],
@@ -151,12 +165,12 @@ export function AnalyticsScreen() {
       datasets: [
         {
           data: buckets.map((b) => Number((b.hashRate / 1e12).toFixed(2))),
-          color: () => theme.primary,
+          color: () => primaryColorRef.current,
           strokeWidth: 2,
         },
       ],
     };
-  }, [snapshots, range, theme.primary]);
+  }, [snapshots, range]);
 
   const uptimeChartData = useMemo(() => {
     if (snapshots.length < 2) return null;
@@ -186,7 +200,7 @@ export function AnalyticsScreen() {
         datasets: [
           {
             data: sampled.map((b) => Number(b.uptime.toFixed(1))),
-            color: () => theme.success,
+            color: () => successColorRef.current,
             strokeWidth: 2,
           },
         ],
@@ -203,12 +217,12 @@ export function AnalyticsScreen() {
       datasets: [
         {
           data: buckets.map((b) => Number(b.uptime.toFixed(1))),
-          color: () => theme.success,
+          color: () => successColorRef.current,
           strokeWidth: 2,
         },
       ],
     };
-  }, [snapshots, range, theme.success]);
+  }, [snapshots, range]);
 
   const chartConfig = {
     backgroundColor: theme.surface,

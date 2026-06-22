@@ -54,6 +54,7 @@ interface MinersState {
   scanNetwork: () => Promise<void>;
   setMinerWallet: (minerId: string, walletId: string | undefined) => Promise<void>;
   setMinerGroup: (minerId: string, group: string | undefined) => Promise<void>;
+  setMinerIp: (minerId: string, ip: string, port?: number) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
@@ -294,6 +295,16 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
     const updated = { ...miner, group: group || undefined };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  setMinerIp: async (minerId: string, ip: string, port?: number) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, ip, port: port ?? miner.port };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),

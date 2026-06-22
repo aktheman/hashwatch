@@ -57,18 +57,12 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
 - Tests: 745 frontend (62 suites) + 105 backend (12 suites) = 850 total
 - Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — all met
-  - constants.ts: 100% stmts/funcs/branches/lines
-  - auth.ts: 100% stmts/funcs/lines, 90% branches
-  - networkStatus.ts: 100% stmts, 86.36% branches, 100% funcs, 100% lines
-  - bitcoin.ts: 97.38% stmts, 87.17% branches, 100% funcs, 100% lines
-  - bitaxe.ts: 94.94% stmts, 92.8% branches, 85% funcs, 97.67% lines
-  - miners.ts: 97.23% stmts, 83.33% branches, 96.15% funcs, 99.31% lines
-  - toast.ts: 100% stmts/funcs/lines, 75% branches
+- Security: 0 vulns via `overrides` in package.json (nested for eas-cli deps)
+- AnalyticsScreen: parallel snapshot fetch via `Promise.all`, LRU cache keyed by `minerCacheKey-range`, chart theme colors via refs (avoids recomputation on theme change)
+- MinerDetailScreen: inline IP editing via TextInput on pencil icon tap, saves via `setMinerIp` store action
+- Native SQLite: schema version tracking via `PRAGMA user_version` — guard ALTER TABLE behind version checks (no more unconditional runs on startup)
+- CI: removed duplicate coverage step (npx jest --coverage --silent), made `npm audit` non-blocking (`|| echo`)
 - web bundle: 2.2MB / 820 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
-- AppNavigator code-split: all 10 screens use `React.lazy(() => import(...).then(m => ({ default: m.ScreenName })))` wrapped in `<Suspense>` with `ScreenErrorBoundary` — enables Metro to create separate chunks per screen
-- `formatTemperature` now accepts `number | undefined | null`, returns `'--'` for nullish
-- Timer `unref()` calls added in `hashrate.ts` (fetchBTCPrice, fetchNetworkHashrate, startPricePolling) to prevent Jest worker leaks
-- Security: 24→6 vulns via `overrides` (node-forge 1.4.0, tar 7.5.16); remaining 6 require `--force` (downgrades eas-cli)
 - i18n: `react-i18next` configured with en/es locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded strings remain.
 - Skeleton loading: `SkeletonCard` replaces `ActivityIndicator` in DashboardScreen (initial load), AnalyticsScreen (chart loading), WalletsScreen (DB load)
 - Design system: `src/utils/design.ts` provides spacing, radius, fontSize, fontWeight, cardShadow, cardStyle tokens
