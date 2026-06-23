@@ -22,6 +22,22 @@ export default {
     },
     web: {
       favicon: './assets/favicon.png',
+      lang: 'en',
+      themeColor: '#0A0A1A',
+      shortName: 'HashWatch',
+      scope: '/',
+      startUrl: '/',
+      display: 'standalone',
+      barColor: '#0A0A1A',
+      prefersColorScheme: 'dark',
+      description:
+        'Real-time BitAxe miner monitoring — track hashrate, temperature, pool stats, and more.',
+      build: {
+        pwa: {
+          serviceWorkerPath: 'service-worker.js',
+          appScope: '/',
+        },
+      },
     },
     plugins: [
       'expo-sqlite',

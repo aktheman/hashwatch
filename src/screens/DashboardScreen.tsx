@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useMemo } from 'react';
+import { useEffect, useCallback, useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,9 @@ import {
   getNetworkHashrate,
   formatHashrateWithUnit,
 } from '../utils/hashrate';
-import { useTheme } from '../theme';
+import { useTheme, setThemeMode, getThemeMode } from '../theme';
+import { exportAllData } from '../utils/export';
+import { checkMinerAlerts } from '../services/notifications';
 import { MetricTile } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
 import * as DB from '../db/database';
@@ -106,6 +108,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       clearInterval(autoScanInterval);
     };
   }, []);
+
+  const prevMiners = useRef(miners);
+  useEffect(() => {
+    const prev = prevMiners.current;
+    prevMiners.current = miners;
+    if (prev.length > 0 || miners.length > 0) {
+      checkMinerAlerts(prev, miners);
+    }
+  }, [miners]);
 
   const handleMinerPress = useCallback(
     (miner: Miner) => {
@@ -633,14 +644,37 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 <Text style={styles.liveDot}>●</Text> live monitor
               </Text>
             </View>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Settings"
-              style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
-              onPress={() => navigation.navigate('Settings')}
-            >
-              <Text style={styles.settingsIcon}>⚙</Text>
-            </TouchableOpacity>
+            <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Export data"
+                style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                onPress={() => exportAllData()}
+              >
+                <Text style={styles.settingsIcon}>↓</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Switch theme"
+                style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                onPress={() => {
+                  const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
+                  const current = getThemeMode();
+                  const idx = modes.indexOf(current as (typeof modes)[number]);
+                  setThemeMode(modes[(idx + 1) % modes.length]);
+                }}
+              >
+                <Text style={styles.settingsIcon}>🎨</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Settings"
+                style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                onPress={() => navigation.navigate('Settings')}
+              >
+                <Text style={styles.settingsIcon}>⚙</Text>
+              </TouchableOpacity>
+            </View>
           </>
         )}
       </View>
