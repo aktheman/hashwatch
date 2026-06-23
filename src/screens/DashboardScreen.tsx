@@ -22,6 +22,7 @@ import { Miner, Wallet, NavigationProp } from '../types';
 import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
+import { MetricTile } from '../components/DashboardComponents';
 import * as DB from '../db/database';
 
 interface DashboardScreenProps {
@@ -586,48 +587,40 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       </View>
 
       <View style={styles.summaryRow}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>⬡</Text>
-          <Text style={styles.summaryValue}>{miners.length}</Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.miners')}</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>🟢</Text>
-          <Text style={[styles.summaryValue, { color: theme.success }]}>{onlineCount}</Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.online')}</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>⚡</Text>
-          <Text style={[styles.summaryValue, { color: theme.primary }]}>
-            {formatTotal(totalHashrate)}
-          </Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.hashrate')}</Text>
-        </View>
+        <MetricTile
+          title={String(t('dashboard.miners'))}
+          value={String(miners.length)}
+          accent="primary"
+        />
+        <MetricTile
+          title={String(t('dashboard.online'))}
+          value={String(onlineCount)}
+          accent="success"
+        />
+        <MetricTile
+          title={String(t('dashboard.hashrate'))}
+          value={formatTotal(totalHashrate)}
+          unit="H/s"
+          accent="info"
+        />
       </View>
       <View style={styles.summaryRow}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>🔌</Text>
-          <Text style={[styles.summaryValue, { color: theme.warning }]}>
-            {totalPower.toFixed(1)}
-          </Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.power')}</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>🌡</Text>
-          <Text
-            style={[styles.summaryValue, { color: avgTemp > 70 ? theme.danger : theme.success }]}
-          >
-            {avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°
-          </Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.avgTemp')}</Text>
-        </View>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryIcon}>📊</Text>
-          <Text style={[styles.summaryValue, { color: theme.accent }]}>
-            {formatWTHs(totalPower, totalHashrate / 1e12, 'TH/s')}
-          </Text>
-          <Text style={styles.summaryLabel}>{t('dashboard.efficiency')}</Text>
-        </View>
+        <MetricTile
+          title={String(t('dashboard.power'))}
+          value={`${totalPower.toFixed(1)}`}
+          unit="W"
+          accent="warning"
+        />
+        <MetricTile
+          title={String(t('dashboard.avgTemp'))}
+          value={`${avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°`}
+          accent={avgTemp > 70 ? 'danger' : 'success'}
+        />
+        <MetricTile
+          title={String(t('dashboard.efficiency'))}
+          value={formatWTHs(totalPower, totalHashrate / 1e12, 'TH/s')}
+          accent="primary"
+        />
       </View>
 
       {miners.length > 0 && <EarningsCard miners={miners} />}

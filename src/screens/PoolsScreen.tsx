@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
+import { MetricTile } from '../components/DashboardComponents';
 import { Miner, NavigationProp } from '../types';
 import {
   toHashesPerSecond,
@@ -163,22 +164,25 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
               </View>
             </View>
             <View style={styles.statRow}>
-              <View style={styles.stat}>
-                <Text style={styles.statValue}>{formatRate(item.totalHashrate)}</Text>
-                <Text style={styles.statLabel}>{t('pools.hashrate')}</Text>
-              </View>
-              <View style={styles.stat}>
-                <Text style={styles.statValue}>
-                  {estimateBTCPerDay(item.totalHashrate) > 0
+              <MetricTile
+                title={String(t('pools.hashrate'))}
+                value={formatRate(item.totalHashrate)}
+                accent="info"
+              />
+              <MetricTile
+                title={String(t('pools.estDaily'))}
+                value={
+                  estimateBTCPerDay(item.totalHashrate) > 0
                     ? formatBTC(estimateBTCPerDay(item.totalHashrate))
-                    : '—'}
-                </Text>
-                <Text style={styles.statLabel}>{t('pools.estDaily')}</Text>
-              </View>
-              <View style={styles.stat}>
-                <Text style={styles.statValue}>{item.miners.length}</Text>
-                <Text style={styles.statLabel}>{t('pools.miners')}</Text>
-              </View>
+                    : '—'
+                }
+                accent="success"
+              />
+              <MetricTile
+                title={String(t('pools.miners'))}
+                value={String(item.miners.length)}
+                accent="primary"
+              />
             </View>
             <View style={styles.minerList}>
               {item.miners.map((m) => (
