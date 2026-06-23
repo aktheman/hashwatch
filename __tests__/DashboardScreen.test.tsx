@@ -180,11 +180,10 @@ it('shows summary stats with miners', async () => {
     ] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('dashboard.miners')).toBeTruthy();
-  expect(screen.getByText('dashboard.online')).toBeTruthy();
+  expect(screen.getByText('1')).toBeTruthy();
   expect(screen.getAllByText('dashboard.hashrate').length).toBeGreaterThan(0);
   expect(screen.getByText('dashboard.power')).toBeTruthy();
-  expect(screen.getByText('dashboard.avgTemp')).toBeTruthy();
+  expect(screen.getByText('dashboard.temp')).toBeTruthy();
   expect(screen.getByText('dashboard.efficiency')).toBeTruthy();
 }, 15000);
 

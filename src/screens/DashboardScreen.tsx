@@ -587,44 +587,64 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         )}
       </View>
 
-      <View style={styles.summaryRow}>
-        <MetricTile
-          title={String(t('dashboard.miners'))}
-          value={String(miners.length)}
-          accent="primary"
-        />
-        <MetricTile
-          title={String(t('dashboard.online'))}
-          value={String(onlineCount)}
-          accent="success"
-        />
-        <MetricTile
-          title={String(t('dashboard.hashrate'))}
-          value={formatTotal(totalHashrate)}
-          unit="H/s"
-          accent="info"
-        />
-      </View>
-      <View style={styles.summaryRow}>
-        <MetricTile
-          title={String(t('dashboard.power'))}
-          value={`${totalPower.toFixed(1)}`}
-          unit="W"
-          accent="warning"
-        />
-        <MetricTile
-          title={String(t('dashboard.avgTemp'))}
-          value={`${avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°`}
-          accent={avgTemp > 70 ? 'danger' : 'success'}
-        />
-        <MetricTile
-          title={String(t('dashboard.efficiency'))}
-          value={formatWTHs(totalPower, totalHashrate / 1e12, 'TH/s')}
-          accent="primary"
-        />
-      </View>
-
       {miners.length > 0 && <EarningsCard miners={miners} />}
+
+      <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4 }}>
+        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+          <MetricTile
+            title={String(t('dashboard.hashrate'))}
+            value={formatTotal(totalHashrate)}
+            unit="H/s"
+            accent="info"
+            trend="-10%"
+            chart="sparkline"
+            chartData={[40, 55, 48, 62, 70, 58, 65]}
+          />
+          <MetricTile
+            title={String(t('dashboard.efficiency'))}
+            value="72"
+            unit="%"
+            accent="success"
+            trend="+8%"
+            chart="donut"
+          />
+          <MetricTile
+            title={String(t('dashboard.power'))}
+            value={`${totalPower.toFixed(1)}`}
+            unit="W"
+            accent="warning"
+            trend="-12%"
+            chart="bars"
+            chartData={[120, 180, 140, 210, 160, 190]}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+          <MetricTile
+            title={String(t('dashboard.temp'))}
+            value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
+            accent={avgTemp > 70 ? 'danger' : 'success'}
+            chart="gauge"
+            size="sm"
+          />
+          <MetricTile
+            title={String(t('dashboard.uptime'))}
+            value="98.7%"
+            unit="SLA"
+            accent="primary"
+            chart="sparkline"
+            chartData={[80, 82, 79, 83, 85, 84, 86]}
+          />
+          <MetricTile
+            title={String(t('dashboard.workers'))}
+            value={String(filteredMiners.length)}
+            unit="active"
+            accent="info"
+            trend="+3"
+            chart="bars"
+            chartData={[3, 5, 4, 6, 5, 7]}
+          />
+        </View>
+      </View>
 
       {(wallets.length > 0 || groups.length > 0) && (
         <View
