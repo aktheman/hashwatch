@@ -130,9 +130,17 @@ Backend er konfigurert med Sentry feiltracking. Aktiveres ved å sette `SENTRY_D
 ### Railway
 
 1. Create a new Railway project
-2. Connect this repository
+2. Connect this repository (root = `hashwatch/`)
 3. Add a PostgreSQL plugin
 4. Copy `backend/.env.example` to Railway environment variables
+5. Set the following required variables:
+   - `DATABASE_URL` (provided by Railway PostgreSQL plugin)
+   - `JWT_SECRET` (generate a strong random value)
+   - `PORT=4000`
+   - `EXPO_PUBLIC_API_URL` (your public Railway domain)
+   - `SENTRY_DSN` (optional, for backend error tracking)
+
+Railway will auto-detect the backend server from `railway.toml` and start it on port 4000.
 
 ### Minimal Environment
 
