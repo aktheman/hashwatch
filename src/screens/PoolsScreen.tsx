@@ -3,7 +3,6 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
-import { PoolCoverage } from '../components/PoolCoverage';
 import { Miner, NavigationProp } from '../types';
 import {
   toHashesPerSecond,
@@ -12,15 +11,6 @@ import {
   formatBTC,
 } from '../utils/hashrate';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
-
-interface PoolStats {
-  id: string;
-  name: string;
-  minerCount: number;
-  totalHashrate: number;
-  unit?: string;
-}
 
 interface PoolGroup {
   pool: string;
@@ -38,29 +28,6 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
-  const [apiPools, setApiPools] = useState<PoolStats[]>([]);
-  const [loadingPools, setLoadingPools] = useState(false);
-
-  const loadPools = async () => {
-    setLoadingPools(true);
-    try {
-      const res = await fetch('/api/miners/pools');
-      if (res.ok) {
-        const json = (await res.json()) as PoolStats[];
-        setApiPools(Array.isArray(json) ? json : []);
-      }
-    } catch {
-      setApiPools([]);
-    } finally {
-      setLoadingPools(false);
-    }
-  };
-
-  useEffect(() => {
-    loadPools();
-    const id = setInterval(loadPools, 30_000);
-    return () => clearInterval(id);
-  }, []);
 
   const poolGroups = useMemo(() => {
     const groups: Record<string, PoolGroup> = {};
