@@ -148,10 +148,15 @@ Backend is configured with Sentry error tracking. Enable by setting `SENTRY_DSN`
 
 Railway will auto-detect the backend server from `railway.toml` and start it on port 4000.
 
-Verify deployment with Railway's provided domain:
+Current production backend:
+
+- URL: https://hashwatch-production-5b6e.up.railway.app
+- Health: https://hashwatch-production-5b6e.up.railway.app/api/health
+
+Verify deployment:
 
 ```bash
-curl https://<your-railway-domain>/api/health
+curl https://hashwatch-production-5b6e.up.railway.app/api/health
 ```
 
 Expected response: `{"status":"ok","db":"connected"}`.
