@@ -9,6 +9,7 @@ interface MinerState {
   isOnline: boolean;
   temperature: number;
   hashRate: number;
+  pool: string | null;
 }
 
 const minerStates = new Map<string, MinerState>();
@@ -30,12 +31,13 @@ export function checkMinerStatus(
   isOnline: boolean,
   temperature: number,
   hashRate: number = 0,
+  pool: string | null = null,
 ): void {
   const key = `${userId}:${minerId}`;
-  const prev = minerStates.get(key);
+  const prev = minerStates.get(key) as MinerState | undefined;
 
   if (!prev) {
-    minerStates.set(key, { isOnline, temperature, hashRate });
+    minerStates.set(key, { isOnline, temperature, hashRate, pool });
     return;
   }
 
@@ -55,5 +57,9 @@ export function checkMinerStatus(
     sendHashrateDropNotification(userId, minerName, minerId, pct);
   }
 
-  minerStates.set(key, { isOnline, temperature, hashRate });
+  if (prev.pool && pool && prev.pool !== pool && canNotify(`${key}:pool_change`)) {
+    // Placeholder for future pool change notification
+  }
+
+  minerStates.set(key, { isOnline, temperature, hashRate, pool });
 }

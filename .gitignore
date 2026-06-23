@@ -46,7 +46,8 @@ yarn-error.*
 # coverage
 coverage/
 
-# test artifacts
+# Playwright
+playwright-report/
 test-results/
 
 # local env - backend
