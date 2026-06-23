@@ -152,59 +152,70 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   refreshMiner: async (id: string) => {
     const miner = get().miners.find((m) => m.id === id);
     if (!miner) return;
-    try {
-      const client = new BitAxeClient(
-        miner.ip,
-        miner.port,
-        miner.apiPath ?? undefined,
-        miner.statusPath ?? undefined,
-      );
-      const { info, status } = await client.fetchAll();
-      const updated: Miner = {
-        ...miner,
-        info,
-        status,
-        lastSeen: Date.now(),
-        isOnline: true,
-      };
-      await DB.saveMiner(updated);
-      const snapshot = buildSnapshot(id, status);
-      await DB.saveSnapshot(snapshot);
-      const token = getAuthToken();
-      if (token && miner.remoteId) {
-        pushStats(miner.remoteId, snapshot).catch((e) => console.warn('pushStats failed:', e));
-      }
-      set((s) => ({
-        miners: s.miners.map((m) => (m.id === id ? updated : m)),
-      }));
-    } catch {
-      const current = get().miners.find((m) => m.id === id);
-      if (!current) return;
-      if (!current.apiPath) {
-        const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
-        if (found?.infoPath) {
-          await DB.saveMiner({
-            ...current,
-            apiPath: found.infoPath || undefined,
-            statusPath: found.statusPath || undefined,
-          });
-          set((s) => ({
-            miners: s.miners.map((m) =>
-              m.id === id
-                ? {
-                    ...m,
-                    apiPath: found.infoPath || undefined,
-                    statusPath: found.statusPath || undefined,
-                  }
-                : m,
-            ),
-          }));
+
+    const attempt = async (retryMs = 0): Promise<void> => {
+      if (retryMs > 0) await new Promise((resolve) => setTimeout(resolve, retryMs));
+
+      try {
+        const client = new BitAxeClient(
+          miner.ip,
+          miner.port,
+          miner.apiPath ?? undefined,
+          miner.statusPath ?? undefined,
+        );
+        const { info, status } = await client.fetchAll();
+        const updated: Miner = {
+          ...miner,
+          info,
+          status,
+          lastSeen: Date.now(),
+          isOnline: true,
+        };
+        await DB.saveMiner(updated);
+        const snapshot = buildSnapshot(id, status);
+        await DB.saveSnapshot(snapshot);
+        const token = getAuthToken();
+        if (token && miner.remoteId) {
+          pushStats(miner.remoteId, snapshot).catch((e) => console.warn('pushStats failed:', e));
+        }
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === id ? updated : m)),
+        }));
+      } catch {
+        const current = get().miners.find((m) => m.id === id);
+        if (!current) return;
+        if (!current.apiPath) {
+          const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
+          if (found?.infoPath) {
+            await DB.saveMiner({
+              ...current,
+              apiPath: found.infoPath || undefined,
+              statusPath: found.statusPath || undefined,
+            });
+            set((s) => ({
+              miners: s.miners.map((m) =>
+                m.id === id
+                  ? {
+                      ...m,
+                      apiPath: found.infoPath || undefined,
+                      statusPath: found.statusPath || undefined,
+                    }
+                  : m,
+              ),
+            }));
+          }
+        }
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
+        }));
+
+        if (typeof (navigator as any)?.onLine === 'boolean' && !(navigator as any).onLine) {
+          setTimeout(() => attempt(2000), 0);
         }
       }
-      set((s) => ({
-        miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
-      }));
-    }
+    };
+
+    await attempt(0);
   },
 
   refreshAll: async () => {
