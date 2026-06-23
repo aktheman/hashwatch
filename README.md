@@ -163,6 +163,19 @@ Expected response: `{"status":"ok","db":"connected"}`.
 
 For web builds, deploy the `dist/` output separately (Vercel/Netlify/Railway static).
 
+### Vercel
+
+1. Import repository in Vercel.
+2. Set **Build Command** `npm run build:web` and **Output Directory** `dist`.
+3. Add environment variables under Project Settings:
+   - `EXPO_PUBLIC_API_URL=https://hashwatch-production-5b6e.up.railway.app`
+   - `EXPO_PUBLIC_MINER_PROXY_URL` (LAN probing / proxy if used from web)
+   - `EXPO_PUBLIC_REVENUECAT_IOS_KEY`
+   - `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`
+4. Deploy. Live URL will be `<project>.vercel.app`.
+
+Web builds require the miner proxy for non-local miner access. See [Web and LAN Access](#web-and-lan-access).
+
 ### Minimal Environment
 
 Set these variables in Railway or your host:
