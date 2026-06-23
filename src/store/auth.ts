@@ -12,6 +12,7 @@ interface QueuedSetting {
   key: string;
   value: string;
   timestamp: number;
+  retries: number;
 }
 
 let _settingsQueue: QueuedSetting[] = [];
@@ -36,14 +37,14 @@ async function saveQueue(): Promise<void> {
 }
 
 export async function queueSetting(key: string, value: string): Promise<void> {
-  _settingsQueue.push({ key, value, timestamp: Date.now() });
+  _settingsQueue.push({ key, value, timestamp: Date.now(), retries: 0 });
   await saveQueue();
 }
 
 async function processQueue(): Promise<void> {
   if (_settingsQueue.length === 0) return;
 
-  // last-write-wins: shortest index = latest timestamp wins
+  // Deduplicate: keep latest timestamp per key
   const byKey = new Map<string, QueuedSetting>();
   for (const item of _settingsQueue) {
     const prev = byKey.get(item.key);
@@ -51,26 +52,29 @@ async function processQueue(): Promise<void> {
       byKey.set(item.key, item);
     }
   }
-  const ordered = Array.from(byKey.values()).sort((a, b) => a.timestamp - b.timestamp);
-
-  _settingsQueue = [...ordered];
+  _settingsQueue = Array.from(byKey.values()).sort((a, b) => a.timestamp - b.timestamp);
   await saveQueue();
 
-  let failed = 0;
+  const completed: string[] = [];
   let delayMs = 500;
+
   for (const item of _settingsQueue) {
     await new Promise((r) => setTimeout(r, delayMs));
     try {
       await API.putSetting(item.key, item.value);
-      failed = 0;
+      completed.push(item.key);
       delayMs = 500;
-    } catch {
-      failed++;
+    } catch (err) {
+      item.retries += 1;
+      if (item.retries >= 3) {
+        completed.push(item.key);
+      }
       delayMs = Math.min(delayMs * 2, 5000);
     }
   }
 
-  if (failed > 0) {
+  if (completed.length > 0) {
+    _settingsQueue = _settingsQueue.filter((item) => !completed.includes(item.key));
     await saveQueue();
   }
 }
@@ -185,11 +189,9 @@ export const useAuthStore = create<AuthState>((set) => ({
           }
           set({ token, email, userId });
         } catch {
-          // keep token available
           set({ token, email: email ?? null, userId: null });
         }
       } else {
-        // Legacy token format
         set({ token, email: email ?? null, userId: null });
       }
       if (useAuthStore.getState().token) {
