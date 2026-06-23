@@ -19,12 +19,10 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner, Wallet, NavigationProp } from '../types';
-import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
-import { Sparkline, MiniBarChart, Donut, Gauge, Timeline } from '../components/ChartWidgets';
 import * as DB from '../db/database';
 
 interface DashboardScreenProps {
@@ -209,7 +207,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     setRefreshing(false);
   }, []);
 
-  const { onlineCount, totalHashrate, totalPower, avgTemp } = useMemo(() => {
+  const { totalHashrate, totalPower, avgTemp } = useMemo(() => {
     const on = filteredMiners.filter((m) => m.isOnline).length;
     const hr = filteredMiners.reduce(
       (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
@@ -221,7 +219,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       withTemp.length > 0
         ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
         : 0;
-    return { onlineCount: on, totalHashrate: hr, totalPower: pw, avgTemp: at };
+    return { totalHashrate: hr, totalPower: pw, avgTemp: at };
   }, [filteredMiners]);
 
   const canAdd = canAddMiner(miners.length);
@@ -589,6 +587,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       </View>
 
       {miners.length > 0 && <EarningsCard miners={miners} />}
+
+      <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4, alignItems: 'center' }}>
+        <WorldMap />
+      </View>
 
       <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4 }}>
         <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
