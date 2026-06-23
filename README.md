@@ -114,6 +114,17 @@ npm run dev
 
 OpenAPI documentation for the backend is at `backend/openapi.json`.
 
+## Testing
+
+- Backend: `cd backend && npx jest --no-coverage`
+- Frontend: `npx jest --no-coverage`
+- Typecheck: `npm run typecheck`
+- E2E: `npm run test:e2e` (Playwright)
+
+### Error tracking (Sentry)
+
+Backend er konfigurert med Sentry feiltracking. Aktiveres ved å sette `SENTRY_DSN` i backend miljøvariabler. DSN skal ikke legges inn i `.env.example`.
+
 ## Deploy
 
 ### Railway

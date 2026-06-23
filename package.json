@@ -37,6 +37,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@react-native/jest-preset": "^0.85.3",
     "@types/jest": "29.5.14",
     "@types/react": "~19.2.17",
@@ -61,6 +62,8 @@
     "build:web": "expo export --platform web",
     "deploy:web": "expo export --platform web && npx vercel --prod",
     "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix",

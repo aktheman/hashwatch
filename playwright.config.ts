@@ -1,21 +1,26 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e/web',
-  timeout: 30000,
-  retries: 0,
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [['line'], ['html', { outputFolder: 'playwright-report' }]],
   use: {
-    baseURL: 'http://localhost:8080',
-    headless: true,
-    launchOptions: {
-      executablePath: '/usr/bin/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    },
+    baseURL: process.env.BASE_URL || 'http://localhost:4000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
+  projects: [
+    { name: 'api', testMatch: /.*\.api\.test\.ts/ },
+    { name: 'web', testMatch: /.*\.web\.test\.ts/ },
+  ],
   webServer: {
-    command: 'npx http-server dist -p 8080 --cors -s',
-    url: 'http://localhost:8080',
-    reuseExistingServer: false,
-    timeout: 10000,
+    command: 'cd backend && npm run dev',
+    url: 'http://localhost:4000/api/health',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
   },
 });
