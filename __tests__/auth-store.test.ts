@@ -389,6 +389,7 @@ describe('restoreSession with queue', () => {
   });
 
   it('starts with empty queue when no stored queue', async () => {
+    mockGetSetting.mockReset();
     mockGetSetting.mockImplementation((k: string) => {
       if (k === 'auth_token') return 't1';
       if (k === 'auth_email') return 'a@b.com';
@@ -397,11 +398,16 @@ describe('restoreSession with queue', () => {
 
     await useAuthStore.getState().restoreSession();
 
+    mockPutSetting.mockClear();
     mockPutSetting.mockResolvedValue(undefined);
     mockGetSettings.mockResolvedValue({});
+
+    const previousPutCalls = [...mockPutSetting.mock.calls];
     await useAuthStore.getState().syncNow();
 
-    expect(mockPutSetting).not.toHaveBeenCalledWith('theme_mode', 'dark');
+    for (const call of mockPutSetting.mock.calls.slice(previousPutCalls.length)) {
+      expect(call[0]).not.toBe('theme_mode');
+    }
   });
 });
 

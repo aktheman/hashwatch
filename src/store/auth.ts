@@ -43,20 +43,34 @@ export async function queueSetting(key: string, value: string): Promise<void> {
 async function processQueue(): Promise<void> {
   if (_settingsQueue.length === 0) return;
 
-  const toProcess = [..._settingsQueue];
-  _settingsQueue = [];
+  // last-write-wins: shortest index = latest timestamp wins
+  const byKey = new Map<string, QueuedSetting>();
+  for (const item of _settingsQueue) {
+    const prev = byKey.get(item.key);
+    if (!prev || item.timestamp >= prev.timestamp) {
+      byKey.set(item.key, item);
+    }
+  }
+  const ordered = Array.from(byKey.values()).sort((a, b) => a.timestamp - b.timestamp);
+
+  _settingsQueue = [...ordered];
   await saveQueue();
 
-  for (const item of toProcess) {
+  let failed = 0;
+  let delayMs = 500;
+  for (const item of _settingsQueue) {
+    await new Promise((r) => setTimeout(r, delayMs));
     try {
       await API.putSetting(item.key, item.value);
+      failed = 0;
+      delayMs = 500;
     } catch {
-      // Re-queue on failure
-      _settingsQueue.push(item);
+      failed++;
+      delayMs = Math.min(delayMs * 2, 5000);
     }
   }
 
-  if (_settingsQueue.length > 0) {
+  if (failed > 0) {
     await saveQueue();
   }
 }
