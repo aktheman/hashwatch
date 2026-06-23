@@ -64,7 +64,7 @@ async function processQueue(): Promise<void> {
       await API.putSetting(item.key, item.value);
       completed.push(item.key);
       delayMs = 500;
-    } catch (err) {
+    } catch {
       item.retries += 1;
       if (item.retries >= 3) {
         completed.push(item.key);
