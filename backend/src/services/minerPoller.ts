@@ -25,15 +25,45 @@ async function fetchJson(url: string): Promise<any | null> {
   }
 }
 
+function extractPool(info: any, status: any): string | null {
+  const fromStatus = typeof status?.pool === 'string' && status.pool ? status.pool : null;
+  const fromInfo = typeof info?.pool === 'string' && info.pool ? info.pool : null;
+  const fromStratum =
+    (typeof status?.stratumURL === 'string' && status.stratumURL) ||
+    (typeof info?.stratumURL === 'string' && info.stratumURL);
+  return fromStatus || fromInfo || fromStratum || null;
+}
+
 async function pollMiner(miner: MinerRow): Promise<void> {
-  const url = `http://${miner.ip}:${miner.port}/api/system/info`;
-  const data = await fetchJson(url);
+  const infoUrl = `http://${miner.ip}:${miner.port}/api/system/info`;
+  const statusUrl = `http://${miner.ip}:${miner.port}/api/system/status`;
 
-  const isOnline = !!data;
-  const temperature = typeof data?.temperature === 'number' ? data.temperature : 0;
-  const hashRate = typeof data?.hashRate === 'number' ? data.hashRate : 0;
+  const [infoData, statusData] = await Promise.all([fetchJson(infoUrl), fetchJson(statusUrl)]);
+  const isOnline = !!infoData || !!statusData;
+  const temperature =
+    typeof statusData?.temperature === 'number'
+      ? statusData.temperature
+      : typeof infoData?.temperature === 'number'
+        ? infoData.temperature
+        : 0;
+  const hashRate =
+    typeof statusData?.hashRate === 'number'
+      ? statusData.hashRate
+      : typeof infoData?.hashRate === 'number'
+        ? infoData.hashRate
+        : 0;
+  const pool = extractPool(infoData, statusData);
 
-  checkMinerStatus(miner.userid, miner.id, miner.name, miner.ip, isOnline, temperature, hashRate);
+  checkMinerStatus(
+    miner.userid,
+    miner.id,
+    miner.name,
+    miner.ip,
+    isOnline,
+    temperature,
+    hashRate,
+    pool,
+  );
 }
 
 let intervalHandle: ReturnType<typeof setInterval> | null = null;
