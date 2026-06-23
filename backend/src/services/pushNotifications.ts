@@ -87,3 +87,20 @@ export async function sendHashrateDropNotification(
     type: 'hashrate_drop',
   });
 }
+
+export async function sendPoolChangeNotification(
+  userId: string,
+  minerName: string,
+  minerId: string,
+  oldPool: string | null,
+  newPool: string | null,
+): Promise<void> {
+  const from = oldPool || 'unknown';
+  const to = newPool || 'unknown';
+  await sendPushNotification(userId, 'Pool Changed', `${minerName} moved from ${from} to ${to}`, {
+    minerId,
+    type: 'pool_change',
+    oldPool: from,
+    newPool: to,
+  });
+}
