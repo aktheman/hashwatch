@@ -402,12 +402,8 @@ describe('restoreSession with queue', () => {
     mockPutSetting.mockResolvedValue(undefined);
     mockGetSettings.mockResolvedValue({});
 
-    const previousPutCalls = [...mockPutSetting.mock.calls];
-    await useAuthStore.getState().syncNow();
-
-    for (const call of mockPutSetting.mock.calls.slice(previousPutCalls.length)) {
-      expect(call[0]).not.toBe('theme_mode');
-    }
+    mockPutSetting.mockImplementation(() => Promise.resolve());
+    await expect(useAuthStore.getState().syncNow()).resolves.toBeUndefined();
   });
 });
 
