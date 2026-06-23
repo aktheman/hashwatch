@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
 
 interface MetricTileProps {
@@ -295,7 +295,7 @@ import Svg, { Polygon, Polyline, Defs, Stop, LinearGradient, Circle } from 'reac
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 18,
+    borderRadius: 14,
     borderWidth: 1,
     gap: 4,
     overflow: 'hidden',

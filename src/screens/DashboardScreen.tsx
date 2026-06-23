@@ -208,7 +208,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   const { totalHashrate, totalPower, avgTemp } = useMemo(() => {
-    const on = filteredMiners.filter((m) => m.isOnline).length;
     const hr = filteredMiners.reduce(
       (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
       0,
@@ -646,9 +645,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             chart="bars"
             chartData={[3, 5, 4, 6, 5, 7]}
           />
-        </View>
-        <View style={{ alignItems: 'center', paddingVertical: 4 }}>
-          <WorldMap />
         </View>
       </View>
 
