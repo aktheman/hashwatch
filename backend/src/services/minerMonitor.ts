@@ -4,6 +4,7 @@ import {
   sendMinerHotNotification,
   sendHashrateDropNotification,
 } from './pushNotifications';
+import { setPoolStatus } from './minerState';
 
 interface MinerState {
   isOnline: boolean;
@@ -38,6 +39,7 @@ export function checkMinerStatus(
 
   if (!prev) {
     minerStates.set(key, { isOnline, temperature, hashRate, pool });
+    setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
     return;
   }
 
@@ -62,4 +64,5 @@ export function checkMinerStatus(
   }
 
   minerStates.set(key, { isOnline, temperature, hashRate, pool });
+  setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
 }
