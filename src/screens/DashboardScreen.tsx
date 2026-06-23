@@ -23,6 +23,7 @@ import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
+import { Sparkline, MiniBarChart, Donut, Gauge, Timeline } from '../components/ChartWidgets';
 import * as DB from '../db/database';
 
 interface DashboardScreenProps {
