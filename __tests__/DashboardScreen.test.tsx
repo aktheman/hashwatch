@@ -138,7 +138,7 @@ beforeEach(() => {
 
 it('renders HashWatch title', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('dashboard.title')).toBeTruthy();
+  expect(screen.getByText('HashWatch')).toBeTruthy();
 }, 20000);
 
 it('shows empty state when no miners', async () => {
