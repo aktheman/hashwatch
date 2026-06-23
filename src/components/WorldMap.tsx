@@ -9,8 +9,8 @@ export function WorldMap() {
     <Svg width={320} height={180} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
       <Defs>
         <LinearGradient id="worldGrad" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={theme.surface} stopOpacity="1" />
-          <Stop offset="1" stopColor={theme.surfaceLight} stopOpacity="1" />
+          <Stop offset="0" stopColor={theme.surfaceLight} stopOpacity="1" />
+          <Stop offset="1" stopColor={theme.surface} stopOpacity="1" />
         </LinearGradient>
       </Defs>
       <Polygon
