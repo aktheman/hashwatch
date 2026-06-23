@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { Skeleton } from '../components/Skeleton';
+import { MetricTile } from '../components/DashboardComponents';
 import { MinerSnapshot } from '../types';
 import {
   toHashesPerSecond,
@@ -329,49 +330,41 @@ export function AnalyticsScreen() {
         }
       >
         <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>⚡</Text>
-            <Text style={[styles.summaryValue, { color: theme.primary }]}>
-              {formatHashrateValue(totalHashrate)}
-            </Text>
-            <Text style={styles.summaryLabel}>{t('analytics.totalHashrate')}</Text>
-          </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>💰</Text>
-            <Text style={[styles.summaryValue, { color: theme.success }]}>
-              {totalEarnings > 0 ? formatBTC(totalEarnings) : '—'}
-            </Text>
-            <Text style={styles.summaryLabel}>{t('analytics.estDailyBTC')}</Text>
-          </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>🔌</Text>
-            <Text style={[styles.summaryValue, { color: theme.warning }]}>
-              {totalPower.toFixed(0)}
-            </Text>
-            <Text style={styles.summaryLabel}>{t('analytics.power')}</Text>
-          </View>
+          <MetricTile
+            title={String(t('analytics.totalHashrate'))}
+            value={formatHashrateValue(totalHashrate)}
+            unit="H/s"
+            accent="info"
+          />
+          <MetricTile
+            title={String(t('analytics.estDailyBTC'))}
+            value={totalEarnings > 0 ? formatBTC(totalEarnings) : '—'}
+            accent="success"
+          />
+          <MetricTile
+            title={String(t('analytics.power'))}
+            value={`${totalPower.toFixed(0)}`}
+            unit="W"
+            accent="warning"
+          />
         </View>
 
         <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>⬡</Text>
-            <Text style={styles.summaryValue}>{miners.length}</Text>
-            <Text style={styles.summaryLabel}>{t('analytics.miners')}</Text>
-          </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>🌡</Text>
-            <Text
-              style={[styles.summaryValue, { color: avgTemp > 70 ? theme.danger : theme.success }]}
-            >
-              {avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°
-            </Text>
-            <Text style={styles.summaryLabel}>{t('analytics.avgTemp')}</Text>
-          </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryIcon}>📦</Text>
-            <Text style={styles.summaryValue}>{totalShares}</Text>
-            <Text style={styles.summaryLabel}>{t('analytics.totalShares')}</Text>
-          </View>
+          <MetricTile
+            title={String(t('analytics.miners'))}
+            value={String(miners.length)}
+            accent="primary"
+          />
+          <MetricTile
+            title={String(t('analytics.avgTemp'))}
+            value={`${avgTemp > 0 ? avgTemp.toFixed(0) : '—'}°`}
+            accent={avgTemp > 70 ? 'danger' : 'success'}
+          />
+          <MetricTile
+            title={String(t('analytics.totalShares'))}
+            value={String(totalShares)}
+            accent="primary"
+          />
         </View>
 
         {powerCost > 0 && (
