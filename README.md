@@ -148,6 +148,14 @@ Backend is configured with Sentry error tracking. Enable by setting `SENTRY_DSN`
 
 Railway will auto-detect the backend server from `railway.toml` and start it on port 4000.
 
+Verify deployment with Railway's provided domain:
+
+```bash
+curl https://<your-railway-domain>/api/health
+```
+
+Expected response: `{"status":"ok","db":"connected"}`.
+
 For web builds, deploy the `dist/` output separately (Vercel/Netlify/Railway static).
 
 ### Minimal Environment
