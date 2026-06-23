@@ -23,6 +23,7 @@ import { formatWTHs } from '../utils/formatters';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
+import { WorldMap } from '../components/WorldMap';
 import { Sparkline, MiniBarChart, Donut, Gauge, Timeline } from '../components/ChartWidgets';
 import * as DB from '../db/database';
 
@@ -643,6 +644,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             chart="bars"
             chartData={[3, 5, 4, 6, 5, 7]}
           />
+        </View>
+        <View style={{ alignItems: 'center', paddingVertical: 4 }}>
+          <WorldMap />
         </View>
       </View>
 
