@@ -1645,6 +1645,93 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         />
       </View>
     </View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight={180}
+        bbWidth={320}
+        focusable={false}
+        height={180}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": 180,
+              "width": 320,
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+        width={320}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -15066562,
+                  1,
+                  -15527125,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="worldGrad"
+              x1="0"
+              x2="0"
+              y1="0"
+              y2="1"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M20 35 25 22 35 18 55 18 72 25 80 38 82 58 70 72 52 78 30 68 18 55z"
+            fill={
+              {
+                "brushRef": "worldGrad",
+                "type": 1,
+              }
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4280163906,
+                "type": 0,
+              }
+            }
+            strokeWidth="0.8"
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+    </View>
   </View>
   <View
     style={
