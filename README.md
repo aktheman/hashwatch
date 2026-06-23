@@ -128,7 +128,7 @@ OpenAPI documentation for the backend is at `backend/openapi.json`.
 
 ### Error tracking (Sentry)
 
-Backend is configured with Sentry error tracking. Enable by setting `SENTRY_DSN` in backend environment variables. DSN should not be added to `.env.example`. Frontend Sentry requires Expo SDK 56+ plugin compatibility.
+Backend is configured with Sentry error tracking. Enable by setting `SENTRY_DSN` in backend environment variables. DSN should not be added to `.env.example`. Frontend Sentry requires Expo SDK 56+ plugin compatibility. Currently blocked by upstream issue: https://github.com/getsentry/sentry-react-native/issues/6212
 
 ## Deploy
 
