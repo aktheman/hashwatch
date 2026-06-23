@@ -14,8 +14,8 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
-    { name: 'api', testMatch: /.*\.api\.test\.ts/ },
-    { name: 'web', testMatch: /.*\.web\.test\.ts/ },
+    { name: 'api', testMatch: /.*\.test\.ts$/ },
+    { name: 'web', testMatch: /.*\.web\.test\.ts$/ },
   ],
   webServer: {
     command: 'cd backend && npm run dev',
