@@ -19,7 +19,13 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner, Wallet, NavigationProp } from '../types';
-import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
+import {
+  toHashesPerSecond,
+  formatHashrateValue,
+  getBTCPrice,
+  getNetworkHashrate,
+  formatHashrateWithUnit,
+} from '../utils/hashrate';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
@@ -225,6 +231,57 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   const formatTotal = (hashesPerSecond: number) => formatHashrateValue(hashesPerSecond);
 
+  const btcPrice = getBTCPrice();
+  const networkHashrate = getNetworkHashrate();
+
+  const lastRefreshTime = useMemo(() => {
+    const times = miners.map((m) => m.lastSeen).filter(Boolean) as number[];
+    if (times.length === 0) return null;
+    return Math.max(...times);
+  }, [miners]);
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const poolInfo = useMemo(() => {
+    const pools = new Map<
+      string,
+      { accepted: number; rejected: number; miners: number; responseTime: number }
+    >();
+    for (const m of miners) {
+      if (!m.status?.pool) continue;
+      const key = m.status.pool;
+      if (!pools.has(key)) {
+        pools.set(key, { accepted: 0, rejected: 0, miners: 0, responseTime: 0 });
+      }
+      const entry = pools.get(key)!;
+      entry.accepted += m.status.sharesAccepted || 0;
+      entry.rejected += m.status.sharesRejected || 0;
+      entry.miners += 1;
+      entry.responseTime = Math.max(entry.responseTime, m.status.poolResponseTime || 0);
+    }
+    return pools;
+  }, [miners]);
+
+  const [sortBy, setSortBy] = useState<'name' | 'hashrate' | 'temp'>('name');
+  const sortedMiners = useMemo(() => {
+    const list = [...filteredMiners];
+    switch (sortBy) {
+      case 'hashrate':
+        list.sort((a, b) => (b.status?.hashRate ?? 0) - (a.status?.hashRate ?? 0));
+        break;
+      case 'temp':
+        list.sort((a, b) => (b.status?.temperature ?? 0) - (a.status?.temperature ?? 0));
+        break;
+      default:
+        list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+    return list;
+  }, [filteredMiners, sortBy]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -234,7 +291,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         },
         headerBar: {
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
           paddingHorizontal: 20,
           paddingTop: 16,
@@ -242,7 +299,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         },
         headerTitle: {
           color: theme.text,
-          fontSize: 26,
+          fontSize: 30,
           fontWeight: '800',
           letterSpacing: -0.5,
         },
@@ -259,17 +316,17 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           marginRight: 4,
         },
         settingsBtn: {
-          width: 38,
-          height: 38,
-          borderRadius: 12,
-          backgroundColor: theme.surface,
+          width: 44,
+          height: 44,
+          borderRadius: 14,
+          backgroundColor: theme.surfaceLight,
           justifyContent: 'center',
           alignItems: 'center',
-          borderWidth: 1,
-          borderColor: theme.border,
+          borderWidth: 1.5,
+          borderColor: theme.primaryLight,
         },
         settingsIcon: {
-          fontSize: 16,
+          fontSize: 20,
         },
         summaryRow: {
           flexDirection: 'row',
@@ -545,38 +602,41 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
-        <View>
-          <Text style={styles.headerTitle}>{t('dashboard.title')}</Text>
-          <Text style={styles.headerSub}>
-            <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
-          </Text>
-        </View>
         {selectionMode ? (
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Cancel selection"
-            style={styles.settingsBtn}
-            onPress={() => {
-              setSelectionMode(false);
-              setSelectedIds(new Set());
-            }}
-          >
-            <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
-          </TouchableOpacity>
+          <>
+            <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Cancel selection"
+              style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
+              onPress={() => {
+                setSelectionMode(false);
+                setSelectedIds(new Set());
+              }}
+            >
+              <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <>
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel="Compare miners"
-              style={[styles.settingsBtn, { marginRight: 8 }]}
+              style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
               onPress={() => setSelectionMode(true)}
             >
               <Text style={styles.settingsIcon}>⇄</Text>
             </TouchableOpacity>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+              <Text style={styles.headerSub}>
+                <Text style={styles.liveDot}>●</Text> live monitor
+              </Text>
+            </View>
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel="Settings"
-              style={styles.settingsBtn}
+              style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
               onPress={() => navigation.navigate('Settings')}
             >
               <Text style={styles.settingsIcon}>⚙</Text>
@@ -587,64 +647,203 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {miners.length > 0 && <EarningsCard miners={miners} />}
 
+      {miners.length > 0 && (
+        <View
+          style={{
+            paddingHorizontal: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 6,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: theme.success,
+                opacity: 0.8,
+              }}
+            />
+            <Text style={{ color: theme.textMuted, fontSize: 11, fontWeight: '600' }}>
+              BTC ${btcPrice.toLocaleString()}
+            </Text>
+            <Text style={{ color: theme.textDim, fontSize: 11 }}>·</Text>
+            <Text style={{ color: theme.textMuted, fontSize: 11, fontWeight: '600' }}>
+              {formatHashrateWithUnit(networkHashrate, 'H/s')}/s
+            </Text>
+          </View>
+          <Text style={{ color: theme.textDim, fontSize: 10 }}>
+            {lastRefreshTime ? `${Math.floor((now - lastRefreshTime) / 1000)}s ago` : ''}
+          </Text>
+        </View>
+      )}
+
       <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4, alignItems: 'center' }}>
         <WorldMap />
       </View>
 
-      <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4 }}>
-        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-          <MetricTile
-            title={String(t('dashboard.hashrate'))}
-            value={formatTotal(totalHashrate)}
-            unit="H/s"
-            accent="info"
-            trend="-10%"
-            chart="sparkline"
-            chartData={[40, 55, 48, 62, 70, 58, 65]}
-          />
-          <MetricTile
-            title={String(t('dashboard.efficiency'))}
-            value="72"
-            unit="%"
-            accent="success"
-            trend="+8%"
-            chart="donut"
-          />
-          <MetricTile
-            title={String(t('dashboard.power'))}
-            value={`${totalPower.toFixed(1)}`}
-            unit="W"
-            accent="warning"
-            trend="-12%"
-            chart="bars"
-            chartData={[120, 180, 140, 210, 160, 190]}
-          />
+      {miners.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 16,
+            paddingHorizontal: 16,
+            marginTop: 2,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: theme.primaryLight,
+                opacity: 0.85,
+              }}
+            />
+            <Text style={{ color: theme.textDim, fontSize: 9 }}>online</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: theme.textMuted,
+                opacity: 0.85,
+              }}
+            />
+            <Text style={{ color: theme.textDim, fontSize: 9 }}>offline</Text>
+          </View>
+          {miners.filter((m) => m.status?.pool).length > 0 && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.info }} />
+              <Text style={{ color: theme.textDim, fontSize: 9 }}>pool</Text>
+            </View>
+          )}
         </View>
-        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-          <MetricTile
-            title={String(t('dashboard.temp'))}
-            value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
-            accent={avgTemp > 70 ? 'danger' : 'success'}
-            chart="gauge"
-            size="sm"
-          />
-          <MetricTile
-            title={String(t('dashboard.uptime'))}
-            value="98.7%"
-            unit="SLA"
-            accent="primary"
-            chart="sparkline"
-            chartData={[80, 82, 79, 83, 85, 84, 86]}
-          />
-          <MetricTile
-            title={String(t('dashboard.workers'))}
-            value={String(filteredMiners.length)}
-            unit="active"
-            accent="info"
-            trend="+3"
-            chart="bars"
-            chartData={[3, 5, 4, 6, 5, 7]}
-          />
+      )}
+
+      {miners.length > 0 && poolInfo.size > 0 && (
+        <View style={{ paddingHorizontal: 16, marginTop: 6, gap: 4 }}>
+          {Array.from(poolInfo.entries())
+            .slice(0, 2)
+            .map(([pool, info]) => (
+              <View
+                key={pool}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: theme.surface,
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}
+                    numberOfLines={1}
+                  >
+                    {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
+                  </Text>
+                  <Text style={{ color: theme.textDim, fontSize: 10 }}>
+                    {info.miners} miner{info.miners > 1 ? 's' : ''} · {info.responseTime}ms
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ color: theme.success, fontSize: 12, fontWeight: '700' }}>
+                    +{info.accepted}
+                  </Text>
+                  {info.rejected > 0 && (
+                    <Text style={{ color: theme.danger, fontSize: 11 }}>-{info.rejected}</Text>
+                  )}
+                </View>
+              </View>
+            ))}
+        </View>
+      )}
+
+      <View style={{ paddingHorizontal: 16, gap: 14, marginTop: 4 }}>
+        <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.hashrate'))}
+              value={formatTotal(totalHashrate)}
+              unit="H/s"
+              accent="info"
+              trend="-10%"
+              chart="sparkline"
+              chartData={[40, 55, 48, 62, 70, 58, 65]}
+              size="lg"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.efficiency'))}
+              value="72"
+              unit="%"
+              accent="success"
+              trend="+8%"
+              chart="donut"
+              size="lg"
+            />
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.power'))}
+              value={`${totalPower.toFixed(1)}`}
+              unit="W"
+              accent="warning"
+              trend="-12%"
+              chart="bars"
+              chartData={[120, 180, 140, 210, 160, 190]}
+              size="lg"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.temp'))}
+              value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
+              accent={avgTemp > 70 ? 'danger' : 'success'}
+              chart="gauge"
+              size="lg"
+            />
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.uptime'))}
+              value="98.7%"
+              unit="SLA"
+              accent="primary"
+              chart="sparkline"
+              chartData={[80, 82, 79, 83, 85, 84, 86]}
+              size="lg"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <MetricTile
+              title={String(t('dashboard.workers'))}
+              value={String(filteredMiners.length)}
+              unit="active"
+              accent="info"
+              trend="+3"
+              chart="bars"
+              chartData={[3, 5, 4, 6, 5, 7]}
+              size="lg"
+            />
+          </View>
         </View>
       </View>
 
@@ -730,6 +929,45 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
+      {miners.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 16,
+            marginBottom: 4,
+          }}
+        >
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Sort:</Text>
+          {(['name', 'hashrate', 'temp'] as const).map((s) => (
+            <TouchableOpacity
+              key={s}
+              accessibilityRole="button"
+              onPress={() => setSortBy(s)}
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 6,
+                backgroundColor: sortBy === s ? theme.primaryLight : theme.surface,
+                borderWidth: 1,
+                borderColor: sortBy === s ? theme.primaryLight : theme.border,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: '700',
+                  color: sortBy === s ? '#FFF' : theme.textMuted,
+                }}
+              >
+                {s === 'name' ? 'Name' : s === 'hashrate' ? 'Hashrate' : 'Temp'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       {!canAdd && miners.length > 0 && (
         <TouchableOpacity
           accessibilityRole="button"
@@ -792,7 +1030,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       ) : (
         <FlatList
-          data={filteredMiners}
+          data={sortedMiners}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <MinerCard
