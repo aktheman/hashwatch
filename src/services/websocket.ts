@@ -72,6 +72,10 @@ function handleMessage(msg: WSMessage) {
       useMinerStore.getState().applyRemoteSnapshot(miner.id, snap);
     }
   }
+  if (msg.type === 'miner_update' && msg.miner) {
+    const data = msg.miner as { id: string; isOnline: boolean; lastSeen?: number };
+    useMinerStore.getState().updateMinerFromServer(data);
+  }
 }
 
 export function disconnectWebSocket() {

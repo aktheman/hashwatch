@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS miner_snapshots (
 CREATE TABLE IF NOT EXISTS push_tokens (
   token TEXT PRIMARY KEY NOT NULL,
   userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  alert_types TEXT,
   createdAt TIMESTAMP DEFAULT NOW()
 );
 

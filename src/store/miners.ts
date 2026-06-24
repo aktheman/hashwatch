@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
-import { Miner, MinerSnapshot, MinerStatus } from '../types';
+import { Miner, MinerInfo, MinerSnapshot, MinerStatus } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
@@ -58,7 +58,16 @@ interface MinersState {
   setMinerName: (minerId: string, name: string) => Promise<void>;
   cloneMiner: (minerId: string) => Promise<void>;
   setMinerIcon: (minerId: string, icon: string | undefined) => Promise<void>;
+  setMinerLocation: (minerId: string, location: string | undefined) => Promise<void>;
+  setMinerTags: (minerId: string, tags: string[]) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
+  updateMinerFromServer: (data: {
+    id: string;
+    isOnline: boolean;
+    lastSeen?: number;
+    status?: MinerStatus;
+    info?: MinerInfo;
+  }) => void;
   clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
 }
@@ -362,6 +371,26 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     }));
   },
 
+  setMinerLocation: async (minerId: string, location: string | undefined) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, location: location || undefined };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  setMinerTags: async (minerId: string, tags: string[]) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, tags };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
   applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
     const miner = get().miners.find((m) => m.id === localId);
     if (!miner) return;
@@ -390,6 +419,21 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === localId ? updated : m)),
+    }));
+  },
+
+  updateMinerFromServer: (data) => {
+    set((s) => ({
+      miners: s.miners.map((m) => {
+        if (m.id !== data.id) return m;
+        return {
+          ...m,
+          isOnline: data.isOnline,
+          lastSeen: data.lastSeen ?? m.lastSeen,
+          status: data.status ?? (data.isOnline ? m.status : undefined),
+          info: data.info ?? m.info,
+        };
+      }),
     }));
   },
 

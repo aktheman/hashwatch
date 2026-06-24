@@ -17,7 +17,10 @@ export async function registerPushToken(authToken: string | null) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({
+        token,
+        alertTypes: ['offline', 'online', 'hot', 'hashrate_drop', 'pool_lost', 'long_uptime'],
+      }),
     });
   } catch {
     // silently fail

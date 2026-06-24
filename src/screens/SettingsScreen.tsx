@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -70,6 +70,31 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [csvInput, setCsvInput] = useState('');
   const [showCsvImport, setShowCsvImport] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState<string | null>(null);
+  const [entitlements, setEntitlements] = useState<string | null>(null);
+
+  const loadDebugInfo = useCallback(async () => {
+    try {
+      const { default: Purchases } = await import('react-native-purchases');
+      const info = await Purchases.getCustomerInfo();
+      setCustomerInfo(JSON.stringify(info, null, 2));
+      const ent = info.entitlements.active;
+      setEntitlements(
+        Object.keys(ent).length > 0
+          ? JSON.stringify(
+              Array.from(Object.entries(ent)).map(([k, v]) => ({
+                [k]: { expiresDate: v.expirationDate },
+              })),
+              null,
+              2,
+            )
+          : 'No active entitlements',
+      );
+    } catch (e) {
+      setCustomerInfo('Error loading: ' + String(e));
+    }
+  }, []);
 
   useEffect(() => {
     getSetting('power_cost').then((v) => setPowerCost(v || ''));
@@ -322,6 +347,102 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.chevron}>›</Text>
           </View>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setShowDebugPanel(!showDebugPanel);
+            if (!showDebugPanel) loadDebugInfo();
+          }}
+          style={{ marginTop: 8 }}
+        >
+          <Text style={{ color: theme.textMuted, fontSize: 11, textAlign: 'center' }}>
+            {showDebugPanel ? '▲ Hide Debug' : '▼ RevenueCat Debug'}
+          </Text>
+        </TouchableOpacity>
+        {showDebugPanel && (
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderRadius: 12,
+              padding: 12,
+              marginTop: 8,
+              borderWidth: 1,
+              borderColor: theme.border,
+            }}
+          >
+            <View style={{ gap: 8 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: theme.primary + '20',
+                  borderRadius: 8,
+                  padding: 10,
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  const { useSubscriptionStore } = require('../store/subscription');
+                  useSubscriptionStore.getState().restore();
+                  Alert.alert('Restore', 'Restore purchases triggered');
+                }}
+              >
+                <Text style={{ color: theme.primary, fontWeight: '600', fontSize: 13 }}>
+                  Restore Purchases
+                </Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.success + '20',
+                    borderRadius: 8,
+                    padding: 10,
+                    alignItems: 'center',
+                  }}
+                  onPress={() => {
+                    const { useSubscriptionStore } = require('../store/subscription');
+                    useSubscriptionStore.getState().setPro();
+                    Alert.alert('Debug', 'Pro status set');
+                  }}
+                >
+                  <Text style={{ color: theme.success, fontWeight: '600', fontSize: 13 }}>
+                    Force Pro
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.danger + '20',
+                    borderRadius: 8,
+                    padding: 10,
+                    alignItems: 'center',
+                  }}
+                  onPress={() => {
+                    const { useSubscriptionStore } = require('../store/subscription');
+                    useSubscriptionStore.getState().setFree();
+                    Alert.alert('Debug', 'Free status set');
+                  }}
+                >
+                  <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 13 }}>
+                    Force Free
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {customerInfo && (
+                <View style={{ backgroundColor: '#000' + '40', borderRadius: 8, padding: 8 }}>
+                  <Text style={{ color: theme.textDim, fontSize: 10, fontFamily: 'monospace' }}>
+                    {customerInfo}
+                  </Text>
+                </View>
+              )}
+              {entitlements && (
+                <View style={{ backgroundColor: '#000' + '40', borderRadius: 8, padding: 8 }}>
+                  <Text style={{ color: theme.textDim, fontSize: 10, fontFamily: 'monospace' }}>
+                    {entitlements}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         <TouchableOpacity
           accessibilityRole="button"

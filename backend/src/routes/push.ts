@@ -6,15 +6,16 @@ export const pushRouter = Router();
 pushRouter.use(authMiddleware);
 
 pushRouter.post('/register', async (req: AuthRequest, res) => {
-  const { token } = req.body;
+  const { token, alertTypes } = req.body;
   if (!token) {
     res.status(400).json({ error: 'token is required' });
     return;
   }
+  const alertTypesStr = Array.isArray(alertTypes) ? alertTypes.join(',') : null;
   await query(
-    `INSERT INTO push_tokens (userId, token) VALUES ($1, $2)
-     ON CONFLICT (token) DO UPDATE SET userId = EXCLUDED.userId`,
-    [req.userId, token],
+    `INSERT INTO push_tokens (userId, token, alert_types) VALUES ($1, $2, $3)
+     ON CONFLICT (token) DO UPDATE SET userId = EXCLUDED.userId, alert_types = EXCLUDED.alert_types`,
+    [req.userId, token, alertTypesStr],
   );
   res.json({ ok: true });
 });
