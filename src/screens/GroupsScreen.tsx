@@ -6,6 +6,7 @@ import { useTheme } from '../theme';
 import { Miner } from '../types';
 import { useTranslation } from 'react-i18next';
 import * as DB from '../db/database';
+import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 
 async function loadEmptyGroups(): Promise<string[]> {
   const raw = await DB.getSetting('empty_groups');
@@ -50,6 +51,28 @@ export function GroupsScreen() {
     );
     return arr;
   }, [miners, emptyGroups]);
+
+  const groupStats = useMemo(() => {
+    const map = new Map<string, { totalHash: number; avgTemp: number; count: number }>();
+    for (const [name, members] of groups) {
+      const totalHash = members.reduce(
+        (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+        0,
+      );
+      const withTemp = members.filter((m) => m.status?.temperature != null);
+      const avgTemp =
+        withTemp.length > 0
+          ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
+          : 0;
+      map.set(name, { totalHash, avgTemp, count: members.length });
+    }
+    return map;
+  }, [groups]);
+
+  const maxHash = useMemo(
+    () => Math.max(0, ...Array.from(groupStats.values()).map((s) => s.totalHash)),
+    [groupStats],
+  );
 
   const addGroup = useCallback(async () => {
     const name = newGroupName.trim();
@@ -230,17 +253,54 @@ export function GroupsScreen() {
       <FlatList
         data={groups}
         keyExtractor={([name]) => name}
-        renderItem={({ item: [name, members] }) => (
-          <View style={styles.groupCard}>
-            <View style={styles.groupHeader}>
-              <View>
-                <Text style={styles.groupName}>
-                  📁 {name === 'Ungrouped' ? t('groups.ungrouped') : name}
-                </Text>
-                <Text style={styles.groupCount}>
-                  {t('groups.minerCount', { count: members.length })}
-                </Text>
+        renderItem={({ item: [name, members] }) => {
+          const stats = groupStats.get(name);
+          const barRatio = stats && maxHash > 0 ? stats.totalHash / maxHash : 0;
+          return (
+            <View style={styles.groupCard}>
+              <View style={styles.groupHeader}>
+                <View>
+                  <Text style={styles.groupName}>
+                    📁 {name === 'Ungrouped' ? t('groups.ungrouped') : name}
+                  </Text>
+                  <Text style={styles.groupCount}>
+                    {t('groups.minerCount', { count: members.length })}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  {stats && stats.totalHash > 0 && (
+                    <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+                      {formatHashrateValue(stats.totalHash)}
+                    </Text>
+                  )}
+                  {stats && stats.avgTemp > 0 && (
+                    <Text style={{ color: theme.textDim, fontSize: 11 }}>
+                      {stats.avgTemp.toFixed(0)}°C avg
+                    </Text>
+                  )}
+                </View>
               </View>
+              {stats && stats.totalHash > 0 && (
+                <View style={{ marginTop: 6, marginBottom: 4 }}>
+                  <View
+                    style={{
+                      height: 4,
+                      borderRadius: 2,
+                      backgroundColor: theme.border,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: `${Math.max(barRatio * 100, 1)}%`,
+                        height: '100%',
+                        borderRadius: 2,
+                        backgroundColor: theme.primary,
+                      }}
+                    />
+                  </View>
+                </View>
+              )}
               {name !== 'Ungrouped' && (
                 <View style={styles.actions}>
                   <TouchableOpacity
@@ -265,30 +325,30 @@ export function GroupsScreen() {
                   </TouchableOpacity>
                 </View>
               )}
+              {members.length > 0 && (
+                <View style={styles.minerList}>
+                  {members.map((m) => (
+                    <View key={m.id} style={styles.minerRow}>
+                      <Text style={styles.minerName}>
+                        {m.name} ({m.ip})
+                      </Text>
+                      {name !== 'Ungrouped' && (
+                        <TouchableOpacity
+                          accessibilityRole="button"
+                          accessibilityLabel={`Remove ${m.name} from group`}
+                          style={styles.ungroupBtn}
+                          onPress={() => setMinerGroup(m.id, undefined)}
+                        >
+                          <Text style={styles.ungroupBtnText}>{t('groups.remove')}</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
-            {members.length > 0 && (
-              <View style={styles.minerList}>
-                {members.map((m) => (
-                  <View key={m.id} style={styles.minerRow}>
-                    <Text style={styles.minerName}>
-                      {m.name} ({m.ip})
-                    </Text>
-                    {name !== 'Ungrouped' && (
-                      <TouchableOpacity
-                        accessibilityRole="button"
-                        accessibilityLabel={`Remove ${m.name} from group`}
-                        style={styles.ungroupBtn}
-                        onPress={() => setMinerGroup(m.id, undefined)}
-                      >
-                        <Text style={styles.ungroupBtnText}>{t('groups.remove')}</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
+          );
+        }}
         ListEmptyComponent={<Text style={styles.emptyText}>{t('groups.noMiners')}</Text>}
       />
     </View>

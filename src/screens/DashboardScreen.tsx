@@ -9,6 +9,8 @@ import {
   Alert,
   Modal,
   StyleSheet,
+  AppState,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
@@ -32,6 +34,11 @@ import { checkMinerAlerts } from '../services/notifications';
 import { MetricTile } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
 import * as DB from '../db/database';
+import {
+  DashboardCustomizer,
+  SectionKey,
+  DEFAULT_VISIBLE,
+} from '../components/DashboardCustomizer';
 
 interface DashboardScreenProps {
   navigation: NavigationProp;
@@ -61,6 +68,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showWalletPicker, setShowWalletPicker] = useState(false);
+  const [expandedPool, setExpandedPool] = useState<string | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [visibleSections, setVisibleSections] = useState<Record<SectionKey, boolean>>({
+    ...DEFAULT_VISIBLE,
+  });
 
   const groups = useMemo(() => {
     const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
@@ -82,6 +95,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     };
   }, []);
 
+  useEffect(() => {
+    DB.getSetting('dashboard_sections').then((saved) => {
+      if (saved) {
+        try {
+          setVisibleSections({ ...DEFAULT_VISIBLE, ...JSON.parse(saved) });
+        } catch {}
+      }
+    });
+  }, []);
+
   const filteredMiners = useMemo(
     () =>
       miners.filter((m) => {
@@ -93,10 +116,23 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     [miners, walletFilter, groupFilter],
   );
 
+  const pollingIntervalRef = useRef(30000);
+  const stopPollingRef = useRef<(() => void) | null>(null);
+
+  const restartPolling = useCallback(
+    (interval: number) => {
+      if (stopPollingRef.current) stopPollingRef.current();
+      pollingIntervalRef.current = interval;
+      stopPollingRef.current = startPolling(interval);
+    },
+    [startPolling],
+  );
+
   useEffect(() => {
     initSubscription();
     loadMiners();
-    const stop = startPolling(30000);
+    stopPollingRef.current = startPolling(30000);
+    pollingIntervalRef.current = 30000;
     const autoScanInterval = setInterval(async () => {
       const v = await DB.getSetting('auto_scan');
       if (v === 'true' && !useMinerStore.getState().scanning) {
@@ -104,10 +140,32 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       }
     }, 300000);
     return () => {
-      stop();
+      stopPollingRef.current?.();
       clearInterval(autoScanInterval);
     };
   }, []);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      const interval = state === 'active' ? 5000 : 30000;
+      if (interval !== pollingIntervalRef.current) {
+        restartPolling(interval);
+      }
+    });
+    return () => sub.remove();
+  }, [restartPolling]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectionMode) {
+        setSelectionMode(false);
+        setSelectedIds(new Set());
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectionMode]);
 
   const prevMiners = useRef(miners);
   useEffect(() => {
@@ -208,6 +266,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     );
   }, [miners, selectedIds, removeMiner, clearSelection, t]);
 
+  const handleToggleSection = useCallback((key: SectionKey) => {
+    setVisibleSections((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      DB.setSetting('dashboard_sections', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const handleAddMiner = useCallback(() => {
     if (!canAddMiner(miners.length)) {
       navigation.navigate('Subscription');
@@ -223,6 +289,99 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     await useMinerStore.getState().refreshAll();
     setRefreshing(false);
   }, []);
+
+  type GroupedItem =
+    | { type: 'header'; group: string; miners: Miner[] }
+    | { type: 'miner'; miner: Miner };
+
+  const renderGroupedItem = useCallback(
+    ({ item }: { item: GroupedItem }) => {
+      if (item.type === 'header') {
+        const totalHash = item.miners.reduce(
+          (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+          0,
+        );
+        const withTemp = item.miners.filter((m) => m.status?.temperature);
+        const avgT =
+          withTemp.length > 0
+            ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
+            : 0;
+        const isCollapsed = collapsedGroups.has(item.group);
+        return (
+          <TouchableOpacity
+            onPress={() =>
+              setCollapsedGroups((prev) => {
+                const next = new Set(prev);
+                if (next.has(item.group)) next.delete(item.group);
+                else next.add(item.group);
+                return next;
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel={`${item.group} group, ${item.miners.length} miners`}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+              backgroundColor: theme.surfaceLight,
+              marginTop: 8,
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+            }}
+          >
+            <Text style={{ color: theme.primary, fontSize: 10, marginRight: 6, width: 12 }}>
+              {isCollapsed ? '▶' : '▼'}
+            </Text>
+            <Text
+              style={{ color: theme.text, fontSize: 13, fontWeight: '700', flex: 1 }}
+              numberOfLines={1}
+            >
+              {item.group}
+            </Text>
+            <Text style={{ color: theme.textDim, fontSize: 10, marginRight: 8 }}>
+              {item.miners.length} miner{item.miners.length !== 1 ? 's' : ''}
+            </Text>
+            {totalHash > 0 && (
+              <Text
+                style={{ color: theme.primary, fontSize: 11, fontWeight: '600', marginRight: 8 }}
+              >
+                {formatHashrateValue(totalHash)}
+              </Text>
+            )}
+            {avgT > 0 && (
+              <Text
+                style={{
+                  color: avgT > 70 ? theme.danger : theme.success,
+                  fontSize: 11,
+                  fontWeight: '600',
+                }}
+              >
+                {avgT.toFixed(0)}°
+              </Text>
+            )}
+          </TouchableOpacity>
+        );
+      }
+      const m = item.miner;
+      return (
+        <MinerCard
+          miner={m}
+          onPress={handleMinerPress}
+          onRename={(id, name) => useMinerStore.getState().setMinerName(id, name)}
+          onDelete={() =>
+            useToastStore.getState().showUndo({
+              id: `delete-${m.id}`,
+              message: t('dashboard.minerRemoved', { name: m.name }),
+              onUndo: () => {},
+              onConfirm: () => useMinerStore.getState().removeMiner(m.id),
+            })
+          }
+        />
+      );
+    },
+    [handleMinerPress, t, collapsedGroups, theme],
+  );
 
   const { totalHashrate, totalPower, avgTemp } = useMemo(() => {
     const hr = filteredMiners.reduce(
@@ -292,6 +451,26 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
     return list;
   }, [filteredMiners, sortBy]);
+
+  const groupedMiners = useMemo(() => {
+    const groups = new Map<string, Miner[]>();
+    for (const m of sortedMiners) {
+      const key = m.group || 'Ungrouped';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(m);
+    }
+    const items: (
+      | { type: 'header'; group: string; miners: Miner[] }
+      | { type: 'miner'; miner: Miner }
+    )[] = [];
+    for (const [group, miners] of groups) {
+      items.push({ type: 'header', group, miners });
+      if (!collapsedGroups.has(group)) {
+        for (const m of miners) items.push({ type: 'miner', miner: m });
+      }
+    }
+    return items;
+  }, [sortedMiners, collapsedGroups]);
 
   const styles = useMemo(
     () =>
@@ -647,6 +826,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
               <TouchableOpacity
                 accessibilityRole="button"
+                accessibilityLabel="Customize dashboard"
+                style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                onPress={() => setShowCustomizer(true)}
+              >
+                <Text style={styles.settingsIcon}>✎</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
                 accessibilityLabel="Export data"
                 style={[styles.settingsBtn, { width: 36, height: 36 }]}
                 onPress={() => exportAllData()}
@@ -679,9 +866,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         )}
       </View>
 
-      {miners.length > 0 && <EarningsCard miners={miners} />}
+      {visibleSections.earnings && miners.length > 0 && <EarningsCard miners={miners} />}
 
-      {miners.length > 0 && (
+      {visibleSections.ticker && miners.length > 0 && (
         <View
           style={{
             paddingHorizontal: 16,
@@ -715,11 +902,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
-      <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4, alignItems: 'center' }}>
-        <WorldMap />
-      </View>
+      {visibleSections.map && (
+        <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4, alignItems: 'center' }}>
+          <WorldMap />
+        </View>
+      )}
 
-      {miners.length > 0 && (
+      {visibleSections.legend && miners.length > 0 && (
         <View
           style={{
             flexDirection: 'row',
@@ -762,126 +951,190 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
-      {miners.length > 0 && poolInfo.size > 0 && (
+      {visibleSections.pools && miners.length > 0 && poolInfo.size > 0 && (
         <View style={{ paddingHorizontal: 16, marginTop: 6, gap: 4 }}>
-          {Array.from(poolInfo.entries())
-            .slice(0, 2)
-            .map(([pool, info]) => (
-              <View
-                key={pool}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  backgroundColor: theme.surface,
-                  borderRadius: 10,
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderWidth: 1,
-                  borderColor: theme.border,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}
-                    numberOfLines={1}
+          {Array.from(poolInfo.entries()).map(([pool, info]) => {
+            const isExpanded = expandedPool === pool;
+            const totalShares = info.accepted + info.rejected;
+            const rejectRate =
+              totalShares > 0 ? ((info.rejected / totalShares) * 100).toFixed(1) : '0.0';
+            const poolMiners = miners.filter((m) => m.status?.pool === pool);
+            return (
+              <View key={pool}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: theme.surface,
+                    borderRadius: 10,
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                  onPress={() => setExpandedPool(isExpanded ? null : pool)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${pool} pool details`}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}
+                      numberOfLines={1}
+                    >
+                      {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
+                    </Text>
+                    <Text style={{ color: theme.textDim, fontSize: 10 }}>
+                      {info.miners} miner{info.miners > 1 ? 's' : ''} · {info.responseTime}ms ·{' '}
+                      {rejectRate}% rejected
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', marginRight: 4 }}>
+                    <Text style={{ color: theme.success, fontSize: 12, fontWeight: '700' }}>
+                      +{info.accepted}
+                    </Text>
+                    {info.rejected > 0 && (
+                      <Text style={{ color: theme.danger, fontSize: 11 }}>-{info.rejected}</Text>
+                    )}
+                  </View>
+                  <Text style={{ color: theme.textMuted, fontSize: 10, marginLeft: 6 }}>
+                    {isExpanded ? '▲' : '▼'}
+                  </Text>
+                </TouchableOpacity>
+                {isExpanded && (
+                  <View
+                    style={{
+                      backgroundColor: theme.surfaceLight,
+                      borderRadius: 10,
+                      marginTop: 2,
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: theme.border,
+                    }}
                   >
-                    {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
-                  </Text>
-                  <Text style={{ color: theme.textDim, fontSize: 10 }}>
-                    {info.miners} miner{info.miners > 1 ? 's' : ''} · {info.responseTime}ms
-                  </Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: theme.success, fontSize: 12, fontWeight: '700' }}>
-                    +{info.accepted}
-                  </Text>
-                  {info.rejected > 0 && (
-                    <Text style={{ color: theme.danger, fontSize: 11 }}>-{info.rejected}</Text>
-                  )}
-                </View>
+                    {poolMiners.map((pm) => (
+                      <View
+                        key={pm.id}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingVertical: 4,
+                        }}
+                      >
+                        <Text
+                          style={{ color: theme.text, fontSize: 12, fontWeight: '600', flex: 1 }}
+                          numberOfLines={1}
+                        >
+                          {pm.name}
+                        </Text>
+                        <Text style={{ color: theme.success, fontSize: 11, marginHorizontal: 8 }}>
+                          +{pm.status?.sharesAccepted ?? 0}
+                        </Text>
+                        <Text style={{ color: theme.danger, fontSize: 11 }}>
+                          -{pm.status?.sharesRejected ?? 0}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
-            ))}
+            );
+          })}
+          {poolInfo.size > 2 && expandedPool === null && (
+            <Text
+              style={{
+                color: theme.textMuted,
+                fontSize: 10,
+                textAlign: 'center',
+                paddingVertical: 2,
+              }}
+            >
+              +{poolInfo.size - 2} more pool{poolInfo.size - 2 > 1 ? 's' : ''}
+            </Text>
+          )}
         </View>
       )}
 
-      <View style={{ paddingHorizontal: 16, gap: 14, marginTop: 4 }}>
-        <View style={{ flexDirection: 'row', gap: 14 }}>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.hashrate'))}
-              value={formatTotal(totalHashrate)}
-              unit="H/s"
-              accent="info"
-              trend="-10%"
-              chart="sparkline"
-              chartData={[40, 55, 48, 62, 70, 58, 65]}
-              size="lg"
-            />
+      {visibleSections.metrics && (
+        <View style={{ paddingHorizontal: 16, gap: 14, marginTop: 4 }}>
+          <View style={{ flexDirection: 'row', gap: 14 }}>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.hashrate'))}
+                value={formatTotal(totalHashrate)}
+                unit="H/s"
+                accent="info"
+                trend="-10%"
+                chart="sparkline"
+                chartData={[40, 55, 48, 62, 70, 58, 65]}
+                size="lg"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.efficiency'))}
+                value="72"
+                unit="%"
+                accent="success"
+                trend="+8%"
+                chart="donut"
+                size="lg"
+              />
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.efficiency'))}
-              value="72"
-              unit="%"
-              accent="success"
-              trend="+8%"
-              chart="donut"
-              size="lg"
-            />
+          <View style={{ flexDirection: 'row', gap: 14 }}>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.power'))}
+                value={`${totalPower.toFixed(1)}`}
+                unit="W"
+                accent="warning"
+                trend="-12%"
+                chart="bars"
+                chartData={[120, 180, 140, 210, 160, 190]}
+                size="lg"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.temp'))}
+                value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
+                accent={avgTemp > 70 ? 'danger' : 'success'}
+                chart="gauge"
+                size="lg"
+              />
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 14 }}>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.uptime'))}
+                value="98.7%"
+                unit="SLA"
+                accent="primary"
+                chart="sparkline"
+                chartData={[80, 82, 79, 83, 85, 84, 86]}
+                size="lg"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <MetricTile
+                title={String(t('dashboard.workers'))}
+                value={String(filteredMiners.length)}
+                unit="active"
+                accent="info"
+                trend="+3"
+                chart="bars"
+                chartData={[3, 5, 4, 6, 5, 7]}
+                size="lg"
+              />
+            </View>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: 14 }}>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.power'))}
-              value={`${totalPower.toFixed(1)}`}
-              unit="W"
-              accent="warning"
-              trend="-12%"
-              chart="bars"
-              chartData={[120, 180, 140, 210, 160, 190]}
-              size="lg"
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.temp'))}
-              value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
-              accent={avgTemp > 70 ? 'danger' : 'success'}
-              chart="gauge"
-              size="lg"
-            />
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 14 }}>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.uptime'))}
-              value="98.7%"
-              unit="SLA"
-              accent="primary"
-              chart="sparkline"
-              chartData={[80, 82, 79, 83, 85, 84, 86]}
-              size="lg"
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <MetricTile
-              title={String(t('dashboard.workers'))}
-              value={String(filteredMiners.length)}
-              unit="active"
-              accent="info"
-              trend="+3"
-              chart="bars"
-              chartData={[3, 5, 4, 6, 5, 7]}
-              size="lg"
-            />
-          </View>
-        </View>
-      </View>
+      )}
 
-      {(wallets.length > 0 || groups.length > 0) && (
+      {visibleSections.filters && (wallets.length > 0 || groups.length > 0) && (
         <View
           style={{
             flexDirection: 'row',
@@ -963,7 +1216,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
-      {miners.length > 0 && (
+      {visibleSections.sort && miners.length > 0 && (
         <View
           style={{
             flexDirection: 'row',
@@ -1064,22 +1317,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       ) : (
         <FlatList
-          data={sortedMiners}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <MinerCard
-              miner={item}
-              onPress={handleMinerPress}
-              onDelete={() =>
-                useToastStore.getState().showUndo({
-                  id: `delete-${item.id}`,
-                  message: t('dashboard.minerRemoved', { name: item.name }),
-                  onUndo: () => {},
-                  onConfirm: () => useMinerStore.getState().removeMiner(item.id),
-                })
-              }
-            />
-          )}
+          data={groupedMiners}
+          keyExtractor={(item) =>
+            item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`
+          }
+          renderItem={renderGroupedItem}
+          initialNumToRender={8}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -1183,6 +1426,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <DashboardCustomizer
+        visible={showCustomizer}
+        onClose={() => setShowCustomizer(false)}
+        visibleSections={visibleSections}
+        onToggle={handleToggleSection}
+      />
 
       <TouchableOpacity
         accessibilityRole="button"

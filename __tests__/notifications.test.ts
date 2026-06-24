@@ -13,6 +13,10 @@ jest.mock('expo-notifications', () => ({
   setNotificationChannelAsync: jest.fn(),
 }));
 
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn().mockResolvedValue('true'),
+}));
+
 function makeStatus(overrides: Partial<Miner['status']> = {}): Miner['status'] {
   return {
     hashRate: 500,

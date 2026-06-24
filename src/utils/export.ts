@@ -150,3 +150,45 @@ export async function importFromJSON(jsonStr: string): Promise<{
     wallets: data.wallets.length,
   };
 }
+
+export async function importFromCSV(
+  csvText: string,
+): Promise<{ imported: number; errors: string[] }> {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2)
+    return { imported: 0, errors: ['CSV must have a header row and at least one data row'] };
+
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const nameIdx = headers.indexOf('name');
+  const ipIdx = headers.indexOf('ip');
+  const portIdx = headers.indexOf('port');
+
+  if (nameIdx === -1 || ipIdx === -1) {
+    return { imported: 0, errors: ['CSV must have "name" and "ip" columns'] };
+  }
+
+  let imported = 0;
+  const errors: string[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map((c) => c.trim());
+    const name = cols[nameIdx];
+    const ip = cols[ipIdx];
+    const port = portIdx >= 0 ? parseInt(cols[portIdx]) || 80 : 80;
+
+    if (!name || !ip) {
+      errors.push(`Row ${i}: missing name or IP`);
+      continue;
+    }
+
+    try {
+      const { useMinerStore } = await import('../store/miners');
+      await useMinerStore.getState().addMiner(ip, port, name);
+      imported++;
+    } catch (e) {
+      errors.push(`Row ${i} (${name}): ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  return { imported, errors };
+}

@@ -49,6 +49,7 @@ export interface Miner {
   port: number;
   walletId?: string;
   group?: string;
+  icon?: string;
   remoteId?: string;
   apiPath?: string | null;
   statusPath?: string | null;

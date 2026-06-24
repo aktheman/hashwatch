@@ -20,6 +20,7 @@ import { EfficiencyTrend } from '../components/EfficiencyTrend';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
 import { NotificationPrefs } from '../components/NotificationPrefs';
+import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
 import {
   formatHashrate,
   formatTemperature,
@@ -323,7 +324,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const getSnapshots = useMinerStore((s) => s.getSnapshots);
   const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
   const setMinerIp = useMinerStore((s) => s.setMinerIp);
+  const setMinerIcon = useMinerStore((s) => s.setMinerIcon);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
@@ -439,7 +442,16 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 { backgroundColor: miner.isOnline ? theme.success : theme.danger },
               ]}
             />
-            <Text style={styles.name}>{miner.name}</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Choose icon"
+              onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+            >
+              <Text style={{ fontSize: 22, marginRight: 4 }}>{miner.icon || '⬡'}</Text>
+              <Text style={styles.name}>{miner.name}</Text>
+              <Text style={{ fontSize: 10, color: theme.primary, marginLeft: 2 }}>✎</Text>
+            </TouchableOpacity>
           </View>
           <View
             style={[
@@ -504,6 +516,52 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         )}
         {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
         {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
+        {showEmojiPicker && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            {[
+              '⬡',
+              '⚡',
+              '🔧',
+              '💎',
+              '🔥',
+              '⚙️',
+              '📡',
+              '🔌',
+              '🖥️',
+              '🧊',
+              '🌊',
+              '⭐',
+              '🎯',
+              '💪',
+              '🚀',
+              '🔋',
+              '💡',
+              '🌀',
+            ].map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                accessibilityRole="button"
+                accessibilityLabel={`Set icon ${emoji}`}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  backgroundColor: miner.icon === emoji ? theme.primary + '30' : theme.surfaceLight,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: miner.icon === emoji ? 2 : 1,
+                  borderColor: miner.icon === emoji ? theme.primary : theme.border,
+                }}
+                onPress={() => {
+                  setMinerIcon(minerId, emoji);
+                  setShowEmojiPicker(false);
+                }}
+              >
+                <Text style={{ fontSize: 18 }}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
       <NotificationPrefs minerId={miner.id} />
@@ -750,20 +808,38 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       )}
 
       <View style={styles.section}>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Share Stats"
-          style={[
-            styles.actionBtn,
-            { backgroundColor: theme.primary + '15', borderColor: theme.primary + '30' },
-          ]}
-          onPress={handleShare}
-        >
-          <Text style={styles.actionBtnIcon}>📤</Text>
-          <Text style={[styles.actionBtnText, { color: theme.primary }]}>
-            {t('minerDetail.shareStats')}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>
+          <Text style={styles.sectionIcon}>🖼</Text> Snapshot
+        </Text>
+        <MinerSnapshotCard miner={miner} />
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Share Stats"
+            style={[
+              styles.actionBtn,
+              { flex: 1, backgroundColor: theme.primary + '15', borderColor: theme.primary + '30' },
+            ]}
+            onPress={handleShare}
+          >
+            <Text style={styles.actionBtnIcon}>📤</Text>
+            <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+              {t('minerDetail.shareStats')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Share as Image"
+            style={[
+              styles.actionBtn,
+              { flex: 1, backgroundColor: theme.info + '15', borderColor: theme.info + '30' },
+            ]}
+            onPress={handleShare}
+          >
+            <Text style={styles.actionBtnIcon}>🖼</Text>
+            <Text style={[styles.actionBtnText, { color: theme.info }]}>Share as Image</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.section}>

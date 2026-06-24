@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Miner } from '../types';
+import * as DB from '../db/database';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -72,6 +73,9 @@ export function cleanupAlertState(activeMinerIds: Set<string>): void {
 
 export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner[]): Promise<void> {
   cleanupAlertState(new Set(currentMiners.map((m) => m.id)));
+
+  const enabledSetting = await DB.getSetting('notifications_enabled');
+  if (enabledSetting === 'false') return;
 
   for (const current of currentMiners) {
     const prev = prevMiners.find((m) => m.id === current.id);
