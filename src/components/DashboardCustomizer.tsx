@@ -38,6 +38,8 @@ interface DashboardCustomizerProps {
   onClose: () => void;
   visibleSections: Record<SectionKey, boolean>;
   onToggle: (key: SectionKey) => void;
+  kioskMode: boolean;
+  onToggleKiosk: (val: boolean) => void;
 }
 
 export function DashboardCustomizer({
@@ -45,6 +47,8 @@ export function DashboardCustomizer({
   onClose,
   visibleSections,
   onToggle,
+  kioskMode,
+  onToggleKiosk,
 }: DashboardCustomizerProps) {
   const theme = useTheme();
 
@@ -98,6 +102,24 @@ export function DashboardCustomizer({
               />
             </View>
           ))}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingVertical: 10,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.border,
+            }}
+          >
+            <Text style={{ color: theme.text, fontSize: 14 }}>📺 Kiosk Mode</Text>
+            <Switch
+              value={kioskMode}
+              onValueChange={(val) => onToggleKiosk(val)}
+              trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+              thumbColor={kioskMode ? theme.primary : theme.textMuted}
+            />
+          </View>
         </View>
       </View>
     </Modal>

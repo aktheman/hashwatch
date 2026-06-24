@@ -11,6 +11,7 @@ import {
   StyleSheet,
   AppState,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
@@ -65,6 +66,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [walletFilter, setWalletFilter] = useState<string | null>(null);
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showWalletPicker, setShowWalletPicker] = useState(false);
@@ -83,6 +86,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
     return sorted;
   }, [miners]);
+
+  const locations = useMemo(
+    () => [...new Set(miners.map((m) => m.location).filter(Boolean))] as string[],
+    [miners],
+  );
+  const allTags = useMemo(() => [...new Set(miners.flatMap((m) => m.tags || []))], [miners]);
+
+  const [kioskMode, setKioskMode] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +114,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         } catch {}
       }
     });
+    DB.getSetting('kiosk_mode').then((v) => {
+      if (v === 'true') setKioskMode(true);
+    });
   }, []);
 
   const filteredMiners = useMemo(
@@ -111,9 +125,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         if (walletFilter && m.walletId !== walletFilter) return false;
         if (groupFilter === 'Ungrouped' && m.group) return false;
         if (groupFilter && groupFilter !== 'Ungrouped' && m.group !== groupFilter) return false;
+        if (locationFilter && m.location !== locationFilter) return false;
+        if (tagFilter && !(m.tags || []).includes(tagFilter)) return false;
         return true;
       }),
-    [miners, walletFilter, groupFilter],
+    [miners, walletFilter, groupFilter, locationFilter, tagFilter],
   );
 
   const pollingIntervalRef = useRef(30000);
@@ -265,6 +281,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       ],
     );
   }, [miners, selectedIds, removeMiner, clearSelection, t]);
+
+  const handleToggleKiosk = useCallback((val: boolean) => {
+    setKioskMode(val);
+    DB.setSetting('kiosk_mode', String(val));
+  }, []);
 
   const handleToggleSection = useCallback((key: SectionKey) => {
     setVisibleSections((prev) => {
@@ -789,82 +810,113 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     [theme],
   );
 
+  const Outer = Platform.OS === 'web' ? ScrollView : View;
+  const outerProps =
+    Platform.OS === 'web'
+      ? { style: styles.container, contentContainerStyle: { paddingBottom: 80 } }
+      : { style: styles.container };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.headerBar}>
-        {selectionMode ? (
-          <>
-            <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Cancel selection"
-              style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
-              onPress={() => {
-                setSelectionMode(false);
-                setSelectedIds(new Set());
-              }}
-            >
-              <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Compare miners"
-              style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
-              onPress={() => setSelectionMode(true)}
-            >
-              <Text style={styles.settingsIcon}>⇄</Text>
-            </TouchableOpacity>
-            <View style={{ alignItems: 'center' }}>
+    <Outer {...outerProps}>
+      {kioskMode ? (
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: 50,
+            right: 12,
+            zIndex: 100,
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: theme.textMuted + '40',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={() => {
+            Alert.alert('Exit Kiosk', 'Tap "Exit" to leave kiosk mode.', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Exit', onPress: () => handleToggleKiosk(false) },
+            ]);
+          }}
+        >
+          <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>✕</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.headerBar}>
+          {selectionMode ? (
+            <>
               <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-              <Text style={styles.headerSub}>
-                <Text style={styles.liveDot}>●</Text> live monitor
-              </Text>
-            </View>
-            <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
               <TouchableOpacity
                 accessibilityRole="button"
-                accessibilityLabel="Customize dashboard"
-                style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                onPress={() => setShowCustomizer(true)}
-              >
-                <Text style={styles.settingsIcon}>✎</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Export data"
-                style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                onPress={() => exportAllData()}
-              >
-                <Text style={styles.settingsIcon}>↓</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityLabel="Switch theme"
-                style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                accessibilityLabel="Cancel selection"
+                style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
                 onPress={() => {
-                  const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
-                  const current = getThemeMode();
-                  const idx = modes.indexOf(current as (typeof modes)[number]);
-                  setThemeMode(modes[(idx + 1) % modes.length]);
+                  setSelectionMode(false);
+                  setSelectedIds(new Set());
                 }}
               >
-                <Text style={styles.settingsIcon}>🎨</Text>
+                <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
               </TouchableOpacity>
+            </>
+          ) : (
+            <>
               <TouchableOpacity
                 accessibilityRole="button"
-                accessibilityLabel="Settings"
-                style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                onPress={() => navigation.navigate('Settings')}
+                accessibilityLabel="Compare miners"
+                style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
+                onPress={() => setSelectionMode(true)}
               >
-                <Text style={styles.settingsIcon}>⚙</Text>
+                <Text style={styles.settingsIcon}>⇄</Text>
               </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+                <Text style={styles.headerSub}>
+                  <Text style={styles.liveDot}>●</Text> live monitor
+                </Text>
+              </View>
+              <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Customize dashboard"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => setShowCustomizer(true)}
+                >
+                  <Text style={styles.settingsIcon}>✎</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Export data"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => exportAllData()}
+                >
+                  <Text style={styles.settingsIcon}>↓</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Switch theme"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => {
+                    const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
+                    const current = getThemeMode();
+                    const idx = modes.indexOf(current as (typeof modes)[number]);
+                    setThemeMode(modes[(idx + 1) % modes.length]);
+                  }}
+                >
+                  <Text style={styles.settingsIcon}>🎨</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Settings"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => navigation.navigate('Settings')}
+                >
+                  <Text style={styles.settingsIcon}>⚙</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      )}
 
       {visibleSections.earnings && miners.length > 0 && <EarningsCard miners={miners} />}
 
@@ -1134,89 +1186,153 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
-      {visibleSections.filters && (wallets.length > 0 || groups.length > 0) && (
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingHorizontal: 16,
-            gap: 6,
-            marginBottom: 6,
-            flexWrap: 'wrap',
-          }}
-        >
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Filter: All"
-            style={[
-              styles.walletChip,
-              {
-                backgroundColor: !walletFilter && !groupFilter ? theme.primary : theme.surfaceLight,
-                borderColor: !walletFilter && !groupFilter ? theme.primary : theme.border,
-              },
-            ]}
-            onPress={() => {
-              setWalletFilter(null);
-              setGroupFilter(null);
+      {!kioskMode &&
+        visibleSections.filters &&
+        (wallets.length > 0 || groups.length > 0 || locations.length > 0 || allTags.length > 0) && (
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingHorizontal: 16,
+              gap: 6,
+              marginBottom: 6,
+              flexWrap: 'wrap',
             }}
           >
-            <Text
-              style={[
-                styles.walletChipText,
-                { color: !walletFilter && !groupFilter ? '#FFF' : theme.text },
-              ]}
-            >
-              {t('common.all')}
-            </Text>
-          </TouchableOpacity>
-          {wallets.map((w) => (
             <TouchableOpacity
               accessibilityRole="button"
-              key={w.id}
-              accessibilityLabel={`Filter by wallet: ${w.name}`}
+              accessibilityLabel="Filter: All"
               style={[
                 styles.walletChip,
                 {
-                  backgroundColor: walletFilter === w.id ? theme.primary : theme.surfaceLight,
-                  borderColor: walletFilter === w.id ? theme.primary : theme.border,
+                  backgroundColor:
+                    !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                      ? theme.primary
+                      : theme.surfaceLight,
+                  borderColor:
+                    !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                      ? theme.primary
+                      : theme.border,
                 },
               ]}
-              onPress={() => setWalletFilter(walletFilter === w.id ? null : w.id)}
+              onPress={() => {
+                setWalletFilter(null);
+                setGroupFilter(null);
+                setLocationFilter(null);
+                setTagFilter(null);
+              }}
             >
               <Text
                 style={[
                   styles.walletChipText,
-                  { color: walletFilter === w.id ? '#FFF' : theme.text },
+                  {
+                    color:
+                      !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                        ? '#FFF'
+                        : theme.text,
+                  },
                 ]}
               >
-                {w.name}
+                {t('common.all')}
               </Text>
             </TouchableOpacity>
-          ))}
-          {groups.map((g) => (
-            <TouchableOpacity
-              accessibilityRole="button"
-              key={g}
-              accessibilityLabel={`Filter by group: ${g}`}
-              style={[
-                styles.walletChip,
-                {
-                  backgroundColor: groupFilter === g ? theme.accent : theme.surfaceLight,
-                  borderColor: groupFilter === g ? theme.accent : theme.border,
-                },
-              ]}
-              onPress={() => setGroupFilter(groupFilter === g ? null : g)}
-            >
-              <Text
-                style={[styles.walletChipText, { color: groupFilter === g ? '#FFF' : theme.text }]}
+            {wallets.map((w) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={w.id}
+                accessibilityLabel={`Filter by wallet: ${w.name}`}
+                style={[
+                  styles.walletChip,
+                  {
+                    backgroundColor: walletFilter === w.id ? theme.primary : theme.surfaceLight,
+                    borderColor: walletFilter === w.id ? theme.primary : theme.border,
+                  },
+                ]}
+                onPress={() => setWalletFilter(walletFilter === w.id ? null : w.id)}
               >
-                📁 {g === 'Ungrouped' ? t('dashboard.ungrouped') : g}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+                <Text
+                  style={[
+                    styles.walletChipText,
+                    { color: walletFilter === w.id ? '#FFF' : theme.text },
+                  ]}
+                >
+                  {w.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {groups.map((g) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={g}
+                accessibilityLabel={`Filter by group: ${g}`}
+                style={[
+                  styles.walletChip,
+                  {
+                    backgroundColor: groupFilter === g ? theme.accent : theme.surfaceLight,
+                    borderColor: groupFilter === g ? theme.accent : theme.border,
+                  },
+                ]}
+                onPress={() => setGroupFilter(groupFilter === g ? null : g)}
+              >
+                <Text
+                  style={[
+                    styles.walletChipText,
+                    { color: groupFilter === g ? '#FFF' : theme.text },
+                  ]}
+                >
+                  📁 {g === 'Ungrouped' ? t('dashboard.ungrouped') : g}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {locations.map((loc) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={loc}
+                style={[
+                  styles.walletChip,
+                  {
+                    backgroundColor: locationFilter === loc ? theme.primary : theme.surfaceLight,
+                    borderColor: locationFilter === loc ? theme.primary : theme.border,
+                  },
+                ]}
+                onPress={() => setLocationFilter(locationFilter === loc ? null : loc)}
+              >
+                <Text
+                  style={[
+                    styles.walletChipText,
+                    { color: locationFilter === loc ? '#FFF' : theme.text },
+                  ]}
+                >
+                  📍 {loc}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {allTags.map((tag) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={tag}
+                style={[
+                  styles.walletChip,
+                  {
+                    backgroundColor: tagFilter === tag ? theme.accent : theme.surfaceLight,
+                    borderColor: tagFilter === tag ? theme.accent : theme.border,
+                  },
+                ]}
+                onPress={() => setTagFilter(tagFilter === tag ? null : tag)}
+              >
+                <Text
+                  style={[
+                    styles.walletChipText,
+                    { color: tagFilter === tag ? '#FFF' : theme.text },
+                  ]}
+                >
+                  🏷️ {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-      {visibleSections.sort && miners.length > 0 && (
+      {!kioskMode && visibleSections.sort && miners.length > 0 && (
         <View
           style={{
             flexDirection: 'row',
@@ -1315,6 +1431,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             </TouchableOpacity>
           </View>
         </View>
+      ) : Platform.OS === 'web' ? (
+        <View style={styles.list}>
+          {groupedMiners.map((item) => (
+            <View key={item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`}>
+              {renderGroupedItem({ item })}
+            </View>
+          ))}
+        </View>
       ) : (
         <FlatList
           data={groupedMiners}
@@ -1340,7 +1464,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         />
       )}
 
-      {selectionMode && (
+      {!kioskMode && selectionMode && (
         <View style={styles.selectionBar}>
           <Text style={styles.selectionCount}>
             {t('comparison.nSelected', { count: selectedIds.size })}
@@ -1432,16 +1556,20 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         onClose={() => setShowCustomizer(false)}
         visibleSections={visibleSections}
         onToggle={handleToggleSection}
+        kioskMode={kioskMode}
+        onToggleKiosk={handleToggleKiosk}
       />
 
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityLabel="Add miner"
-        style={[styles.fab, !canAdd && styles.fabDisabled]}
-        onPress={handleAddMiner}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-    </View>
+      {!kioskMode && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Add miner"
+          style={[styles.fab, !canAdd && styles.fabDisabled]}
+          onPress={handleAddMiner}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
+    </Outer>
   );
 }

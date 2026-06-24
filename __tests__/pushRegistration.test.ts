@@ -53,7 +53,10 @@ it('registers push token with backend', async () => {
       headers: expect.objectContaining({
         Authorization: 'Bearer auth-token',
       }),
-      body: JSON.stringify({ token: 'expo-token-123' }),
+      body: JSON.stringify({
+        token: 'expo-token-123',
+        alertTypes: ['offline', 'online', 'hot', 'hashrate_drop', 'pool_lost', 'long_uptime'],
+      }),
     }),
   );
 });

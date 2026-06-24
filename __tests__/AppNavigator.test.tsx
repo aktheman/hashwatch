@@ -140,19 +140,25 @@ beforeEach(() => {
   jest.clearAllMocks();
   (DB.loadMiners as jest.Mock).mockResolvedValue([]);
   (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
-    if (key === 'empty_groups') return null;
+    if (key === 'empty_groups' || key === 'kiosk_mode') return null;
     return 'true';
   });
 });
 
 it('shows main app when onboarding_complete is true', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('dashboard.noMiners')).toBeTruthy();
 });
 
 it('shows dashboard with all four tabs', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   expect(screen.getByText('tabs.dashboard')).toBeTruthy();
@@ -162,7 +168,10 @@ it('shows dashboard with all four tabs', async () => {
 });
 
 it('shows miner card when miners exist', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   (DB.loadMiners as jest.Mock).mockResolvedValue([makeMiner()]);
   useMinerStore.setState({
     miners: [makeMiner()],
@@ -176,19 +185,28 @@ it('shows miner card when miners exist', async () => {
 });
 
 it('shows OfflineBanner text when online', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
 });
 
 it('renders Suspense loading fallback for lazy screens', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('dashboard.noMiners')).toBeTruthy();
 });
 
 it('navigates to Pools tab', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.pools'));
@@ -196,7 +214,10 @@ it('navigates to Pools tab', async () => {
 });
 
 it('navigates to Analytics tab', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.analytics'));
@@ -204,7 +225,10 @@ it('navigates to Analytics tab', async () => {
 });
 
 it('navigates to Settings tab', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));
@@ -212,7 +236,10 @@ it('navigates to Settings tab', async () => {
 });
 
 it('navigates to Subscription screen from Settings', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));
@@ -222,7 +249,10 @@ it('navigates to Subscription screen from Settings', async () => {
 });
 
 it('navigates to AddMiner screen', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('dashboard.addMiner'));
@@ -230,7 +260,10 @@ it('navigates to AddMiner screen', async () => {
 });
 
 it('navigates to Wallets screen from Settings', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));
@@ -240,7 +273,10 @@ it('navigates to Wallets screen from Settings', async () => {
 });
 
 it('navigates to Groups screen from Settings', async () => {
-  (DB.getSetting as jest.Mock).mockResolvedValue('true');
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));

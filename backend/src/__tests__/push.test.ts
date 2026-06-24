@@ -33,6 +33,7 @@ describe('POST /api/push/register', () => {
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO push_tokens'), [
       'test-user-id',
       'expo-push-token-123',
+      null,
     ]);
   });
 

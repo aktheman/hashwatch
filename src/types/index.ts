@@ -50,6 +50,8 @@ export interface Miner {
   walletId?: string;
   group?: string;
   icon?: string;
+  location?: string;
+  tags?: string[];
   remoteId?: string;
   apiPath?: string | null;
   statusPath?: string | null;

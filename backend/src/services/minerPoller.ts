@@ -1,5 +1,6 @@
 import { query } from '../db';
 import { checkMinerStatus } from './minerMonitor';
+import { broadcast } from '../ws';
 
 interface MinerRow {
   id: string;
@@ -64,6 +65,54 @@ async function pollMiner(miner: MinerRow): Promise<void> {
     hashRate,
     pool,
   );
+
+  if (isOnline) {
+    broadcast(miner.userid, {
+      type: 'miner_update',
+      miner: {
+        id: miner.id,
+        isOnline: true,
+        lastSeen: Date.now(),
+        status: {
+          hashRate: statusData?.hashRate ?? infoData?.hashRate ?? 0,
+          hashRateUnit: statusData?.hashRateUnit ?? 'MH/s',
+          temperature,
+          vrTemp: statusData?.vrTemp ?? 0,
+          voltage: statusData?.voltage ?? 0,
+          current: statusData?.current ?? 0,
+          power: statusData?.power ?? 0,
+          sharesAccepted: statusData?.sharesAccepted ?? 0,
+          sharesRejected: statusData?.sharesRejected ?? 0,
+          bestDiff: statusData?.bestDiff ?? '',
+          bestSessionDiff: statusData?.bestSessionDiff ?? '',
+          uptimeSeconds: statusData?.uptimeSeconds ?? 0,
+          coreVoltage: statusData?.coreVoltage ?? 0,
+          frequency: statusData?.frequency ?? 0,
+          fanSpeed: statusData?.fanSpeed ?? 0,
+          fanRpm: statusData?.fanRpm ?? 0,
+          pool: pool ?? '',
+          poolPort: statusData?.poolPort ?? 0,
+          poolUser: statusData?.poolUser ?? '',
+          poolResponseTime: statusData?.poolResponseTime ?? 0,
+        },
+        info: {
+          version: infoData?.version ?? '',
+          hostname: infoData?.hostname ?? '',
+          macAddr: infoData?.macAddr ?? '',
+          ip: miner.ip,
+          chipType: infoData?.chipType ?? '',
+          ssid: infoData?.ssid ?? '',
+          wifiSignal: infoData?.wifiSignal ?? 0,
+          powerMode: infoData?.powerMode ?? 0,
+        },
+      },
+    });
+  } else {
+    broadcast(miner.userid, {
+      type: 'miner_update',
+      miner: { id: miner.id, isOnline: false, lastSeen: Date.now() },
+    });
+  }
 }
 
 let intervalHandle: ReturnType<typeof setInterval> | null = null;

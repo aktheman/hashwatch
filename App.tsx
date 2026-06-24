@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import './src/i18n';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
@@ -24,6 +24,14 @@ export default function App() {
   const theme = useTheme();
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const style = document.createElement('style');
+      style.textContent = 'html,body,#root{height:100%;margin:0;overflow-x:hidden}';
+      document.head.appendChild(style);
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {

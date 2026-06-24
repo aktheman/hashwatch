@@ -21,6 +21,7 @@ import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
 import { NotificationPrefs } from '../components/NotificationPrefs';
 import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
+import { getAlertRules, setAlertRules, AlertRule } from '../services/notifications';
 import {
   formatHashrate,
   formatTemperature,
@@ -325,13 +326,17 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
   const setMinerIp = useMinerStore((s) => s.setMinerIp);
   const setMinerIcon = useMinerStore((s) => s.setMinerIcon);
+  const setMinerLocation = useMinerStore((s) => s.setMinerLocation);
+  const setMinerTags = useMinerStore((s) => s.setMinerTags);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [editingIP, setEditingIP] = useState(false);
   const [editIPValue, setEditIPValue] = useState('');
+  const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -344,6 +349,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    getAlertRules(minerId).then(setAlertRulesState);
+  }, [minerId]);
 
   const miner = miners.find((m) => m.id === minerId);
 
@@ -564,6 +573,90 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         )}
       </View>
 
+      {alertRules && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>⚙️ Alert Thresholds</Text>
+          <View style={{ gap: 10 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: theme.textDim, fontSize: 13 }}>Temp Alert (°C)</Text>
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                {[60, 65, 70, 75, 80].map((t) => (
+                  <TouchableOpacity
+                    key={t}
+                    onPress={() => {
+                      const next = { ...alertRules, tempThreshold: t };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                      backgroundColor:
+                        alertRules.tempThreshold === t ? theme.danger : theme.surfaceLight,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: alertRules.tempThreshold === t ? '#FFF' : theme.text,
+                        fontSize: 12,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {t}°
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: theme.textDim, fontSize: 13 }}>Hashrate Drop (%)</Text>
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                {[30, 40, 50, 60, 70].map((p) => (
+                  <TouchableOpacity
+                    key={p}
+                    onPress={() => {
+                      const next = { ...alertRules, hashrateDropPercent: p };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                      backgroundColor:
+                        alertRules.hashrateDropPercent === p ? theme.warning : theme.surfaceLight,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: alertRules.hashrateDropPercent === p ? '#FFF' : theme.text,
+                        fontSize: 12,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {p}%
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
       <NotificationPrefs minerId={miner.id} />
 
       <View style={styles.section}>
@@ -640,6 +733,86 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           placeholder={t('minerDetail.groupPlaceholder')}
           placeholderTextColor={theme.textMuted}
           accessibilityLabel="Group tag input"
+        />
+      </View>
+
+      <View style={[styles.section, styles.groupTagRow]}>
+        <Text style={styles.groupTagIcon}>📍</Text>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          onPress={() => setShowLocationPicker(!showLocationPicker)}
+        >
+          <Text style={{ color: theme.text, fontSize: 14 }}>
+            {miner.location || 'Set location...'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {showLocationPicker && (
+        <View style={[styles.section, styles.walletPicker, { marginHorizontal: 16 }]}>
+          <TouchableOpacity
+            onPress={() => {
+              setMinerLocation(minerId, undefined);
+              setShowLocationPicker(false);
+            }}
+          >
+            <Text style={[styles.walletName, { padding: 12 }]}>None</Text>
+          </TouchableOpacity>
+          {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
+            <TouchableOpacity
+              key={loc}
+              onPress={() => {
+                setMinerLocation(minerId, loc);
+                setShowLocationPicker(false);
+              }}
+            >
+              <Text style={[styles.walletName, { padding: 12 }]}>{loc}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>🏷️ Tags</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          {(miner.tags || []).map((tag) => (
+            <TouchableOpacity
+              key={tag}
+              onPress={() =>
+                setMinerTags(
+                  minerId,
+                  (miner.tags || []).filter((t) => t !== tag),
+                )
+              }
+              style={{
+                backgroundColor: theme.primary + '30',
+                borderRadius: 8,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+              }}
+            >
+              <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>{tag} ✕</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <TextInput
+          placeholder="Add tag..."
+          placeholderTextColor={theme.textMuted}
+          onSubmitEditing={(e) => {
+            const tag = e.nativeEvent.text.trim();
+            if (tag && !(miner.tags || []).includes(tag)) {
+              setMinerTags(minerId, [...(miner.tags || []), tag]);
+            }
+            (e.target as any)?.clear?.();
+          }}
+          style={{
+            backgroundColor: theme.surfaceLight,
+            borderRadius: 10,
+            padding: 10,
+            color: theme.text,
+            fontSize: 13,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
         />
       </View>
 

@@ -1,30 +1,32 @@
 import { query } from '../db';
 
-async function getPushTokensForUser(userId: string): Promise<string[]> {
-  const result = await query('SELECT token FROM push_tokens WHERE userId = $1', [userId]);
-  return result.rows.map((r: any) => r.token);
-}
-
 export async function sendPushNotification(
   userId: string,
+  type: string,
   title: string,
   body: string,
-  data?: Record<string, any>,
 ): Promise<void> {
-  const tokens = await getPushTokensForUser(userId);
-  if (tokens.length === 0) return;
+  const result = await query('SELECT token, alert_types FROM push_tokens WHERE userId = $1', [
+    userId,
+  ]);
+  if (result.rows.length === 0) return;
 
   const ExpoModule: any = await import('expo-server-sdk');
   const expo = new ExpoModule.Expo();
 
-  const messages = tokens
-    .filter((token: string) => ExpoModule.Expo.isExpoPushToken(token))
-    .map((token: string) => ({
-      to: token,
+  const messages = result.rows
+    .filter((row: any) => {
+      if (!row.alert_types) return true;
+      const types = row.alert_types.split(',');
+      return types.includes(type);
+    })
+    .filter((row: any) => ExpoModule.Expo.isExpoPushToken(row.token))
+    .map((row: any) => ({
+      to: row.token,
       sound: 'default' as const,
       title,
       body,
-      data: data || {},
+      data: { type },
     }));
 
   const chunks = expo.chunkPushNotifications(messages);
@@ -43,10 +45,12 @@ export async function sendMinerOfflineNotification(
   ip: string,
   minerId: string,
 ): Promise<void> {
-  await sendPushNotification(userId, 'Miner Offline', `${minerName} (${ip}) has gone offline`, {
-    minerId,
-    type: 'offline',
-  });
+  await sendPushNotification(
+    userId,
+    'offline',
+    'Miner Offline',
+    `${minerName} (${ip}) has gone offline`,
+  );
 }
 
 export async function sendMinerOnlineNotification(
@@ -55,10 +59,12 @@ export async function sendMinerOnlineNotification(
   ip: string,
   minerId: string,
 ): Promise<void> {
-  await sendPushNotification(userId, 'Miner Reconnected', `${minerName} (${ip}) is back online`, {
-    minerId,
-    type: 'online',
-  });
+  await sendPushNotification(
+    userId,
+    'online',
+    'Miner Reconnected',
+    `${minerName} (${ip}) is back online`,
+  );
 }
 
 export async function sendMinerHotNotification(
@@ -70,9 +76,9 @@ export async function sendMinerHotNotification(
 ): Promise<void> {
   await sendPushNotification(
     userId,
+    'hot',
     'High Temperature',
     `${minerName} is ${temperature.toFixed(0)}°C — check cooling`,
-    { minerId, type: 'hot' },
   );
 }
 
@@ -82,10 +88,12 @@ export async function sendHashrateDropNotification(
   minerId: string,
   pct: number,
 ): Promise<void> {
-  await sendPushNotification(userId, 'Hashrate Drop', `${minerName} hashrate dropped ${pct}%`, {
-    minerId,
-    type: 'hashrate_drop',
-  });
+  await sendPushNotification(
+    userId,
+    'hashrate_drop',
+    'Hashrate Drop',
+    `${minerName} hashrate dropped ${pct}%`,
+  );
 }
 
 export async function sendPoolChangeNotification(
@@ -97,10 +105,10 @@ export async function sendPoolChangeNotification(
 ): Promise<void> {
   const from = oldPool || 'unknown';
   const to = newPool || 'unknown';
-  await sendPushNotification(userId, 'Pool Changed', `${minerName} moved from ${from} to ${to}`, {
-    minerId,
-    type: 'pool_change',
-    oldPool: from,
-    newPool: to,
-  });
+  await sendPushNotification(
+    userId,
+    'pool_change',
+    'Pool Changed',
+    `${minerName} moved from ${from} to ${to}`,
+  );
 }

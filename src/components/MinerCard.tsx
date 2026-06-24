@@ -281,6 +281,35 @@ export const MinerCard = memo(
           </View>
         </View>
 
+        {miner.tags && miner.tags.length > 0 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: 4,
+              marginLeft: 12,
+              marginBottom: 4,
+            }}
+          >
+            {miner.tags.slice(0, 3).map((tag) => (
+              <View
+                key={tag}
+                style={{
+                  backgroundColor: theme.primary + '25',
+                  borderRadius: 4,
+                  paddingHorizontal: 6,
+                  paddingVertical: 1,
+                }}
+              >
+                <Text style={{ color: theme.primary, fontSize: 9, fontWeight: '600' }}>{tag}</Text>
+              </View>
+            ))}
+            {miner.tags.length > 3 && (
+              <Text style={{ color: theme.textMuted, fontSize: 9 }}>+{miner.tags.length - 3}</Text>
+            )}
+          </View>
+        )}
+
         <Text style={styles.ip}>{miner.ip}</Text>
 
         <View style={styles.divider} />
