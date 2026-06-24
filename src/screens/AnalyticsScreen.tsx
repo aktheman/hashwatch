@@ -21,6 +21,16 @@ import { useWindowDimensions } from 'react-native';
 
 type Range = '1h' | '24h' | '7d' | '30d';
 const ranges: Range[] = ['1h', '24h', '7d', '30d'];
+const MINER_COLORS = [
+  '#6C63FF',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#3B82F6',
+  '#EC4899',
+  '#14B8A6',
+  '#8B5CF6',
+];
 
 export function AnalyticsScreen() {
   const { t } = useTranslation();
@@ -33,6 +43,8 @@ export function AnalyticsScreen() {
   const [range, setRange] = useState<Range>('24h');
   const [powerCost, setPowerCost] = useState(0);
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
+  const [selectedMinerIds, setSelectedMinerIds] = useState<Set<string>>(new Set());
+  const [showMinerFilter, setShowMinerFilter] = useState(false);
 
   const snapshotCache = useRef<Map<string, MinerSnapshot[]>>(new Map());
   const primaryColorRef = useRef(theme.primary);
@@ -96,6 +108,17 @@ export function AnalyticsScreen() {
     setRefreshing(false);
   };
 
+  const toggleMinerFilter = () => setShowMinerFilter((p) => !p);
+
+  const toggleMiner = (id: string) => {
+    const next = new Set(selectedMinerIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedMinerIds(next);
+  };
+
+  const selectAllMiners = () => setSelectedMinerIds(new Set());
+
   const { totalHashrate, totalEarnings, totalPower, avgTemp, totalShares } = useMemo(() => {
     const hps = miners.reduce(
       (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
@@ -122,47 +145,71 @@ export function AnalyticsScreen() {
 
   const chartData = useMemo(() => {
     if (snapshots.length < 2) return null;
-    const buckets: { time: number; hashRate: number }[] = [];
     const interval =
       range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
-    const grouped: Record<number, number[]> = {};
+
+    const allGrouped: Record<number, number[]> = {};
     for (const s of snapshots) {
       const bucket = Math.floor(s.timestamp / interval) * interval;
-      if (!grouped[bucket]) grouped[bucket] = [];
-      grouped[bucket].push(toHashesPerSecond(s.hashRate, s.hashRateUnit));
+      if (!allGrouped[bucket]) allGrouped[bucket] = [];
+      allGrouped[bucket].push(toHashesPerSecond(s.hashRate, s.hashRateUnit));
     }
-    for (const time of Object.keys(grouped).map(Number).sort()) {
-      const vals = grouped[time];
-      buckets.push({ time, hashRate: vals.reduce((a, b) => a + b, 0) / vals.length });
+
+    const bucketTimes = Object.keys(allGrouped).map(Number).sort();
+    let sampledTimes = bucketTimes;
+    if (bucketTimes.length > 30) {
+      const step = Math.ceil(bucketTimes.length / 30);
+      sampledTimes = bucketTimes.filter((_, i) => i % step === 0);
     }
-    if (buckets.length > 30) {
-      const step = Math.ceil(buckets.length / 30);
-      const sampled = buckets.filter((_, i) => i % step === 0);
-      return {
-        labels: sampled.map((b) => {
-          const d = new Date(b.time);
-          const showDate = range === '7d' || range === '30d';
-          return showDate
-            ? `${d.getMonth() + 1}/${d.getDate()}`
-            : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-        }),
-        datasets: [
-          {
-            data: sampled.map((b) => Number((b.hashRate / 1e12).toFixed(2))),
-            color: () => primaryColorRef.current,
-            strokeWidth: 2,
-          },
-        ],
-      };
+
+    const labels = sampledTimes.map((b) => {
+      const d = new Date(b);
+      const showDate = range === '7d' || range === '30d';
+      return showDate
+        ? `${d.getMonth() + 1}/${d.getDate()}`
+        : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    if (selectedMinerIds.size > 0) {
+      const selectedMiners = miners.filter((m) => selectedMinerIds.has(m.id));
+      const datasets: { data: number[]; color: () => string; strokeWidth: number }[] = [];
+      const legend: string[] = [];
+      let colorIdx = 0;
+
+      selectedMiners.forEach((miner) => {
+        const minerSnapshots = snapshots.filter((s) => s.minerId === miner.id);
+        if (minerSnapshots.length < 2) return;
+
+        const grouped: Record<number, number[]> = {};
+        for (const s of minerSnapshots) {
+          const bucket = Math.floor(s.timestamp / interval) * interval;
+          if (!grouped[bucket]) grouped[bucket] = [];
+          grouped[bucket].push(toHashesPerSecond(s.hashRate, s.hashRateUnit));
+        }
+
+        const data = sampledTimes.map((time) => {
+          const vals = grouped[time];
+          if (!vals) return 0;
+          return Number((vals.reduce((a, b) => a + b, 0) / vals.length / 1e12).toFixed(2));
+        });
+
+        const minerColor = MINER_COLORS[colorIdx % MINER_COLORS.length];
+        datasets.push({ data, color: () => minerColor, strokeWidth: 2 });
+        legend.push(miner.name || miner.id);
+        colorIdx++;
+      });
+
+      if (datasets.length === 0) return null;
+      return { labels, datasets, legend };
     }
+
+    const buckets = sampledTimes.map((time) => {
+      const vals = allGrouped[time];
+      return { time, hashRate: vals.reduce((a, b) => a + b, 0) / vals.length };
+    });
+
     return {
-      labels: buckets.map((b) => {
-        const d = new Date(b.time);
-        const showDate = range === '7d' || range === '30d';
-        return showDate
-          ? `${d.getMonth() + 1}/${d.getDate()}`
-          : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-      }),
+      labels,
       datasets: [
         {
           data: buckets.map((b) => Number((b.hashRate / 1e12).toFixed(2))),
@@ -171,50 +218,74 @@ export function AnalyticsScreen() {
         },
       ],
     };
-  }, [snapshots, range]);
+  }, [snapshots, range, selectedMinerIds, miners]);
 
   const uptimeChartData = useMemo(() => {
     if (snapshots.length < 2) return null;
-    const buckets: { time: number; uptime: number }[] = [];
     const interval =
       range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
-    const grouped: Record<number, number[]> = {};
+
+    const allGrouped: Record<number, number[]> = {};
     for (const s of snapshots) {
       const bucket = Math.floor(s.timestamp / interval) * interval;
-      if (!grouped[bucket]) grouped[bucket] = [];
-      grouped[bucket].push(s.uptimeSeconds / 3600);
+      if (!allGrouped[bucket]) allGrouped[bucket] = [];
+      allGrouped[bucket].push(s.uptimeSeconds / 3600);
     }
-    for (const time of Object.keys(grouped).map(Number).sort()) {
-      const vals = grouped[time];
-      buckets.push({ time, uptime: vals.reduce((a, b) => a + b, 0) / vals.length });
+
+    const bucketTimes = Object.keys(allGrouped).map(Number).sort();
+    let sampledTimes = bucketTimes;
+    if (bucketTimes.length > 30) {
+      const step = Math.ceil(bucketTimes.length / 30);
+      sampledTimes = bucketTimes.filter((_, i) => i % step === 0);
     }
-    if (buckets.length > 30) {
-      const step = Math.ceil(buckets.length / 30);
-      const sampled = buckets.filter((_, i) => i % step === 0);
-      return {
-        labels: sampled.map((b) => {
-          const d = new Date(b.time);
-          return range === '7d' || range === '30d'
-            ? `${d.getMonth() + 1}/${d.getDate()}`
-            : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-        }),
-        datasets: [
-          {
-            data: sampled.map((b) => Number(b.uptime.toFixed(1))),
-            color: () => successColorRef.current,
-            strokeWidth: 2,
-          },
-        ],
-      };
+
+    const labels = sampledTimes.map((b) => {
+      const d = new Date(b);
+      return range === '7d' || range === '30d'
+        ? `${d.getMonth() + 1}/${d.getDate()}`
+        : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    if (selectedMinerIds.size > 0) {
+      const selectedMiners = miners.filter((m) => selectedMinerIds.has(m.id));
+      const datasets: { data: number[]; color: () => string; strokeWidth: number }[] = [];
+      const legend: string[] = [];
+      let colorIdx = 0;
+
+      selectedMiners.forEach((miner) => {
+        const minerSnapshots = snapshots.filter((s) => s.minerId === miner.id);
+        if (minerSnapshots.length < 2) return;
+
+        const grouped: Record<number, number[]> = {};
+        for (const s of minerSnapshots) {
+          const bucket = Math.floor(s.timestamp / interval) * interval;
+          if (!grouped[bucket]) grouped[bucket] = [];
+          grouped[bucket].push(s.uptimeSeconds / 3600);
+        }
+
+        const data = sampledTimes.map((time) => {
+          const vals = grouped[time];
+          if (!vals) return 0;
+          return Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1));
+        });
+
+        const minerColor = MINER_COLORS[colorIdx % MINER_COLORS.length];
+        datasets.push({ data, color: () => minerColor, strokeWidth: 2 });
+        legend.push(miner.name || miner.id);
+        colorIdx++;
+      });
+
+      if (datasets.length === 0) return null;
+      return { labels, datasets, legend };
     }
+
+    const buckets = sampledTimes.map((time) => {
+      const vals = allGrouped[time];
+      return { time, uptime: vals.reduce((a, b) => a + b, 0) / vals.length };
+    });
+
     return {
-      labels: buckets.map((b) => {
-        const d = new Date(b.time);
-        const showDate = range === '7d' || range === '30d';
-        return showDate
-          ? `${d.getMonth() + 1}/${d.getDate()}`
-          : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-      }),
+      labels,
       datasets: [
         {
           data: buckets.map((b) => Number(b.uptime.toFixed(1))),
@@ -223,7 +294,7 @@ export function AnalyticsScreen() {
         },
       ],
     };
-  }, [snapshots, range]);
+  }, [snapshots, range, selectedMinerIds, miners]);
 
   const chartConfig = {
     backgroundColor: theme.surface,
@@ -303,6 +374,53 @@ export function AnalyticsScreen() {
         center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
         loadingText: { color: theme.textDim, marginTop: 12, fontSize: 14 },
         emptyText: { color: theme.textDim, fontSize: 14, textAlign: 'center', lineHeight: 20 },
+        filterBtn: {
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        filterBtnActive: {
+          backgroundColor: theme.primary,
+          borderColor: theme.primary,
+        },
+        filterBtnText: { fontSize: 12, fontWeight: '600', color: theme.text },
+        filterBtnTextActive: { color: '#FFF' },
+        chipRow: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 6,
+          marginBottom: 12,
+        },
+        chip: {
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: theme.border,
+          backgroundColor: 'transparent',
+        },
+        chipSelected: {
+          backgroundColor: theme.primary,
+          borderColor: theme.primary,
+        },
+        chipText: { fontSize: 12, color: theme.text, fontWeight: '500' },
+        chipTextSelected: { color: '#FFF' },
+        legendRow: {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 12,
+          marginTop: 12,
+          justifyContent: 'center',
+        },
+        legendItem: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 4,
+        },
+        legendDot: { width: 8, height: 8, borderRadius: 4 },
+        legendText: { fontSize: 11, color: theme.textDim },
       }),
     [theme],
   );
@@ -314,6 +432,16 @@ export function AnalyticsScreen() {
           <Text style={styles.headerTitle}>{t('analytics.title')}</Text>
           <Text style={styles.headerSub}>{t('analytics.subtitle')}</Text>
         </View>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Filter by miner"
+          style={[styles.filterBtn, showMinerFilter && styles.filterBtnActive]}
+          onPress={toggleMinerFilter}
+        >
+          <Text style={[styles.filterBtnText, showMinerFilter && styles.filterBtnTextActive]}>
+            Filter
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -431,6 +559,38 @@ export function AnalyticsScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          {showMinerFilter && (
+            <View style={styles.chipRow}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="All miners"
+                style={[styles.chip, selectedMinerIds.size === 0 && styles.chipSelected]}
+                onPress={selectAllMiners}
+              >
+                <Text
+                  style={[styles.chipText, selectedMinerIds.size === 0 && styles.chipTextSelected]}
+                >
+                  All miners
+                </Text>
+              </TouchableOpacity>
+              {miners.map((m) => {
+                const isSelected = selectedMinerIds.has(m.id);
+                return (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    key={m.id}
+                    accessibilityLabel={m.name || m.id}
+                    style={[styles.chip, isSelected && styles.chipSelected]}
+                    onPress={() => toggleMiner(m.id)}
+                  >
+                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                      {m.name || m.id}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
           {loading ? (
             <View style={{ height: 200, justifyContent: 'center', gap: 12 }}>
               <Skeleton height={20} borderRadius={10} />
@@ -438,17 +598,34 @@ export function AnalyticsScreen() {
               <Skeleton height={14} borderRadius={7} width="60%" />
             </View>
           ) : chartData ? (
-            <LineChart
-              data={chartData}
-              width={screenWidth - 64}
-              height={200}
-              chartConfig={chartConfig}
-              bezier
-              style={{ borderRadius: 8 }}
-              withInnerLines={false}
-              withOuterLines={false}
-              fromZero
-            />
+            <>
+              <LineChart
+                data={chartData}
+                width={screenWidth - 64}
+                height={200}
+                chartConfig={chartConfig}
+                bezier
+                style={{ borderRadius: 8 }}
+                withInnerLines={false}
+                withOuterLines={false}
+                fromZero
+              />
+              {chartData && 'legend' in chartData && (chartData as any).legend?.length > 0 && (
+                <View style={styles.legendRow}>
+                  {(chartData as any).legend.map((name: string, idx: number) => (
+                    <View key={name} style={styles.legendItem}>
+                      <View
+                        style={[
+                          styles.legendDot,
+                          { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
+                        ]}
+                      />
+                      <Text style={styles.legendText}>{name}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </>
           ) : (
             <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
               {t('analytics.notEnoughData')}
@@ -465,17 +642,36 @@ export function AnalyticsScreen() {
               <Skeleton height={14} borderRadius={7} width="60%" />
             </View>
           ) : uptimeChartData ? (
-            <LineChart
-              data={uptimeChartData}
-              width={screenWidth - 64}
-              height={200}
-              chartConfig={chartConfig}
-              bezier
-              style={{ borderRadius: 8 }}
-              withInnerLines={false}
-              withOuterLines={false}
-              fromZero
-            />
+            <>
+              <LineChart
+                data={uptimeChartData}
+                width={screenWidth - 64}
+                height={200}
+                chartConfig={chartConfig}
+                bezier
+                style={{ borderRadius: 8 }}
+                withInnerLines={false}
+                withOuterLines={false}
+                fromZero
+              />
+              {uptimeChartData &&
+                'legend' in uptimeChartData &&
+                (uptimeChartData as any).legend?.length > 0 && (
+                  <View style={styles.legendRow}>
+                    {(uptimeChartData as any).legend.map((name: string, idx: number) => (
+                      <View key={name} style={styles.legendItem}>
+                        <View
+                          style={[
+                            styles.legendDot,
+                            { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
+                          ]}
+                        />
+                        <Text style={styles.legendText}>{name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+            </>
           ) : (
             <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
               {t('analytics.notEnoughData')}

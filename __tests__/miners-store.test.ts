@@ -664,11 +664,114 @@ describe('loadMiners with auth', () => {
   });
 });
 
+describe('setMinerName', () => {
+  it('updates miner name in store and persists', async () => {
+    mockLoadMiners.mockResolvedValue([
+      { id: 'm1', name: 'Old Name', ip: '10.0.0.1', port: 80, isOnline: true },
+    ]);
+    await useMinerStore.getState().loadMiners();
+    await act(async () => {});
+
+    await useMinerStore.getState().setMinerName('m1', 'New Name');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', name: 'New Name' }),
+    );
+    const miner = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(miner?.name).toBe('New Name');
+  });
+
+  it('returns early when miner is not found', async () => {
+    const saveBefore = mockSaveMiner.mock.calls.length;
+    await useMinerStore.getState().setMinerName('nonexistent', 'New Name');
+    expect(mockSaveMiner).toHaveBeenCalledTimes(saveBefore);
+  });
+});
+
 describe('refreshMiner missing ID', () => {
   it('returns early when miner is not found', async () => {
     const saveMinerBefore = mockSaveMiner.mock.calls.length;
     await useMinerStore.getState().refreshMiner('nonexistent');
     expect(mockSaveMiner).toHaveBeenCalledTimes(saveMinerBefore);
+  });
+});
+
+describe('cloneMiner', () => {
+  it('creates a clone of the miner with copy name and cleared fields', async () => {
+    const miner = {
+      id: 'm1',
+      name: 'TestMiner',
+      ip: '1.2.3.4',
+      port: 80,
+      group: 'Lab',
+      walletId: 'w1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'GH/s', temperature: 45 },
+      info: { hostname: 'test' },
+      lastSeen: 1000,
+      addedAt: 500,
+      remoteId: 'remote-1',
+    };
+    useMinerStore.setState({ miners: [miner as never] });
+    jest.useFakeTimers({ now: 2000 });
+
+    await useMinerStore.getState().cloneMiner('m1');
+
+    const state = useMinerStore.getState();
+    expect(state.miners).toHaveLength(2);
+    const clone = state.miners.find((m) => m.id !== 'm1')!;
+    expect(clone.name).toBe('TestMiner (copy)');
+    expect(clone.ip).toBe('1.2.3.4');
+    expect(clone.group).toBe('Lab');
+    expect(clone.walletId).toBe('w1');
+    expect(clone.status).toBeUndefined();
+    expect(clone.info).toBeUndefined();
+    expect(clone.lastSeen).toBeUndefined();
+    expect(clone.remoteId).toBeUndefined();
+    expect(clone.addedAt).toBe(2000);
+    expect(mockSaveMiner).toHaveBeenCalledWith(clone);
+    jest.useRealTimers();
+  });
+
+  it('does nothing when miner not found', async () => {
+    const minersBefore = useMinerStore.getState().miners.length;
+    await useMinerStore.getState().cloneMiner('nonexistent');
+    expect(useMinerStore.getState().miners.length).toBe(minersBefore);
+    expect(mockSaveMiner).not.toHaveBeenCalled();
+  });
+});
+
+describe('setMinerIcon', () => {
+  it('sets icon on miner', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerIcon('m1', '🔥');
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.icon).toBe('🔥');
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ id: 'm1', icon: '🔥' }));
+  });
+
+  it('clears icon when undefined', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, icon: '🔥' } as never],
+    });
+
+    await useMinerStore.getState().setMinerIcon('m1', undefined);
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.icon).toBeUndefined();
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', icon: undefined }),
+    );
+  });
+
+  it('does nothing when miner not found', async () => {
+    const saveBefore = mockSaveMiner.mock.calls.length;
+    await useMinerStore.getState().setMinerIcon('nonexistent', '🔥');
+    expect(mockSaveMiner).toHaveBeenCalledTimes(saveBefore);
   });
 });
 

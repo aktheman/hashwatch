@@ -55,6 +55,9 @@ interface MinersState {
   setMinerWallet: (minerId: string, walletId: string | undefined) => Promise<void>;
   setMinerGroup: (minerId: string, group: string | undefined) => Promise<void>;
   setMinerIp: (minerId: string, ip: string, port?: number) => Promise<void>;
+  setMinerName: (minerId: string, name: string) => Promise<void>;
+  cloneMiner: (minerId: string) => Promise<void>;
+  setMinerIcon: (minerId: string, icon: string | undefined) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   clearError: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
@@ -316,6 +319,43 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
     const updated = { ...miner, ip, port: port ?? miner.port };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  setMinerName: async (minerId: string, name: string) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, name };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  cloneMiner: async (minerId: string) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const clone: Miner = {
+      ...miner,
+      id: generateId(),
+      name: `${miner.name} (copy)`,
+      addedAt: Date.now(),
+      lastSeen: undefined,
+      status: undefined,
+      info: undefined,
+      remoteId: undefined,
+    };
+    await DB.saveMiner(clone);
+    set((s) => ({ miners: [...s.miners, clone] }));
+  },
+
+  setMinerIcon: async (minerId: string, icon: string | undefined) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, icon: icon || undefined };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),

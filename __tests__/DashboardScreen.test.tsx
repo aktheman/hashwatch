@@ -365,7 +365,7 @@ it('shows group filter chips', async () => {
     miners: [makeMiner({ group: 'rack-a' })],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText(/rack-a/)).toBeTruthy();
+  expect(screen.getAllByText(/rack-a/).length).toBeGreaterThanOrEqual(1);
 });
 
 it('filters miners by group', async () => {
@@ -432,7 +432,7 @@ it('shows high temperature in danger color', async () => {
     ],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('85°')).toBeTruthy();
+  expect(screen.getAllByText('85°').length).toBeGreaterThanOrEqual(1);
 });
 
 it('shows dash when no temperature data', async () => {

@@ -170,9 +170,14 @@ function applyMode() {
     _current = neonTheme;
   } else if (_mode === '5tratum') {
     _current = stratumTheme;
-  } else {
-    const prefersDark = _mode === 'dark';
+  } else if (_mode === 'system') {
+    const prefersDark =
+      Platform.OS === 'web'
+        ? (window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false)
+        : false;
     _current = prefersDark ? darkTheme : lightTheme;
+  } else {
+    _current = _mode === 'dark' ? darkTheme : lightTheme;
   }
   listeners.forEach((cb) => cb());
 }
@@ -204,3 +209,38 @@ export const theme = new Proxy({} as Theme, {
     return (_current as Record<string, unknown>)[prop];
   },
 });
+
+let scheduleTimerId: ReturnType<typeof setTimeout> | null = null;
+let scheduledMode: 'dark' | 'light' | null = null;
+
+export function scheduleThemeSwitch(hour: number, mode: 'dark' | 'light') {
+  if (scheduleTimerId !== null) {
+    clearTimeout(scheduleTimerId);
+    scheduleTimerId = null;
+  }
+  if (scheduledMode === mode) return;
+  scheduledMode = mode;
+
+  const now = new Date();
+  const target = new Date(now);
+  target.setHours(hour, 0, 0, 0);
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+  const msUntil = target.getTime() - now.getTime();
+
+  scheduleTimerId = setTimeout(() => {
+    setThemeMode(mode === 'dark' ? 'dark' : 'light');
+    scheduleTimerId = null;
+    scheduledMode = null;
+    scheduleThemeSwitch(hour, mode);
+  }, msUntil);
+}
+
+export function clearThemeSchedule() {
+  if (scheduleTimerId !== null) {
+    clearTimeout(scheduleTimerId);
+    scheduleTimerId = null;
+  }
+  scheduledMode = null;
+}

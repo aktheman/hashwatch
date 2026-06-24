@@ -13,14 +13,21 @@ import {
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore, queueSetting } from '../store/auth';
-import { useTheme, setThemeMode, getThemeMode } from '../theme';
+import {
+  useTheme,
+  setThemeMode,
+  getThemeMode,
+  scheduleThemeSwitch,
+  clearThemeSchedule,
+} from '../theme';
 import { getSetting, setSetting } from '../db/database';
-import { exportAllData, exportJSON } from '../utils/export';
+import { exportAllData, exportJSON, importFromCSV } from '../utils/export';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useNetworkStatus } from '../services/networkStatus';
+import i18n from '../i18n';
 
 function formatLastSync(ts: number): string {
   const diff = Date.now() - ts;
@@ -57,11 +64,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [authError, setAuthError] = useState('');
   const [powerCost, setPowerCost] = useState('');
   const [autoScan, setAutoScan] = useState(false);
+  const [language, setLanguage] = useState(i18n.language);
+  const [autoDarkHour, setAutoDarkHour] = useState<number | null>(null);
   const powerCostDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [csvInput, setCsvInput] = useState('');
+  const [showCsvImport, setShowCsvImport] = useState(false);
 
   useEffect(() => {
     getSetting('power_cost').then((v) => setPowerCost(v || ''));
     getSetting('auto_scan').then((v) => setAutoScan(v === 'true'));
+    getSetting('language').then((saved) => {
+      if (saved) i18n.changeLanguage(saved);
+    });
+    getSetting('auto_dark_hour').then((v) => setAutoDarkHour(v ? parseInt(v) : null));
   }, []);
 
   const handleAuth = async () => {
@@ -455,6 +471,111 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             ))}
           </View>
         </View>
+        <View style={{ ...styles.row, marginTop: 8 }}>
+          <Text style={styles.rowLabel}>Language / 语言 / Sprache</Text>
+        </View>
+        <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {['en', 'es', 'zh', 'ja', 'de', 'fr'].map((lang) => (
+              <TouchableOpacity
+                key={lang}
+                style={{
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: language === lang ? theme.primary : theme.surfaceLight,
+                  borderWidth: 1,
+                  borderColor: language === lang ? theme.primary : theme.border,
+                }}
+                onPress={() => {
+                  i18n.changeLanguage(lang);
+                  setLanguage(lang);
+                  setSetting('language', lang);
+                }}
+              >
+                <Text
+                  style={{
+                    color: language === lang ? '#FFF' : theme.text,
+                    fontSize: 13,
+                    fontWeight: '600',
+                  }}
+                >
+                  {
+                    {
+                      en: '🇬🇧 English',
+                      es: '🇪🇸 Español',
+                      zh: '🇨🇳 中文',
+                      ja: '🇯🇵 日本語',
+                      de: '🇩🇪 Deutsch',
+                      fr: '🇫🇷 Français',
+                    }[lang]
+                  }
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <View style={{ ...styles.row, marginTop: 12 }}>
+          <Text style={styles.rowLabel}>Dark Mode Schedule</Text>
+        </View>
+        <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <TouchableOpacity
+              style={{
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                borderRadius: 10,
+                backgroundColor: autoDarkHour === null ? theme.primary : theme.surfaceLight,
+                borderWidth: 1,
+                borderColor: autoDarkHour === null ? theme.primary : theme.border,
+              }}
+              onPress={() => {
+                setAutoDarkHour(null);
+                clearThemeSchedule();
+                setSetting('auto_dark_hour', '');
+              }}
+            >
+              <Text
+                style={{
+                  color: autoDarkHour === null ? '#FFF' : theme.text,
+                  fontSize: 13,
+                  fontWeight: '600',
+                }}
+              >
+                Off
+              </Text>
+            </TouchableOpacity>
+            {[18, 19, 20, 21, 22, 23].map((hour) => (
+              <TouchableOpacity
+                key={hour}
+                style={{
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  backgroundColor: autoDarkHour === hour ? theme.primary : theme.surfaceLight,
+                  borderWidth: 1,
+                  borderColor: autoDarkHour === hour ? theme.primary : theme.border,
+                }}
+                onPress={() => {
+                  setAutoDarkHour(hour);
+                  scheduleThemeSwitch(hour, 'dark');
+                  scheduleThemeSwitch((hour + (hour >= 23 ? -17 : 1)) % 24, 'light');
+                  setSetting('auto_dark_hour', String(hour));
+                }}
+              >
+                <Text
+                  style={{
+                    color: autoDarkHour === hour ? '#FFF' : theme.text,
+                    fontSize: 13,
+                    fontWeight: '600',
+                  }}
+                >
+                  {hour}:00
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -485,6 +606,37 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             placeholderTextColor={theme.textMuted}
             keyboardType="decimal-pad"
             accessibilityLabel="Power cost input"
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionTitle}>
+          <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>
+            🔔 Notifications
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: theme.surface,
+            borderRadius: 14,
+            padding: 14,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
+        >
+          <Text style={{ color: theme.text, fontSize: 14 }}>Push Alerts</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={(val) => {
+              setNotificationsEnabled(val);
+              setSetting('notifications_enabled', String(val));
+            }}
+            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+            thumbColor={notificationsEnabled ? theme.primary : theme.textMuted}
           />
         </View>
       </View>
@@ -593,6 +745,82 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.chevron}>›</Text>
           </View>
         </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Import CSV"
+          style={styles.row}
+          onPress={() => setShowCsvImport(!showCsvImport)}
+        >
+          <Text style={styles.rowLabel}>Import CSV</Text>
+          <Text style={styles.actionText}>{showCsvImport ? 'Cancel' : 'Import'}</Text>
+        </TouchableOpacity>
+        {showCsvImport && (
+          <View style={{ marginTop: 12, gap: 8 }}>
+            <Text style={{ color: theme.textDim, fontSize: 12 }}>
+              Paste CSV (columns: name, ip, port):
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: theme.surface,
+                borderRadius: 10,
+                padding: 12,
+                color: theme.text,
+                fontFamily: 'monospace',
+                fontSize: 12,
+                minHeight: 100,
+                borderWidth: 1,
+                borderColor: theme.border,
+              }}
+              value={csvInput}
+              onChangeText={setCsvInput}
+              multiline
+              placeholder="name,ip,port&#10;Miner1,192.168.1.10,80"
+              placeholderTextColor={theme.textMuted}
+            />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.primary,
+                  borderRadius: 10,
+                  padding: 12,
+                  alignItems: 'center',
+                }}
+                onPress={async () => {
+                  const result = await importFromCSV(csvInput);
+                  Alert.alert(
+                    'Import Complete',
+                    `Imported: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
+                    [{ text: 'OK' }],
+                  );
+                  if (result.errors.length > 0) {
+                    console.warn('CSV import errors:', result.errors);
+                  }
+                  setShowCsvImport(false);
+                  setCsvInput('');
+                }}
+              >
+                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>Import</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: theme.surfaceLight,
+                  borderRadius: 10,
+                  padding: 12,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                }}
+                onPress={() => {
+                  setShowCsvImport(false);
+                  setCsvInput('');
+                }}
+              >
+                <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>

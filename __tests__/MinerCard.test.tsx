@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import React from 'react';
 import { Alert } from 'react-native';
 import { MinerCard } from '../src/components/MinerCard';
@@ -199,4 +199,21 @@ it('renders without crashing without onDelete', async () => {
   const miner = makeMiner();
   await render(<MinerCard miner={miner} onPress={jest.fn()} />);
   expect(screen.getByText('Test Miner')).toBeTruthy();
+});
+
+it('shows rename icon when onRename provided', async () => {
+  const miner = makeMiner();
+  await render(<MinerCard miner={miner} onPress={jest.fn()} onRename={jest.fn()} />);
+  expect(screen.getByLabelText('Edit miner name')).toBeTruthy();
+});
+
+it('calls onRename when name is edited and submitted', async () => {
+  const onRename = jest.fn();
+  const miner = makeMiner();
+  await render(<MinerCard miner={miner} onPress={jest.fn()} onRename={onRename} />);
+  fireEvent.press(screen.getByLabelText('Edit miner name'));
+  const input = await screen.findByDisplayValue('Test Miner');
+  await act(async () => fireEvent.changeText(input, 'New Name'));
+  await act(async () => fireEvent(input, 'submitEditing'));
+  expect(onRename).toHaveBeenCalledWith('m1', 'New Name');
 });
