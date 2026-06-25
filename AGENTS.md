@@ -55,8 +55,10 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 745 frontend (62 suites) + 105 backend (12 suites) = 850 total
-- Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — all met
+- Tests: 898 frontend (71 suites) + 105 backend (12 suites) = 1003 total
+- `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
+- `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
+- Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — not yet met (71.29/77.1/83.73/82.09)
 - Security: 0 vulns via `overrides` in package.json (nested for eas-cli deps)
 - AnalyticsScreen: parallel snapshot fetch via `Promise.all`, LRU cache keyed by `minerCacheKey-range`, chart theme colors via refs (avoids recomputation on theme change)
 - MinerDetailScreen: inline IP editing via TextInput on pencil icon tap, saves via `setMinerIp` store action
@@ -87,3 +89,5 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - **AppNavigator miner card**: `DB.loadMiners` mock must return desired miners; the real `loadMiners()` in the store calls `DB.loadMiners()` internally and overwrites any `setState`-preset miners. Mock `refreshAll` to `jest.fn()` to prevent `refreshMiner` from crashing on incomplete mock miner data.
 - **BitAxeClient mock for navigator tests**: Must be a constructor mock (`jest.fn().mockImplementation(...)`) with `fetchAll`, not just `{ probe: jest.fn() }`, because `refreshMiner` calls `new BitAxeClient(...)`.
 - **Cross-test leak**: `jest.clearAllMocks()` preserves `mockResolvedValue`. Reset shared mocks explicitly in `beforeEach`.
+- **`screen` singleton staleness**: `import { screen } from '@testing-library/react-native'` captures `defaultScreen` at import time via CJS destructuring. `render()` updates `exports.screen` via `setRenderResult`, but the local `screen` binding remains `defaultScreen` → `getBy*` throws "render function has not been called". Fix: use render result (e.g., `const r = await render(...)` then `r.getByText(...)`) instead of `screen` singleton.
+- **`fireEvent` is async**: In RNTL v14, `fireEvent.press`, `fireEvent.changeText` etc. are `async` and wrap handlers in `act`. Without `await`, state updates are not flushed before subsequent assertions. Always `await fireEvent.*(...)` to ensure React state is settled.

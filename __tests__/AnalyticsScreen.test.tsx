@@ -260,3 +260,121 @@ it('shows efficiency chart not enough data with no snapshots', async () => {
     expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1);
   });
 });
+
+it('shows uptime chart button', async () => {
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('analytics.uptimeHistory')).toBeTruthy();
+});
+
+it('switches to uptime chart on button press', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue(
+    Array.from({ length: 10 }, (_, i) => ({
+      minerId: 'm1',
+      hashRate: 500,
+      hashRateUnit: 'TH/s',
+      temperature: 55,
+      power: 120,
+      uptimeSeconds: 3600,
+      timestamp: Date.now() - (9 - i) * 3600000,
+      sharesAccepted: 1,
+      sharesRejected: 0,
+    })),
+  );
+  await render(<AnalyticsScreen />);
+
+  fireEvent.press(screen.getByText('analytics.uptimeHistory'));
+
+  await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
+});
+
+it('shows uptime chart not enough data with no snapshots', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue([]);
+  await render(<AnalyticsScreen />);
+
+  fireEvent.press(screen.getByText('analytics.uptimeHistory'));
+
+  await waitFor(() => {
+    expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+it('shows Filter button and toggles filter panel', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      name: 'Miner 1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+    {
+      id: 'm2',
+      name: 'Miner 2',
+      isOnline: true,
+      status: { hashRate: 300, hashRateUnit: 'TH/s', temperature: 45, power: 80 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+
+  await fireEvent.press(screen.getByText('Filter'));
+  await waitFor(() => {
+    expect(screen.getByText('All miners')).toBeTruthy();
+  });
+  expect(screen.getByText('Miner 1')).toBeTruthy();
+  expect(screen.getByText('Miner 2')).toBeTruthy();
+});
+
+it('selects individual miner filter chips', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      name: 'Miner 1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+    {
+      id: 'm2',
+      name: 'Miner 2',
+      isOnline: true,
+      status: { hashRate: 300, hashRateUnit: 'TH/s', temperature: 45, power: 80 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+  await fireEvent.press(screen.getByText('Filter'));
+  await waitFor(() => {
+    expect(screen.getByText('All miners')).toBeTruthy();
+  });
+
+  await fireEvent.press(screen.getByText('Miner 1'));
+});
+
+it('selects all miners filter chip resets selection', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      name: 'Miner 1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  await render(<AnalyticsScreen />);
+  await fireEvent.press(screen.getByText('Filter'));
+  await waitFor(() => {
+    expect(screen.getByText('All miners')).toBeTruthy();
+  });
+
+  await fireEvent.press(screen.getByText('All miners'));
+});
