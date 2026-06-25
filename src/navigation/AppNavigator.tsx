@@ -45,6 +45,9 @@ const ImportDataScreen = lazy(() =>
 const MinerComparisonScreen = lazy(() =>
   import('../screens/MinerComparisonScreen').then((m) => ({ default: m.MinerComparisonScreen })),
 );
+const AlertHistoryScreen = lazy(() =>
+  import('../screens/AlertHistoryScreen').then((m) => ({ default: m.AlertHistoryScreen })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -78,6 +81,7 @@ const WrappedWallets = withScreenBoundary(WalletsScreen);
 const WrappedGroups = withScreenBoundary(GroupsScreen);
 const WrappedImportData = withScreenBoundary(ImportDataScreen);
 const WrappedMinerComparison = withScreenBoundary(MinerComparisonScreen);
+const WrappedAlertHistory = withScreenBoundary(AlertHistoryScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -211,6 +215,11 @@ export function AppNavigator() {
           name="MinerComparison"
           component={WrappedMinerComparison}
           options={{ title: t('navigator.minerComparison') }}
+        />
+        <Stack.Screen
+          name="AlertHistory"
+          component={WrappedAlertHistory}
+          options={{ title: t('alertHistory.title', 'Alert History') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

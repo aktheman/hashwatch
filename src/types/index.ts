@@ -60,6 +60,7 @@ export interface Miner {
   lastSeen?: number;
   addedAt?: number;
   isOnline: boolean;
+  notes?: string;
 }
 
 export interface MinerSnapshot {
@@ -88,6 +89,7 @@ export type RootStackParamList = {
   Groups: undefined;
   ImportData: undefined;
   MinerComparison: { minerIds: string[] };
+  AlertHistory: undefined;
 };
 
 export type TabParamList = {

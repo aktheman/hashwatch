@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Miner } from '../types';
 import * as DB from '../db/database';
+import { useAlertHistoryStore } from '../store/alertHistory';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -196,12 +197,24 @@ async function sendOfflineAlert(miner: Miner) {
     minerId: miner.id,
     type: 'offline',
   });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'offline',
+    title: `${miner.name} went offline`,
+  });
 }
 
 async function sendOfflineReminder(miner: Miner) {
   await send('Still Offline', `${miner.name} has been offline for over 5 minutes`, {
     minerId: miner.id,
     type: 'offline_reminder',
+  });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'offline_reminder',
+    title: `${miner.name} still offline`,
   });
 }
 
@@ -210,12 +223,24 @@ async function sendOnlineAlert(miner: Miner) {
     minerId: miner.id,
     type: 'online',
   });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'online',
+    title: `${miner.name} reconnected`,
+  });
 }
 
 async function sendHotAlert(miner: Miner, temp: number) {
   await send('High Temperature', `${miner.name} is ${temp.toFixed(0)}°C — check cooling`, {
     minerId: miner.id,
     type: 'hot',
+  });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'hot',
+    title: `${miner.name} temperature ${temp.toFixed(0)}°C`,
   });
 }
 
@@ -225,12 +250,24 @@ async function sendHashrateDropAlert(miner: Miner, currentHr: number, prevHr: nu
     minerId: miner.id,
     type: 'hashrate_drop',
   });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'hashrate_drop',
+    title: `${miner.name} hashrate dropped ${pct}%`,
+  });
 }
 
 async function sendPoolLostAlert(miner: Miner, pool: string) {
   await send('Pool Disconnected', `${miner.name} lost connection to ${pool}`, {
     minerId: miner.id,
     type: 'pool_lost',
+  });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'pool_lost',
+    title: `${miner.name} lost pool ${pool}`,
   });
 }
 
@@ -239,5 +276,11 @@ async function sendLongUptimeAlert(miner: Miner, seconds: number) {
   await send('Long Uptime', `${miner.name} running for ${hrs}h`, {
     minerId: miner.id,
     type: 'long_uptime',
+  });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'long_uptime',
+    title: `${miner.name} running ${hrs}h`,
   });
 }

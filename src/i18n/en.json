@@ -31,6 +31,13 @@
     "power": "Power (W)",
     "avgTemp": "Avg Temp",
     "efficiency": "Efficiency",
+    "profitability": "Profitability",
+    "btcDay": "BTC/day",
+    "btcWeek": "BTC/week",
+    "btcMonth": "BTC/month",
+    "usdEquivalent": "USD Equivalent",
+    "perMiner": "Per Miner",
+    "total": "Total",
     "ungrouped": "Ungrouped",
     "minerRemoved": "{{name}} removed"
   },
@@ -59,6 +66,7 @@
     "netDay": "Net/Day",
     "hashrateHistory": "Hashrate History",
     "uptimeHistory": "Uptime History",
+    "efficiencyHistory": "Efficiency History",
     "notEnoughData": "Not enough data yet. Keep miners running."
   },
   "settings": {

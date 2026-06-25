@@ -22,12 +22,77 @@ import {
 } from '../theme';
 import { getSetting, setSetting } from '../db/database';
 import { exportAllData, exportJSON, importFromCSV } from '../utils/export';
+import { exportBackup, importBackup } from '../services/backup';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
 import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useNetworkStatus } from '../services/networkStatus';
+import { useNotificationHistoryStore } from '../store/notificationHistory';
 import i18n from '../i18n';
+
+function NotificationHistorySection() {
+  const theme = useTheme();
+  const history = useNotificationHistoryStore((s) => s.history);
+  const sent = history.filter((e) => e.status === 'sent').length;
+  const failed = history.filter((e) => e.status === 'failed').length;
+  const recent = history.slice(0, 50);
+  const styles = StyleSheet.create({
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      color: theme.textDim,
+      fontSize: 11,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: 8,
+      marginLeft: 4,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: theme.surface,
+      padding: 14,
+      borderRadius: 12,
+      marginBottom: 2,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    rowLabel: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: '500',
+    },
+    rowValue: {
+      color: theme.textDim,
+      fontSize: 15,
+    },
+  });
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Notification History</Text>
+      <View style={styles.row}>
+        <Text style={styles.rowLabel}>Sent</Text>
+        <Text style={[styles.rowValue, { color: theme.success }]}>{sent}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.rowLabel}>Failed</Text>
+        <Text style={[styles.rowValue, { color: theme.danger }]}>{failed}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.rowLabel}>Last 50</Text>
+        <Text style={styles.rowValue}>
+          {recent.length > 0
+            ? `${recent[0].title} · ${new Date(recent[0].sentAt).toLocaleDateString()}`
+            : 'No notifications yet'}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 function formatLastSync(ts: number): string {
   const diff = Date.now() - ts;
@@ -103,6 +168,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       if (saved) i18n.changeLanguage(saved);
     });
     getSetting('auto_dark_hour').then((v) => setAutoDarkHour(v ? parseInt(v) : null));
+    useNotificationHistoryStore.getState().loadHistory();
   }, []);
 
   const handleAuth = async () => {
@@ -372,6 +438,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           >
             <View style={{ gap: 8 }}>
               <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Restore purchases"
                 style={{
                   backgroundColor: theme.primary + '20',
                   borderRadius: 8,
@@ -390,6 +458,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Force pro status"
                   style={{
                     flex: 1,
                     backgroundColor: theme.success + '20',
@@ -408,6 +478,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel="Force free status"
                   style={{
                     flex: 1,
                     backgroundColor: theme.danger + '20',
@@ -600,6 +672,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             {['en', 'es', 'zh', 'ja', 'de', 'fr'].map((lang) => (
               <TouchableOpacity
                 key={lang}
+                accessibilityRole="button"
+                accessibilityLabel={`Switch language to ${lang}`}
                 style={{
                   paddingHorizontal: 14,
                   paddingVertical: 8,
@@ -642,6 +716,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Disable dark mode schedule"
               style={{
                 paddingHorizontal: 14,
                 paddingVertical: 8,
@@ -669,6 +745,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             {[18, 19, 20, 21, 22, 23].map((hour) => (
               <TouchableOpacity
                 key={hour}
+                accessibilityRole="button"
+                accessibilityLabel={`Schedule dark mode at ${hour}:00`}
                 style={{
                   paddingHorizontal: 14,
                   paddingVertical: 8,
@@ -758,9 +836,22 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             }}
             trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
             thumbColor={notificationsEnabled ? theme.primary : theme.textMuted}
+            accessibilityLabel="Toggle push notifications"
           />
         </View>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={[styles.row, { marginTop: 8 }]}
+          onPress={() => navigation.navigate('AlertHistory')}
+        >
+          <Text style={styles.rowLabel}>Alert History</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </TouchableOpacity>
       </View>
+
+      <NotificationHistorySection />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.miners')}</Text>
@@ -900,6 +991,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Import CSV data"
                 style={{
                   flex: 1,
                   backgroundColor: theme.primary,
@@ -924,6 +1017,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>Import</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Cancel CSV import"
                 style={{
                   backgroundColor: theme.surfaceLight,
                   borderRadius: 10,
@@ -942,6 +1037,63 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             </View>
           </View>
         )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Backup</Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Export all data"
+          style={styles.row}
+          onPress={() => {
+            exportBackup().catch((e) => {
+              Alert.alert('Export Failed', e instanceof Error ? e.message : 'Unknown error');
+            });
+          }}
+        >
+          <Text style={styles.rowLabel}>Export All Data</Text>
+          <Text style={styles.actionText}>Download</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Import data from file"
+          style={styles.row}
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              const input = window.document.createElement('input');
+              input.type = 'file';
+              input.accept = '.json';
+              input.onchange = async () => {
+                const file = input.files?.[0];
+                if (!file) return;
+                try {
+                  const text = await file.text();
+                  const result = await importBackup(text);
+                  if (result.success) {
+                    Alert.alert('Import Complete', 'All data has been restored successfully.');
+                    loadMiners();
+                  } else {
+                    Alert.alert(
+                      'Import Failed',
+                      (result.errors || []).join('\n') || 'Unknown error',
+                    );
+                  }
+                } catch (e) {
+                  Alert.alert(
+                    'Import Failed',
+                    e instanceof Error ? e.message : 'Failed to read file',
+                  );
+                }
+              };
+              input.click();
+            } else {
+              navigation.navigate('ImportData');
+            }
+          }}
+        >
+          <Text style={styles.rowLabel}>Import Data</Text>
+          <Text style={styles.actionText}>Restore</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>

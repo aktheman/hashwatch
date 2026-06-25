@@ -19,6 +19,17 @@ import * as DB from '../db/database';
 import { LineChart } from 'react-native-chart-kit';
 import { useWindowDimensions } from 'react-native';
 
+interface ChartDataWithLegend {
+  labels: string[];
+  datasets: {
+    data: number[];
+    color?: (opacity?: number) => string;
+    colors?: Array<(opacity?: number) => string>;
+    strokeWidth?: number;
+  }[];
+  legend?: string[];
+}
+
 type Range = '1h' | '24h' | '7d' | '30d';
 const ranges: Range[] = ['1h', '24h', '7d', '30d'];
 const MINER_COLORS = [
@@ -42,6 +53,7 @@ export function AnalyticsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<Range>('24h');
   const [powerCost, setPowerCost] = useState(0);
+  const [chartView, setChartView] = useState<'hashrate' | 'uptime' | 'efficiency'>('hashrate');
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
   const [selectedMinerIds, setSelectedMinerIds] = useState<Set<string>>(new Set());
   const [showMinerFilter, setShowMinerFilter] = useState(false);
@@ -200,7 +212,7 @@ export function AnalyticsScreen() {
       });
 
       if (datasets.length === 0) return null;
-      return { labels, datasets, legend };
+      return { labels, datasets, legend } as ChartDataWithLegend;
     }
 
     const buckets = sampledTimes.map((time) => {
@@ -217,7 +229,7 @@ export function AnalyticsScreen() {
           strokeWidth: 2,
         },
       ],
-    };
+    } as ChartDataWithLegend;
   }, [snapshots, range, selectedMinerIds, miners]);
 
   const uptimeChartData = useMemo(() => {
@@ -276,7 +288,7 @@ export function AnalyticsScreen() {
       });
 
       if (datasets.length === 0) return null;
-      return { labels, datasets, legend };
+      return { labels, datasets, legend } as ChartDataWithLegend;
     }
 
     const buckets = sampledTimes.map((time) => {
@@ -293,8 +305,88 @@ export function AnalyticsScreen() {
           strokeWidth: 2,
         },
       ],
-    };
+    } as ChartDataWithLegend;
   }, [snapshots, range, selectedMinerIds, miners]);
+
+  const efficiencyChartData = useMemo(() => {
+    if (snapshots.length < 2) return null;
+    const interval =
+      range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
+
+    const allGrouped: Record<number, number[]> = {};
+    for (const s of snapshots) {
+      const bucket = Math.floor(s.timestamp / interval) * interval;
+      if (!allGrouped[bucket]) allGrouped[bucket] = [];
+      const hps = toHashesPerSecond(s.hashRate, s.hashRateUnit);
+      const efficiency = hps > 0 ? s.power / (hps / 1e12) : 0;
+      allGrouped[bucket].push(efficiency);
+    }
+
+    const bucketTimes = Object.keys(allGrouped).map(Number).sort();
+    let sampledTimes = bucketTimes;
+    if (bucketTimes.length > 30) {
+      const step = Math.ceil(bucketTimes.length / 30);
+      sampledTimes = bucketTimes.filter((_, i) => i % step === 0);
+    }
+
+    const labels = sampledTimes.map((b) => {
+      const d = new Date(b);
+      return range === '7d' || range === '30d'
+        ? `${d.getMonth() + 1}/${d.getDate()}`
+        : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    if (selectedMinerIds.size > 0) {
+      const selectedMiners = miners.filter((m) => selectedMinerIds.has(m.id));
+      const datasets: { data: number[]; color: () => string; strokeWidth: number }[] = [];
+      const legend: string[] = [];
+      let colorIdx = 0;
+
+      selectedMiners.forEach((miner) => {
+        const minerSnapshots = snapshots.filter((s) => s.minerId === miner.id);
+        if (minerSnapshots.length < 2) return;
+
+        const grouped: Record<number, number[]> = {};
+        for (const s of minerSnapshots) {
+          const bucket = Math.floor(s.timestamp / interval) * interval;
+          if (!grouped[bucket]) grouped[bucket] = [];
+          const hps = toHashesPerSecond(s.hashRate, s.hashRateUnit);
+          const efficiency = hps > 0 ? s.power / (hps / 1e12) : 0;
+          grouped[bucket].push(efficiency);
+        }
+
+        const data = sampledTimes.map((time) => {
+          const vals = grouped[time];
+          if (!vals) return 0;
+          return Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1));
+        });
+
+        const minerColor = MINER_COLORS[colorIdx % MINER_COLORS.length];
+        datasets.push({ data, color: () => minerColor, strokeWidth: 2 });
+        legend.push(miner.name || miner.id);
+        colorIdx++;
+      });
+
+      if (datasets.length === 0) return null;
+      return { labels, datasets, legend } as ChartDataWithLegend;
+    }
+
+    const buckets = sampledTimes.map((time) => {
+      const vals = allGrouped[time];
+      return { time, efficiency: vals.reduce((a, b) => a + b, 0) / vals.length };
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: buckets.map((b) => Number(b.efficiency.toFixed(1))),
+          color: () => theme.warning,
+          strokeWidth: 2,
+        },
+      ],
+    } as ChartDataWithLegend;
+  }, [snapshots, range, selectedMinerIds, miners, theme.warning]);
 
   const chartConfig = {
     backgroundColor: theme.surface,
@@ -537,7 +629,32 @@ export function AnalyticsScreen() {
         )}
 
         <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>{t('analytics.hashrateHistory')}</Text>
+          <View style={styles.rangeRow}>
+            {(['hashrate', 'uptime', 'efficiency'] as const).map((view) => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={view}
+                style={[
+                  styles.rangeBtn,
+                  {
+                    backgroundColor: chartView === view ? theme.primary : theme.surfaceLight,
+                    borderColor: chartView === view ? theme.primary : theme.border,
+                  },
+                ]}
+                onPress={() => setChartView(view)}
+              >
+                <Text
+                  style={[styles.rangeBtnText, { color: chartView === view ? '#FFF' : theme.text }]}
+                >
+                  {view === 'hashrate'
+                    ? t('analytics.hashrateHistory')
+                    : view === 'uptime'
+                      ? t('analytics.uptimeHistory')
+                      : t('analytics.efficiencyHistory')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           <View style={styles.rangeRow}>
             {ranges.map((r) => (
               <TouchableOpacity
@@ -597,7 +714,7 @@ export function AnalyticsScreen() {
               <Skeleton height={80} borderRadius={8} />
               <Skeleton height={14} borderRadius={7} width="60%" />
             </View>
-          ) : chartData ? (
+          ) : chartView === 'hashrate' && chartData ? (
             <>
               <LineChart
                 data={chartData}
@@ -610,38 +727,24 @@ export function AnalyticsScreen() {
                 withOuterLines={false}
                 fromZero
               />
-              {chartData && 'legend' in chartData && (chartData as any).legend?.length > 0 && (
-                <View style={styles.legendRow}>
-                  {(chartData as any).legend.map((name: string, idx: number) => (
-                    <View key={name} style={styles.legendItem}>
-                      <View
-                        style={[
-                          styles.legendDot,
-                          { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
-                        ]}
-                      />
-                      <Text style={styles.legendText}>{name}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
+              {(chartData as ChartDataWithLegend).legend &&
+                (chartData as ChartDataWithLegend).legend!.length > 0 && (
+                  <View style={styles.legendRow}>
+                    {(chartData as ChartDataWithLegend).legend!.map((name: string, idx: number) => (
+                      <View key={name} style={styles.legendItem}>
+                        <View
+                          style={[
+                            styles.legendDot,
+                            { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
+                          ]}
+                        />
+                        <Text style={styles.legendText}>{name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
             </>
-          ) : (
-            <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
-              {t('analytics.notEnoughData')}
-            </Text>
-          )}
-        </View>
-
-        <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>{t('analytics.uptimeHistory')}</Text>
-          {loading ? (
-            <View style={{ height: 200, justifyContent: 'center', gap: 12 }}>
-              <Skeleton height={20} borderRadius={10} />
-              <Skeleton height={80} borderRadius={8} />
-              <Skeleton height={14} borderRadius={7} width="60%" />
-            </View>
-          ) : uptimeChartData ? (
+          ) : chartView === 'uptime' && uptimeChartData ? (
             <>
               <LineChart
                 data={uptimeChartData}
@@ -654,21 +757,54 @@ export function AnalyticsScreen() {
                 withOuterLines={false}
                 fromZero
               />
-              {uptimeChartData &&
-                'legend' in uptimeChartData &&
-                (uptimeChartData as any).legend?.length > 0 && (
+              {(uptimeChartData as ChartDataWithLegend).legend &&
+                (uptimeChartData as ChartDataWithLegend).legend!.length > 0 && (
                   <View style={styles.legendRow}>
-                    {(uptimeChartData as any).legend.map((name: string, idx: number) => (
-                      <View key={name} style={styles.legendItem}>
-                        <View
-                          style={[
-                            styles.legendDot,
-                            { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
-                          ]}
-                        />
-                        <Text style={styles.legendText}>{name}</Text>
-                      </View>
-                    ))}
+                    {(uptimeChartData as ChartDataWithLegend).legend!.map(
+                      (name: string, idx: number) => (
+                        <View key={name} style={styles.legendItem}>
+                          <View
+                            style={[
+                              styles.legendDot,
+                              { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
+                            ]}
+                          />
+                          <Text style={styles.legendText}>{name}</Text>
+                        </View>
+                      ),
+                    )}
+                  </View>
+                )}
+            </>
+          ) : chartView === 'efficiency' && efficiencyChartData ? (
+            <>
+              <LineChart
+                data={efficiencyChartData}
+                width={screenWidth - 64}
+                height={200}
+                chartConfig={chartConfig}
+                bezier
+                style={{ borderRadius: 8 }}
+                withInnerLines={false}
+                withOuterLines={false}
+                fromZero
+              />
+              {(efficiencyChartData as ChartDataWithLegend).legend &&
+                (efficiencyChartData as ChartDataWithLegend).legend!.length > 0 && (
+                  <View style={styles.legendRow}>
+                    {(efficiencyChartData as ChartDataWithLegend).legend!.map(
+                      (name: string, idx: number) => (
+                        <View key={name} style={styles.legendItem}>
+                          <View
+                            style={[
+                              styles.legendDot,
+                              { backgroundColor: MINER_COLORS[idx % MINER_COLORS.length] },
+                            ]}
+                          />
+                          <Text style={styles.legendText}>{name}</Text>
+                        </View>
+                      ),
+                    )}
                   </View>
                 )}
             </>

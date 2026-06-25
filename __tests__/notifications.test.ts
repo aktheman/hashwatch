@@ -15,6 +15,7 @@ jest.mock('expo-notifications', () => ({
 
 jest.mock('../src/db/database', () => ({
   getSetting: jest.fn().mockResolvedValue('true'),
+  setSetting: jest.fn().mockResolvedValue(undefined),
 }));
 
 function makeStatus(overrides: Partial<Miner['status']> = {}): Miner['status'] {

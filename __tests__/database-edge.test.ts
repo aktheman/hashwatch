@@ -71,11 +71,12 @@ describe('schema migration', () => {
       require('../src/db/database.ts');
     });
 
-    expect(store['hashwatch_schema_version']).toBe('2');
+    expect(store['hashwatch_schema_version']).toBe('3');
     expect(() => JSON.parse(store['hashwatch_miners'])).not.toThrow();
     const miners = JSON.parse(store['hashwatch_miners']);
     expect(miners).toHaveLength(1);
     expect(miners[0].name).toBe('Old');
+    expect(miners[0].notes).toBeUndefined();
     expect(store['hashwatch_snapshots']).toBe('[]');
   });
 
@@ -90,9 +91,11 @@ describe('schema migration', () => {
       require('../src/db/database.ts');
     });
 
-    expect(store['hashwatch_schema_version']).toBe('2');
+    expect(store['hashwatch_schema_version']).toBe('3');
     const snapshots = JSON.parse(store['hashwatch_snapshots']);
     expect(snapshots[0].hashRateUnit).toBe('GH/s');
+    const miners = JSON.parse(store['hashwatch_miners']);
+    expect(miners[0].notes).toBeUndefined();
   });
 
   it('skips migration when already current version', () => {
@@ -105,7 +108,7 @@ describe('schema migration', () => {
       require('../src/db/database.ts');
     });
 
-    expect(store['hashwatch_schema_version']).toBe('2');
+    expect(store['hashwatch_schema_version']).toBe('3');
   });
 });
 
@@ -284,5 +287,153 @@ describe('CRUD operations', () => {
     await DB.cleanupOldSnapshots(1 * 24 * 60 * 60 * 1000);
     const snaps = await DB.getSnapshots('m1');
     expect(snaps).toHaveLength(0);
+  });
+});
+
+describe('exportAllData / importAllData', () => {
+  beforeEach(() => {
+    store = {};
+  });
+
+  it('exportAllData returns all stored data', async () => {
+    const miner = { id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, isOnline: false };
+    const wallet = {
+      id: 'w1',
+      name: 'Mining',
+      address: 'bc1q...',
+      color: '#fff',
+      createdAt: Date.now(),
+    };
+    const snap = {
+      minerId: 'm1',
+      timestamp: 100,
+      hashRate: 500,
+      hashRateUnit: 'GH/s',
+      temperature: 50,
+      voltage: 1200,
+      current: 3.5,
+      power: 12,
+      sharesAccepted: 100,
+      sharesRejected: 1,
+      uptimeSeconds: 3600,
+      frequency: 400,
+    };
+    const alertEvent = {
+      id: 'a1',
+      minerId: 'm1',
+      minerName: 'Test',
+      type: 'offline',
+      title: 'went offline',
+      timestamp: 100,
+      read: false,
+    };
+
+    await DB.saveMiner(miner as any);
+    await DB.saveSnapshot(snap as any);
+    await DB.saveWallet(wallet as any);
+    store['hashwatch_alert_history'] = JSON.stringify([alertEvent]);
+
+    const result = await DB.exportAllData();
+
+    expect(result.miners).toHaveLength(1);
+    expect(result.miners[0].id).toBe('m1');
+    expect(result.snapshots).toHaveLength(1);
+    expect(result.wallets).toHaveLength(1);
+    expect(result.alertHistory).toEqual([alertEvent]);
+    expect(result.notificationHistory).toEqual([]);
+  });
+
+  it('exportAllData returns empty arrays when no data', async () => {
+    const result = await DB.exportAllData();
+    expect(result.miners).toEqual([]);
+    expect(result.snapshots).toEqual([]);
+    expect(result.wallets).toEqual([]);
+    expect(result.settings).toEqual({});
+    expect(result.alertHistory).toEqual([]);
+    expect(result.notificationHistory).toEqual([]);
+  });
+
+  it('importAllData restores miners, snapshots, wallets', async () => {
+    const miner = { id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, isOnline: false };
+    const wallet = {
+      id: 'w1',
+      name: 'Mining',
+      address: 'bc1q...',
+      color: '#fff',
+      createdAt: Date.now(),
+    };
+    const snap = {
+      minerId: 'm1',
+      timestamp: 100,
+      hashRate: 500,
+      hashRateUnit: 'GH/s',
+      temperature: 50,
+      voltage: 1200,
+      current: 3.5,
+      power: 12,
+      sharesAccepted: 100,
+      sharesRejected: 1,
+      uptimeSeconds: 3600,
+      frequency: 400,
+    };
+
+    await DB.importAllData({
+      miners: [miner as any],
+      snapshots: [snap as any],
+      wallets: [wallet as any],
+    });
+
+    const miners = await DB.loadMiners();
+    const wallets = await DB.loadWallets();
+    const snaps = await DB.getSnapshots('m1');
+    expect(miners).toHaveLength(1);
+    expect(wallets).toHaveLength(1);
+    expect(snaps).toHaveLength(1);
+  });
+
+  it('importAllData merges settings', async () => {
+    await DB.setSetting('theme_mode', 'dark');
+    await DB.importAllData({
+      settings: { power_cost: '0.15' },
+    });
+
+    expect(await DB.getSetting('theme_mode')).toBe('dark');
+    expect(await DB.getSetting('power_cost')).toBe('0.15');
+  });
+
+  it('importAllData restores alert and notification history', async () => {
+    const alertEvent = {
+      id: 'a1',
+      minerId: 'm1',
+      minerName: 'Test',
+      type: 'offline',
+      title: 'went offline',
+      timestamp: 100,
+      read: false,
+    };
+    const notif = {
+      id: 'n1',
+      token: 'tok',
+      title: 'Alert',
+      body: 'body',
+      data: {},
+      sentAt: 100,
+      status: 'sent' as const,
+    };
+
+    await DB.importAllData({
+      alertHistory: [alertEvent],
+      notificationHistory: [notif],
+    });
+
+    const result = await DB.exportAllData();
+    expect(result.alertHistory).toEqual([alertEvent]);
+    expect(result.notificationHistory).toEqual([notif]);
+  });
+
+  it('importAllData handles partial payload gracefully', async () => {
+    await expect(DB.importAllData({})).resolves.toBeUndefined();
+    const miners = await DB.loadMiners();
+    expect(miners).toEqual([]);
   });
 });

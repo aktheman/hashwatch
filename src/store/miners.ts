@@ -60,6 +60,7 @@ interface MinersState {
   setMinerIcon: (minerId: string, icon: string | undefined) => Promise<void>;
   setMinerLocation: (minerId: string, location: string | undefined) => Promise<void>;
   setMinerTags: (minerId: string, tags: string[]) => Promise<void>;
+  setMinerNotes: (minerId: string, notes: string) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   updateMinerFromServer: (data: {
     id: string;
@@ -385,6 +386,16 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
     const updated = { ...miner, tags };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  setMinerNotes: async (minerId: string, notes: string) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, notes: notes || undefined };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
