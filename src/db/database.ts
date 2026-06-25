@@ -5,7 +5,9 @@ const STORAGE_KEY_SNAPSHOTS = 'hashwatch_snapshots';
 const STORAGE_KEY_SETTINGS = 'hashwatch_settings';
 const STORAGE_KEY_WALLETS = 'hashwatch_wallets';
 const STORAGE_KEY_SCHEMA = 'hashwatch_schema_version';
-const CURRENT_SCHEMA_VERSION = 2;
+const STORAGE_KEY_ALERT_HISTORY = 'hashwatch_alert_history';
+const STORAGE_KEY_NOTIFICATION_HISTORY = 'hashwatch_notification_history';
+const CURRENT_SCHEMA_VERSION = 3;
 
 let _writeQueue: Promise<void> = Promise.resolve();
 
@@ -63,6 +65,16 @@ async function migrate(): Promise<void> {
     }));
     saveJSON(STORAGE_KEY_SNAPSHOTS, migrated);
     setSchemaVersion(2);
+  }
+
+  if (version < 3) {
+    const miners = loadJSON<Record<string, unknown>[]>(STORAGE_KEY_MINERS, []);
+    const migrated = miners.map((m: Record<string, unknown>) => ({
+      ...m,
+      notes: (m.notes as string) || undefined,
+    }));
+    saveJSON(STORAGE_KEY_MINERS, migrated);
+    setSchemaVersion(3);
   }
 }
 
@@ -157,4 +169,62 @@ export async function cleanupOldSnapshots(
   const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
   const filtered = snapshots.filter((s) => s.timestamp >= cutoff);
   saveJSON(STORAGE_KEY_SNAPSHOTS, filtered);
+}
+
+export interface FullExport {
+  miners: Miner[];
+  snapshots: MinerSnapshot[];
+  wallets: Wallet[];
+  settings: Record<string, string>;
+  alertHistory: unknown[];
+  notificationHistory: unknown[];
+}
+
+export async function exportAllData(): Promise<FullExport> {
+  const miners = loadJSON<Miner[]>(STORAGE_KEY_MINERS, []);
+  const allSnapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  const wallets = loadJSON<Wallet[]>(STORAGE_KEY_WALLETS, []);
+  const settings = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});
+  let alertHistory: unknown[] = [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_ALERT_HISTORY);
+    if (raw) alertHistory = JSON.parse(raw);
+  } catch {}
+  let notificationHistory: unknown[] = [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_NOTIFICATION_HISTORY);
+    if (raw) notificationHistory = JSON.parse(raw);
+  } catch {}
+  return { miners, snapshots: allSnapshots, wallets, settings, alertHistory, notificationHistory };
+}
+
+export interface ImportPayload {
+  miners?: Miner[];
+  snapshots?: MinerSnapshot[];
+  wallets?: Wallet[];
+  settings?: Record<string, string>;
+  alertHistory?: unknown[];
+  notificationHistory?: unknown[];
+}
+
+export async function importAllData(data: ImportPayload): Promise<void> {
+  if (Array.isArray(data.miners)) {
+    saveJSON(STORAGE_KEY_MINERS, data.miners);
+  }
+  if (Array.isArray(data.snapshots)) {
+    saveJSON(STORAGE_KEY_SNAPSHOTS, data.snapshots);
+  }
+  if (Array.isArray(data.wallets)) {
+    saveJSON(STORAGE_KEY_WALLETS, data.wallets);
+  }
+  if (data.settings) {
+    const existing = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});
+    saveJSON(STORAGE_KEY_SETTINGS, { ...existing, ...data.settings });
+  }
+  if (Array.isArray(data.alertHistory)) {
+    saveJSON(STORAGE_KEY_ALERT_HISTORY, data.alertHistory);
+  }
+  if (Array.isArray(data.notificationHistory)) {
+    saveJSON(STORAGE_KEY_NOTIFICATION_HISTORY, data.notificationHistory);
+  }
 }

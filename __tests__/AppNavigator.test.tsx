@@ -180,7 +180,7 @@ it('shows miner card when miners exist', async () => {
     refreshAll: jest.fn(),
   });
   await render(<AppNavigator />);
-  expect(await screen.findByText('TestMiner')).toBeTruthy();
+  expect((await screen.findAllByText('TestMiner')).length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText('500.0 GH/s').length).toBeGreaterThanOrEqual(1);
 });
 

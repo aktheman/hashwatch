@@ -201,7 +201,7 @@ it('shows miner card when miners exist', async () => {
     ] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('TestMiner')).toBeTruthy();
+  expect(screen.getAllByText('TestMiner')[0]).toBeTruthy();
 });
 
 it('navigates to MinerDetail on miner press', async () => {
@@ -218,7 +218,7 @@ it('navigates to MinerDetail on miner press', async () => {
     ] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('TestMiner'));
+  fireEvent.press(screen.getByLabelText('TestMiner, online, 500.0 GH/s'));
   expect(navigation.navigate).toHaveBeenCalledWith('MinerDetail', { minerId: 'm1' });
 });
 
@@ -326,13 +326,13 @@ it('filters miners by wallet', async () => {
     ],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('Miner1')).toBeTruthy();
-  expect(screen.getByText('Miner2')).toBeTruthy();
+  expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
 
   fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
-  expect(screen.getByText('Miner1')).toBeTruthy();
+  expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
   await waitFor(() => {
-    expect(screen.queryByText('Miner2')).toBeNull();
+    expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
 });
 
@@ -351,12 +351,12 @@ it('toggles wallet filter off on second press', async () => {
   await render(<DashboardScreen navigation={navigation} />);
   fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   await waitFor(() => {
-    expect(screen.queryByText('Miner2')).toBeNull();
+    expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
   fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   await waitFor(() => {
-    expect(screen.getByText('Miner1')).toBeTruthy();
-    expect(screen.getByText('Miner2')).toBeTruthy();
+    expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -376,13 +376,13 @@ it('filters miners by group', async () => {
     ],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  expect(screen.getByText('Miner1')).toBeTruthy();
-  expect(screen.getByText('Miner2')).toBeTruthy();
+  expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
 
   fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
-  expect(screen.getByText('Miner1')).toBeTruthy();
+  expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
   await waitFor(() => {
-    expect(screen.queryByText('Miner2')).toBeNull();
+    expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
 });
 
@@ -396,12 +396,12 @@ it('toggles group filter off on second press', async () => {
   await render(<DashboardScreen navigation={navigation} />);
   fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
   await waitFor(() => {
-    expect(screen.queryByText('Miner2')).toBeNull();
+    expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
   fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
   await waitFor(() => {
-    expect(screen.getByText('Miner1')).toBeTruthy();
-    expect(screen.getByText('Miner2')).toBeTruthy();
+    expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -417,11 +417,11 @@ it('All chip resets both wallet and group filters', async () => {
   await render(<DashboardScreen navigation={navigation} />);
   fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   await waitFor(() => {
-    expect(screen.queryByText('Miner2')).toBeNull();
+    expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
   fireEvent.press(screen.getByLabelText('Filter: All'));
   await waitFor(() => {
-    expect(screen.getByText('Miner2')).toBeTruthy();
+    expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -479,7 +479,7 @@ describe('comparison selection mode', () => {
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
     fireEvent.press(btn);
-    const miner1 = await screen.findByText('Miner1');
+    const [, miner1] = await screen.findAllByText('Miner1');
     fireEvent.press(miner1);
     expect(await screen.findByText('comparison.compare')).toBeTruthy();
   });
@@ -504,9 +504,9 @@ describe('comparison selection mode', () => {
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
     fireEvent.press(btn);
-    const miner1 = await screen.findByText('Miner1');
+    const [, miner1] = await screen.findAllByText('Miner1');
     fireEvent.press(miner1);
-    const miner2 = await screen.findByText('Miner2');
+    const [, miner2] = await screen.findAllByText('Miner2');
     fireEvent.press(miner2);
     const compareAction = await screen.findByText('comparison.compare');
     fireEvent.press(compareAction);
@@ -524,7 +524,7 @@ describe('comparison selection mode', () => {
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
     fireEvent.press(btn);
-    const miner1 = await screen.findByText('Miner1');
+    const [, miner1] = await screen.findAllByText('Miner1');
     fireEvent.press(miner1);
     expect(await screen.findByLabelText('Cancel selection')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Cancel selection'));
@@ -553,8 +553,8 @@ describe('batch operations', () => {
     const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation(() => {});
     await render(<DashboardScreen navigation={navigation} />);
     fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press(await screen.findByText('Miner1'));
-    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
     fireEvent.press(await screen.findByLabelText('Batch group'));
     const promptArgs = promptSpy.mock.calls[0];
     const okButton = promptArgs?.[2]?.find((b: any) => b.text === 'common.ok');
@@ -577,8 +577,8 @@ describe('batch operations', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press(await screen.findByText('Miner1'));
-    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
     fireEvent.press(await screen.findByLabelText('Batch wallet'));
     expect(await screen.findByLabelText('Assign wallet: Test Wallet')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Assign wallet: Test Wallet'));
@@ -600,8 +600,8 @@ describe('batch operations', () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     await render(<DashboardScreen navigation={navigation} />);
     fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press(await screen.findByText('Miner1'));
-    fireEvent.press(await screen.findByText('Miner2'));
+    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
     fireEvent.press(await screen.findByLabelText('Batch delete'));
     const alertArgs = alertSpy.mock.calls[0];
     const deleteButton = alertArgs?.[2]?.find((b: any) => b.text === 'common.delete');

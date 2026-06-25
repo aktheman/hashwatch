@@ -823,3 +823,39 @@ describe('getSnapshots edge cases', () => {
     mockAuthToken = null;
   });
 });
+
+describe('setMinerNotes', () => {
+  it('sets notes on miner', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerNotes('m1', 'Runs hot in summer');
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.notes).toBe('Runs hot in summer');
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', notes: 'Runs hot in summer' }),
+    );
+  });
+
+  it('clears notes when empty string', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, notes: 'old notes' } as never],
+    });
+
+    await useMinerStore.getState().setMinerNotes('m1', '');
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.notes).toBeUndefined();
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', notes: undefined }),
+    );
+  });
+
+  it('does nothing when miner not found', async () => {
+    const saveBefore = mockSaveMiner.mock.calls.length;
+    await useMinerStore.getState().setMinerNotes('nonexistent', 'notes');
+    expect(mockSaveMiner).toHaveBeenCalledTimes(saveBefore);
+  });
+});

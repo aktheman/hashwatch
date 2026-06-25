@@ -263,6 +263,7 @@ export const MinerCard = memo(
                 </Text>
                 {onRename && (
                   <TouchableOpacity
+                    accessibilityRole="button"
                     onPress={() => {
                       setEditNameValue(miner.name);
                       setEditingName(true);

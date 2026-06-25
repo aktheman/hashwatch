@@ -179,3 +179,84 @@ it('shows empty chart text with no snapshot data', async () => {
     expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1),
   );
 });
+
+it('shows efficiency chart button', async () => {
+  await render(<AnalyticsScreen />);
+  expect(screen.getByText('analytics.efficiencyHistory')).toBeTruthy();
+});
+
+it('switches to efficiency chart on button press', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue(
+    Array.from({ length: 10 }, (_, i) => ({
+      minerId: 'm1',
+      hashRate: 500,
+      hashRateUnit: 'TH/s',
+      temperature: 55,
+      power: 120,
+      uptimeSeconds: 3600,
+      timestamp: Date.now() - (9 - i) * 3600000,
+      sharesAccepted: 1,
+      sharesRejected: 0,
+    })),
+  );
+  await render(<AnalyticsScreen />);
+
+  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+
+  await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
+});
+
+it('shows efficiency chart with data', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue(
+    Array.from({ length: 10 }, (_, i) => ({
+      minerId: 'm1',
+      hashRate: 500,
+      hashRateUnit: 'TH/s',
+      temperature: 55,
+      power: 120,
+      uptimeSeconds: 3600,
+      timestamp: Date.now() - (9 - i) * 3600000,
+      sharesAccepted: 1,
+      sharesRejected: 0,
+    })),
+  );
+  await render(<AnalyticsScreen />);
+
+  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+
+  await waitFor(() => {
+    expect(screen.queryByText('analytics.notEnoughData')).toBeNull();
+  });
+});
+
+it('shows efficiency chart not enough data with no snapshots', async () => {
+  mockMiners = [
+    {
+      id: 'm1',
+      isOnline: true,
+      status: { hashRate: 500, hashRateUnit: 'TH/s', temperature: 55, power: 120 },
+    },
+  ];
+  mockGetSnapshots.mockResolvedValue([]);
+  await render(<AnalyticsScreen />);
+
+  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+
+  await waitFor(() => {
+    expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1);
+  });
+});

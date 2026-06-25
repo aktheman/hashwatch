@@ -32,7 +32,7 @@ import {
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { exportAllData } from '../utils/export';
 import { checkMinerAlerts } from '../services/notifications';
-import { MetricTile } from '../components/DashboardComponents';
+import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
 import * as DB from '../db/database';
 import {
@@ -73,10 +73,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [expandedPool, setExpandedPool] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [autoGroupBy, setAutoGroupBy] = useState<null | 'location' | 'tag'>(null);
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Record<SectionKey, boolean>>({
     ...DEFAULT_VISIBLE,
   });
+  const [powerCost, setPowerCost] = useState(0);
 
   const groups = useMemo(() => {
     const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
@@ -116,6 +118,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     });
     DB.getSetting('kiosk_mode').then((v) => {
       if (v === 'true') setKioskMode(true);
+    });
+    DB.getSetting('power_cost').then((v) => {
+      setPowerCost(parseFloat(v || '0') || 0);
     });
   }, []);
 
@@ -293,6 +298,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       DB.setSetting('dashboard_sections', JSON.stringify(next));
       return next;
     });
+  }, []);
+
+  const handleResetSections = useCallback(() => {
+    setVisibleSections({ ...DEFAULT_VISIBLE });
+    DB.setSetting('dashboard_sections', JSON.stringify(DEFAULT_VISIBLE));
+  }, []);
+
+  const handleApplyPreset = useCallback((sections: Record<SectionKey, boolean>) => {
+    setVisibleSections({ ...sections });
+    DB.setSetting('dashboard_sections', JSON.stringify(sections));
   }, []);
 
   const handleAddMiner = useCallback(() => {
@@ -476,7 +491,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const groupedMiners = useMemo(() => {
     const groups = new Map<string, Miner[]>();
     for (const m of sortedMiners) {
-      const key = m.group || 'Ungrouped';
+      let key: string;
+      if (autoGroupBy === 'location') {
+        key = m.location || 'Ungrouped';
+      } else if (autoGroupBy === 'tag') {
+        key = (m.tags && m.tags[0]) || 'Ungrouped';
+      } else {
+        key = m.group || 'Ungrouped';
+      }
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
@@ -491,7 +513,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       }
     }
     return items;
-  }, [sortedMiners, collapsedGroups]);
+  }, [sortedMiners, collapsedGroups, autoGroupBy]);
 
   const styles = useMemo(
     () =>
@@ -820,6 +842,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     <Outer {...outerProps}>
       {kioskMode ? (
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Exit kiosk mode"
           style={{
             position: 'absolute',
             top: 50,
@@ -1186,6 +1210,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </View>
       )}
 
+      {visibleSections.profitability && miners.length > 0 && (
+        <ProfitabilityCard miners={filteredMiners} powerCost={powerCost} />
+      )}
+
       {!kioskMode &&
         visibleSections.filters &&
         (wallets.length > 0 || groups.length > 0 || locations.length > 0 || allTags.length > 0) && (
@@ -1287,6 +1315,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <TouchableOpacity
                 accessibilityRole="button"
                 key={loc}
+                accessibilityLabel={`Filter by location: ${loc}`}
                 style={[
                   styles.walletChip,
                   {
@@ -1310,6 +1339,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <TouchableOpacity
                 accessibilityRole="button"
                 key={tag}
+                accessibilityLabel={`Filter by tag: ${tag}`}
                 style={[
                   styles.walletChip,
                   {
@@ -1347,6 +1377,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <TouchableOpacity
               key={s}
               accessibilityRole="button"
+              accessibilityLabel={`Sort by ${s}`}
               onPress={() => setSortBy(s)}
               style={{
                 paddingHorizontal: 8,
@@ -1365,6 +1396,45 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 }}
               >
                 {s === 'name' ? 'Name' : s === 'hashrate' ? 'Hashrate' : 'Temp'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {!kioskMode && visibleSections.sort && miners.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 16,
+            marginBottom: 4,
+          }}
+        >
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Group:</Text>
+          {([null, 'location', 'tag'] as const).map((g) => (
+            <TouchableOpacity
+              key={g ?? 'off'}
+              accessibilityRole="button"
+              onPress={() => setAutoGroupBy(g)}
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 6,
+                backgroundColor: autoGroupBy === g ? theme.accent : theme.surface,
+                borderWidth: 1,
+                borderColor: autoGroupBy === g ? theme.accent : theme.border,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: '700',
+                  color: autoGroupBy === g ? '#FFF' : theme.textMuted,
+                }}
+              >
+                {g === null ? 'Off' : g === 'location' ? '📍 Loc' : '🏷️ Tag'}
               </Text>
             </TouchableOpacity>
           ))}
@@ -1556,6 +1626,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         onClose={() => setShowCustomizer(false)}
         visibleSections={visibleSections}
         onToggle={handleToggleSection}
+        onReset={handleResetSections}
+        onApplyPreset={handleApplyPreset}
         kioskMode={kioskMode}
         onToggleKiosk={handleToggleKiosk}
       />

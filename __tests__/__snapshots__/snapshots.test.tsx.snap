@@ -3344,6 +3344,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         >
           <View
+            accessibilityLabel="Switch language to en"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3396,6 +3398,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Switch language to es"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3448,6 +3452,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Switch language to zh"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3500,6 +3506,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Switch language to ja"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3552,6 +3560,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Switch language to de"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3604,6 +3614,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Switch language to fr"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3703,6 +3715,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         >
           <View
+            accessibilityLabel="Disable dark mode schedule"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3755,6 +3769,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 18:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3808,6 +3824,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 19:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3861,6 +3879,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 20:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3914,6 +3934,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 21:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -3967,6 +3989,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 22:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -4020,6 +4044,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
             </Text>
           </View>
           <View
+            accessibilityLabel="Schedule dark mode at 23:00"
+            accessibilityRole="button"
             accessibilityState={
               {
                 "busy": undefined,
@@ -4226,6 +4252,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           Push Alerts
         </Text>
         <RCTSwitch
+          accessibilityLabel="Toggle push notifications"
           accessibilityRole="switch"
           onChange={[Function]}
           onResponderTerminationRequest={[Function]}
@@ -4240,6 +4267,228 @@ exports[`SettingsScreen matches snapshot 1`] = `
           tintColor="#1A1A3E"
           value={true}
         />
+      </View>
+      <View
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "marginTop": 8,
+            "opacity": 1,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Alert History
+        </Text>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#5C5F7A",
+                "fontSize": 20,
+                "fontWeight": "300",
+              }
+            }
+          >
+            ›
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "marginBottom": 24,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#8B8FA3",
+            "fontSize": 11,
+            "fontWeight": "700",
+            "letterSpacing": 0.8,
+            "marginBottom": 8,
+            "marginLeft": 4,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Notification History
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Sent
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "color": "#8B8FA3",
+                "fontSize": 15,
+              },
+              {
+                "color": "#10B981",
+              },
+            ]
+          }
+        >
+          0
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Failed
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "color": "#8B8FA3",
+                "fontSize": 15,
+              },
+              {
+                "color": "#EF4444",
+              },
+            ]
+          }
+        >
+          0
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Last 50
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#8B8FA3",
+              "fontSize": 15,
+            }
+          }
+        >
+          No notifications yet
+        </Text>
       </View>
     </View>
     <View
@@ -4900,6 +5149,165 @@ exports[`SettingsScreen matches snapshot 1`] = `
           }
         >
           Import
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "marginBottom": 24,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#8B8FA3",
+            "fontSize": 11,
+            "fontWeight": "700",
+            "letterSpacing": 0.8,
+            "marginBottom": 8,
+            "marginLeft": 4,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Backup
+      </Text>
+      <View
+        accessibilityLabel="Export all data"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "opacity": 1,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Export All Data
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6C63FF",
+              "fontSize": 15,
+              "fontWeight": "600",
+            }
+          }
+        >
+          Download
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Import data from file"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#13132B",
+            "borderColor": "#1E1E42",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 2,
+            "opacity": 1,
+            "padding": 14,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#FFFFFF",
+              "fontSize": 15,
+              "fontWeight": "500",
+            }
+          }
+        >
+          Import Data
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6C63FF",
+              "fontSize": 15,
+              "fontWeight": "600",
+            }
+          }
+        >
+          Restore
         </Text>
       </View>
     </View>

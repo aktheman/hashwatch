@@ -328,6 +328,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const setMinerIcon = useMinerStore((s) => s.setMinerIcon);
   const setMinerLocation = useMinerStore((s) => s.setMinerLocation);
   const setMinerTags = useMinerStore((s) => s.setMinerTags);
+  const setMinerNotes = useMinerStore((s) => s.setMinerNotes);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -589,6 +590,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 {[60, 65, 70, 75, 80].map((t) => (
                   <TouchableOpacity
                     key={t}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Set temp alert to ${t}°C`}
                     onPress={() => {
                       const next = { ...alertRules, tempThreshold: t };
                       setAlertRulesState(next);
@@ -627,6 +630,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 {[30, 40, 50, 60, 70].map((p) => (
                   <TouchableOpacity
                     key={p}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Set hashrate drop alert to ${p}%`}
                     onPress={() => {
                       const next = { ...alertRules, hashrateDropPercent: p };
                       setAlertRulesState(next);
@@ -750,6 +755,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       {showLocationPicker && (
         <View style={[styles.section, styles.walletPicker, { marginHorizontal: 16 }]}>
           <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Clear location"
             onPress={() => {
               setMinerLocation(minerId, undefined);
               setShowLocationPicker(false);
@@ -760,6 +767,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
             <TouchableOpacity
               key={loc}
+              accessibilityRole="button"
+              accessibilityLabel={`Set location to ${loc}`}
               onPress={() => {
                 setMinerLocation(minerId, loc);
                 setShowLocationPicker(false);
@@ -777,6 +786,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           {(miner.tags || []).map((tag) => (
             <TouchableOpacity
               key={tag}
+              accessibilityRole="button"
+              accessibilityLabel={`Remove tag ${tag}`}
               onPress={() =>
                 setMinerTags(
                   minerId,
@@ -813,6 +824,24 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             borderWidth: 1,
             borderColor: theme.border,
           }}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>📝 Notes</Text>
+        <TextInput
+          style={[styles.groupTagInput, { minHeight: 80, textAlignVertical: 'top' }]}
+          value={miner.notes || ''}
+          onChangeText={(text) => {
+            if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
+            groupDebounceRef.current = setTimeout(() => {
+              setMinerNotes(minerId, text);
+            }, 500);
+          }}
+          placeholder="Add notes about this miner..."
+          placeholderTextColor={theme.textMuted}
+          multiline
+          accessibilityLabel="Miner notes input"
         />
       </View>
 

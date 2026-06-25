@@ -23,6 +23,12 @@ export function contrastRatio(fg: string, bg: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+export function checkContrast(
+  theme: Record<string, string>,
+): { pair: string; ratio: number; pass: boolean }[] {
+  return auditThemeContrast(theme);
+}
+
 export function auditThemeContrast(
   theme: Record<string, string>,
 ): { pair: string; ratio: number; pass: boolean }[] {

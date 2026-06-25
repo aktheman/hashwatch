@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
+import { Miner } from '../types';
+import { estimateBTCPerDay, formatBTC, getBTCPrice } from '../utils/hashrate';
 
 interface MetricTileProps {
   title: string;
@@ -287,6 +289,147 @@ function GaugeArc({
           {value}°
         </Text>
       </View>
+    </View>
+  );
+}
+
+export function ProfitabilityCard({ miners, powerCost }: { miners: Miner[]; powerCost?: number }) {
+  const theme = useTheme();
+  const btcPrice = getBTCPrice();
+
+  const perMiner = useMemo(
+    () =>
+      miners.map((m) => {
+        const hps =
+          (m.status?.hashRate ?? 0) *
+          (() => {
+            const u = m.status?.hashRateUnit;
+            if (u === 'KH/s') return 1e3;
+            if (u === 'MH/s') return 1e6;
+            if (u === 'GH/s') return 1e9;
+            if (u === 'TH/s') return 1e12;
+            if (u === 'PH/s') return 1e15;
+            return 1;
+          })();
+        const btcDay = estimateBTCPerDay(hps);
+        return { ...m, btcPerDay: btcDay, hps };
+      }),
+    [miners],
+  );
+
+  const totalBtcDay = useMemo(() => perMiner.reduce((sum, m) => sum + m.btcPerDay, 0), [perMiner]);
+
+  const usdPerDay = totalBtcDay * btcPrice;
+
+  return (
+    <View
+      style={{
+        marginHorizontal: 16,
+        marginTop: 12,
+        backgroundColor: theme.surface,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: theme.border,
+        padding: 16,
+        gap: 10,
+      }}
+    >
+      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>≡ Profitability</Text>
+      {perMiner.map((m) => (
+        <View
+          key={m.id}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 4,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+          }}
+        >
+          <Text
+            style={{ color: theme.text, fontSize: 13, fontWeight: '600', flex: 1 }}
+            numberOfLines={1}
+          >
+            {m.name || m.id}
+          </Text>
+          <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+            {formatBTC(m.btcPerDay)}/day
+          </Text>
+          {btcPrice > 0 && (
+            <Text style={{ color: theme.textDim, fontSize: 11, marginLeft: 6 }}>
+              (~${(m.btcPerDay * btcPrice).toFixed(2)})
+            </Text>
+          )}
+        </View>
+      ))}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 6,
+        }}
+      >
+        <Text style={{ color: theme.text, fontSize: 14, fontWeight: '800' }}>Total</Text>
+        <Text style={{ color: theme.success, fontSize: 14, fontWeight: '800' }}>
+          {formatBTC(totalBtcDay)}/day
+        </Text>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Week</Text>
+          <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+            {formatBTC(totalBtcDay * 7)}
+          </Text>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Month</Text>
+          <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+            {formatBTC(totalBtcDay * 30)}
+          </Text>
+        </View>
+        {btcPrice > 0 && (
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>USD/day</Text>
+            <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+              ~${usdPerDay.toFixed(2)}
+            </Text>
+          </View>
+        )}
+      </View>
+      {typeof powerCost === 'number' && powerCost > 0 && totalBtcDay > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 4,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+          }}
+        >
+          <Text style={{ color: theme.textDim, fontSize: 12 }}>Net/day (after power)</Text>
+          <Text
+            style={{
+              color:
+                totalBtcDay * btcPrice -
+                  (miners.reduce((s, m) => s + (m.status?.power ?? 0), 0) / 1000) * 24 * powerCost >
+                0
+                  ? theme.success
+                  : theme.danger,
+              fontSize: 13,
+              fontWeight: '700',
+            }}
+          >
+            $
+            {(
+              totalBtcDay * btcPrice -
+              (miners.reduce((s, m) => s + (m.status?.power ?? 0), 0) / 1000) * 24 * powerCost
+            ).toFixed(2)}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
