@@ -222,7 +222,8 @@ export const useMinerStore = create<MinersState>((set, get) => ({
           miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
         }));
 
-        if (typeof (navigator as any)?.onLine === 'boolean' && !(navigator as any).onLine) {
+        const nav = navigator as Navigator & { onLine?: boolean };
+        if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
           setTimeout(() => attempt(2000), 0);
         }
       }

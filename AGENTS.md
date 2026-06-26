@@ -82,6 +82,18 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `refreshMiner` probe recovery (lines 186-203): requires complex mock orchestration
 - `onNetworkReconnect` offline→online integration test: cannot reliably test with fake timers due to async polling timing vs React act() infrastructure
 
+## Disk Space
+
+The dev VM has a 100GB root partition that fills up to 99-100% frequently. When commands fail with `ENOSPC`/`nospc`:
+
+- `rm -rf /tmp/jest_rs` (Jest cache, ~190MB)
+- `rm -rf /home/aktheman/.npm/_cacache` (npm cache, ~1GB)
+- `rm -rf /home/aktheman/.npm/_logs`
+
+## Railway Backend URL
+
+The Railway deployment URL can change on each deploy. The correct URL is documented in README.md. As of June 2026: `https://hashwatch-production-5b6e.up.railway.app`. Both `.env` and Vercel env var `EXPO_PUBLIC_API_URL` must be kept in sync.
+
 ## Test Debugging Notes
 
 - **i18n mock**: `jest.setup.js` mocks `react-i18next` with a `t` function that returns the key (with `{{var}}` interpolation). Tests must assert against i18n keys (e.g., `'dashboard.title'`) not translated strings.

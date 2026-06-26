@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import Svg, { Path, Circle, G } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { useMinerStore } from '../store/miners';
