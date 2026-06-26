@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
@@ -213,7 +213,7 @@ export function SubscriptionScreen() {
             </Text>
           </View>
         ) : (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Upgrade to Pro"
             style={[styles.upgradeBtn, loading && styles.btnDisabled]}
@@ -225,11 +225,11 @@ export function SubscriptionScreen() {
             ) : (
               <Text style={styles.upgradeBtnText}>{t('subscription.upgradeToPro')}</Text>
             )}
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
-      <TouchableOpacity
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel="Restore Purchases"
         style={[styles.restoreBtn, loading && styles.btnDisabled]}
@@ -237,7 +237,7 @@ export function SubscriptionScreen() {
         disabled={loading}
       >
         <Text style={styles.restoreBtnText}>{t('subscription.restorePurchases')}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }

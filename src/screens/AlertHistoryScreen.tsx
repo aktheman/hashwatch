@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useAlertHistoryStore, AlertEvent } from '../store/alertHistory';
@@ -175,16 +175,12 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
     <View style={styles.container}>
       {events.length > 0 && (
         <View style={styles.header}>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={styles.headerBtn}
-            onPress={markAllRead}
-          >
+          <Pressable accessibilityRole="button" style={styles.headerBtn} onPress={markAllRead}>
             <Text style={styles.headerBtnText}>
               {t('alertHistory.markAllRead', 'Mark All Read')}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             accessibilityRole="button"
             style={styles.clearBtn}
             onPress={() => {
@@ -192,7 +188,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
             }}
           >
             <Text style={styles.clearBtnText}>{t('alertHistory.clearAll', 'Clear All')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
       <FlatList
@@ -204,7 +200,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
               <Text style={styles.dateHeaderText}>{section.date}</Text>
             </View>
             {section.data.map((ev) => (
-              <TouchableOpacity
+              <Pressable
                 key={ev.id}
                 accessibilityRole="button"
                 style={[styles.eventRow, !ev.read && styles.eventUnread]}
@@ -222,7 +218,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
                   </Text>
                 </View>
                 <Text style={styles.eventTime}>{formatTimestamp(ev.timestamp)}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         )}

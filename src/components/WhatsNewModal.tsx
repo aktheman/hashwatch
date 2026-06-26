@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../theme';
 import * as DB from '../db/database';
@@ -115,7 +115,7 @@ export function WhatsNewModal() {
               </View>
             ))}
           </ScrollView>
-          <TouchableOpacity
+          <Pressable
             style={{
               backgroundColor: theme.primary,
               borderRadius: 12,
@@ -126,7 +126,7 @@ export function WhatsNewModal() {
             onPress={() => setVisible(false)}
           >
             <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15 }}>Got it!</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </Modal>

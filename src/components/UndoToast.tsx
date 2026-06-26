@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Platform, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Animated, Platform, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
@@ -31,7 +31,7 @@ export function UndoToast() {
       <Text style={[styles.message, { color: theme.text }]} numberOfLines={1}>
         {undo.message}
       </Text>
-      <TouchableOpacity
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.undo')}
         onPress={() => {
@@ -41,7 +41,7 @@ export function UndoToast() {
         style={[styles.undoBtn, { backgroundColor: theme.primary }]}
       >
         <Text style={[styles.undoText, { color: theme.bg }]}>{t('common.undo')}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }

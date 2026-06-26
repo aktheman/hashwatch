@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Animated,
   FlatList,
@@ -154,9 +154,9 @@ export function OnboardingScreen({ onComplete }: Props) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity accessibilityRole="button" style={styles.skipBtn} onPress={handleSkip}>
+      <Pressable accessibilityRole="button" style={styles.skipBtn} onPress={handleSkip}>
         <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
-      </TouchableOpacity>
+      </Pressable>
 
       <FlatList
         testID="onboarding-flatlist"
@@ -186,11 +186,11 @@ export function OnboardingScreen({ onComplete }: Props) {
           ))}
         </View>
 
-        <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={handleNext}>
+        <Pressable accessibilityRole="button" style={styles.btn} onPress={handleNext}>
           <Text style={styles.btnText}>
             {isLast ? t('onboarding.getStarted') : t('onboarding.next')}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );

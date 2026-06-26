@@ -1,14 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Alert,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, FlatList, Pressable, TextInput, Modal, Alert, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -258,14 +249,14 @@ export function WalletsScreen() {
           <Text style={styles.emptyIcon}>💼</Text>
           <Text style={styles.emptyTitle}>{t('wallets.noWallets')}</Text>
           <Text style={styles.emptyText}>{t('wallets.noWalletsBody')}</Text>
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Create Wallet"
             style={styles.addBtn}
             onPress={openCreate}
           >
             <Text style={styles.addBtnText}>{t('wallets.createWallet')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -274,14 +265,14 @@ export function WalletsScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Add Wallet"
               style={styles.addBtn}
               onPress={openCreate}
             >
               <Text style={styles.addBtnText}>{t('wallets.addWallet')}</Text>
-            </TouchableOpacity>
+            </Pressable>
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -302,15 +293,15 @@ export function WalletsScreen() {
                 {item.address}
               </Text>
               <View style={styles.cardActions}>
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Edit wallet: ${item.name}`}
                   style={[styles.actionBtn, styles.actionBtnEdit]}
                   onPress={() => openEdit(item)}
                 >
                   <Text style={[styles.actionText, styles.actionTextEdit]}>{t('common.edit')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Delete wallet: ${item.name}`}
                   style={[styles.actionBtn, styles.actionBtnDelete]}
@@ -319,7 +310,7 @@ export function WalletsScreen() {
                   <Text style={[styles.actionText, styles.actionTextDelete]}>
                     {t('common.delete')}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           )}
@@ -355,7 +346,7 @@ export function WalletsScreen() {
             <Text style={styles.label}>{t('wallets.color')}</Text>
             <View style={styles.colorRow}>
               {WALLET_COLORS.map((c) => (
-                <TouchableOpacity
+                <Pressable
                   key={c}
                   accessibilityRole="button"
                   accessibilityLabel="Select color"
@@ -369,22 +360,22 @@ export function WalletsScreen() {
               ))}
             </View>
             <View style={styles.modalActions}>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Cancel"
                 style={styles.modalCancel}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Save"
                 style={styles.modalSave}
                 onPress={save}
               >
                 <Text style={styles.modalSaveText}>{t('common.save')}</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>

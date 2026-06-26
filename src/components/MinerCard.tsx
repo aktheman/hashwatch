@@ -1,14 +1,5 @@
 import { memo, useMemo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Pressable,
-  Alert,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+import { View, Text, TextInput, Pressable, Alert, StyleSheet, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Miner } from '../types';
 import {
@@ -225,14 +216,13 @@ export const MinerCard = memo(
     }, [miner, onDelete, onClone, t]);
 
     return (
-      <TouchableOpacity
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${miner.name}, ${miner.isOnline ? 'online' : 'offline'}, ${hashrate}`}
         style={[styles.card, !isOnline && styles.cardOffline]}
         onPress={() => onPress(miner)}
         onLongPress={handleLongPress}
         delayLongPress={600}
-        activeOpacity={0.7}
       >
         <View style={styles.cardAccent} />
         <View style={styles.topRow}>
@@ -383,7 +373,7 @@ export const MinerCard = memo(
             </View>
           </>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   },
   (prev, next) => {

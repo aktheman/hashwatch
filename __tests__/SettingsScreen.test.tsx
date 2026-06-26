@@ -102,7 +102,7 @@ jest.mock('../src/store/auth', () => ({
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { SettingsScreen } from '../src/screens/SettingsScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -387,4 +387,34 @@ it('shows alert when exportAllData fails', async () => {
   await fireEvent.press(screen.getByLabelText('Export CSV'));
   await waitFor(() => expect(mockAlert).toHaveBeenCalled());
   mockAlert.mockRestore();
+});
+
+it('shows proxy URL section on web platform', async () => {
+  const origOS = (Platform as any).OS;
+  (Platform as any).OS = 'web';
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.getByLabelText('Proxy URL input')).toBeTruthy();
+  expect(screen.getByLabelText('settings.saveProxyUrl')).toBeTruthy();
+  (Platform as any).OS = origOS;
+});
+
+it('saves proxy URL on web platform', async () => {
+  const origOS = (Platform as any).OS;
+  (Platform as any).OS = 'web';
+  const { setSetting: mockSetSetting } = jest.requireMock('../src/db/database');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.changeText(screen.getByLabelText('Proxy URL input'), 'http://proxy:4567');
+  await fireEvent.press(screen.getByLabelText('settings.saveProxyUrl'));
+  await waitFor(() => {
+    expect(mockSetSetting).toHaveBeenCalledWith('proxy_url', 'http://proxy:4567');
+  });
+  (Platform as any).OS = origOS;
+});
+
+it('toggles RevenueCat debug panel', async () => {
+  await render(<SettingsScreen navigation={navigation} />);
+  expect(screen.queryByText('▼ RevenueCat Debug')).toBeTruthy();
+  await fireEvent.press(screen.getByText('▼ RevenueCat Debug'));
+  expect(screen.queryByText('▲ Hide Debug')).toBeTruthy();
+  expect(screen.getByLabelText('Restore purchases')).toBeTruthy();
 });

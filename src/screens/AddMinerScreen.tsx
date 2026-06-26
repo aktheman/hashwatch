@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   ScrollView,
   Platform,
@@ -266,7 +266,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           onChangeText={setName}
           accessibilityLabel="Miner name input"
         />
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add Miner"
           style={[styles.primaryBtn, (connecting || !ip.trim()) && styles.btnDisabled]}
@@ -278,7 +278,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           ) : (
             <Text style={styles.primaryBtnText}>{t('addMiner.addMiner')}</Text>
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={styles.divider}>
@@ -317,7 +317,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           </View>
         )}
         {scanning ? (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Cancel Scan"
             style={[styles.secondaryBtn, { borderColor: theme.danger }]}
@@ -326,16 +326,16 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
             <Text style={[styles.secondaryBtnText, { color: theme.danger }]}>
               {t('addMiner.cancelScan')}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ) : (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Find Miners"
             style={styles.secondaryBtn}
             onPress={handleScan}
           >
             <Text style={styles.secondaryBtnText}>{t('addMiner.findMiners')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
@@ -345,7 +345,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
             {t('addMiner.foundMiners', { count: foundMiners.length })}
           </Text>
           {foundMiners.map((m) => (
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               key={m.ip}
               accessibilityLabel={`Add miner: ${m.ip}`}
@@ -359,7 +359,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
               <View style={styles.foundAddBadge}>
                 <Text style={styles.foundAdd}>{t('common.add')}</Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
