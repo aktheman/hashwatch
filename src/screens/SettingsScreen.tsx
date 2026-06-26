@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Alert,
   Platform,
@@ -368,20 +368,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             returnKeyType="done"
             accessibilityLabel="Proxy URL input"
           />
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('settings.saveProxyUrl')}
             style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
             onPress={saveProxyUrl}
           >
             <Text style={styles.proxyBtnText}>{t('settings.saveProxyUrl')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Wallets"
           style={styles.row}
@@ -391,8 +391,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Plan"
           style={styles.row}
@@ -412,9 +412,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             </View>
             <Text style={styles.chevron}>›</Text>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             setShowDebugPanel(!showDebugPanel);
             if (!showDebugPanel) loadDebugInfo();
@@ -424,7 +424,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={{ color: theme.textMuted, fontSize: 11, textAlign: 'center' }}>
             {showDebugPanel ? '▲ Hide Debug' : '▼ RevenueCat Debug'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
         {showDebugPanel && (
           <View
             style={{
@@ -437,7 +437,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             }}
           >
             <View style={{ gap: 8 }}>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Restore purchases"
                 style={{
@@ -454,9 +454,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Text style={{ color: theme.primary, fontWeight: '600', fontSize: 13 }}>
                   Restore Purchases
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Force pro status"
                   style={{
@@ -474,8 +474,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   <Text style={{ color: theme.success, fontWeight: '600', fontSize: 13 }}>
                     Force Pro
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Force free status"
                   style={{
@@ -493,7 +493,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 13 }}>
                     Force Free
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
               {customerInfo && (
                 <View style={{ backgroundColor: '#000' + '40', borderRadius: 8, padding: 8 }}>
@@ -513,7 +513,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           </View>
         )}
 
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Remote Sync"
           style={styles.row}
@@ -526,21 +526,21 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             </Text>
             <Text style={styles.chevron}>{showAuth ? 'v' : '›'}</Text>
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         {showAuth && (
           <View style={styles.authBox}>
             {token ? (
               <>
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Disconnect"
                   style={styles.logoutBtn}
                   onPress={logout}
                 >
                   <Text style={styles.logoutBtnText}>{t('settings.disconnect')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Sync Now"
                   style={[styles.authBtn, { marginTop: 8 }]}
@@ -550,7 +550,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   <Text style={styles.authBtnText}>
                     {syncing ? t('settings.syncing') : t('settings.syncNow')}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
                 {lastSyncTimestamp && (
                   <Text style={[styles.sectionSub, { textAlign: 'center', marginTop: 6 }]}>
                     {t('settings.lastSync', {
@@ -581,7 +581,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   accessibilityLabel="Password input"
                 />
                 {authError && <Text style={styles.authError}>{authError}</Text>}
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={isRegister ? 'Create Account' : 'Sign In'}
                   style={styles.authBtn}
@@ -590,8 +590,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   <Text style={styles.authBtnText}>
                     {isRegister ? t('settings.createAccount') : t('settings.signIn')}
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={isRegister ? 'Switch to sign in' : 'Switch to create account'}
                   onPress={() => setIsRegister(!isRegister)}
@@ -599,7 +599,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   <Text style={styles.authToggle}>
                     {isRegister ? t('settings.switchToSignIn') : t('settings.switchToCreate')}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </>
             )}
           </View>
@@ -612,7 +612,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={styles.rowLabel}>{t('settings.theme')}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {(['system', 'dark', 'light', 'neon', 'matrix', '5tratum'] as const).map((mode) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={mode}
                 accessibilityLabel={`${mode} theme`}
@@ -657,7 +657,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                             : '🔄'}{' '}
                   {t(`themes.${mode}`)}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -667,7 +667,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {['en', 'es', 'zh', 'ja', 'de', 'fr'].map((lang) => (
-              <TouchableOpacity
+              <Pressable
                 key={lang}
                 accessibilityRole="button"
                 accessibilityLabel={`Switch language to ${lang}`}
@@ -703,7 +703,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     }[lang]
                   }
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -712,7 +712,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </View>
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Disable dark mode schedule"
               style={{
@@ -738,9 +738,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               >
                 Off
               </Text>
-            </TouchableOpacity>
+            </Pressable>
             {[18, 19, 20, 21, 22, 23].map((hour) => (
-              <TouchableOpacity
+              <Pressable
                 key={hour}
                 accessibilityRole="button"
                 accessibilityLabel={`Schedule dark mode at ${hour}:00`}
@@ -768,7 +768,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 >
                   {hour}:00
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -836,7 +836,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Toggle push notifications"
           />
         </View>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           style={[styles.row, { marginTop: 8 }]}
           onPress={() => navigation.navigate('AlertHistory')}
@@ -845,7 +845,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <NotificationHistorySection />
@@ -885,15 +885,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Auto-scan network"
           />
         </View>
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.row}
-          onPress={() => loadMiners()}
-        >
+        <Pressable accessibilityRole="button" style={styles.row} onPress={() => loadMiners()}>
           <Text style={styles.rowLabel}>{t('settings.refreshAll')}</Text>
           <Text style={styles.actionText}>{t('settings.refresh')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           style={styles.row}
           onPress={scanNetwork}
@@ -903,8 +899,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={styles.actionText}>
             {scanning ? t('settings.scanning') : t('settings.scan')}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Groups"
           style={styles.row}
@@ -915,8 +911,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.actionText}>{t('settings.manage')}</Text>
             <Text style={styles.chevron}>›</Text>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export CSV"
           style={styles.row}
@@ -928,8 +924,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>{t('settings.exportCsv')}</Text>
           <Text style={styles.actionText}>{t('settings.snapshots')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export JSON backup"
           style={styles.row}
@@ -941,8 +937,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>{t('settings.exportJson')}</Text>
           <Text style={styles.actionText}>{t('settings.fullBackup')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Import data"
           style={styles.row}
@@ -953,8 +949,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.actionText}>{t('settings.restore')}</Text>
             <Text style={styles.chevron}>›</Text>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Import CSV"
           style={styles.row}
@@ -962,7 +958,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>Import CSV</Text>
           <Text style={styles.actionText}>{showCsvImport ? 'Cancel' : 'Import'}</Text>
-        </TouchableOpacity>
+        </Pressable>
         {showCsvImport && (
           <View style={{ marginTop: 12, gap: 8 }}>
             <Text style={{ color: theme.textDim, fontSize: 12 }}>
@@ -987,7 +983,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               placeholderTextColor={theme.textMuted}
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Import CSV data"
                 style={{
@@ -1012,8 +1008,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 }}
               >
                 <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>Import</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Cancel CSV import"
                 style={{
@@ -1030,7 +1026,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 }}
               >
                 <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>Cancel</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}
@@ -1038,7 +1034,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Backup</Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export all data"
           style={styles.row}
@@ -1050,8 +1046,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>Export All Data</Text>
           <Text style={styles.actionText}>Download</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Import data from file"
           style={styles.row}
@@ -1090,7 +1086,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>Import Data</Text>
           <Text style={styles.actionText}>Restore</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={styles.section}>

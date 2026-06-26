@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, FlatList, Alert, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
@@ -240,14 +240,14 @@ export function GroupsScreen() {
           returnKeyType="done"
           accessibilityLabel="New group name"
         />
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add group"
           style={styles.addBtn}
           onPress={addGroup}
         >
           <Text style={styles.addBtnText}>{t('common.add')}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <FlatList
@@ -303,7 +303,7 @@ export function GroupsScreen() {
               )}
               {name !== 'Ungrouped' && (
                 <View style={styles.actions}>
-                  <TouchableOpacity
+                  <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Rename group ${name}`}
                     style={[styles.actionBtn, { borderColor: theme.primary }]}
@@ -312,8 +312,8 @@ export function GroupsScreen() {
                     <Text style={[styles.actionBtnText, { color: theme.primary }]}>
                       {t('groups.rename')}
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Pressable>
+                  <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Remove group ${name}`}
                     style={[styles.actionBtn, { borderColor: theme.danger }]}
@@ -322,7 +322,7 @@ export function GroupsScreen() {
                     <Text style={[styles.actionBtnText, { color: theme.danger }]}>
                       {t('groups.remove')}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
               {members.length > 0 && (
@@ -333,14 +333,14 @@ export function GroupsScreen() {
                         {m.name} ({m.ip})
                       </Text>
                       {name !== 'Ungrouped' && (
-                        <TouchableOpacity
+                        <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`Remove ${m.name} from group`}
                           style={styles.ungroupBtn}
                           onPress={() => setMinerGroup(m.id, undefined)}
                         >
                           <Text style={styles.ungroupBtnText}>{t('groups.remove')}</Text>
-                        </TouchableOpacity>
+                        </Pressable>
                       )}
                     </View>
                   ))}

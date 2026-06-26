@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
@@ -524,7 +524,7 @@ export function AnalyticsScreen() {
           <Text style={styles.headerTitle}>{t('analytics.title')}</Text>
           <Text style={styles.headerSub}>{t('analytics.subtitle')}</Text>
         </View>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Filter by miner"
           style={[styles.filterBtn, showMinerFilter && styles.filterBtnActive]}
@@ -533,7 +533,7 @@ export function AnalyticsScreen() {
           <Text style={[styles.filterBtnText, showMinerFilter && styles.filterBtnTextActive]}>
             Filter
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -631,7 +631,7 @@ export function AnalyticsScreen() {
         <View style={styles.chartCard}>
           <View style={styles.rangeRow}>
             {(['hashrate', 'uptime', 'efficiency'] as const).map((view) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={view}
                 style={[
@@ -652,12 +652,12 @@ export function AnalyticsScreen() {
                       ? t('analytics.uptimeHistory')
                       : t('analytics.efficiencyHistory')}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
           <View style={styles.rangeRow}>
             {ranges.map((r) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={r}
                 accessibilityLabel={`Show ${r === '1h' ? '1 hour' : r === '24h' ? '24 hours' : r === '7d' ? '7 days' : '30 days'}`}
@@ -673,12 +673,12 @@ export function AnalyticsScreen() {
                 <Text style={[styles.rangeBtnText, { color: range === r ? '#FFF' : theme.text }]}>
                   {r}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
           {showMinerFilter && (
             <View style={styles.chipRow}>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="All miners"
                 style={[styles.chip, selectedMinerIds.size === 0 && styles.chipSelected]}
@@ -689,11 +689,11 @@ export function AnalyticsScreen() {
                 >
                   All miners
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
               {miners.map((m) => {
                 const isSelected = selectedMinerIds.has(m.id);
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     accessibilityRole="button"
                     key={m.id}
                     accessibilityLabel={m.name || m.id}
@@ -703,7 +703,7 @@ export function AnalyticsScreen() {
                     <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
                       {m.name || m.id}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>

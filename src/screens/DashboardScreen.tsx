@@ -3,7 +3,7 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   RefreshControl,
   Alert,
@@ -344,7 +344,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             : 0;
         const isCollapsed = collapsedGroups.has(item.group);
         return (
-          <TouchableOpacity
+          <Pressable
             onPress={() =>
               setCollapsedGroups((prev) => {
                 const next = new Set(prev);
@@ -396,7 +396,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 {avgT.toFixed(0)}°
               </Text>
             )}
-          </TouchableOpacity>
+          </Pressable>
         );
       }
       const m = item.miner;
@@ -841,7 +841,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   return (
     <Outer {...outerProps}>
       {kioskMode ? (
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Exit kiosk mode"
           style={{
@@ -864,13 +864,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           }}
         >
           <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>✕</Text>
-        </TouchableOpacity>
+        </Pressable>
       ) : (
         <View style={styles.headerBar}>
           {selectionMode ? (
             <>
               <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Cancel selection"
                 style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
@@ -880,18 +880,18 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 }}
               >
                 <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
-              </TouchableOpacity>
+              </Pressable>
             </>
           ) : (
             <>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Compare miners"
                 style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
                 onPress={() => setSelectionMode(true)}
               >
                 <Text style={styles.settingsIcon}>⇄</Text>
-              </TouchableOpacity>
+              </Pressable>
               <View style={{ alignItems: 'center' }}>
                 <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
                 <Text style={styles.headerSub}>
@@ -899,23 +899,23 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 </Text>
               </View>
               <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Customize dashboard"
                   style={[styles.settingsBtn, { width: 36, height: 36 }]}
                   onPress={() => setShowCustomizer(true)}
                 >
                   <Text style={styles.settingsIcon}>✎</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Export data"
                   style={[styles.settingsBtn, { width: 36, height: 36 }]}
                   onPress={() => exportAllData()}
                 >
                   <Text style={styles.settingsIcon}>↓</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Switch theme"
                   style={[styles.settingsBtn, { width: 36, height: 36 }]}
@@ -927,15 +927,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   }}
                 >
                   <Text style={styles.settingsIcon}>🎨</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Settings"
                   style={[styles.settingsBtn, { width: 36, height: 36 }]}
                   onPress={() => navigation.navigate('Settings')}
                 >
                   <Text style={styles.settingsIcon}>⚙</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </>
           )}
@@ -1037,7 +1037,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             const poolMiners = miners.filter((m) => m.status?.pool === pool);
             return (
               <View key={pool}>
-                <TouchableOpacity
+                <Pressable
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -1076,7 +1076,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   <Text style={{ color: theme.textMuted, fontSize: 10, marginLeft: 6 }}>
                     {isExpanded ? '▲' : '▼'}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
                 {isExpanded && (
                   <View
                     style={{
@@ -1226,7 +1226,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               flexWrap: 'wrap',
             }}
           >
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Filter: All"
               style={[
@@ -1262,9 +1262,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               >
                 {t('common.all')}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
             {wallets.map((w) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={w.id}
                 accessibilityLabel={`Filter by wallet: ${w.name}`}
@@ -1285,10 +1285,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   {w.name}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
             {groups.map((g) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={g}
                 accessibilityLabel={`Filter by group: ${g}`}
@@ -1309,10 +1309,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   📁 {g === 'Ungrouped' ? t('dashboard.ungrouped') : g}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
             {locations.map((loc) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={loc}
                 accessibilityLabel={`Filter by location: ${loc}`}
@@ -1333,10 +1333,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   📍 {loc}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
             {allTags.map((tag) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={tag}
                 accessibilityLabel={`Filter by tag: ${tag}`}
@@ -1357,7 +1357,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   🏷️ {tag}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         )}
@@ -1374,7 +1374,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         >
           <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Sort:</Text>
           {(['name', 'hashrate', 'temp'] as const).map((s) => (
-            <TouchableOpacity
+            <Pressable
               key={s}
               accessibilityRole="button"
               accessibilityLabel={`Sort by ${s}`}
@@ -1397,7 +1397,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               >
                 {s === 'name' ? 'Name' : s === 'hashrate' ? 'Hashrate' : 'Temp'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -1414,7 +1414,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         >
           <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Group:</Text>
           {([null, 'location', 'tag'] as const).map((g) => (
-            <TouchableOpacity
+            <Pressable
               key={g ?? 'off'}
               accessibilityRole="button"
               onPress={() => setAutoGroupBy(g)}
@@ -1436,20 +1436,20 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               >
                 {g === null ? 'Off' : g === 'location' ? '📍 Loc' : '🏷️ Tag'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
 
       {!canAdd && miners.length > 0 && (
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Upgrade to Pro"
           style={styles.upgradeBanner}
           onPress={() => navigation.navigate('Subscription')}
         >
           <Text style={styles.upgradeBannerText}>🔒 {t('dashboard.upgradePro')}</Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
 
       <ErrorBanner message={error} onDismiss={clearError} onRetry={loadMiners} />
@@ -1483,22 +1483,22 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={styles.stepText}>{t('dashboard.step3')}</Text>
           </View>
           <View style={styles.emptyActions}>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Add Miner"
               style={styles.primaryBtn}
               onPress={handleAddMiner}
             >
               <Text style={styles.primaryBtnText}>{t('dashboard.addMiner')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Scan Network"
               style={styles.secondaryBtn}
               onPress={scanNetwork}
             >
               <Text style={styles.secondaryBtnText}>{t('dashboard.scanNetwork')}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       ) : Platform.OS === 'web' ? (
@@ -1540,23 +1540,23 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             {t('comparison.nSelected', { count: selectedIds.size })}
           </Text>
           <View style={styles.selectionActions}>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Batch group"
               style={styles.batchBtn}
               onPress={handleBatchGroup}
             >
               <Text style={styles.batchBtnText}>{t('dashboard.group')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Batch wallet"
               style={styles.batchBtn}
               onPress={() => setShowWalletPicker(true)}
             >
               <Text style={styles.batchBtnText}>{t('dashboard.wallet')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Batch delete"
               style={[styles.batchBtn, styles.batchDeleteBtn]}
@@ -1565,8 +1565,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Text style={[styles.batchBtnText, styles.batchDeleteText]}>
                 {t('common.delete')}
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Compare"
               style={[styles.compareBtn, selectedIds.size < 2 && styles.compareBtnDisabled]}
@@ -1579,7 +1579,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               }}
             >
               <Text style={styles.compareBtnText}>{t('comparison.compare')}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       )}
@@ -1590,23 +1590,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         animationType="fade"
         onRequestClose={() => setShowWalletPicker(false)}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowWalletPicker(false)}
-        >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowWalletPicker(false)}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{t('dashboard.assignWallet')}</Text>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="No wallet"
               style={styles.modalOption}
               onPress={() => handleBatchWallet(undefined)}
             >
               <Text style={styles.modalOptionText}>{t('dashboard.noWallet')}</Text>
-            </TouchableOpacity>
+            </Pressable>
             {wallets.map((w) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={w.id}
                 accessibilityLabel={`Assign wallet: ${w.name}`}
@@ -1615,10 +1611,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               >
                 <View style={[styles.walletDot, { backgroundColor: w.color }]} />
                 <Text style={styles.modalOptionText}>{w.name}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
-        </TouchableOpacity>
+        </Pressable>
       </Modal>
 
       <DashboardCustomizer
@@ -1633,14 +1629,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       />
 
       {!kioskMode && (
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add miner"
           style={[styles.fab, !canAdd && styles.fabDisabled]}
           onPress={handleAddMiner}
         >
           <Text style={styles.fabText}>+</Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
     </Outer>
   );

@@ -4,7 +4,7 @@ import {
   Text,
   TextInput,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Share,
   Alert,
@@ -376,14 +376,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       <View style={styles.center}>
         <Text style={styles.offlineIcon}>⬡</Text>
         <Text style={styles.offlineText}>{t('minerDetail.notFound')}</Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
           style={styles.retryBtn}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.retryBtnText}>{t('common.goBack')}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -394,14 +394,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.offlineIcon}>📡</Text>
         <Text style={styles.offlineText}>{t('minerDetail.offline')}</Text>
         <Text style={styles.offlineSubtext}>{t('minerDetail.offlineBody', { ip: miner.ip })}</Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Retry"
           style={styles.retryBtn}
           onPress={() => refreshMiner(minerId)}
         >
           <Text style={styles.retryBtnText}>{t('common.retry')}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -453,7 +453,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 { backgroundColor: miner.isOnline ? theme.success : theme.danger },
               ]}
             />
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Choose icon"
               onPress={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -462,7 +462,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               <Text style={{ fontSize: 22, marginRight: 4 }}>{miner.icon || '⬡'}</Text>
               <Text style={styles.name}>{miner.name}</Text>
               <Text style={{ fontSize: 10, color: theme.primary, marginLeft: 2 }}>✎</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <View
             style={[
@@ -498,7 +498,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               returnKeyType="done"
               accessibilityLabel="Edit IP address"
             />
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Save IP"
               onPress={() => {
@@ -509,10 +509,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               }}
             >
               <Text style={{ fontSize: 16, color: theme.success, marginLeft: 8 }}>✓</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         ) : (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Edit IP address"
             onPress={() => {
@@ -523,7 +523,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           >
             <Text style={styles.ip}>{miner.ip}</Text>
             <Text style={{ fontSize: 12, color: theme.primary, marginLeft: 6 }}>✏️</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
         {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
         {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
@@ -549,7 +549,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               '💡',
               '🌀',
             ].map((emoji) => (
-              <TouchableOpacity
+              <Pressable
                 key={emoji}
                 accessibilityRole="button"
                 accessibilityLabel={`Set icon ${emoji}`}
@@ -569,7 +569,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 }}
               >
                 <Text style={{ fontSize: 18 }}>{emoji}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         )}
@@ -589,7 +589,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               <Text style={{ color: theme.textDim, fontSize: 13 }}>Temp Alert (°C)</Text>
               <View style={{ flexDirection: 'row', gap: 4 }}>
                 {[60, 65, 70, 75, 80].map((t) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={t}
                     accessibilityRole="button"
                     accessibilityLabel={`Set temp alert to ${t}°C`}
@@ -615,7 +615,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     >
                       {t}°
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             </View>
@@ -629,7 +629,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               <Text style={{ color: theme.textDim, fontSize: 13 }}>Hashrate Drop (%)</Text>
               <View style={{ flexDirection: 'row', gap: 4 }}>
                 {[30, 40, 50, 60, 70].map((p) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={p}
                     accessibilityRole="button"
                     accessibilityLabel={`Set hashrate drop alert to ${p}%`}
@@ -655,7 +655,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     >
                       {p}%
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             </View>
@@ -666,7 +666,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       <NotificationPrefs minerId={miner.id} />
 
       <View style={styles.section}>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Assign wallet"
           style={styles.walletRow}
@@ -682,10 +682,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Text>
           </View>
           <Text style={styles.walletRowArrow}>{t('minerDetail.assign')}</Text>
-        </TouchableOpacity>
+        </Pressable>
         {showWalletPicker && (
           <View style={styles.walletPicker}>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="No wallet"
               style={[
@@ -698,9 +698,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               }}
             >
               <Text style={styles.walletName}>{t('common.none')}</Text>
-            </TouchableOpacity>
+            </Pressable>
             {wallets.map((w) => (
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 key={w.id}
                 accessibilityLabel={`Select wallet: ${w.name}`}
@@ -717,7 +717,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               >
                 <View style={[styles.walletDot, { backgroundColor: w.color }]} />
                 <Text style={styles.walletName}>{w.name}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         )}
@@ -744,18 +744,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
       <View style={[styles.section, styles.groupTagRow]}>
         <Text style={styles.groupTagIcon}>📍</Text>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={() => setShowLocationPicker(!showLocationPicker)}
-        >
+        <Pressable style={{ flex: 1 }} onPress={() => setShowLocationPicker(!showLocationPicker)}>
           <Text style={{ color: theme.text, fontSize: 14 }}>
             {miner.location || 'Set location...'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
       {showLocationPicker && (
         <View style={[styles.section, styles.walletPicker, { marginHorizontal: 16 }]}>
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Clear location"
             onPress={() => {
@@ -764,9 +761,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             }}
           >
             <Text style={[styles.walletName, { padding: 12 }]}>None</Text>
-          </TouchableOpacity>
+          </Pressable>
           {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
-            <TouchableOpacity
+            <Pressable
               key={loc}
               accessibilityRole="button"
               accessibilityLabel={`Set location to ${loc}`}
@@ -776,7 +773,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               }}
             >
               <Text style={[styles.walletName, { padding: 12 }]}>{loc}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -785,7 +782,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={styles.sectionTitle}>🏷️ Tags</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {(miner.tags || []).map((tag) => (
-            <TouchableOpacity
+            <Pressable
               key={tag}
               accessibilityRole="button"
               accessibilityLabel={`Remove tag ${tag}`}
@@ -803,7 +800,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               }}
             >
               <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>{tag} ✕</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
         <TextInput
@@ -1017,7 +1014,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </Text>
         <MinerSnapshotCard miner={miner} />
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Share Stats"
             style={[
@@ -1030,8 +1027,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={[styles.actionBtnText, { color: theme.primary }]}>
               {t('minerDetail.shareStats')}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Share as Image"
             style={[
@@ -1042,7 +1039,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           >
             <Text style={styles.actionBtnIcon}>🖼</Text>
             <Text style={[styles.actionBtnText, { color: theme.info }]}>Share as Image</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -1050,7 +1047,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <Text style={[styles.sectionTitle, { color: theme.warning }]}>
           <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.actions')}
         </Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Restart Miner"
           style={[
@@ -1079,31 +1076,31 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <Text style={[styles.actionBtnText, { color: theme.warning }]}>
             {t('minerDetail.restartMiner')}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[styles.sectionTitle, { color: theme.danger }]}>
           <Text style={styles.sectionIcon}>⚠</Text> {t('minerDetail.dangerZone')}
         </Text>
-        <TouchableOpacity
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel="Remove Miner"
           style={styles.deleteBtn}
           onPress={() => setShowConfirm(!showConfirm)}
         >
           <Text style={styles.deleteBtnText}>{t('minerDetail.removeMiner')}</Text>
-        </TouchableOpacity>
+        </Pressable>
         {showConfirm && (
           <View style={styles.confirmBox}>
             <Text style={styles.confirmText}>
               {t('minerDetail.removeConfirm', { name: miner.name })}
             </Text>
-            <TouchableOpacity
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel="Yes, Remove"
               style={styles.confirmBtn}
               onPress={handleDelete}
             >
               <Text style={styles.confirmBtnText}>{t('minerDetail.yesRemove')}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
       </View>

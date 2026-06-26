@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
@@ -186,7 +186,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
             </View>
             <View style={styles.minerList}>
               {item.miners.map((m) => (
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   key={m.id}
                   accessibilityLabel={`View miner: ${m.name}`}
@@ -205,7 +205,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
                   <Text style={styles.minerHash}>
                     {formatRate(toHashesPerSecond(m.status?.hashRate || 0, m.status?.hashRateUnit))}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           </View>

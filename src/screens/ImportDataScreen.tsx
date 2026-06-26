@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Alert,
   ScrollView,
   StyleSheet,
@@ -129,7 +129,7 @@ export function ImportDataScreen() {
         accessibilityLabel="Paste JSON backup data"
       />
 
-      <TouchableOpacity
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel="Import data"
         style={[styles.importBtn, importing && styles.importBtnDisabled]}
@@ -139,7 +139,7 @@ export function ImportDataScreen() {
         <Text style={styles.importBtnText}>
           {importing ? t('import.importing') : t('import.title')}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
 
       {result && (
         <View style={styles.resultBox}>

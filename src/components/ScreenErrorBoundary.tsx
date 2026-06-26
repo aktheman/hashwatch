@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useTheme } from '../theme';
@@ -52,7 +52,7 @@ class ScreenErrorBoundaryInner extends Component<InnerProps, State> {
           <Text style={[styles.message, { color: t.textDim }]}>
             {this.state.error?.message || translate('errorBoundary.unexpectedError')}
           </Text>
-          <TouchableOpacity
+          <Pressable
             style={[styles.retryBtn, { backgroundColor: t.primary }]}
             onPress={this.handleRetry}
             accessibilityLabel={translate('errorBoundary.tryAgain')}
@@ -61,15 +61,15 @@ class ScreenErrorBoundaryInner extends Component<InnerProps, State> {
             <Text style={[styles.retryText, { color: buttonText }]}>
               {translate('errorBoundary.tryAgain')}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[styles.goBackBtn, { borderColor: t.border }]}
             onPress={this.handleGoBack}
             accessibilityLabel={translate('common.goBack')}
             accessibilityRole="button"
           >
             <Text style={[styles.goBackText, { color: t.text }]}>{translate('common.goBack')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       );
     }

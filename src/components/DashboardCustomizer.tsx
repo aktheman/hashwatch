@@ -1,14 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Switch,
-  TextInput,
-  Alert,
-  ScrollView,
-} from 'react-native';
+import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../theme';
 
 export type SectionKey =
@@ -159,9 +150,9 @@ export function DashboardCustomizer({
             <Text style={{ color: theme.text, fontSize: 18, fontWeight: '700' }}>
               Customize Dashboard
             </Text>
-            <TouchableOpacity accessibilityRole="button" onPress={onClose}>
+            <Pressable accessibilityRole="button" onPress={onClose}>
               <Text style={{ color: theme.primary, fontSize: 16 }}>Done</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <ScrollView>
             {Object.entries(SECTION_LABELS).map(([key, label]) => (
@@ -224,7 +215,7 @@ export function DashboardCustomizer({
                   value={presetName}
                   onChangeText={setPresetName}
                 />
-                <TouchableOpacity
+                <Pressable
                   accessibilityRole="button"
                   style={{
                     backgroundColor: theme.primary,
@@ -235,9 +226,9 @@ export function DashboardCustomizer({
                   onPress={handleSavePreset}
                 >
                   <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 13 }}>Save</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 style={{
                   backgroundColor: theme.surfaceLight,
@@ -252,7 +243,7 @@ export function DashboardCustomizer({
                 <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>
                   {showPresets ? 'Hide Presets' : `Load Preset (${presets.length})`}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
               {showPresets && presets.length === 0 && (
                 <Text style={{ color: theme.textMuted, fontSize: 12, textAlign: 'center' }}>
                   No saved presets yet.
@@ -269,7 +260,7 @@ export function DashboardCustomizer({
                       paddingVertical: 6,
                     }}
                   >
-                    <TouchableOpacity
+                    <Pressable
                       accessibilityRole="button"
                       style={{
                         flex: 1,
@@ -285,8 +276,8 @@ export function DashboardCustomizer({
                       <Text style={{ color: theme.text, fontWeight: '600', fontSize: 13 }}>
                         {p.name}
                       </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                    </Pressable>
+                    <Pressable
                       accessibilityRole="button"
                       onPress={() => handleDeletePreset(p.name)}
                       style={{
@@ -301,10 +292,10 @@ export function DashboardCustomizer({
                       <Text style={{ color: theme.danger, fontSize: 14, fontWeight: '700' }}>
                         ✕
                       </Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 ))}
-              <TouchableOpacity
+              <Pressable
                 accessibilityRole="button"
                 style={{
                   backgroundColor: theme.danger + '1A',
@@ -333,7 +324,7 @@ export function DashboardCustomizer({
                 <Text style={{ color: theme.danger, fontWeight: '700', fontSize: 13 }}>
                   Reset to Defaults
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </ScrollView>
         </View>

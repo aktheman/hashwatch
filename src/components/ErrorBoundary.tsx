@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { theme } from '../theme';
 
@@ -40,14 +40,14 @@ class ErrorBoundaryInternal extends Component<Props, State> {
           <Text style={[styles.message, { color: tTheme.textDim }]}>
             {this.state.error?.message || t('errorBoundary.unexpectedError')}
           </Text>
-          <TouchableOpacity
+          <Pressable
             style={[styles.retryBtn, { backgroundColor: tTheme.primary }]}
             onPress={this.handleRetry}
             accessibilityLabel={t('errorBoundary.tryAgain')}
             accessibilityRole="button"
           >
             <Text style={[styles.retryText, { color: '#FFF' }]}>{t('errorBoundary.tryAgain')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       );
     }

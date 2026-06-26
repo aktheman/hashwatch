@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Linking, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import {
@@ -37,11 +37,10 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
   };
 
   return (
-    <TouchableOpacity
+    <Pressable
       accessibilityRole="button"
       style={[styles.banner, { backgroundColor: theme.warning + '1A', borderColor: theme.warning }]}
       onPress={handlePress}
-      activeOpacity={0.7}
     >
       <Text style={styles.icon}>⬆</Text>
       <View style={styles.textWrap}>
@@ -53,7 +52,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
         </Text>
       </View>
       <Text style={[styles.arrow, { color: theme.textMuted }]}>›</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
