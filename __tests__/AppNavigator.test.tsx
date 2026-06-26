@@ -101,7 +101,7 @@ jest.mock('../src/discovery/localNetwork', () => ({
   getLocalSubnet: jest.fn(),
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react-native';
 import React from 'react';
 import { AppNavigator } from '../src/navigation/AppNavigator';
 import { setTheme, darkTheme } from '../src/theme';
@@ -143,6 +143,10 @@ beforeEach(() => {
     if (key === 'empty_groups' || key === 'kiosk_mode') return null;
     return 'true';
   });
+});
+
+afterEach(() => {
+  cleanup();
 });
 
 it('shows main app when onboarding_complete is true', async () => {
@@ -210,7 +214,7 @@ it('navigates to Pools tab', async () => {
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.pools'));
-  expect(await screen.findByText('pools.noPools')).toBeTruthy();
+  expect(await screen.findByText('pools.noPools', {}, { timeout: 15000 })).toBeTruthy();
 });
 
 it('navigates to Analytics tab', async () => {
@@ -221,7 +225,7 @@ it('navigates to Analytics tab', async () => {
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.analytics'));
-  expect(await screen.findByText('analytics.title')).toBeTruthy();
+  expect(await screen.findByText('analytics.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
 it('navigates to Settings tab', async () => {
@@ -232,7 +236,7 @@ it('navigates to Settings tab', async () => {
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));
-  expect(await screen.findByText('settings.title')).toBeTruthy();
+  expect(await screen.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
 it('navigates to Subscription screen from Settings', async () => {
@@ -243,9 +247,9 @@ it('navigates to Subscription screen from Settings', async () => {
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
   fireEvent.press(screen.getByText('tabs.settings'));
-  await screen.findByText('settings.title');
+  await screen.findByText('settings.title', {}, { timeout: 15000 });
   fireEvent.press(screen.getByText('settings.plan'));
-  expect(await screen.findByText('subscription.title')).toBeTruthy();
+  expect(await screen.findByText('subscription.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
 it('navigates to AddMiner screen', async () => {

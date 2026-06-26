@@ -100,6 +100,7 @@ export function cleanupAlertState(activeMinerIds: Set<string>): void {
 }
 
 export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner[]): Promise<void> {
+  if (Platform.OS === 'web') return;
   cleanupAlertState(new Set(currentMiners.map((m) => m.id)));
 
   const enabledSetting = await DB.getSetting('notifications_enabled');

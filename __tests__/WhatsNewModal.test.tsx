@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { render, screen, waitFor, cleanup } from '@testing-library/react-native';
 import { WhatsNewModal } from '../src/components/WhatsNewModal';
 
 const mockGetSetting = jest.fn();
@@ -24,6 +24,10 @@ jest.mock('../src/theme', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+afterEach(() => {
+  cleanup();
 });
 
 describe('WhatsNewModal', () => {

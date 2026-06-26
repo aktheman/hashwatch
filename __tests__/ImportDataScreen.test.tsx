@@ -1,9 +1,10 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react-native';
 import React from 'react';
 import { Alert } from 'react-native';
 import { ImportDataScreen } from '../src/screens/ImportDataScreen';
 
 const mockImport = jest.fn();
+let deferredResolve: ((v: unknown) => void) | null = null;
 
 jest.mock('../src/utils/export', () => ({
   importFromJSON: (json: string) => mockImport(json),
@@ -32,6 +33,12 @@ beforeEach(() => {
   mockImport.mockResolvedValue({ miners: 3, snapshots: 50, wallets: 2 });
 });
 
+afterEach(() => {
+  deferredResolve?.(undefined);
+  deferredResolve = null;
+  cleanup();
+});
+
 it('renders import screen', async () => {
   await render(<ImportDataScreen />);
   expect(screen.getAllByText('import.title').length).toBeGreaterThanOrEqual(1);
@@ -50,7 +57,12 @@ it('shows alert when importing empty text', async () => {
 });
 
 it('shows Importing... text while import is in progress', async () => {
-  mockImport.mockImplementation(() => new Promise(() => {}));
+  mockImport.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        deferredResolve = resolve;
+      }),
+  );
   await render(<ImportDataScreen />);
 
   await act(async () => {
@@ -64,7 +76,12 @@ it('shows Importing... text while import is in progress', async () => {
 });
 
 it('disables button while importing', async () => {
-  mockImport.mockImplementation(() => new Promise(() => {}));
+  mockImport.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        deferredResolve = resolve;
+      }),
+  );
   await render(<ImportDataScreen />);
 
   await act(async () => {
