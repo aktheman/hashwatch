@@ -47,6 +47,18 @@ jest.mock('../src/db/database', () => ({
 const mockShowUndo = jest.fn(({ onConfirm }: any) => {
   onConfirm();
 });
+jest.mock('../src/services/notifications', () => ({
+  getAlertRules: () =>
+    Promise.resolve({
+      tempThreshold: 70,
+      hashrateDropPercent: 50,
+      offlineReminderMinutes: 5,
+      uptimeThresholdHours: 24,
+    }),
+  setAlertRules: jest.fn(),
+  checkMinerAlerts: jest.fn(),
+}));
+
 jest.mock('../src/store/toast', () => ({
   useToastStore: Object.assign(
     (selector: any) =>
@@ -311,4 +323,125 @@ it('shows restart miner button and calls restart API', async () => {
     );
   });
   mockAlert.mockRestore();
+});
+
+it('opens and selects emoji from picker', async () => {
+  const mockSetMinerIcon = jest.fn();
+  useMinerStore.setState({ setMinerIcon: mockSetMinerIcon } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  fireEvent.press(screen.getByLabelText('Choose icon'));
+  expect(await screen.findByLabelText('Set icon ⚡')).toBeTruthy();
+
+  fireEvent.press(screen.getByLabelText('Set icon ⚡'));
+  expect(mockSetMinerIcon).toHaveBeenCalledWith('m1', '⚡');
+});
+
+it('edits miner IP inline and saves', async () => {
+  const mockSetMinerIp = jest.fn();
+  useMinerStore.setState({ setMinerIp: mockSetMinerIp } as any);
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  const pencil = r.getByText('✏️');
+  await fireEvent.press(pencil);
+  const input = await r.findByDisplayValue('192.168.1.100');
+  await fireEvent.changeText(input, '10.0.0.50');
+  const saveBtn = r.getByLabelText('Save IP');
+  await fireEvent.press(saveBtn);
+
+  expect(mockSetMinerIp).toHaveBeenCalledWith('m1', '10.0.0.50');
+});
+
+it('sets temp threshold via alert chip', async () => {
+  const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  fireEvent.press(screen.getByLabelText('Set temp alert to 75°C'));
+
+  expect(mockAlertRules).toHaveBeenCalledWith('m1', expect.objectContaining({ tempThreshold: 75 }));
+});
+
+it('sets hashrate drop alert via chip', async () => {
+  const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  fireEvent.press(screen.getByLabelText('Set hashrate drop alert to 60%'));
+
+  expect(mockAlertRules).toHaveBeenCalledWith(
+    'm1',
+    expect.objectContaining({ hashrateDropPercent: 60 }),
+  );
+});
+
+it('selects a specific wallet from wallet picker', async () => {
+  const mockSetMinerWallet = jest.fn();
+  useMinerStore.setState({ setMinerWallet: mockSetMinerWallet } as any);
+
+  const { loadWallets: mockLoadWallets } = jest.requireMock('../src/db/database');
+  mockLoadWallets.mockResolvedValue([{ id: 'w1', name: 'Main Wallet', color: '#FF0000' }]);
+
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  fireEvent.press(screen.getByLabelText('Assign wallet'));
+  expect(await screen.findByLabelText('Select wallet: Main Wallet')).toBeTruthy();
+  fireEvent.press(screen.getByLabelText('Select wallet: Main Wallet'));
+
+  expect(mockSetMinerWallet).toHaveBeenCalledWith('m1', 'w1');
+});
+
+it('opens location picker and selects a location', async () => {
+  const mockSetMinerLocation = jest.fn();
+  useMinerStore.setState({ setMinerLocation: mockSetMinerLocation } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  fireEvent.press(screen.getByText('Set location...'));
+  expect(await screen.findByLabelText('Set location to Data Center')).toBeTruthy();
+
+  fireEvent.press(screen.getByLabelText('Set location to Data Center'));
+  expect(mockSetMinerLocation).toHaveBeenCalledWith('m1', 'Data Center');
+});
+
+it('clears location via None option', async () => {
+  const mockSetMinerLocation = jest.fn();
+  useMinerStore.setState({ setMinerLocation: mockSetMinerLocation } as any);
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  await fireEvent.press(r.getByText('Set location...'));
+  await fireEvent.press(r.getByText('None'));
+
+  expect(mockSetMinerLocation).toHaveBeenCalledWith('m1', undefined);
+});
+
+it('adds and removes tags', async () => {
+  const mockSetMinerTags = jest.fn();
+  useMinerStore.setState({ setMinerTags: mockSetMinerTags } as any);
+
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        tags: ['existing-tag'],
+      },
+    ],
+  });
+
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  expect(screen.getByLabelText('Remove tag existing-tag')).toBeTruthy();
+
+  fireEvent.press(screen.getByLabelText('Remove tag existing-tag'));
+  expect(mockSetMinerTags).toHaveBeenCalledWith('m1', []);
+});
+
+it('edits notes with debounce', async () => {
+  jest.useFakeTimers();
+  const mockSetMinerNotes = jest.fn();
+  useMinerStore.setState({ setMinerNotes: mockSetMinerNotes } as any);
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+
+  const notesInput = r.getByLabelText('Miner notes input');
+  await fireEvent.changeText(notesInput, 'New notes content');
+  jest.advanceTimersByTime(600);
+
+  expect(mockSetMinerNotes).toHaveBeenCalledWith('m1', 'New notes content');
+  jest.useRealTimers();
 });

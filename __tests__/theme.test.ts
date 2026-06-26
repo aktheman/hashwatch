@@ -3,6 +3,9 @@ import {
   getTheme,
   setThemeMode,
   getThemeMode,
+  scheduleThemeSwitch,
+  clearThemeSchedule,
+  theme,
   darkTheme,
   lightTheme,
   neonTheme,
@@ -107,5 +110,74 @@ describe('setThemeMode / getThemeMode', () => {
     setThemeMode('light');
     setThemeMode('dark');
     expect(getTheme().bg).toBe(darkTheme.bg);
+  });
+});
+
+describe('theme Proxy', () => {
+  it('returns current theme property via Proxy', () => {
+    setTheme(neonTheme);
+    expect(theme.bg).toBe(neonTheme.bg);
+    expect(theme.primary).toBe(neonTheme.primary);
+    expect(theme.text).toBe(neonTheme.text);
+  });
+
+  it('returns updated value when theme changes', () => {
+    expect(theme.bg).toBe(darkTheme.bg);
+    setTheme(lightTheme);
+    expect(theme.bg).toBe(lightTheme.bg);
+  });
+});
+
+describe('scheduleThemeSwitch / clearThemeSchedule', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-06-26T10:00:00'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    clearThemeSchedule();
+    setThemeMode('dark');
+  });
+
+  it('schedules a theme switch for a future hour', () => {
+    scheduleThemeSwitch(14, 'light');
+    jest.advanceTimersByTime(4 * 3600 * 1000 - 1);
+    expect(getThemeMode()).toBe('dark');
+    jest.advanceTimersByTime(1);
+    expect(getThemeMode()).toBe('light');
+  });
+
+  it('schedules for next day when hour has passed today', () => {
+    scheduleThemeSwitch(8, 'light');
+    jest.advanceTimersByTime(22 * 3600 * 1000);
+    expect(getThemeMode()).toBe('light');
+  });
+
+  it('clearThemeSchedule cancels pending switch', () => {
+    scheduleThemeSwitch(14, 'light');
+    clearThemeSchedule();
+    jest.advanceTimersByTime(4 * 3600 * 1000);
+    expect(getThemeMode()).toBe('dark');
+  });
+
+  it('clearThemeSchedule is safe when no timer is active', () => {
+    expect(() => clearThemeSchedule()).not.toThrow();
+  });
+
+  it('does not schedule duplicate mode', () => {
+    scheduleThemeSwitch(14, 'dark');
+    const timerId = setTimeout(jest.fn(), 10000);
+    jest.advanceTimersByTime(4 * 3600 * 1000);
+    expect(getThemeMode()).toBe('dark');
+    clearTimeout(timerId);
+  });
+
+  it('reschedules after switching (recursive call)', () => {
+    scheduleThemeSwitch(14, 'light');
+    jest.advanceTimersByTime(4 * 3600 * 1000);
+    expect(getThemeMode()).toBe('light');
+    jest.advanceTimersByTime(24 * 3600 * 1000 - 1);
+    expect(getThemeMode()).toBe('light');
   });
 });

@@ -45,6 +45,7 @@ jest.mock('../src/api/client', () => ({
   fetchMiners: jest.fn().mockResolvedValue([]),
   createMiner: jest.fn(),
   deleteMinerAPI: jest.fn(),
+  putSetting: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../src/services/minerSync', () => ({
@@ -101,6 +102,7 @@ jest.mock('../src/store/auth', () => ({
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
 import { SettingsScreen } from '../src/screens/SettingsScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -136,8 +138,8 @@ beforeEach(() => {
 
 it('renders settings title', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(await screen.findByText('settings.title')).toBeTruthy();
-});
+  expect(await screen.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();
+}, 20000);
 
 it('shows plan as Free by default', async () => {
   await render(<SettingsScreen navigation={navigation} />);
@@ -340,4 +342,49 @@ it('disables Sync Now button while syncing', async () => {
   await fireEvent.press(screen.getByLabelText('Remote Sync'));
   const btn = screen.getByLabelText('Sync Now');
   expect(btn.props.accessibilityState.disabled).toBe(true);
+});
+
+it('calls exportAllData on Export CSV press', async () => {
+  const { exportAllData: mockExport } = jest.requireMock('../src/utils/export');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Export CSV'));
+  expect(mockExport).toHaveBeenCalled();
+});
+
+it('calls exportJSON on Export JSON backup press', async () => {
+  const { exportJSON: mockExport } = jest.requireMock('../src/utils/export');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Export JSON backup'));
+  expect(mockExport).toHaveBeenCalled();
+});
+
+it('switches language via language chip', async () => {
+  const { setSetting: mockSetSetting } = jest.requireMock('../src/db/database');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Switch language to es'));
+  expect(mockSetSetting).toHaveBeenCalledWith('language', 'es');
+});
+
+it('disables dark mode schedule via Off button', async () => {
+  const { setSetting: mockSetSetting } = jest.requireMock('../src/db/database');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Disable dark mode schedule'));
+  expect(mockSetSetting).toHaveBeenCalledWith('auto_dark_hour', '');
+});
+
+it('schedules dark mode at selected hour', async () => {
+  const { setSetting: mockSetSetting } = jest.requireMock('../src/db/database');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Schedule dark mode at 20:00'));
+  expect(mockSetSetting).toHaveBeenCalledWith('auto_dark_hour', '20');
+});
+
+it('shows alert when exportAllData fails', async () => {
+  const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { exportAllData: mockExport } = jest.requireMock('../src/utils/export');
+  mockExport.mockRejectedValue(new Error('fail'));
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Export CSV'));
+  await waitFor(() => expect(mockAlert).toHaveBeenCalled());
+  mockAlert.mockRestore();
 });

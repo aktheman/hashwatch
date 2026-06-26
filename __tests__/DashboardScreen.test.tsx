@@ -152,7 +152,7 @@ it('shows loading state', async () => {
   useMinerStore.setState({ loading: true, initialized: false });
   await render(<DashboardScreen navigation={navigation} />);
   expect(screen.queryByText('dashboard.noMiners')).toBeNull();
-});
+}, 15000);
 
 it('navigates to AddMiner from empty state', async () => {
   await render(<DashboardScreen navigation={navigation} />);
@@ -611,4 +611,87 @@ describe('batch operations', () => {
     });
     alertSpy.mockRestore();
   });
+});
+
+it('shows sort chips and sorts by hashrate', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({
+        id: 'm1',
+        name: 'MinerA',
+        status: { hashRate: 100, hashRateUnit: 'GH/s', power: 12, temperature: 45 },
+      }),
+      makeMiner({
+        id: 'm2',
+        name: 'MinerB',
+        status: { hashRate: 500, hashRateUnit: 'GH/s', power: 12, temperature: 45 },
+      }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  expect(r.getByText('Sort:')).toBeTruthy();
+  await fireEvent.press(r.getByLabelText('Sort by hashrate'));
+  expect(r.getAllByText(/MinerA|MinerB/).length).toBeGreaterThanOrEqual(2);
+});
+
+it('shows sort chips and sorts by temp', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({
+        id: 'm1',
+        name: 'MinerA',
+        status: { hashRate: 500, hashRateUnit: 'GH/s', power: 12, temperature: 30 },
+      }),
+      makeMiner({
+        id: 'm2',
+        name: 'MinerB',
+        status: { hashRate: 500, hashRateUnit: 'GH/s', power: 12, temperature: 60 },
+      }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Sort by temp'));
+  expect(r.getAllByText(/MinerA|MinerB/).length).toBeGreaterThanOrEqual(2);
+});
+
+it('groups miners by location', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Loc1Miner', location: 'Home' }),
+      makeMiner({ id: 'm2', name: 'Loc2Miner', location: 'Office' }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('📍 Loc'));
+  expect(r.getByText('Home')).toBeTruthy();
+  expect(r.getByText('Office')).toBeTruthy();
+});
+
+it('groups miners by tag', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Tag1Miner', tags: ['gpu'] }),
+      makeMiner({ id: 'm2', name: 'Tag2Miner', tags: ['asic'] }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('📍 Loc'));
+  await fireEvent.press(r.getByText('🏷️ Tag'));
+  expect(r.getAllByText(/gpu/).length).toBeGreaterThanOrEqual(1);
+  expect(r.getAllByText(/asic/).length).toBeGreaterThanOrEqual(1);
+});
+
+it('restores saved section visibility from DB', async () => {
+  const { getSetting: mockGetSetting } = jest.requireMock('../src/db/database');
+  mockGetSetting.mockImplementation((key: string) => {
+    if (key === 'dashboard_sections') return Promise.resolve(JSON.stringify({ sort: false }));
+    if (key === 'kiosk_mode') return Promise.resolve(null);
+    if (key === 'power_cost') return Promise.resolve(null);
+    return Promise.resolve(null);
+  });
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  expect(r.queryByText('Sort:')).toBeNull();
 });

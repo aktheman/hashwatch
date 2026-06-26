@@ -859,3 +859,124 @@ describe('setMinerNotes', () => {
     expect(mockSaveMiner).toHaveBeenCalledTimes(saveBefore);
   });
 });
+
+describe('setMinerIp', () => {
+  it('updates miner IP and calls saveMiner', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerIp('m1', '5.6.7.8', 8080);
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.ip).toBe('5.6.7.8');
+    expect(updated?.port).toBe(8080);
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', ip: '5.6.7.8', port: 8080 }),
+    );
+  });
+
+  it('does nothing when miner not found', async () => {
+    const before = mockSaveMiner.mock.calls.length;
+    await useMinerStore.getState().setMinerIp('nonexistent', '5.6.7.8');
+    expect(mockSaveMiner).toHaveBeenCalledTimes(before);
+  });
+
+  it('preserves existing port when not provided', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerIp('m1', '5.6.7.8');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', ip: '5.6.7.8', port: 80 }),
+    );
+  });
+});
+
+describe('setMinerLocation', () => {
+  it('updates miner location', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerLocation('m1', 'Server Room A');
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.location).toBe('Server Room A');
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', location: 'Server Room A' }),
+    );
+  });
+
+  it('clears location when undefined', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, location: 'Old' } as never],
+    });
+
+    await useMinerStore.getState().setMinerLocation('m1', undefined);
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', location: undefined }),
+    );
+  });
+});
+
+describe('setMinerTags', () => {
+  it('updates miner tags', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().setMinerTags('m1', ['tag1', 'tag2']);
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.tags).toEqual(['tag1', 'tag2']);
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', tags: ['tag1', 'tag2'] }),
+    );
+  });
+});
+
+describe('updateMinerFromServer', () => {
+  it('updates matching miner from server data', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80, isOnline: false } as never],
+    });
+
+    useMinerStore.getState().updateMinerFromServer({
+      id: 'm1',
+      isOnline: true,
+      lastSeen: 5000,
+    });
+
+    const updated = useMinerStore.getState().miners.find((m) => m.id === 'm1');
+    expect(updated?.isOnline).toBe(true);
+    expect(updated?.lastSeen).toBe(5000);
+  });
+
+  it('ignores data for non-matching miner', async () => {
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Test', ip: '1.2.3.4', port: 80 } as never],
+    });
+
+    useMinerStore.getState().updateMinerFromServer({
+      id: 'nonexistent',
+      isOnline: true,
+    });
+
+    const miners = useMinerStore.getState().miners;
+    expect(miners).toHaveLength(1);
+  });
+});
+
+describe('syncWithBackend failure', () => {
+  it('handles sync failure gracefully', async () => {
+    mockAuthToken = 'test-token';
+    mockSyncMinersWithBackend.mockRejectedValue(new Error('network error'));
+
+    await expect(useMinerStore.getState().syncWithBackend()).resolves.toBeUndefined();
+    mockAuthToken = null;
+  });
+});

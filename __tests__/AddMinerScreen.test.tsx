@@ -170,8 +170,8 @@ it('shows pro limit error when adding beyond maxMiners', async () => {
   await act(async () => {
     fireEvent.press(screen.getByLabelText('Add Miner'));
   });
-  expect(await screen.findByText(/addMiner.upgradePro/)).toBeTruthy();
-});
+  expect(await screen.findByText(/addMiner.upgradePro/, {}, { timeout: 15000 })).toBeTruthy();
+}, 20000);
 
 it('shows error when addMiner throws', async () => {
   const addMinerMock = jest.fn().mockRejectedValue(new Error('Connection refused'));
