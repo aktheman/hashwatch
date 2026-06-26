@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import Svg, { Polygon, Polyline, Defs, Stop, LinearGradient, Circle } from 'react-native-svg';
 import { useTheme } from '../theme';
 
@@ -13,7 +13,7 @@ interface SparklineProps {
   fill?: string;
 }
 
-export function Sparkline({ data, width = 120, height = 40, color, fill }: SparklineProps) {
+export function Sparkline({ data, width = 120, height = 40, color, fill: _fill }: SparklineProps) {
   const theme = useTheme();
   const stroke = color || theme.info;
   const min = Math.min(...data);

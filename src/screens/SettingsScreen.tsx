@@ -447,7 +447,6 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   alignItems: 'center',
                 }}
                 onPress={() => {
-                  const { useSubscriptionStore } = require('../store/subscription');
                   useSubscriptionStore.getState().restore();
                   Alert.alert('Restore', 'Restore purchases triggered');
                 }}
@@ -468,7 +467,6 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     alignItems: 'center',
                   }}
                   onPress={() => {
-                    const { useSubscriptionStore } = require('../store/subscription');
                     useSubscriptionStore.getState().setPro();
                     Alert.alert('Debug', 'Pro status set');
                   }}
@@ -488,7 +486,6 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     alignItems: 'center',
                   }}
                   onPress={() => {
-                    const { useSubscriptionStore } = require('../store/subscription');
                     useSubscriptionStore.getState().setFree();
                     Alert.alert('Debug', 'Free status set');
                   }}

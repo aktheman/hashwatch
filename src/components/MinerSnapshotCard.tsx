@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { Miner } from '../types';
 import { useTheme } from '../theme';
 import {

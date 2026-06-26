@@ -339,6 +339,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [editIPValue, setEditIPValue] = useState('');
   const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tagInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -806,6 +807,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           ))}
         </View>
         <TextInput
+          ref={tagInputRef}
           placeholder="Add tag..."
           placeholderTextColor={theme.textMuted}
           onSubmitEditing={(e) => {
@@ -813,7 +815,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             if (tag && !(miner.tags || []).includes(tag)) {
               setMinerTags(minerId, [...(miner.tags || []), tag]);
             }
-            (e.target as any)?.clear?.();
+            tagInputRef.current?.clear();
           }}
           style={{
             backgroundColor: theme.surfaceLight,
