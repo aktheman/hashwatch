@@ -425,6 +425,162 @@ describe('loadQueue edge cases', () => {
   });
 });
 
+describe('restoreSession expired JWT', () => {
+  it('handles expired JWT token by clearing it', async () => {
+    const header = btoa(JSON.stringify({ alg: 'HS256' }));
+    const expiredTime = Math.floor(Date.now() / 1000) - 3600;
+    const payload = btoa(JSON.stringify({ userId: 'u1', exp: expiredTime }));
+    const expiredJwt = `${header}.${payload}.signature`;
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return expiredJwt;
+      if (k === 'auth_email') return 'a@b.com';
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    const state = useAuthStore.getState();
+    expect(state.token).toBeNull();
+    expect(state.userId).toBeNull();
+    expect(mockSetSetting).toHaveBeenCalledWith('auth_token', '');
+  });
+});
+
+describe('processQueue dedup and retry', () => {
+  beforeEach(async () => {
+    useAuthStore.setState({
+      token: 't1',
+      userId: 'u1',
+      email: 'a@b.com',
+      syncing: false,
+      synced: false,
+      lastSyncTimestamp: null,
+    });
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'settings_queue') return '[]';
+      if (k === 'theme_mode') return 'dark';
+      if (k === 'power_cost') return '0.15';
+      if (k === 'auto_scan') return 'true';
+      return null;
+    });
+    mockGetSettings.mockResolvedValue({});
+    mockPutSetting.mockResolvedValue(undefined);
+    await useAuthStore.getState().restoreSession();
+  });
+
+  it('deduplicates queue by keeping latest timestamp per key', async () => {
+    await queueSetting('theme_mode', 'dark');
+    await queueSetting('theme_mode', 'light');
+    await queueSetting('theme_mode', 'neon');
+
+    await useAuthStore.getState().syncNow();
+
+    const putCalls = mockPutSetting.mock.calls.filter(([k]) => k === 'theme_mode');
+    expect(putCalls[0][1]).toBe('neon');
+  });
+
+  it('increments retry count on API failure', async () => {
+    jest.isolateModules(async () => {
+      const mockPS = jest.fn();
+      jest.doMock('../src/api/client', () => ({
+        configureClient: jest.fn(),
+        putSetting: (k: string, v: string) => mockPS(k, v),
+      }));
+      jest.doMock('../src/db/database', () => ({
+        setSetting: (k: string, v: string) => mockSetSetting(k, v),
+        getSetting: (k: string) => mockGetSetting(k),
+      }));
+      const { queueSetting: qs } = await import('../src/store/auth');
+      const { useAuthStore: store } = await import('../src/store/auth');
+
+      store.setState({
+        token: 't1',
+        userId: 'u1',
+        email: 'a@b.com',
+        syncing: false,
+        synced: false,
+        lastSyncTimestamp: null,
+      });
+      mockGetSetting.mockImplementation((k: string) => {
+        if (k === 'settings_queue') return '[]';
+        if (k === 'theme_mode') return 'dark';
+        if (k === 'power_cost') return '0.15';
+        if (k === 'auto_scan') return 'true';
+        return null;
+      });
+
+      await store.getState().restoreSession();
+      await qs('theme_mode', 'dark');
+
+      mockPS.mockRejectedValue(new Error('network error'));
+      await store.getState().syncNow();
+
+      const parsed = JSON.parse(
+        mockSetSetting.mock.calls.find(([k]) => k === 'settings_queue')![1] as string,
+      );
+      expect(parsed[0].retries).toBeGreaterThan(0);
+    });
+  });
+
+  it('removes item from queue after 3 retries', async () => {
+    jest.isolateModules(async () => {
+      const mockPS = jest.fn();
+      jest.doMock('../src/api/client', () => ({
+        configureClient: jest.fn(),
+        putSetting: (k: string, v: string) => mockPS(k, v),
+      }));
+      jest.doMock('../src/db/database', () => ({
+        setSetting: (k: string, v: string) => mockSetSetting(k, v),
+        getSetting: (k: string) => mockGetSetting(k),
+      }));
+      const { queueSetting: qs, useAuthStore: store } = await import('../src/store/auth');
+
+      store.setState({
+        token: 't1',
+        userId: 'u1',
+        email: 'a@b.com',
+        syncing: false,
+        synced: false,
+        lastSyncTimestamp: null,
+      });
+      mockGetSetting.mockImplementation((k: string) => {
+        if (k === 'settings_queue') return '[]';
+        if (k === 'theme_mode') return 'dark';
+        if (k === 'power_cost') return '0.15';
+        if (k === 'auto_scan') return 'true';
+        return null;
+      });
+
+      await store.getState().restoreSession();
+      await qs('theme_mode', 'dark');
+      mockPS.mockRejectedValue(new Error('network error'));
+
+      await store.getState().syncNow();
+      await store.getState().syncNow();
+      await store.getState().syncNow();
+
+      const queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+      const lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
+      expect(lastSave).toHaveLength(0);
+    });
+  });
+});
+
+describe('restoreSession no token path', () => {
+  it('does not connect WS or register push when no token after restore', async () => {
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return null;
+      if (k === 'auth_email') return null;
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    expect(mockConnectWS).not.toHaveBeenCalled();
+    expect(mockRegisterPush).not.toHaveBeenCalled();
+  });
+});
+
 describe('restoreSession JWT decode', () => {
   it('decodes userId from valid JWT token', async () => {
     const header = btoa(JSON.stringify({ alg: 'HS256' }));
@@ -456,6 +612,23 @@ describe('restoreSession JWT decode', () => {
     await useAuthStore.getState().restoreSession();
 
     const state = useAuthStore.getState();
+    expect(state.userId).toBeNull();
+  });
+
+  it('falls back gracefully when JWT payload is invalid JSON', async () => {
+    const header = btoa(JSON.stringify({ alg: 'HS256' }));
+    const invalidPayload = btoa('not-json');
+    const badJwt = `${header}.${invalidPayload}.signature`;
+    mockGetSetting.mockImplementation((k: string) => {
+      if (k === 'auth_token') return badJwt;
+      if (k === 'auth_email') return 'a@b.com';
+      return null;
+    });
+
+    await useAuthStore.getState().restoreSession();
+
+    const state = useAuthStore.getState();
+    expect(state.token).toBe(badJwt);
     expect(state.userId).toBeNull();
   });
 });

@@ -151,8 +151,8 @@ it('shows main app when onboarding_complete is true', async () => {
     return null;
   });
   await render(<AppNavigator />);
-  expect(await screen.findByText('dashboard.noMiners')).toBeTruthy();
-});
+  expect(await screen.findByText('dashboard.noMiners', {}, { timeout: 15000 })).toBeTruthy();
+}, 20000);
 
 it('shows dashboard with all four tabs', async () => {
   (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {

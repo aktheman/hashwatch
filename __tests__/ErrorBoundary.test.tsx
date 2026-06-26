@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
+import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 
@@ -27,18 +27,12 @@ it('renders Try Again button after error', async () => {
 
   const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-  // Render without awaiting — React 19's act() can hang when error
-  // boundaries catch synchronous render errors. The render work still
-  // completes synchronously; we wait for the error UI via waitFor.
-  render(
+  const r = await render(
     <ErrorBoundary>
       <Bomb />
     </ErrorBoundary>,
   );
 
-  await waitFor(() => {
-    expect(screen.getByText('errorBoundary.tryAgain')).toBeTruthy();
-  });
-
+  expect(r.getByText('errorBoundary.tryAgain')).toBeTruthy();
   expect(consoleSpy).toHaveBeenCalled();
 });

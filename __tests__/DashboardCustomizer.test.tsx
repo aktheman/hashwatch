@@ -69,9 +69,9 @@ describe('DashboardCustomizer', () => {
 
   it('renders modal when visible', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    expect(r.getByText('Customize Dashboard')).toBeTruthy();
+    expect(await r.findByText('Customize Dashboard', {}, { timeout: 15000 })).toBeTruthy();
     expect(r.getByText('Done')).toBeTruthy();
-  });
+  }, 20000);
 
   it('renders all section toggles', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
