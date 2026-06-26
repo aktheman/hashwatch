@@ -1,5 +1,14 @@
 import { memo, useMemo, useCallback, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+  Alert,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Miner } from '../types';
 import {
@@ -262,8 +271,7 @@ export const MinerCard = memo(
                   {miner.name}
                 </Text>
                 {onRename && (
-                  <TouchableOpacity
-                    accessibilityRole="button"
+                  <Pressable
                     onPress={() => {
                       setEditNameValue(miner.name);
                       setEditingName(true);
@@ -272,7 +280,7 @@ export const MinerCard = memo(
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
                     <Text style={{ fontSize: 12, color: theme.primary, marginLeft: 4 }}>✎</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 )}
               </View>
             )}

@@ -121,7 +121,7 @@ const navigation = { navigate: jest.fn() };
 
 beforeEach(() => {
   cleanup();
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  jest.useFakeTimers();
   setTheme(darkTheme);
   useSubscriptionStore.setState({
     tier: 'free',
