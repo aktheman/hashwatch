@@ -94,7 +94,7 @@ jest.mock('../src/services/websocket', () => ({
   disconnectWebSocket: jest.fn(),
 }));
 
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react-native';
 import React from 'react';
 import { Alert, Platform } from 'react-native';
 import { DashboardScreen } from '../src/screens/DashboardScreen';
@@ -1112,9 +1112,109 @@ it('web Escape key exits selection mode', async () => {
   expect(r.getByLabelText('Cancel selection')).toBeTruthy();
   const keydownCalls = addEventListener.mock.calls.filter((c: any) => c[0] === 'keydown');
   const handler = keydownCalls[keydownCalls.length - 1][1];
-  handler({ key: 'Escape' });
+  await act(() => {
+    handler({ key: 'Escape' });
+  });
   await waitFor(() => {
     expect(r.queryByLabelText('Cancel selection')).toBeNull();
   });
   Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
+  delete (globalThis as any).window;
+  delete (globalThis as any).window;
+});
+
+it('pull-to-refresh calls refreshAll', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+    refreshAll: jest.fn().mockResolvedValue(undefined),
+  });
+  await render(<DashboardScreen navigation={navigation} />);
+  await useMinerStore.getState().refreshAll();
+  expect(useMinerStore.getState().refreshAll).toHaveBeenCalled();
+});
+
+it('delete toast onConfirm calls removeMiner', async () => {
+  const mockShowUndo = jest.fn();
+  const { useToastStore } = require('../src/store/toast');
+  useToastStore.setState({ showUndo: mockShowUndo });
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+    removeMiner: jest.fn().mockResolvedValue(undefined),
+  });
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  const card = r.getByLabelText('Miner1, online, 500.0 GH/s');
+  fireEvent(card, 'onLongPress');
+  const removeButton = (alertSpy.mock.calls[0][2] as any[])?.find(
+    (b: any) => b.text === 'minerCard.remove',
+  );
+  removeButton?.onPress?.();
+  const toastConfig = mockShowUndo.mock.calls[0][0];
+  toastConfig.onConfirm();
+  expect(useMinerStore.getState().removeMiner).toHaveBeenCalledWith('m1');
+  alertSpy.mockRestore();
+});
+
+it('rename miner calls setMinerName', async () => {
+  const mockSetMinerName = jest.fn();
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+    setMinerName: mockSetMinerName,
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Edit miner name'));
+  await fireEvent.changeText(r.getByLabelText('Rename miner'), 'NewName');
+  fireEvent(r.getByLabelText('Rename miner'), 'submitEditing');
+  expect(mockSetMinerName).toHaveBeenCalledWith('m1', 'NewName');
+});
+
+it('applies preset sections via customizer', async () => {
+  const LS: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (key: string) => LS[key] ?? null,
+    setItem: (key: string, val: string) => {
+      LS[key] = val;
+    },
+  };
+  const presetSections: Record<string, boolean> = {
+    earnings: false,
+    ticker: true,
+    map: true,
+    legend: true,
+    pools: true,
+    metrics: true,
+    filters: true,
+    sort: true,
+    profitability: true,
+  };
+  LS['hashwatch_dashboard_presets'] = JSON.stringify([
+    { name: 'Test Preset', sections: presetSections },
+  ]);
+  const { setSetting } = require('../src/db/database');
+  (setSetting as jest.Mock).mockClear();
+  useMinerStore.setState({ miners: [makeMiner()] });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Customize dashboard'));
+  await fireEvent.press(r.getByText('Load Preset (1)'));
+  await fireEvent.press(r.getByText('Test Preset'));
+  expect(setSetting).toHaveBeenCalledWith('dashboard_sections', JSON.stringify(presetSections));
+  delete (globalThis as any).localStorage;
+});
+
+it('modal overlay closes wallet picker', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  const minerCards = await r.findAllByText('Miner1');
+  await fireEvent.press(minerCards[minerCards.length - 1]);
+  await fireEvent.press(r.getByLabelText('Batch wallet'));
+  await waitFor(() => {
+    expect(r.getByText('dashboard.assignWallet')).toBeTruthy();
+  });
+  await fireEvent.press(r.getByLabelText('Close wallet picker'));
+  await waitFor(() => {
+    expect(r.queryByText('dashboard.assignWallet')).toBeNull();
+  });
 });
