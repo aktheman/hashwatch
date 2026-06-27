@@ -24,6 +24,16 @@ jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(),
 }));
 
+jest.mock('../src/utils/export', () => ({
+  exportAllData: jest.fn(),
+}));
+
+jest.mock('../src/theme', () => ({
+  ...(jest.requireActual('../src/theme') as object),
+  setThemeMode: jest.fn(),
+  getThemeMode: jest.fn(() => 'dark' as const),
+}));
+
 jest.mock('../src/db/database', () => ({
   loadMiners: jest.fn().mockResolvedValue([]),
   saveMiner: jest.fn().mockResolvedValue(undefined),
@@ -132,8 +142,9 @@ beforeEach(() => {
     clearError: jest.fn(),
   });
   jest.clearAllMocks();
-  const { loadWallets } = require('../src/db/database');
+  const { loadWallets, getSetting } = require('../src/db/database');
   (loadWallets as jest.Mock).mockResolvedValue([]);
+  (getSetting as jest.Mock).mockResolvedValue(null);
 });
 
 it('renders HashWatch title', async () => {
@@ -694,4 +705,319 @@ it('restores saved section visibility from DB', async () => {
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
   expect(r.queryByText('Sort:')).toBeNull();
+});
+
+it('filters miners by location chip', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', location: 'Home' }),
+      makeMiner({ id: 'm2', name: 'Miner2', location: 'Office' }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  expect(r.getAllByLabelText(/Filter by location:/).length).toBe(2);
+  await fireEvent.press(r.getByLabelText('Filter by location: Home'));
+  expect(r.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+  await waitFor(() => {
+    expect(r.queryAllByText('Miner2').length).toBe(0);
+  });
+});
+
+it('toggles location filter off on second press', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', location: 'Home' }),
+      makeMiner({ id: 'm2', name: 'Miner2', location: 'Office' }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Filter by location: Home'));
+  await waitFor(() => {
+    expect(r.queryAllByText('Miner2').length).toBe(0);
+  });
+  await fireEvent.press(r.getByLabelText('Filter by location: Home'));
+  await waitFor(() => {
+    expect(r.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+    expect(r.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+it('filters miners by tag chip', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', tags: ['gpu'] }),
+      makeMiner({ id: 'm2', name: 'Miner2', tags: ['asic'] }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Filter by tag: gpu'));
+  expect(r.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+  await waitFor(() => {
+    expect(r.queryAllByText('Miner2').length).toBe(0);
+  });
+});
+
+it('toggles tag filter off on second press', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', tags: ['gpu'] }),
+      makeMiner({ id: 'm2', name: 'Miner2', tags: ['asic'] }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Filter by tag: gpu'));
+  await waitFor(() => {
+    expect(r.queryAllByText('Miner2').length).toBe(0);
+  });
+  await fireEvent.press(r.getByLabelText('Filter by tag: gpu'));
+  await waitFor(() => {
+    expect(r.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
+    expect(r.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+it('collapse group header hides miners in that group', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', location: 'Home' }),
+      makeMiner({ id: 'm2', name: 'Miner2', location: 'Home' }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('📍 Loc'));
+  const header = r.getByLabelText('Home group, 2 miners');
+  expect(r.queryByText('▶')).toBeNull();
+  await fireEvent.press(header);
+  await waitFor(() => {
+    expect(r.getByText('▶')).toBeTruthy();
+  });
+  await waitFor(() => {
+    expect(r.queryByLabelText('Miner1, online, 500.0 GH/s')).toBeNull();
+    expect(r.queryByLabelText('Miner2, online, 500.0 GH/s')).toBeNull();
+  });
+});
+
+it('expand collapsed group shows miners again', async () => {
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', location: 'Home' }),
+      makeMiner({ id: 'm2', name: 'Miner2', location: 'Home' }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('📍 Loc'));
+  await fireEvent.press(r.getByLabelText('Home group, 2 miners'));
+  await waitFor(() => {
+    expect(r.getByText('▶')).toBeTruthy();
+  });
+  await fireEvent.press(r.getByLabelText('Home group, 2 miners'));
+  await waitFor(() => {
+    expect(r.getByText('▼')).toBeTruthy();
+  });
+  await waitFor(() => {
+    expect(r.getByLabelText('Miner1, online, 500.0 GH/s')).toBeTruthy();
+    expect(r.getByLabelText('Miner2, online, 500.0 GH/s')).toBeTruthy();
+  });
+});
+
+it('export button calls exportAllData', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Export data'));
+  const { exportAllData } = jest.requireMock('../src/utils/export');
+  expect(exportAllData).toHaveBeenCalledTimes(1);
+});
+
+it('theme button cycles mode', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Switch theme'));
+  const { setThemeMode } = jest.requireMock('../src/theme');
+  expect(setThemeMode).toHaveBeenCalledWith('neon');
+});
+
+it('deselects miner on second tap in selection mode', async () => {
+  const mockShowUndo = jest.fn();
+  const { useToastStore } = require('../src/store/toast');
+  useToastStore.setState({ showUndo: mockShowUndo });
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+    setMinerWallet: jest.fn(),
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  const miners = await r.findAllByText('Miner1');
+  await fireEvent.press(miners[miners.length - 1]);
+  await waitFor(() => {
+    expect(r.getByLabelText('Compare').props.accessibilityState.disabled).toBe(true);
+  });
+});
+
+it('batch Remove Group clears groups on selected miners', async () => {
+  const mockSetGroup = jest.fn();
+  const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation((...args) => {});
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+    setMinerGroup: mockSetGroup,
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  await fireEvent.press((await r.findAllByText('Miner1'))[1]);
+  await fireEvent.press((await r.findAllByText('Miner2'))[1]);
+  await fireEvent.press(r.getByLabelText('Batch group'));
+  const promptArgs = promptSpy.mock.calls[0];
+  const removeBtn = promptArgs?.[2]?.find((b: any) => b.text === 'dashboard.removeGroup');
+  removeBtn?.onPress?.();
+  await waitFor(() => {
+    expect(mockSetGroup).toHaveBeenCalledWith('m1', undefined);
+    expect(mockSetGroup).toHaveBeenCalledWith('m2', undefined);
+  });
+  promptSpy.mockRestore();
+});
+
+describe('kiosk mode', () => {
+  it('renders exit kiosk button when kiosk mode is enabled', async () => {
+    const { getSetting } = jest.requireMock('../src/db/database');
+    (getSetting as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'kiosk_mode') return Promise.resolve('true');
+      if (key === 'dashboard_sections') return Promise.resolve(null);
+      if (key === 'power_cost') return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    const r = await render(<DashboardScreen navigation={navigation} />);
+    expect(r.getByLabelText('Exit kiosk mode')).toBeTruthy();
+  });
+
+  it('kiosk exit alert calls setSetting', async () => {
+    const { getSetting } = jest.requireMock('../src/db/database');
+    (getSetting as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'kiosk_mode') return Promise.resolve('true');
+      if (key === 'dashboard_sections') return Promise.resolve(null);
+      if (key === 'power_cost') return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
+    useMinerStore.setState({
+      miners: [makeMiner()],
+    });
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const r = await render(<DashboardScreen navigation={navigation} />);
+    await fireEvent.press(r.getByLabelText('Exit kiosk mode'));
+    const alertArgs = alertSpy.mock.calls[0];
+    const exitButton = alertArgs?.[2]?.find((b: any) => b.text === 'Exit');
+    exitButton?.onPress?.();
+    const { setSetting } = jest.requireMock('../src/db/database');
+    expect(setSetting).toHaveBeenCalledWith('kiosk_mode', 'false');
+    alertSpy.mockRestore();
+  });
+});
+
+describe('pool details', () => {
+  it('renders pool section when miners have pool info', async () => {
+    useMinerStore.setState({
+      miners: [
+        makeMiner({
+          status: {
+            hashRate: 500,
+            hashRateUnit: 'GH/s',
+            power: 12,
+            temperature: 45,
+            pool: 'stratum+tcp://pool.example.com:3333',
+            sharesAccepted: 10,
+            sharesRejected: 2,
+            poolResponseTime: 45,
+          },
+        }),
+      ],
+    });
+    const r = await render(<DashboardScreen navigation={navigation} />);
+    expect(r.getByLabelText(/pool details/)).toBeTruthy();
+  });
+
+  it('expands pool to show miner shares', async () => {
+    useMinerStore.setState({
+      miners: [
+        makeMiner({
+          id: 'm1',
+          name: 'PoolMiner',
+          status: {
+            hashRate: 500,
+            hashRateUnit: 'GH/s',
+            power: 12,
+            temperature: 45,
+            pool: 'stratum+tcp://pool.example.com:3333',
+            sharesAccepted: 10,
+            sharesRejected: 2,
+            poolResponseTime: 45,
+          },
+        }),
+      ],
+    });
+    const r = await render(<DashboardScreen navigation={navigation} />);
+    await fireEvent.press(r.getByLabelText(/pool details/));
+    expect(r.getAllByText('PoolMiner').length).toBeGreaterThanOrEqual(1);
+    expect(r.getAllByText('+10').length).toBeGreaterThanOrEqual(1);
+    expect(r.getAllByText('-2').length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+it('customize dashboard button opens customizer', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Customize dashboard'));
+  expect(r.getByText('Customize Dashboard')).toBeTruthy();
+});
+
+it('"No wallet" option clears wallet assignment in batch picker', async () => {
+  const mockSetWallet = jest.fn();
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+    setMinerWallet: mockSetWallet,
+  });
+  const { loadWallets } = require('../src/db/database');
+  (loadWallets as jest.Mock).mockResolvedValue([{ id: 'w1', name: 'Test Wallet', color: '#f00' }]);
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  await fireEvent.press((await r.findAllByText('Miner1'))[1]);
+  await fireEvent.press(r.getByLabelText('Batch wallet'));
+  expect(r.getByLabelText('No wallet')).toBeTruthy();
+  await fireEvent.press(r.getByLabelText('No wallet'));
+  await waitFor(() => {
+    expect(mockSetWallet).toHaveBeenCalledWith('m1', undefined);
+  });
+});
+
+it('batch delete onConfirm calls removeMiner', async () => {
+  const mockRemoveMiner = jest.fn();
+  const capturedOptions: any[] = [];
+  const mockShowUndo = jest.fn((opts: any) => capturedOptions.push(opts));
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+    removeMiner: mockRemoveMiner,
+  });
+  const { useToastStore } = require('../src/store/toast');
+  useToastStore.setState({ showUndo: mockShowUndo });
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  await fireEvent.press((await r.findAllByText('Miner1'))[1]);
+  await fireEvent.press((await r.findAllByText('Miner2'))[1]);
+  await fireEvent.press(r.getByLabelText('Batch delete'));
+  const alertArgs = alertSpy.mock.calls[0];
+  const deleteButton = alertArgs?.[2]?.find((b: any) => b.text === 'common.delete');
+  deleteButton?.onPress?.();
+  expect(mockShowUndo).toHaveBeenCalledTimes(2);
+  capturedOptions[0].onConfirm();
+  expect(mockRemoveMiner).toHaveBeenCalledWith('m1');
+  capturedOptions[1].onConfirm();
+  expect(mockRemoveMiner).toHaveBeenCalledWith('m2');
+  alertSpy.mockRestore();
 });
