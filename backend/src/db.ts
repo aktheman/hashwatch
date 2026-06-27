@@ -10,7 +10,7 @@ const pool = process.env.DATABASE_URL
       password: process.env.DB_PASSWORD || 'hashwatch',
     });
 
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: unknown[]) {
   return pool.query(text, params);
 }
 

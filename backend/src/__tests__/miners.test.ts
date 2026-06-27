@@ -1,14 +1,14 @@
 import request from 'supertest';
 import express from 'express';
-import jwt from 'jsonwebtoken';
+import type { Request, Response, NextFunction } from 'express';
 
 const mockQuery = jest.fn();
 jest.mock('../db', () => ({ query: mockQuery }));
 jest.mock('../middleware/auth', () => {
-  const actual = jest.requireActual('../middleware/auth');
+  const actual = jest.requireActual('../middleware/auth') as Record<string, unknown>;
   return {
     ...actual,
-    authMiddleware: (req: any, _res: any, next: any) => {
+    authMiddleware: (req: Request & { userId?: string }, _res: Response, next: NextFunction) => {
       req.userId = 'test-user-id';
       next();
     },

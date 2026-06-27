@@ -13,7 +13,7 @@ interface MinerRow {
 const POLL_INTERVAL = 60_000;
 const TIMEOUT = 5000;
 
-async function fetchJson(url: string): Promise<any | null> {
+async function fetchJson(url: string): Promise<unknown | null> {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), TIMEOUT);
@@ -26,12 +26,14 @@ async function fetchJson(url: string): Promise<any | null> {
   }
 }
 
-function extractPool(info: any, status: any): string | null {
-  const fromStatus = typeof status?.pool === 'string' && status.pool ? status.pool : null;
-  const fromInfo = typeof info?.pool === 'string' && info.pool ? info.pool : null;
+function extractPool(info: unknown, status: unknown): string | null {
+  const infoObj = info as Record<string, unknown> | null;
+  const statusObj = status as Record<string, unknown> | null;
+  const fromStatus = typeof statusObj?.pool === 'string' && statusObj.pool ? statusObj.pool : null;
+  const fromInfo = typeof infoObj?.pool === 'string' && infoObj.pool ? infoObj.pool : null;
   const fromStratum =
-    (typeof status?.stratumURL === 'string' && status.stratumURL) ||
-    (typeof info?.stratumURL === 'string' && info.stratumURL);
+    (typeof statusObj?.stratumURL === 'string' && statusObj.stratumURL) ||
+    (typeof infoObj?.stratumURL === 'string' && infoObj.stratumURL);
   return fromStatus || fromInfo || fromStratum || null;
 }
 
@@ -74,36 +76,40 @@ async function pollMiner(miner: MinerRow): Promise<void> {
         isOnline: true,
         lastSeen: Date.now(),
         status: {
-          hashRate: statusData?.hashRate ?? infoData?.hashRate ?? 0,
-          hashRateUnit: statusData?.hashRateUnit ?? 'MH/s',
+          hashRate:
+            (statusData as Record<string, unknown>)?.hashRate ??
+            (infoData as Record<string, unknown>)?.hashRate ??
+            0,
+          hashRateUnit: (statusData as Record<string, unknown>)?.hashRateUnit ?? 'MH/s',
           temperature,
-          vrTemp: statusData?.vrTemp ?? 0,
-          voltage: statusData?.voltage ?? 0,
-          current: statusData?.current ?? 0,
-          power: statusData?.power ?? 0,
-          sharesAccepted: statusData?.sharesAccepted ?? 0,
-          sharesRejected: statusData?.sharesRejected ?? 0,
-          bestDiff: statusData?.bestDiff ?? '',
-          bestSessionDiff: statusData?.bestSessionDiff ?? '',
-          uptimeSeconds: statusData?.uptimeSeconds ?? 0,
-          coreVoltage: statusData?.coreVoltage ?? 0,
-          frequency: statusData?.frequency ?? 0,
-          fanSpeed: statusData?.fanSpeed ?? 0,
-          fanRpm: statusData?.fanRpm ?? 0,
+          vrTemp: (statusData as Record<string, unknown>)?.vrTemp ?? 0,
+          voltage: (statusData as Record<string, unknown>)?.voltage ?? 0,
+          current: (statusData as Record<string, unknown>)?.current ?? 0,
+          power: (statusData as Record<string, unknown>)?.power ?? 0,
+          sharesAccepted: (statusData as Record<string, unknown>)?.sharesAccepted ?? 0,
+          sharesRejected: (statusData as Record<string, unknown>)?.sharesRejected ?? 0,
+          bestDiff: ((statusData as Record<string, unknown>)?.bestDiff as string | undefined) ?? '',
+          bestSessionDiff:
+            ((statusData as Record<string, unknown>)?.bestSessionDiff as string | undefined) ?? '',
+          uptimeSeconds: (statusData as Record<string, unknown>)?.uptimeSeconds ?? 0,
+          coreVoltage: (statusData as Record<string, unknown>)?.coreVoltage ?? 0,
+          frequency: (statusData as Record<string, unknown>)?.frequency ?? 0,
+          fanSpeed: (statusData as Record<string, unknown>)?.fanSpeed ?? 0,
+          fanRpm: (statusData as Record<string, unknown>)?.fanRpm ?? 0,
           pool: pool ?? '',
-          poolPort: statusData?.poolPort ?? 0,
-          poolUser: statusData?.poolUser ?? '',
-          poolResponseTime: statusData?.poolResponseTime ?? 0,
+          poolPort: (statusData as Record<string, unknown>)?.poolPort ?? 0,
+          poolUser: ((statusData as Record<string, unknown>)?.poolUser as string | undefined) ?? '',
+          poolResponseTime: (statusData as Record<string, unknown>)?.poolResponseTime ?? 0,
         },
         info: {
-          version: infoData?.version ?? '',
-          hostname: infoData?.hostname ?? '',
-          macAddr: infoData?.macAddr ?? '',
+          version: ((infoData as Record<string, unknown>)?.version as string | undefined) ?? '',
+          hostname: ((infoData as Record<string, unknown>)?.hostname as string | undefined) ?? '',
+          macAddr: ((infoData as Record<string, unknown>)?.macAddr as string | undefined) ?? '',
           ip: miner.ip,
-          chipType: infoData?.chipType ?? '',
-          ssid: infoData?.ssid ?? '',
-          wifiSignal: infoData?.wifiSignal ?? 0,
-          powerMode: infoData?.powerMode ?? 0,
+          chipType: ((infoData as Record<string, unknown>)?.chipType as string | undefined) ?? '',
+          ssid: ((infoData as Record<string, unknown>)?.ssid as string | undefined) ?? '',
+          wifiSignal: (infoData as Record<string, unknown>)?.wifiSignal ?? 0,
+          powerMode: (infoData as Record<string, unknown>)?.powerMode ?? 0,
         },
       },
     });

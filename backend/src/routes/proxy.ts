@@ -60,32 +60,37 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
     }
 
     res.json(response.data);
-  } catch (e: any) {
+  } catch (e: unknown) {
     const sentryContext: Record<string, unknown> = { url: req.body.url, method: req.body.method };
 
-    if (e.code === 'ECONNREFUSED' || e.code === 'EHOSTUNREACH') {
-      captureException(e, sentryContext);
-      return res
-        .status(502)
-        .json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
-    }
-    if (
-      e.code === 'ETIMEDOUT' ||
-      e.code === 'ENETUNREACH' ||
-      e.code === 'ENETDOWN' ||
-      e.code === 'EINVAL'
-    ) {
-      captureException(e, sentryContext);
-      return res.status(502).json({ error: 'unreachable', message: 'Miner unreachable (timeout)' });
-    }
-    if (e.code === 'ERR_BAD_RESPONSE') {
-      captureException(e, sentryContext);
-      return res
-        .status(502)
-        .json({ error: 'bad_response', message: 'Invalid response from miner' });
+    if (e && typeof e === 'object' && 'code' in e) {
+      const code = (e as { code?: string }).code;
+      if (code === 'ECONNREFUSED' || code === 'EHOSTUNREACH') {
+        captureException(e as unknown, sentryContext);
+        return res
+          .status(502)
+          .json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
+      }
+      if (
+        code === 'ETIMEDOUT' ||
+        code === 'ENETUNREACH' ||
+        code === 'ENETDOWN' ||
+        code === 'EINVAL'
+      ) {
+        captureException(e as unknown, sentryContext);
+        return res
+          .status(502)
+          .json({ error: 'unreachable', message: 'Miner unreachable (timeout)' });
+      }
+      if (code === 'ERR_BAD_RESPONSE') {
+        captureException(e as unknown, sentryContext);
+        return res
+          .status(502)
+          .json({ error: 'bad_response', message: 'Invalid response from miner' });
+      }
     }
 
-    captureException(e, sentryContext);
+    captureException(e as unknown, sentryContext);
     res.status(500).json({ error: 'proxy_error', message: 'Internal proxy error' });
   }
 });
@@ -103,8 +108,8 @@ proxyRouter.post('/restart', async (req: AuthRequest, res) => {
     }
     await axios({ url, method: 'POST', timeout: 5000, validateStatus: () => true });
     res.json({ success: true });
-  } catch (e: any) {
-    captureException(e, { route: 'proxy.restart' });
+  } catch (e: unknown) {
+    captureException(e as unknown, { route: 'proxy.restart' });
     res.status(502).json({ error: 'restart_failed', message: 'Could not reach miner' });
   }
 });

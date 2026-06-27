@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { captureException } from '../services/sentry';
-import { checkMinerStatus } from '../services/minerMonitor';
 import { listPoolStats } from '../services/minerState';
 
 export const minersRouter = Router();
@@ -34,11 +33,11 @@ minersRouter.post('/', async (req: AuthRequest, res) => {
       [getUserId(req), data.name, data.ip, data.port],
     );
     res.status(201).json(result.rows[0]);
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    captureException(e, { route: 'miners.create' });
+    captureException(e);
     res.status(500).json({ error: 'internal server error' });
   }
 });
@@ -46,9 +45,9 @@ minersRouter.post('/', async (req: AuthRequest, res) => {
 minersRouter.put('/:id', async (req: AuthRequest, res) => {
   try {
     const data = minerSchema.partial().parse(req.body);
-    const id = req.params.id as string;
+    const id = req.params.id;
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let idx = 1;
 
     if (data.name !== undefined) {
@@ -79,17 +78,17 @@ minersRouter.put('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'miner not found' });
     }
     res.json(result.rows[0]);
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
-    captureException(e, { route: 'miners.update' });
+    captureException(e);
     res.status(500).json({ error: 'internal server error' });
   }
 });
 
 minersRouter.delete('/:id', async (req: AuthRequest, res) => {
-  const id = req.params.id as string;
+  const id = req.params.id;
   const result = await query('DELETE FROM miners WHERE id = $1 AND userId = $2 RETURNING id', [
     id,
     getUserId(req),
@@ -104,8 +103,8 @@ minersRouter.get('/pools', async (_req: AuthRequest, res) => {
   try {
     const data = listPoolStats().map((p, idx) => ({ id: String(idx), ...p }));
     res.json(data);
-  } catch (e: any) {
-    captureException(e, { route: 'miners.pools' });
+  } catch (e: unknown) {
+    captureException(e);
     res.status(500).json({ error: 'internal server error' });
   }
 });

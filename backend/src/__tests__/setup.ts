@@ -8,11 +8,13 @@ jest.mock('expo-server-sdk', () => {
     chunkPushNotifications: mockChunkPushNotifications,
     sendPushNotificationsAsync: mockSendPushNotificationsAsync,
   }));
-  (mockExpo as any).isExpoPushToken = jest.fn().mockReturnValue(true);
+  const mockExpoWithToken = Object.assign(mockExpo, {
+    isExpoPushToken: jest.fn().mockReturnValue(true),
+  });
   return {
     __esModule: true,
-    default: { Expo: mockExpo },
-    Expo: mockExpo,
+    default: { Expo: mockExpoWithToken },
+    Expo: mockExpoWithToken,
     ExpoPushMessage: {},
     ExpoPushTicket: {},
   };

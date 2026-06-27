@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
@@ -12,7 +11,7 @@ settingsRouter.get('/', async (req: AuthRequest, res) => {
   ]);
   const settings: Record<string, string> = {};
   for (const row of result.rows) {
-    settings[(row as any).key] = (row as any).value;
+    settings[(row as { key: string }).key] = (row as { value: string }).value;
   }
   res.json(settings);
 });

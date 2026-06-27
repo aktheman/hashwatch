@@ -29,7 +29,7 @@ authRouter.post('/register', async (req, res) => {
     const userId = result.rows[0].id;
     const token = generateToken(userId);
     res.status(201).json({ token, userId });
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
@@ -52,7 +52,7 @@ authRouter.post('/login', async (req, res) => {
     }
     const token = generateToken(userId);
     res.json({ token, userId });
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof z.ZodError) {
       return res.status(400).json({ error: e.errors });
     }
