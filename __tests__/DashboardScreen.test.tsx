@@ -96,7 +96,7 @@ jest.mock('../src/services/websocket', () => ({
 
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react-native';
 import React from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 import { DashboardScreen } from '../src/screens/DashboardScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -1120,7 +1120,6 @@ it('web Escape key exits selection mode', async () => {
   });
   Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
   delete (globalThis as any).window;
-  delete (globalThis as any).window;
 });
 
 it('pull-to-refresh calls refreshAll', async () => {
@@ -1214,6 +1213,65 @@ it('modal overlay closes wallet picker', async () => {
     expect(r.getByText('dashboard.assignWallet')).toBeTruthy();
   });
   await fireEvent.press(r.getByLabelText('Close wallet picker'));
+  await waitFor(() => {
+    expect(r.queryByText('dashboard.assignWallet')).toBeNull();
+  });
+});
+
+it('restarts polling when AppState changes', async () => {
+  const origImpl = (AppState.addEventListener as jest.Mock).getMockImplementation();
+  let appStateCb: ((state: string) => void) | null = null;
+  (AppState.addEventListener as jest.Mock).mockImplementation(
+    (_event: string, cb: (state: string) => void) => {
+      appStateCb = cb;
+      return { remove: jest.fn() };
+    },
+  );
+  useMinerStore.setState({
+    miners: [makeMiner()],
+    startPolling: jest.fn().mockReturnValue(jest.fn()),
+  });
+  await render(<DashboardScreen navigation={navigation} />);
+  expect(appStateCb).not.toBeNull();
+  await act(() => appStateCb!('active'));
+  expect(useMinerStore.getState().startPolling).toHaveBeenCalledWith(5000);
+  appStateCb!('background');
+  expect(useMinerStore.getState().startPolling).toHaveBeenCalledWith(30000);
+  (AppState.addEventListener as jest.Mock).mockImplementation(origImpl);
+});
+
+it('auto-scans when auto_scan is enabled', async () => {
+  jest.useFakeTimers();
+  const { getSetting } = require('../src/db/database');
+  (getSetting as jest.Mock).mockResolvedValue('true');
+  useMinerStore.setState({
+    miners: [makeMiner()],
+    scanning: false,
+  });
+  const scanNetwork = jest.fn();
+  useMinerStore.setState({ scanNetwork });
+  await render(<DashboardScreen navigation={navigation} />);
+  jest.advanceTimersByTime(300000);
+  await Promise.resolve();
+  await Promise.resolve();
+  expect(scanNetwork).toHaveBeenCalled();
+  jest.useRealTimers();
+});
+
+it('modal onRequestClose closes wallet picker', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  const minerCards = await r.findAllByText('Miner1');
+  await fireEvent.press(minerCards[minerCards.length - 1]);
+  await fireEvent.press(r.getByLabelText('Batch wallet'));
+  await waitFor(() => {
+    expect(r.getByTestId('wallet-picker-modal')).toBeTruthy();
+  });
+  const modal = r.getByTestId('wallet-picker-modal');
+  await act(() => modal.props.onRequestClose());
   await waitFor(() => {
     expect(r.queryByText('dashboard.assignWallet')).toBeNull();
   });
