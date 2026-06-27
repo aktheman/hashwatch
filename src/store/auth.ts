@@ -73,10 +73,8 @@ async function processQueue(): Promise<void> {
     }
   }
 
-  if (completed.length > 0) {
-    _settingsQueue = _settingsQueue.filter((item) => !completed.includes(item.key));
-    await saveQueue();
-  }
+  _settingsQueue = _settingsQueue.filter((item) => !completed.includes(item.key));
+  await saveQueue();
 }
 
 async function syncSettingsFromBackend() {

@@ -240,15 +240,15 @@ it('toggles auth form when Remote Sync row is pressed', async () => {
 
 it('calls login when auth form is submitted', async () => {
   mockLogin.mockResolvedValueOnce(true);
-  render(<SettingsScreen navigation={navigation} />);
+  const r = await render(<SettingsScreen navigation={navigation} />);
   await waitFor(() => {
-    expect(screen.getByText('settings.remoteSync')).toBeTruthy();
+    expect(r.getByText('settings.remoteSync')).toBeTruthy();
   });
-  await fireEvent.press(screen.getByLabelText('Remote Sync'));
-  const emailInput = await screen.findByLabelText('Email input');
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  const emailInput = await r.findByLabelText('Email input');
   await fireEvent.changeText(emailInput, 'test@test.com');
-  await fireEvent.changeText(screen.getByLabelText('Password input'), 'password123');
-  await fireEvent.press(screen.getByLabelText('Sign In'));
+  await fireEvent.changeText(r.getByLabelText('Password input'), 'password123');
+  await fireEvent.press(r.getByLabelText('Sign In'));
   await waitFor(() => {
     expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'password123');
   });
@@ -256,17 +256,17 @@ it('calls login when auth form is submitted', async () => {
 
 it('shows error on failed login', async () => {
   mockLogin.mockResolvedValueOnce(false);
-  render(<SettingsScreen navigation={navigation} />);
+  const r = await render(<SettingsScreen navigation={navigation} />);
   await waitFor(() => {
-    expect(screen.getByText('settings.remoteSync')).toBeTruthy();
+    expect(r.getByText('settings.remoteSync')).toBeTruthy();
   });
-  await fireEvent.press(screen.getByLabelText('Remote Sync'));
-  const emailInput = await screen.findByLabelText('Email input');
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  const emailInput = await r.findByLabelText('Email input');
   await fireEvent.changeText(emailInput, 'bad@test.com');
-  await fireEvent.changeText(screen.getByLabelText('Password input'), 'wrong');
-  await fireEvent.press(screen.getByLabelText('Sign In'));
+  await fireEvent.changeText(r.getByLabelText('Password input'), 'wrong');
+  await fireEvent.press(r.getByLabelText('Sign In'));
   await waitFor(() => {
-    expect(screen.getByText('settings.loginFailed')).toBeTruthy();
+    expect(r.getByText('settings.loginFailed')).toBeTruthy();
   });
 });
 

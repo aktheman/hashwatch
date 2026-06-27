@@ -1,12 +1,14 @@
 import { useAuthStore, queueSetting } from '../src/store/auth';
 
-const mockSetSetting = jest.fn();
-const mockGetSetting = jest.fn();
-
 jest.mock('../src/db/database', () => ({
-  setSetting: (k: string, v: string) => mockSetSetting(k, v),
-  getSetting: (k: string) => mockGetSetting(k),
+  setSetting: jest.fn(),
+  getSetting: jest.fn(() => null),
 }));
+
+import * as DB from '../src/db/database';
+
+const mockSetSetting = DB.setSetting as unknown as jest.Mock;
+const mockGetSetting = DB.getSetting as unknown as jest.Mock;
 
 const mockLogin = jest.fn();
 const mockRegister = jest.fn();
@@ -480,89 +482,28 @@ describe('processQueue dedup and retry', () => {
   });
 
   it('increments retry count on API failure', async () => {
-    jest.isolateModules(async () => {
-      const mockPS = jest.fn();
-      jest.doMock('../src/api/client', () => ({
-        configureClient: jest.fn(),
-        putSetting: (k: string, v: string) => mockPS(k, v),
-      }));
-      jest.doMock('../src/db/database', () => ({
-        setSetting: (k: string, v: string) => mockSetSetting(k, v),
-        getSetting: (k: string) => mockGetSetting(k),
-      }));
-      const { queueSetting: qs } = await import('../src/store/auth');
-      const { useAuthStore: store } = await import('../src/store/auth');
+    await queueSetting('theme_mode', 'dark');
 
-      store.setState({
-        token: 't1',
-        userId: 'u1',
-        email: 'a@b.com',
-        syncing: false,
-        synced: false,
-        lastSyncTimestamp: null,
-      });
-      mockGetSetting.mockImplementation((k: string) => {
-        if (k === 'settings_queue') return '[]';
-        if (k === 'theme_mode') return 'dark';
-        if (k === 'power_cost') return '0.15';
-        if (k === 'auto_scan') return 'true';
-        return null;
-      });
+    mockPutSetting.mockRejectedValue(new Error('network error'));
+    await useAuthStore.getState().syncNow();
 
-      await store.getState().restoreSession();
-      await qs('theme_mode', 'dark');
-
-      mockPS.mockRejectedValue(new Error('network error'));
-      await store.getState().syncNow();
-
-      const parsed = JSON.parse(
-        mockSetSetting.mock.calls.find(([k]) => k === 'settings_queue')![1] as string,
-      );
-      expect(parsed[0].retries).toBeGreaterThan(0);
-    });
+    const calls = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+    const parsed = JSON.parse(calls[calls.length - 1][1] as string);
+    expect(parsed[0].retries).toBeGreaterThan(0);
   });
 
   it('removes item from queue after 3 retries', async () => {
-    jest.isolateModules(async () => {
-      const mockPS = jest.fn();
-      jest.doMock('../src/api/client', () => ({
-        configureClient: jest.fn(),
-        putSetting: (k: string, v: string) => mockPS(k, v),
-      }));
-      jest.doMock('../src/db/database', () => ({
-        setSetting: (k: string, v: string) => mockSetSetting(k, v),
-        getSetting: (k: string) => mockGetSetting(k),
-      }));
-      const { queueSetting: qs, useAuthStore: store } = await import('../src/store/auth');
+    await queueSetting('theme_mode', 'dark');
 
-      store.setState({
-        token: 't1',
-        userId: 'u1',
-        email: 'a@b.com',
-        syncing: false,
-        synced: false,
-        lastSyncTimestamp: null,
-      });
-      mockGetSetting.mockImplementation((k: string) => {
-        if (k === 'settings_queue') return '[]';
-        if (k === 'theme_mode') return 'dark';
-        if (k === 'power_cost') return '0.15';
-        if (k === 'auto_scan') return 'true';
-        return null;
-      });
+    mockPutSetting.mockRejectedValue(new Error('network error'));
 
-      await store.getState().restoreSession();
-      await qs('theme_mode', 'dark');
-      mockPS.mockRejectedValue(new Error('network error'));
+    await useAuthStore.getState().syncNow();
+    await useAuthStore.getState().syncNow();
+    await useAuthStore.getState().syncNow();
 
-      await store.getState().syncNow();
-      await store.getState().syncNow();
-      await store.getState().syncNow();
-
-      const queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
-      const lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
-      expect(lastSave).toHaveLength(0);
-    });
+    const queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+    const lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
+    expect(lastSave).toHaveLength(0);
   });
 });
 
