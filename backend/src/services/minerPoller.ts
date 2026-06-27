@@ -40,22 +40,23 @@ function extractPool(info: unknown, status: unknown): string | null {
 async function pollMiner(miner: MinerRow): Promise<void> {
   const infoUrl = `http://${miner.ip}:${miner.port}/api/system/info`;
   const statusUrl = `http://${miner.ip}:${miner.port}/api/system/status`;
-
   const [infoData, statusData] = await Promise.all([fetchJson(infoUrl), fetchJson(statusUrl)]);
   const isOnline = !!infoData || !!statusData;
+  const status = statusData as Record<string, unknown> | null;
+  const info = infoData as Record<string, unknown> | null;
   const temperature =
-    typeof statusData?.temperature === 'number'
-      ? statusData.temperature
-      : typeof infoData?.temperature === 'number'
-        ? infoData.temperature
+    typeof status?.temperature === 'number'
+      ? status.temperature
+      : typeof info?.temperature === 'number'
+        ? info.temperature
         : 0;
   const hashRate =
-    typeof statusData?.hashRate === 'number'
-      ? statusData.hashRate
-      : typeof infoData?.hashRate === 'number'
-        ? infoData.hashRate
+    typeof status?.hashRate === 'number'
+      ? status.hashRate
+      : typeof info?.hashRate === 'number'
+        ? info.hashRate
         : 0;
-  const pool = extractPool(infoData, statusData);
+  const pool = extractPool(info, status);
 
   checkMinerStatus(
     miner.userid,
