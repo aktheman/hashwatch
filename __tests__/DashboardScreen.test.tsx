@@ -96,7 +96,7 @@ jest.mock('../src/services/websocket', () => ({
 
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { DashboardScreen } from '../src/screens/DashboardScreen';
 import { setTheme, darkTheme } from '../src/theme';
 import { useMinerStore } from '../src/store/miners';
@@ -841,17 +841,18 @@ it('theme button cycles mode', async () => {
 });
 
 it('deselects miner on second tap in selection mode', async () => {
-  const mockShowUndo = jest.fn();
-  const { useToastStore } = require('../src/store/toast');
-  useToastStore.setState({ showUndo: mockShowUndo });
   useMinerStore.setState({
     miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
-    setMinerWallet: jest.fn(),
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Compare miners'));
-  const miners = await r.findAllByText('Miner1');
-  await fireEvent.press(miners[miners.length - 1]);
+  const minerCards = await r.findAllByText('Miner1');
+  await fireEvent.press(minerCards[minerCards.length - 1]);
+  await waitFor(() => {
+    expect(r.getByText('comparison.nSelected')).toBeTruthy();
+  });
+  const minerCards2 = await r.findAllByText('Miner1');
+  await fireEvent.press(minerCards2[minerCards2.length - 1]);
   await waitFor(() => {
     expect(r.getByLabelText('Compare').props.accessibilityState.disabled).toBe(true);
   });
@@ -1020,4 +1021,100 @@ it('batch delete onConfirm calls removeMiner', async () => {
   capturedOptions[1].onConfirm();
   expect(mockRemoveMiner).toHaveBeenCalledWith('m2');
   alertSpy.mockRestore();
+});
+
+it('long press miner card triggers delete toast', async () => {
+  const mockShowUndo = jest.fn();
+  const { useToastStore } = require('../src/store/toast');
+  useToastStore.setState({ showUndo: mockShowUndo });
+  useMinerStore.setState({
+    miners: [makeMiner({ id: 'm1', name: 'Miner1' })],
+  });
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  const card = r.getByLabelText('Miner1, online, 500.0 GH/s');
+  fireEvent(card, 'onLongPress');
+  const alertArgs = alertSpy.mock.calls[0];
+  const removeButton = alertArgs?.[2]?.find((b: any) => b.text === 'minerCard.remove');
+  removeButton?.onPress?.();
+  expect(mockShowUndo).toHaveBeenCalledWith(expect.objectContaining({ id: 'delete-m1' }));
+  alertSpy.mockRestore();
+});
+
+it('customizer Done button closes the customizer', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Customize dashboard'));
+  expect(r.getByText('Customize Dashboard')).toBeTruthy();
+  await fireEvent.press(r.getByText('Done'));
+  expect(r.queryByText('Customize Dashboard')).toBeNull();
+});
+
+it('customizer Reset button resets sections to defaults', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Customize dashboard'));
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  await fireEvent.press(r.getByText('Reset to Defaults'));
+  const alertArgs = alertSpy.mock.calls[0];
+  const resetButton = alertArgs?.[2]?.find((b: any) => b.text === 'Reset');
+  resetButton?.onPress?.();
+  const { setSetting } = jest.requireMock('../src/db/database');
+  expect(setSetting).toHaveBeenCalledWith('dashboard_sections', expect.any(String));
+  const saved = JSON.parse(setSetting.mock.calls[0][1]);
+  expect(saved.sort).toBe(true);
+  alertSpy.mockRestore();
+});
+
+it('toggle section via customizer switch hides that section', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Customize dashboard'));
+  const switches = r.getAllByRole('switch');
+  expect(switches.length).toBeGreaterThanOrEqual(1);
+  await fireEvent(switches[0], 'onValueChange', false);
+  await fireEvent.press(r.getByText('Done'));
+  const { setSetting } = jest.requireMock('../src/db/database');
+  const lastCall = setSetting.mock.calls[setSetting.mock.calls.length - 1];
+  const saved = JSON.parse(lastCall[1]);
+  expect(saved.earnings).toBe(false);
+});
+
+it('computes lastRefreshTime from miner lastSeen', async () => {
+  const now = Date.now();
+  useMinerStore.setState({
+    miners: [
+      makeMiner({ id: 'm1', name: 'Miner1', lastSeen: now - 5000 }),
+      makeMiner({ id: 'm2', name: 'Miner2', lastSeen: now - 10000 }),
+    ],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  expect(r.getByText('HashWatch')).toBeTruthy();
+});
+
+it('web Escape key exits selection mode', async () => {
+  const origOS = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+  const addEventListener = jest.fn();
+  const removeEventListener = jest.fn();
+  (globalThis as any).window = { addEventListener, removeEventListener };
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Compare miners'));
+  expect(r.getByLabelText('Cancel selection')).toBeTruthy();
+  const keydownCalls = addEventListener.mock.calls.filter((c: any) => c[0] === 'keydown');
+  const handler = keydownCalls[keydownCalls.length - 1][1];
+  handler({ key: 'Escape' });
+  await waitFor(() => {
+    expect(r.queryByLabelText('Cancel selection')).toBeNull();
+  });
+  Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
 });

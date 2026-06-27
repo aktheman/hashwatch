@@ -15,6 +15,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
     },
     title: 'HashWatch',
     icon: path.join(__dirname, '..', 'assets', 'favicon.png'),
