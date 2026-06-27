@@ -12,6 +12,7 @@ describe('auth middleware - JWT_SECRET missing', () => {
   });
 
   it('throws when JWT_SECRET is not set', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     expect(() => require('../middleware/auth')).toThrow(
       'JWT_SECRET environment variable is required',
     );

@@ -1,9 +1,14 @@
 import request from 'supertest';
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
+
+interface ProxyError extends Error {
+  code?: string;
+}
 
 jest.mock('axios', () => jest.fn());
 jest.mock('../middleware/auth', () => ({
-  authMiddleware: (req: any, _res: any, next: any) => {
+  authMiddleware: (req: Request & { userId?: string }, _res: Response, next: NextFunction) => {
     req.userId = 'test-user-id';
     next();
   },
@@ -11,6 +16,10 @@ jest.mock('../middleware/auth', () => ({
 
 import axios from 'axios';
 import { proxyRouter } from '../routes/proxy';
+
+interface ProxyError extends Error {
+  code?: string;
+}
 
 const mockAxios = axios as unknown as jest.Mock;
 
@@ -62,7 +71,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 when miner is unreachable (connection refused)', async () => {
-    const err: any = new Error('Connection refused');
+    const err = new Error('Connection refused') as ProxyError;
     err.code = 'ECONNREFUSED';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -75,7 +84,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 when miner times out', async () => {
-    const err: any = new Error('Timeout');
+    const err = new Error('Timeout') as ProxyError;
     err.code = 'ETIMEDOUT';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -88,7 +97,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 on ENETUNREACH', async () => {
-    const err: any = new Error('Network unreachable');
+    const err = new Error('Network unreachable') as ProxyError;
     err.code = 'ENETUNREACH';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -101,7 +110,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 on ENETDOWN', async () => {
-    const err: any = new Error('Network down');
+    const err = new Error('Network down') as ProxyError;
     err.code = 'ENETDOWN';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -114,7 +123,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 on EINVAL', async () => {
-    const err: any = new Error('Invalid argument');
+    const err = new Error('Invalid argument') as ProxyError;
     err.code = 'EINVAL';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -127,7 +136,7 @@ describe('POST /api/proxy', () => {
   });
 
   it('returns 502 on bad response', async () => {
-    const err: any = new Error('Bad response');
+    const err = new Error('Bad response') as ProxyError;
     err.code = 'ERR_BAD_RESPONSE';
     mockAxios.mockRejectedValueOnce(err);
 
@@ -232,7 +241,7 @@ describe('POST /api/proxy/restart', () => {
   });
 
   it('returns 502 when restart fails', async () => {
-    const err: any = new Error('Unreachable');
+    const err = new Error('Unreachable') as ProxyError;
     err.code = 'ECONNREFUSED';
     mockAxios.mockRejectedValueOnce(err);
 

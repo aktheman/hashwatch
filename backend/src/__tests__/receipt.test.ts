@@ -1,10 +1,12 @@
 import request from 'supertest';
 import express from 'express';
 
+import type { Request, Response, NextFunction } from 'express';
+
 const mockQuery = jest.fn();
 jest.mock('../db', () => ({ query: mockQuery }));
 jest.mock('../middleware/auth', () => ({
-  authMiddleware: (req: any, _res: any, next: any) => {
+  authMiddleware: (req: Request & { userId?: string }, _res: Response, next: NextFunction) => {
     req.userId = 'test-user-id';
     next();
   },
@@ -12,7 +14,7 @@ jest.mock('../middleware/auth', () => ({
 
 const mockAxiosPost = jest.fn();
 jest.mock('axios', () => ({
-  post: (...args: any[]) => mockAxiosPost(...args),
+  post: (...args: Parameters<typeof mockAxiosPost>) => mockAxiosPost(...args),
 }));
 
 import { receiptRouter } from '../routes/receipt';

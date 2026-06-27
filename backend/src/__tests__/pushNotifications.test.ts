@@ -10,12 +10,14 @@ import {
 } from '../services/pushNotifications';
 
 const mockSendPushNotificationsAsync = jest.fn().mockResolvedValue([{ status: 'ok' }]);
-const mockChunkPushNotifications = jest.fn().mockImplementation((msgs: any) => [msgs]);
+const mockChunkPushNotifications = jest
+  .fn()
+  .mockImplementation((msgs: { to?: string }[]) => [msgs]);
 const mockExpoConstructor = jest.fn().mockImplementation(() => ({
   chunkPushNotifications: mockChunkPushNotifications,
   sendPushNotificationsAsync: mockSendPushNotificationsAsync,
-}));
-(mockExpoConstructor as any).isExpoPushToken = jest.fn().mockReturnValue(true);
+})) as jest.Mock & { isExpoPushToken?: jest.Mock };
+mockExpoConstructor.isExpoPushToken = jest.fn().mockReturnValue(true);
 
 jest.mock('expo-server-sdk', () => ({
   __esModule: true,
@@ -25,7 +27,7 @@ jest.mock('expo-server-sdk', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (mockExpoConstructor as any).isExpoPushToken = jest.fn().mockReturnValue(true);
+  mockExpoConstructor.isExpoPushToken = jest.fn().mockReturnValue(true);
 });
 
 describe('sendPushNotification', () => {
@@ -55,7 +57,7 @@ describe('sendPushNotification', () => {
     mockQuery.mockResolvedValueOnce({
       rows: [{ token: 'invalid-token' }, { token: 'ExpoPushToken-valid' }],
     });
-    (mockExpoConstructor as any).isExpoPushToken = jest
+    mockExpoConstructor.isExpoPushToken = jest
       .fn()
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true);

@@ -3,7 +3,6 @@ import {
   sendMinerOnlineNotification,
   sendMinerHotNotification,
   sendHashrateDropNotification,
-  sendPoolChangeNotification,
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
 

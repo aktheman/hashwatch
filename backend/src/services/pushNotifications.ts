@@ -11,17 +11,17 @@ export async function sendPushNotification(
   ]);
   if (result.rows.length === 0) return;
 
-  const ExpoModule: any = await import('expo-server-sdk');
-  const expo = new ExpoModule.Expo();
+  const { Expo } = await import('expo-server-sdk');
+  const expo = new Expo();
 
   const messages = result.rows
-    .filter((row: any) => {
+    .filter((row: { alert_types?: string; token: string }) => {
       if (!row.alert_types) return true;
       const types = row.alert_types.split(',');
       return types.includes(type);
     })
-    .filter((row: any) => ExpoModule.Expo.isExpoPushToken(row.token))
-    .map((row: any) => ({
+    .filter((row: { token: string }) => Expo.isExpoPushToken(row.token))
+    .map((row: { token: string }) => ({
       to: row.token,
       sound: 'default' as const,
       title,
@@ -43,7 +43,7 @@ export async function sendMinerOfflineNotification(
   userId: string,
   minerName: string,
   ip: string,
-  minerId: string,
+  _minerId: string,
 ): Promise<void> {
   await sendPushNotification(
     userId,
@@ -57,7 +57,7 @@ export async function sendMinerOnlineNotification(
   userId: string,
   minerName: string,
   ip: string,
-  minerId: string,
+  _minerId: string,
 ): Promise<void> {
   await sendPushNotification(
     userId,
@@ -72,7 +72,7 @@ export async function sendMinerHotNotification(
   minerName: string,
   ip: string,
   temperature: number,
-  minerId: string,
+  _minerId: string,
 ): Promise<void> {
   await sendPushNotification(
     userId,
@@ -85,7 +85,7 @@ export async function sendMinerHotNotification(
 export async function sendHashrateDropNotification(
   userId: string,
   minerName: string,
-  minerId: string,
+  _minerId: string,
   pct: number,
 ): Promise<void> {
   await sendPushNotification(
@@ -99,7 +99,7 @@ export async function sendHashrateDropNotification(
 export async function sendPoolChangeNotification(
   userId: string,
   minerName: string,
-  minerId: string,
+  _minerId: string,
   oldPool: string | null,
   newPool: string | null,
 ): Promise<void> {
