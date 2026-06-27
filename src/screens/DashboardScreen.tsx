@@ -185,7 +185,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('keydown', handleKeyDown);
+      }
+    };
   }, [selectionMode]);
 
   const prevMiners = useRef(miners);
@@ -1590,7 +1594,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         animationType="fade"
         onRequestClose={() => setShowWalletPicker(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setShowWalletPicker(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowWalletPicker(false)}
+          accessibilityLabel="Close wallet picker"
+        >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{t('dashboard.assignWallet')}</Text>
             <Pressable
