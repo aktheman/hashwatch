@@ -1593,6 +1593,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         transparent
         animationType="fade"
         onRequestClose={() => setShowWalletPicker(false)}
+        testID="wallet-picker-modal"
       >
         <Pressable
           style={styles.modalOverlay}
