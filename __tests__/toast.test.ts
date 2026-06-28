@@ -92,3 +92,22 @@ it('dismissUndo is safe when no undo is active', () => {
   expect(() => useToastStore.getState().dismissUndo()).not.toThrow();
   expect(useToastStore.getState().undo).toBeNull();
 });
+
+it('showUndo clears timer from previous same-id action', () => {
+  const onConfirm = jest.fn();
+  useToastStore.getState().showUndo({
+    id: 'dup',
+    message: 'First',
+    onUndo: jest.fn(),
+    onConfirm,
+  });
+  jest.advanceTimersByTime(2000);
+  useToastStore.getState().showUndo({
+    id: 'dup',
+    message: 'Second',
+    onUndo: jest.fn(),
+    onConfirm: jest.fn(),
+  });
+  jest.advanceTimersByTime(5000);
+  expect(onConfirm).not.toHaveBeenCalled();
+});

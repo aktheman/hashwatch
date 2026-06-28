@@ -34,6 +34,7 @@ import { exportAllData } from '../utils/export';
 import { checkMinerAlerts } from '../services/notifications';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
+import { TimeAgo } from '../components/TimeAgo';
 import * as DB from '../db/database';
 import {
   DashboardCustomizer,
@@ -449,12 +450,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     if (times.length === 0) return null;
     return Math.max(...times);
   }, [miners]);
-
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const poolInfo = useMemo(() => {
     const pools = new Map<
@@ -976,9 +971,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               {formatHashrateWithUnit(networkHashrate, 'H/s')}/s
             </Text>
           </View>
-          <Text style={{ color: theme.textDim, fontSize: 10 }}>
-            {lastRefreshTime ? `${Math.floor((now - lastRefreshTime) / 1000)}s ago` : ''}
-          </Text>
+          <TimeAgo timestamp={lastRefreshTime} style={{ color: theme.textDim, fontSize: 10 }} />
         </View>
       )}
 

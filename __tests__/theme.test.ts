@@ -1,8 +1,17 @@
+import { renderHook } from '@testing-library/react-native';
+import { Platform } from 'react-native';
+
+jest.mock('react-native', () => {
+  const RN = jest.requireActual('react-native');
+  RN.useColorScheme = jest.fn(() => 'light');
+  return RN;
+});
 import {
   setTheme,
   getTheme,
   setThemeMode,
   getThemeMode,
+  useTheme,
   scheduleThemeSwitch,
   clearThemeSchedule,
   theme,
@@ -111,6 +120,41 @@ describe('setThemeMode / getThemeMode', () => {
     setThemeMode('dark');
     expect(getTheme().bg).toBe(darkTheme.bg);
   });
+
+  it('setThemeMode system on non-web uses light theme (no matchMedia)', () => {
+    setThemeMode('system');
+    expect(getTheme().bg).toBe(lightTheme.bg);
+  });
+});
+
+describe('system mode on web platform', () => {
+  const origOS = Platform.OS;
+  beforeEach(() => {
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    setTheme(darkTheme);
+  });
+
+  afterEach(() => {
+    Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
+    delete (globalThis as any).window;
+    setThemeMode('dark');
+  });
+
+  it('setThemeMode system on web with dark preference applies darkTheme', () => {
+    (globalThis as any).window = {
+      matchMedia: jest.fn().mockReturnValue({ matches: true }),
+    };
+    setThemeMode('system');
+    expect(getTheme().bg).toBe(darkTheme.bg);
+  });
+
+  it('setThemeMode system on web with light preference applies lightTheme', () => {
+    (globalThis as any).window = {
+      matchMedia: jest.fn().mockReturnValue({ matches: false }),
+    };
+    setThemeMode('system');
+    expect(getTheme().bg).toBe(lightTheme.bg);
+  });
 });
 
 describe('theme Proxy', () => {
@@ -179,5 +223,63 @@ describe('scheduleThemeSwitch / clearThemeSchedule', () => {
     expect(getThemeMode()).toBe('light');
     jest.advanceTimersByTime(24 * 3600 * 1000 - 1);
     expect(getThemeMode()).toBe('light');
+  });
+});
+
+describe('useTheme hook', () => {
+  afterEach(() => {
+    setThemeMode('dark');
+  });
+
+  it('returns dark theme by default (mode is dark)', async () => {
+    setThemeMode('dark');
+    const { result } = await renderHook(() => useTheme());
+    expect(result.current.bg).toBe(darkTheme.bg);
+  });
+
+  it('returns light theme when mode is light', async () => {
+    setThemeMode('light');
+    const { result } = await renderHook(() => useTheme());
+    expect(result.current.bg).toBe(lightTheme.bg);
+  });
+});
+
+describe('useTheme system mode with Platform.OS override', () => {
+  const origOS = Platform.OS;
+
+  afterEach(() => {
+    Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
+    delete (globalThis as Record<string, unknown>).window;
+    setThemeMode('dark');
+  });
+
+  it('sets theme based on system color scheme when mode is system on non-web', async () => {
+    setThemeMode('system');
+    const { result } = await renderHook(() => useTheme());
+    expect(result.current.bg).toBe(lightTheme.bg);
+  });
+
+  it('calls matchMedia.addEventListener on web with system mode', async () => {
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    const addEventListener = jest.fn();
+    const removeEventListener = jest.fn();
+    (globalThis as any).window = {
+      matchMedia: jest
+        .fn()
+        .mockReturnValue({ matches: false, addEventListener, removeEventListener }),
+    };
+    setThemeMode('system');
+    await renderHook(() => useTheme());
+    const mqArg = (globalThis as any).window.matchMedia.mock.calls[0][0];
+    expect(mqArg).toBe('(prefers-color-scheme: dark)');
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+  });
+
+  it('returns empty cleanup when matchMedia is absent on web', async () => {
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    (globalThis as any).window = {};
+    setThemeMode('system');
+    const { result } = await renderHook(() => useTheme());
+    expect(result.current.bg).toBe(lightTheme.bg);
   });
 });

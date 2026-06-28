@@ -29,6 +29,17 @@ jest.mock('react-i18next', () => {
   };
 });
 
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  setNotificationChannelAsync: jest.fn(),
+  scheduleNotificationAsync: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  getExpoPushTokenAsync: jest.fn(),
+  getPermissionsAsync: jest.fn(),
+  AndroidImportance: { HIGH: 4 },
+}));
+
 jest.mock('expo-constants', () => ({
   __esModule: true,
   default: {

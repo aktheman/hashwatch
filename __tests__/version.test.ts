@@ -39,6 +39,22 @@ describe('needsUpdate', () => {
     expect(needsUpdate('v2', 'v2.2.1')).toBe(true);
     expect(needsUpdate('v3', 'v3.0.0')).toBe(false);
   });
+
+  it('returns true when minor is newer patch', () => {
+    expect(needsUpdate('v2.2.0', 'v2.2.1')).toBe(true);
+  });
+
+  it('returns false when current is newer patch', () => {
+    expect(needsUpdate('v2.2.2', 'v2.2.1')).toBe(false);
+  });
+
+  it('returns false when minor version is ahead', () => {
+    expect(needsUpdate('v2.3.0', 'v2.2.1')).toBe(false);
+  });
+
+  it('returns true when minor version is behind', () => {
+    expect(needsUpdate('v2.1.9', 'v2.2.0')).toBe(true);
+  });
 });
 
 describe('getFirmwareUrl', () => {
@@ -97,5 +113,28 @@ describe('fetchLatestFirmware', () => {
     });
     const result = await fetchLatestFirmware();
     expect(result).toBeNull();
+  });
+
+  it('calls unref on timer when available', async () => {
+    const origSetTimeout = global.setTimeout;
+    const mockUnref = jest.fn();
+    const mockTimer = { unref: mockUnref };
+    global.setTimeout = jest.fn(() => mockTimer) as any;
+    global.fetch = jest.fn().mockRejectedValue(new Error('timeout'));
+
+    await fetchLatestFirmware();
+
+    expect(mockUnref).toHaveBeenCalled();
+    global.setTimeout = origSetTimeout;
+  });
+
+  it('handles AbortController timeout when setTimeout returns number', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ tag_name: 'v2.2.1' }),
+    });
+
+    const result = await fetchLatestFirmware();
+    expect(result).toBe('v2.2.1');
   });
 });

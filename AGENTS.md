@@ -17,24 +17,24 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Key Files
 
 - `__tests__/miners-store.test.ts`: 38 tests covering load/add/remove/refresh/sync/snapshots/wallet/group
-- `__tests__/miners-store-edge.test.ts`: 6 tests — AppState pause/resume, interval tick (paused/not-paused), onAuthLogin callback, scanNetwork error/success
+- `__tests__/miners-store-edge.test.ts`: 7 tests — AppState pause/resume, interval tick (paused/not-paused), onAuthLogin callback, scanNetwork error/success, offline retry
 - `__tests__/widget.test.tsx`: 3 tests (Android guard, native module call, missing module)
 - `__tests__/authToken.test.ts`: 6 tests (getter, setter, login callbacks)
 - `__tests__/networkStatus.test.ts`: 11 tests (online, offline, null fallback, catch, multi-listener, cleanup, onNetworkReconnect staying-online, staying-offline, override) + 1 untestable branch comment
 - `__tests__/version.test.ts`: 13 tests (parse, needsUpdate, fetch success/failure, changelog URL, fetchNetworkHashrate)
-- `__tests__/theme.test.ts`: 17 tests (all 5 themes, setThemeMode, mode tracking, custom themes)
+- `__tests__/theme.test.ts`: 22 tests (all 5 themes, setThemeMode, mode tracking, custom themes, useTheme hook, system mode web/non-web/matchMedia)
 - `__tests__/api-client.test.ts`: 28 tests (auth, interceptors, caching, error handling)
 - `__tests__/DashboardScreen.test.tsx`: 38 tests (filtering, upgrade banner, error banner, scanning, wallet/group filters, temp display, comparison selection mode, batch operations)
 - `__tests__/WalletsScreen.test.tsx`: 14 tests (CRUD, modal, color picker, validation)
 - `__tests__/MinerDetailScreen.test.tsx`: 19 tests (rendering, share, delete, offline, not-found, goBack, wallet picker, group tag input, efficiency trend, restart miner)
 - `__tests__/SettingsScreen.test.tsx`: 26 tests (theme, remote sync, auth, power cost, exports, Sync Now button, syncing disabled)
-- `__tests__/auth-store.test.ts`: 26 tests (login, register, logout, restoreSession, syncSettingsFromBackend, syncNow, loadQueue, JWT decode)
+- `__tests__/auth-store.test.ts`: 38 tests (login, register, logout, restoreSession, syncSettingsFromBackend, syncNow, loadQueue, JWT decode, module-level setup, onNetworkReconnect callback)
 - `__tests__/AddMinerScreen.test.tsx`: 14 tests (pro limit, add error, scan cancel, scan fail, discovered list, add discovered, scan progress)
 - `__tests__/AnalyticsScreen.test.tsx`: 11 tests (summary stats, range selectors including 30d, chart, Power Cost, static labels, empty state)
 - `__tests__/ImportDataScreen.test.tsx`: 8 tests (empty input, importing state, button disabled, success, singular, failure, non-Error throw)
 - `__tests__/bitcoin.test.ts`: 13 tests (mainnet P2PKH/P2SH/Bech32, testnet Bech32/legacy, invalid checksums, mixed case, invalid charset)
 - `__tests__/OnboardingScreen.test.tsx`: 8 tests (swipe slides, get-started on last slide)
-- `__tests__/toast.test.ts`: 7 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss, safe dismissUndo when null)
+- `__tests__/toast.test.ts`: 9 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss, safe dismissUndo when null, same-id timer clear)
 - `__tests__/UndoToast.test.tsx`: 4 tests (null state, renders message+undo, tap calls onUndo, accessibility label)
 - `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
 - `__tests__/AppNavigator.test.tsx`: 12 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback, navigation)
@@ -55,10 +55,10 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 898 frontend (71 suites) + 105 backend (12 suites) = 1003 total
+- Tests: 923 frontend (71 suites) + 105 backend (12 suites) = 1028 total
 - `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
 - `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
-- Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — not yet met (71.29/77.1/83.73/82.09)
+- Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — currently 83.54/91.95/96.24/94.38 (all thresholds met)
 - Security: 0 vulns via `overrides` in package.json (nested for eas-cli deps)
 - AnalyticsScreen: parallel snapshot fetch via `Promise.all`, LRU cache keyed by `minerCacheKey-range`, chart theme colors via refs (avoids recomputation on theme change)
 - MinerDetailScreen: inline IP editing via TextInput on pencil icon tap, saves via `setMinerIp` store action
@@ -81,6 +81,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `networkStatus` unref check (line 35-41): Node.js-specific, `setInterval` in Jest returns number, not object with `.unref()`
 - `refreshMiner` probe recovery (lines 186-203): requires complex mock orchestration
 - `onNetworkReconnect` offline→online integration test: cannot reliably test with fake timers due to async polling timing vs React act() infrastructure
+- `useTheme` subscribe cleanup (theme.ts:194): `useSyncExternalStore` cleanup on unmount not triggered by renderHook in test env
 
 ## Disk Space
 

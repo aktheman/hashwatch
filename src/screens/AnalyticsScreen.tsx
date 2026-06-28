@@ -58,13 +58,17 @@ export function AnalyticsScreen() {
   const [selectedMinerIds, setSelectedMinerIds] = useState<Set<string>>(new Set());
   const [showMinerFilter, setShowMinerFilter] = useState(false);
 
-  const snapshotCache = useRef<Map<string, MinerSnapshot[]>>(new Map());
+  const snapshotCache = useRef<Map<string, { data: MinerSnapshot[]; key: string }>>(new Map());
+  const CACHE_MAX = 10;
   const primaryColorRef = useRef(theme.primary);
   const successColorRef = useRef(theme.success);
   primaryColorRef.current = theme.primary;
   successColorRef.current = theme.success;
 
-  const minersCacheKey = miners.map((m) => `${m.id}:${m.lastSeen || 0}`).join(',');
+  const minerIdsKey = miners
+    .map((m) => m.id)
+    .sort()
+    .join(',');
 
   useEffect(() => {
     let cancelled = false;
@@ -88,10 +92,10 @@ export function AnalyticsScreen() {
 
   const loadSnapshots = async () => {
     setLoading(true);
-    const cacheKey = `${minersCacheKey}-${range}`;
+    const cacheKey = `${minerIdsKey}-${range}`;
     const cached = snapshotCache.current.get(cacheKey);
-    if (cached) {
-      setSnapshots(cached);
+    if (cached && cached.key === cacheKey) {
+      setSnapshots(cached.data);
       setLoading(false);
       return;
     }
@@ -108,7 +112,11 @@ export function AnalyticsScreen() {
       .flat()
       .filter((s) => s.timestamp >= cutoff);
     all.sort((a, b) => a.timestamp - b.timestamp);
-    snapshotCache.current.set(cacheKey, all);
+    if (snapshotCache.current.size >= CACHE_MAX) {
+      const firstKey = snapshotCache.current.keys().next().value;
+      if (firstKey) snapshotCache.current.delete(firstKey);
+    }
+    snapshotCache.current.set(cacheKey, { data: all, key: cacheKey });
     setSnapshots(all);
     setLoading(false);
   };

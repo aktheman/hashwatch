@@ -107,10 +107,15 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
   if (enabledSetting === 'false') return;
 
   const alertRuleCache = new Map<string, AlertRule>();
+  const alertPrefCache = new Map<string, Record<string, boolean>>();
   for (const miner of currentMiners) {
     if (!alertRuleCache.has(miner.id)) {
       const rules = await getAlertRules(miner.id);
       alertRuleCache.set(miner.id, rules);
+    }
+    if (!alertPrefCache.has(miner.id)) {
+      const raw = await DB.getSetting(`notify_${miner.id}`);
+      alertPrefCache.set(miner.id, raw ? JSON.parse(raw) : {});
     }
   }
 
@@ -118,17 +123,24 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     const prev = prevMiners.find((m) => m.id === current.id);
     if (!prev) continue;
     const rules = alertRuleCache.get(current.id) || DEFAULT_RULES;
+    const prefs = alertPrefCache.get(current.id) || {};
+
+    if (!rules.enabled) continue;
 
     if (prev.isOnline && !current.isOnline) {
-      notifiedOfflineAt.set(current.id, Date.now());
-      await sendOfflineAlert(current);
+      if (prefs.offline !== false) {
+        notifiedOfflineAt.set(current.id, Date.now());
+        await sendOfflineAlert(current);
+      }
     }
 
     if (current.isOnline && !prev.isOnline) {
       const lastOffline = notifiedOfflineAt.get(current.id);
       if (lastOffline) {
         notifiedOfflineAt.delete(current.id);
-        await sendOnlineAlert(current);
+        if (prefs.online !== false) {
+          await sendOnlineAlert(current);
+        }
       }
     }
 
@@ -137,7 +149,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
       const reminderMs = rules.offlineReminderMinutes * 60 * 1000;
       if (lastOffline && Date.now() - lastOffline > reminderMs) {
         notifiedOfflineAt.set(current.id, Date.now());
-        await sendOfflineReminder(current);
+        if (prefs.offline !== false) {
+          await sendOfflineReminder(current);
+        }
       }
       continue;
     }
@@ -145,7 +159,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     const temp = current.status?.temperature ?? 0;
     if (temp > rules.tempThreshold && !notifiedHot.has(current.id)) {
       notifiedHot.add(current.id);
-      await sendHotAlert(current, temp);
+      if (prefs.hot !== false) {
+        await sendHotAlert(current, temp);
+      }
     }
     if (temp <= rules.tempThreshold - 5 && notifiedHot.has(current.id)) {
       notifiedHot.delete(current.id);
@@ -156,7 +172,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     const dropRatio = 100 / (100 - rules.hashrateDropPercent);
     if (prevHr > 0 && hr > 0 && prevHr / hr > dropRatio && !notifiedHashrateDrop.has(current.id)) {
       notifiedHashrateDrop.add(current.id);
-      await sendHashrateDropAlert(current, hr, prevHr);
+      if (prefs.hashrate_drop !== false) {
+        await sendHashrateDropAlert(current, hr, prevHr);
+      }
     }
     if (hr >= prevHr && notifiedHashrateDrop.has(current.id)) {
       notifiedHashrateDrop.delete(current.id);
@@ -166,7 +184,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     const prevPool = prev.status?.pool;
     if (prevPool && !pool && !notifiedPoolLoss.has(current.id)) {
       notifiedPoolLoss.add(current.id);
-      await sendPoolLostAlert(current, prevPool);
+      if (prefs.pool_lost !== false) {
+        await sendPoolLostAlert(current, prevPool);
+      }
     }
     if (pool && notifiedPoolLoss.has(current.id)) {
       notifiedPoolLoss.delete(current.id);
@@ -176,7 +196,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     const uptime = current.status?.uptimeSeconds ?? 0;
     if (uptime > uptimeThresholdSec && !notifiedLongUptime.has(current.id)) {
       notifiedLongUptime.add(current.id);
-      await sendLongUptimeAlert(current, uptime);
+      if (prefs.long_uptime !== false) {
+        await sendLongUptimeAlert(current, uptime);
+      }
     }
     if (uptime < uptimeThresholdSec && notifiedLongUptime.has(current.id)) {
       notifiedLongUptime.delete(current.id);

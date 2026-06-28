@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import {
   spacing,
   radius,
@@ -70,12 +71,42 @@ describe('cardShadow', () => {
   it('returns elevation on native', () => {
     const result = cardShadow(darkTheme, 'md');
     expect(result).toHaveProperty('elevation');
+    expect(result.elevation).toBe(3);
   });
 
-  it('returns boxShadow on web', () => {
-    const origPlatform = process.env.EXPO_OS_WEB;
+  it('returns elevation sm for sm intensity', () => {
     const result = cardShadow(darkTheme, 'sm');
-    expect(result).toBeTruthy();
+    expect(result.elevation).toBe(2);
+  });
+
+  it('returns elevation lg for lg intensity', () => {
+    const result = cardShadow(darkTheme, 'lg');
+    expect(result.elevation).toBe(4);
+  });
+
+  it('returns boxShadow on web platform', () => {
+    const origOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    const result = cardShadow(darkTheme, 'md');
+    expect(result).toHaveProperty('boxShadow');
+    expect(result.boxShadow).toContain(darkTheme.glow);
+    Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
+  });
+
+  it('returns boxShadow for sm on web', () => {
+    const origOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    const result = cardShadow(darkTheme, 'sm');
+    expect(result.boxShadow).toContain('12px');
+    Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
+  });
+
+  it('returns boxShadow for lg on web', () => {
+    const origOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    const result = cardShadow(darkTheme, 'lg');
+    expect(result.boxShadow).toContain('24px');
+    Object.defineProperty(Platform, 'OS', { value: origOS, configurable: true, writable: true });
   });
 });
 
