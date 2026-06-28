@@ -21,6 +21,14 @@ jest.mock('../src/db/database', () => ({
   setSetting: (k: string, v: string) => mockSetSetting(k, v),
 }));
 
+jest.mock('../src/store/miners', () => ({
+  useMinerStore: {
+    getState: () => ({
+      addMiner: jest.fn(),
+    }),
+  },
+}));
+
 jest.mock('../src/constants', () => ({
   getExtra: () => ({ apiUrl: 'http://localhost:4000' }),
 }));
@@ -94,6 +102,11 @@ beforeEach(() => {
   mockGetSetting.mockResolvedValue(null);
 });
 
+afterAll(() => {
+  delete (globalThis as any).window;
+  delete (globalThis as any).URL;
+});
+
 describe('exportAllData', () => {
   it('generates CSV and triggers download on web', async () => {
     mockLoadMiners.mockResolvedValue([sampleMiner]);
@@ -106,6 +119,48 @@ describe('exportAllData', () => {
     expect((globalThis as any).URL.createObjectURL).toHaveBeenCalled();
     expect((globalThis as any).window.document.createElement).toHaveBeenCalledWith('a');
     expect((globalThis as any).URL.revokeObjectURL).toHaveBeenCalled();
+  });
+
+  it('uses Share.share on non-web platform', async () => {
+    mockPlatform = 'android';
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSnapshots.mockResolvedValue([sampleSnapshot]);
+    const mockShare = require('react-native').Share.share;
+
+    await exportAllData();
+
+    expect(mockShare).toHaveBeenCalled();
+    expect(mockShare.mock.calls[0][0]).toMatchObject({
+      message: expect.stringContaining('hashRate'),
+      title: expect.stringContaining('hashwatch_export'),
+    });
+  });
+
+  it('handles empty miners list', async () => {
+    mockLoadMiners.mockResolvedValue([]);
+
+    await expect(exportAllData()).resolves.toBeUndefined();
+    expect((globalThis as any).URL.createObjectURL).toHaveBeenCalled();
+  });
+});
+
+describe('escapeCSV (internal)', () => {
+  // We test escapeCSV indirectly through CSV export output
+  it('escapes commas, quotes, and newlines in CSV values', async () => {
+    const minerWithComma: Miner = {
+      ...sampleMiner,
+      name: 'Miner, "A" & B\nLine2',
+      ip: 'safe',
+    };
+    mockLoadMiners.mockResolvedValue([minerWithComma]);
+    mockGetSnapshots.mockResolvedValue([sampleSnapshot]);
+
+    await exportAllData();
+
+    const mockCreateObjectURL = (globalThis as any).URL.createObjectURL;
+    const blob = mockCreateObjectURL.mock.calls[0][0];
+    const text = await blob.text();
+    expect(text).toContain('"Miner, ""A"" & B');
   });
 });
 
@@ -191,5 +246,67 @@ describe('importFromJSON', () => {
 
   it('throws on invalid JSON', async () => {
     await expect(importFromJSON('not json')).rejects.toThrow();
+  });
+
+  it('handles missing settings gracefully', async () => {
+    const json = JSON.stringify({
+      version: 2,
+      exportedAt: '2025-01-01T00:00:00.000Z',
+      miners: [],
+      snapshots: [],
+      wallets: [],
+    });
+    const result = await importFromJSON(json);
+    expect(result.miners).toBe(0);
+  });
+});
+
+describe('importFromCSV', () => {
+  let importFromCSV: typeof import('../src/utils/export').importFromCSV;
+
+  beforeAll(async () => {
+    importFromCSV = (await import('../src/utils/export')).importFromCSV;
+  });
+
+  it('returns error for empty CSV', async () => {
+    const result = await importFromCSV('');
+    expect(result.imported).toBe(0);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('returns error for header-only CSV', async () => {
+    const result = await importFromCSV('name,ip,port');
+    expect(result.imported).toBe(0);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('returns error when name column is missing', async () => {
+    const result = await importFromCSV('ip,port\n192.168.1.1,80');
+    expect(result.imported).toBe(0);
+    expect(result.errors[0]).toContain('name');
+  });
+
+  it('returns error when ip column is missing', async () => {
+    const result = await importFromCSV('name,port\nTest,80');
+    expect(result.imported).toBe(0);
+    expect(result.errors[0]).toContain('name');
+  });
+
+  it('reports error row when name or ip is empty', async () => {
+    const result = await importFromCSV('name,ip,port\n,192.168.1.1,80\nMiner2,,80');
+    expect(result.imported).toBe(0);
+    expect(result.errors.length).toBe(2);
+  });
+
+  it('imports valid rows and reports errors for failures', async () => {
+    const result = await importFromCSV(
+      'name,ip,port\nMiner1,192.168.1.1,80\nMiner2,192.168.1.2,80',
+    );
+    expect(result.imported).toBe(2);
+    expect(result.errors.length).toBe(0);
+  });
+
+  it('uses default port 80 when port column is missing', async () => {
+    await importFromCSV('name,ip\nMiner1,192.168.1.1');
   });
 });

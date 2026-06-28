@@ -29,6 +29,9 @@ jest.mock('expo-notifications', () => ({
   setNotificationChannelAsync: jest.fn(),
   scheduleNotificationAsync: jest.fn(),
   getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: 'mock-token' }),
+  addNotificationResponseReceivedListener: jest.fn().mockReturnValue({ remove: jest.fn() }),
+  getPermissionsAsync: jest.fn(),
+  AndroidImportance: { HIGH: 4 },
 }));
 
 jest.mock('expo-network', () => ({

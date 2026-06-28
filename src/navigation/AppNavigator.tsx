@@ -1,8 +1,9 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { createNavigationContainerRef, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { startPricePolling } from '../utils/hashrate';
 
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,10 @@ import { OfflineBanner } from '../components/OfflineBanner';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 import { UndoToast } from '../components/UndoToast';
 import { useTheme } from '../theme';
+import { useAlertHistoryStore } from '../store/alertHistory';
 import type { RootStackParamList, TabParamList } from '../types';
+
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 const DashboardScreen = lazy(() =>
   import('../screens/DashboardScreen').then((m) => ({ default: m.DashboardScreen })),
@@ -106,6 +110,7 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 function MainTabs() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const unreadCount = useAlertHistoryStore((s) => s.events.filter((e) => !e.read).length);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -145,7 +150,11 @@ function MainTabs() {
       <Tab.Screen
         name="Settings"
         component={WrappedSettings}
-        options={{ headerShown: false, tabBarLabel: t('tabs.settings') }}
+        options={{
+          headerShown: false,
+          tabBarLabel: t('tabs.settings'),
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+        }}
       />
     </Tab.Navigator>
   );
@@ -168,8 +177,18 @@ export function AppNavigator() {
     return stop;
   }, []);
 
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data;
+      if (data?.minerId && navigationRef.current) {
+        navigationRef.current.navigate('MinerDetail', { minerId: data.minerId as string });
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <OfflineBanner />
       <UndoToast />
       <Stack.Navigator

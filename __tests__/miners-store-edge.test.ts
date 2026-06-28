@@ -174,6 +174,32 @@ describe('scanNetwork error handling', () => {
     expect(state.error).toContain('Scan timeout');
   });
 
+  it('retries refreshMiner when offline', async () => {
+    const origOnLine = Object.getOwnPropertyDescriptor(navigator, 'onLine');
+    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
+
+    let storeRef: {
+      getState: () => { refreshMiner: (id: string) => Promise<void>; miners: unknown[] };
+    };
+    jest.isolateModules(() => {
+      const { useMinerStore } = require('../src/store/miners');
+      useMinerStore.setState({
+        miners: [{ id: 'm1', ip: '192.168.1.1', port: 80, apiPath: '/api/info', isOnline: true }],
+      });
+      storeRef = useMinerStore;
+    });
+
+    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+    await storeRef.getState().refreshMiner('m1');
+    expect(setTimeoutSpy).toHaveBeenCalled();
+
+    if (origOnLine) {
+      Object.defineProperty(navigator, 'onLine', origOnLine);
+    } else {
+      delete (navigator as Record<string, unknown>).onLine;
+    }
+  });
+
   it('adds discovered miners on success', async () => {
     let storeRef: {
       getState: () => {

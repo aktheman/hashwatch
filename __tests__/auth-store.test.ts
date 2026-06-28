@@ -5,6 +5,13 @@ jest.mock('../src/db/database', () => ({
   getSetting: jest.fn(() => null),
 }));
 
+const networkReconnectCallbacks: Array<() => void> = [];
+jest.mock('../src/services/networkStatus', () => ({
+  onNetworkReconnect: jest.fn().mockImplementation((cb: () => void) => {
+    networkReconnectCallbacks.push(cb);
+  }),
+}));
+
 import * as DB from '../src/db/database';
 
 const mockSetSetting = DB.setSetting as unknown as jest.Mock;
@@ -14,12 +21,15 @@ const mockLogin = jest.fn();
 const mockRegister = jest.fn();
 const mockGetSettings = jest.fn();
 const mockPutSetting = jest.fn();
+const configureClientArgs: Record<string, unknown>[] = [];
 jest.mock('../src/api/client', () => ({
   login: (e: string, p: string) => mockLogin(e, p),
   register: (e: string, p: string) => mockRegister(e, p),
   getSettings: (...args: unknown[]) => mockGetSettings(...args),
   putSetting: (key: string, value: string) => mockPutSetting(key, value),
-  configureClient: jest.fn(),
+  configureClient: jest.fn().mockImplementation((opts: Record<string, unknown>) => {
+    configureClientArgs.push(opts);
+  }),
 }));
 
 const mockConnectWS = jest.fn();
@@ -504,6 +514,57 @@ describe('processQueue dedup and retry', () => {
     const queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
     const lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
     expect(lastSave).toHaveLength(0);
+  });
+});
+
+describe('module-level setup', () => {
+  it('calls configureClient with getToken and onUnauthorized', () => {
+    expect(configureClientArgs.length).toBeGreaterThan(0);
+    expect(configureClientArgs[0]).toMatchObject({
+      getToken: expect.any(Function),
+      onUnauthorized: expect.any(Function),
+    });
+  });
+
+  it('getToken returns current token from store', () => {
+    useAuthStore.setState({ token: 't1' });
+    expect(configureClientArgs.length).toBeGreaterThan(0);
+    const { getToken } = configureClientArgs[0] as { getToken: () => string | null };
+    expect(getToken()).toBe('t1');
+  });
+
+  it('onUnauthorized calls logout when triggered', () => {
+    useAuthStore.setState({ token: 't1', userId: 'u1', email: 'a@b.com' });
+    expect(configureClientArgs.length).toBeGreaterThan(0);
+    const { onUnauthorized } = configureClientArgs[0] as { onUnauthorized: () => void };
+    onUnauthorized();
+    const state = useAuthStore.getState();
+    expect(state.token).toBeNull();
+  });
+
+  it('registers onNetworkReconnect callback via dynamic import', async () => {
+    await new Promise(process.nextTick);
+    expect(networkReconnectCallbacks.length).toBeGreaterThan(0);
+  });
+
+  it('onNetworkReconnect callback calls syncNow when token is set', async () => {
+    await new Promise(process.nextTick);
+    expect(networkReconnectCallbacks.length).toBeGreaterThan(0);
+    useAuthStore.setState({ token: 't1' });
+    const syncNowSpy = jest.spyOn(useAuthStore.getState(), 'syncNow').mockResolvedValue(undefined);
+    networkReconnectCallbacks[0]();
+    expect(syncNowSpy).toHaveBeenCalled();
+    syncNowSpy.mockRestore();
+  });
+
+  it('onNetworkReconnect callback does not call syncNow when token is null', async () => {
+    await new Promise(process.nextTick);
+    expect(networkReconnectCallbacks.length).toBeGreaterThan(0);
+    useAuthStore.setState({ token: null });
+    const syncNowSpy = jest.spyOn(useAuthStore.getState(), 'syncNow').mockResolvedValue(undefined);
+    networkReconnectCallbacks[0]();
+    expect(syncNowSpy).not.toHaveBeenCalled();
+    syncNowSpy.mockRestore();
   });
 });
 

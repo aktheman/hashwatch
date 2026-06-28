@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
+import pLimit from 'p-limit';
 import { Miner, MinerInfo, MinerSnapshot, MinerStatus } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
@@ -234,11 +235,8 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   refreshAll: async () => {
     const prev = get().miners;
-    const CONCURRENCY = 5;
-    for (let i = 0; i < prev.length; i += CONCURRENCY) {
-      const batch = prev.slice(i, i + CONCURRENCY);
-      await Promise.allSettled(batch.map((m) => get().refreshMiner(m.id)));
-    }
+    const limit = pLimit(20);
+    await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
     const current = get().miners;
     if (current.length > 0) {
       checkMinerAlerts(prev, current);
