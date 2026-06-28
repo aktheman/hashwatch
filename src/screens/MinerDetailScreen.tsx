@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Share,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
@@ -338,8 +339,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [editingIP, setEditingIP] = useState(false);
   const [editIPValue, setEditIPValue] = useState('');
   const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tagInputRef = useRef<TextInput>(null);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshMiner(minerId);
+    setRefreshing(false);
+  }, [minerId, refreshMiner]);
 
   useEffect(() => {
     let cancelled = false;
@@ -443,6 +451,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+      }
     >
       <View style={styles.header}>
         <View style={styles.headerTop}>

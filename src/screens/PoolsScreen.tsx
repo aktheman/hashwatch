@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { useMemo, useState, useCallback } from 'react';
+import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
@@ -28,6 +28,14 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
+  const refreshAll = useMinerStore((s) => s.refreshAll);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshAll();
+    setRefreshing(false);
+  }, [refreshAll]);
 
   const poolGroups = useMemo(() => {
     const groups: Record<string, PoolGroup> = {};
@@ -149,6 +157,9 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         windowSize={7}
         maxToRenderPerBatch={10}
         removeClippedSubviews
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+        }
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>

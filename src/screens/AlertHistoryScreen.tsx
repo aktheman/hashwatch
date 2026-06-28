@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { useMemo, useState, useCallback } from 'react';
+import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useAlertHistoryStore, AlertEvent } from '../store/alertHistory';
@@ -55,6 +55,14 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
   const markRead = useAlertHistoryStore((s) => s.markRead);
   const markAllRead = useAlertHistoryStore((s) => s.markAllRead);
   const clearAll = useAlertHistoryStore((s) => s.clearAll);
+
+  const loadEvents = useAlertHistoryStore((s) => s.loadEvents);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadEvents();
+    setRefreshing(false);
+  }, [loadEvents]);
 
   const sections = useMemo(() => groupByDate(events), [events]);
 
@@ -230,6 +238,9 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
           </View>
         }
         contentContainerStyle={{ paddingBottom: 32 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+        }
       />
     </View>
   );

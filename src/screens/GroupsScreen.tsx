@@ -1,5 +1,14 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, FlatList, Alert, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  FlatList,
+  Alert,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
@@ -31,9 +40,17 @@ export function GroupsScreen() {
 
   const [newGroupName, setNewGroupName] = useState('');
   const [emptyGroups, setEmptyGroups] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadEmptyGroups().then(setEmptyGroups);
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    const eg = await loadEmptyGroups();
+    setEmptyGroups(eg);
+    setRefreshing(false);
   }, []);
 
   const groups = useMemo(() => {
@@ -350,6 +367,9 @@ export function GroupsScreen() {
           );
         }}
         ListEmptyComponent={<Text style={styles.emptyText}>{t('groups.noMiners')}</Text>}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+        }
       />
     </View>
   );
