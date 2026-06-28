@@ -9,6 +9,7 @@ import {
   Platform,
   Switch,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
@@ -138,6 +139,17 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<string | null>(null);
   const [entitlements, setEntitlements] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadMiners();
+    const pc = await getSetting('power_cost');
+    setPowerCost(pc || '');
+    const as = await getSetting('auto_scan');
+    setAutoScan(as === 'true');
+    setRefreshing(false);
+  }, [loadMiners]);
 
   const loadDebugInfo = useCallback(async () => {
     try {
@@ -349,7 +361,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+      }
+    >
       <Text style={styles.title}>{t('settings.title')}</Text>
 
       {Platform.OS === 'web' && (

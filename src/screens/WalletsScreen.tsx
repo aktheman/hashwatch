@@ -1,5 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
-import { View, Text, FlatList, Pressable, TextInput, Modal, Alert, StyleSheet } from 'react-native';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  TextInput,
+  Modal,
+  Alert,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -43,6 +53,13 @@ export function WalletsScreen() {
     const w = await DB.loadWallets();
     setWallets(w);
   };
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadWallets();
+    setRefreshing(false);
+  }, []);
 
   const openCreate = () => {
     setEditingWallet(null);
@@ -314,6 +331,13 @@ export function WalletsScreen() {
               </View>
             </View>
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.primary}
+            />
+          }
         />
       )}
 

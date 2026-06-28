@@ -202,6 +202,79 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
   }, [miners]);
 
+  const [metrics, setMetrics] = useState({
+    hashrateHistory: [] as number[],
+    powerHistory: [] as number[],
+    uptimeHistory: [] as number[],
+    hashrateTrend: '',
+    powerTrend: '',
+    workerTrend: '',
+    uptimeAvg: 0,
+    efficiencyPct: 0,
+    recentHashrates: [] as number[],
+    recentPower: [] as number[],
+    recentUptimes: [] as number[],
+  });
+
+  useEffect(() => {
+    if (miners.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const snapshots = (await Promise.all(miners.map((m) => DB.getSnapshots(m.id, 100))))
+        .flat()
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+      if (cancelled) return;
+
+      const recent = snapshots.slice(-20);
+      const hashrateHistory = recent.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit));
+      const powerHistory = recent.map((s) => s.power);
+      const uptimeHistory = recent.map((s) => s.uptimeSeconds);
+
+      const totalHr = filteredMiners.reduce(
+        (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+        0,
+      );
+      const totalPw = filteredMiners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
+
+      const computeTrend = (vals: number[]): string => {
+        if (vals.length < 2) return '';
+        const first = vals[0];
+        const last = vals[vals.length - 1];
+        if (first === 0) return '';
+        const pct = ((last - first) / first) * 100;
+        const sign = pct >= 0 ? '+' : '';
+        return `${sign}${pct.toFixed(1)}%`;
+      };
+
+      const avgUptime =
+        filteredMiners.length > 0
+          ? filteredMiners.reduce((s, m) => s + (m.status?.uptimeSeconds ?? 0), 0) /
+            filteredMiners.length
+          : 0;
+
+      const efficiencyPct =
+        totalPw > 0 && totalHr > 0 ? Math.min(100, (totalHr / 1e12 / totalPw) * 100) : 0;
+
+      setMetrics({
+        hashrateHistory,
+        powerHistory,
+        uptimeHistory,
+        hashrateTrend: computeTrend(hashrateHistory),
+        powerTrend: computeTrend(powerHistory),
+        workerTrend: snapshots.length > 0 ? `+${filteredMiners.length}` : '',
+        uptimeAvg: avgUptime,
+        efficiencyPct,
+        recentHashrates: hashrateHistory.slice(-7),
+        recentPower: powerHistory.slice(-7),
+        recentUptimes: uptimeHistory.slice(-7),
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [miners, filteredMiners]);
+
   const handleMinerPress = useCallback(
     (miner: Miner) => {
       if (selectionMode) {
@@ -1138,19 +1211,18 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 value={formatTotal(totalHashrate)}
                 unit="H/s"
                 accent="info"
-                trend="-10%"
-                chart="sparkline"
-                chartData={[40, 55, 48, 62, 70, 58, 65]}
+                trend={metrics.hashrateTrend}
+                chart={metrics.recentHashrates.length > 0 ? 'sparkline' : undefined}
+                chartData={metrics.recentHashrates}
                 size="lg"
               />
             </View>
             <View style={{ flex: 1 }}>
               <MetricTile
                 title={String(t('dashboard.efficiency'))}
-                value="72"
+                value={metrics.efficiencyPct > 0 ? metrics.efficiencyPct.toFixed(1) : '—'}
                 unit="%"
-                accent="success"
-                trend="+8%"
+                accent={metrics.efficiencyPct > 50 ? 'success' : 'warning'}
                 chart="donut"
                 size="lg"
               />
@@ -1163,9 +1235,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 value={`${totalPower.toFixed(1)}`}
                 unit="W"
                 accent="warning"
-                trend="-12%"
-                chart="bars"
-                chartData={[120, 180, 140, 210, 160, 190]}
+                trend={metrics.powerTrend}
+                chart={metrics.recentPower.length > 0 ? 'bars' : undefined}
+                chartData={metrics.recentPower}
                 size="lg"
               />
             </View>
@@ -1183,11 +1255,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <View style={{ flex: 1 }}>
               <MetricTile
                 title={String(t('dashboard.uptime'))}
-                value="98.7%"
-                unit="SLA"
+                value={
+                  metrics.uptimeAvg > 0
+                    ? `${Math.round((metrics.uptimeAvg / 86400) * 100) / 100}d`
+                    : '—'
+                }
                 accent="primary"
-                chart="sparkline"
-                chartData={[80, 82, 79, 83, 85, 84, 86]}
+                chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
+                chartData={metrics.recentUptimes.map((u) => Math.round(u / 3600))}
                 size="lg"
               />
             </View>
@@ -1197,9 +1272,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 value={String(filteredMiners.length)}
                 unit="active"
                 accent="info"
-                trend="+3"
-                chart="bars"
-                chartData={[3, 5, 4, 6, 5, 7]}
+                trend={metrics.workerTrend}
                 size="lg"
               />
             </View>
