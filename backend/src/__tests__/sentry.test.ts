@@ -23,23 +23,23 @@ describe('sentry service', () => {
     jest.resetModules();
   });
 
-  const withFreshModule = (env: Record<string, string | undefined>) => {
+  const withFreshModule = async (env: Record<string, string | undefined>) => {
     Object.entries(env).forEach(([k, v]) => {
       if (v === undefined) delete process.env[k];
       else process.env[k] = v;
     });
     jest.resetModules();
-    return require('../services/sentry');
+    return import('../services/sentry') as Promise<typeof import('../services/sentry')>;
   };
 
-  it('returns early when DSN is missing', () => {
-    const { initSentry } = withFreshModule({ SENTRY_DSN: undefined });
+  it('returns early when DSN is missing', async () => {
+    const { initSentry } = await withFreshModule({ SENTRY_DSN: undefined });
     initSentry();
     expect(mockInit).not.toHaveBeenCalled();
   });
 
-  it('initializes Sentry with expected config', () => {
-    const { initSentry } = withFreshModule({
+  it('initializes Sentry with expected config', async () => {
+    const { initSentry } = await withFreshModule({
       SENTRY_DSN: 'https://example@sentry.io/123',
       SENTRY_TRACES_SAMPLE_RATE: '0.1',
       SENTRY_PROFILES_SAMPLE_RATE: '0.2',
@@ -57,8 +57,8 @@ describe('sentry service', () => {
     );
   });
 
-  it('initializes Sentry with default sample rates', () => {
-    const { initSentry } = withFreshModule({
+  it('initializes Sentry with default sample rates', async () => {
+    const { initSentry } = await withFreshModule({
       SENTRY_DSN: 'https://example@sentry.io/123',
       SENTRY_TRACES_SAMPLE_RATE: undefined,
       SENTRY_PROFILES_SAMPLE_RATE: undefined,
@@ -73,16 +73,16 @@ describe('sentry service', () => {
     );
   });
 
-  it('reports enabled status from SENTRY_DSN', () => {
-    const withoutDsn = withFreshModule({ SENTRY_DSN: undefined });
+  it('reports enabled status from SENTRY_DSN', async () => {
+    const withoutDsn = await withFreshModule({ SENTRY_DSN: undefined });
     expect(withoutDsn.isSentryEnabled()).toBe(false);
 
-    const withDsn = withFreshModule({ SENTRY_DSN: 'https://example@sentry.io/123' });
+    const withDsn = await withFreshModule({ SENTRY_DSN: 'https://example@sentry.io/123' });
     expect(withDsn.isSentryEnabled()).toBe(true);
   });
 
-  it('captureException forwards context extras when provided', () => {
-    const { captureException } = withFreshModule({
+  it('captureException forwards context extras when provided', async () => {
+    const { captureException } = await withFreshModule({
       SENTRY_DSN: 'https://example@sentry.io/123',
     });
     captureException(new Error('boom'), { foo: 'bar' });
@@ -93,8 +93,8 @@ describe('sentry service', () => {
     expect(scope.setExtras).toHaveBeenCalledWith({ foo: 'bar' });
   });
 
-  it('captureMessage uses default info level and forwards context', () => {
-    const { captureMessage } = withFreshModule({
+  it('captureMessage uses default info level and forwards context', async () => {
+    const { captureMessage } = await withFreshModule({
       SENTRY_DSN: 'https://example@sentry.io/123',
     });
     captureMessage('hello', 'warning', { a: 1 });
@@ -107,12 +107,43 @@ describe('sentry service', () => {
     expect(mockCaptureMessage).toHaveBeenCalledWith('hello', 'warning');
   });
 
-  it('skips Sentry calls when DSN is missing', () => {
-    const { captureException, captureMessage } = withFreshModule({ SENTRY_DSN: undefined });
+  it('skips Sentry calls when DSN is missing', async () => {
+    const { captureException, captureMessage } = await withFreshModule({ SENTRY_DSN: undefined });
     captureException(new Error('no-dsn'));
     captureMessage('no-dsn');
     expect(mockWithScope).not.toHaveBeenCalled();
     expect(mockCaptureException).not.toHaveBeenCalled();
+    expect(mockCaptureMessage).not.toHaveBeenCalled();
+  });
+
+  it('initializes Sentry with explicit production environment', async () => {
+    const { initSentry } = await withFreshModule({
+      SENTRY_DSN: 'https://example@sentry.io/123',
+      NODE_ENV: 'production',
+    });
+    initSentry();
+    expect(mockInit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dsn: 'https://example@sentry.io/123',
+        environment: 'production',
+        tracesSampleRate: 0,
+        profilesSampleRate: 0,
+        sendDefaultPii: false,
+      }),
+    );
+  });
+
+  it('captureException skips call when Sentry is disabled', async () => {
+    const { captureException } = await withFreshModule({ SENTRY_DSN: undefined });
+    captureException(new Error('silent'));
+    expect(mockWithScope).not.toHaveBeenCalled();
+    expect(mockCaptureException).not.toHaveBeenCalled();
+  });
+
+  it('captureMessage skips call when Sentry is disabled', async () => {
+    const { captureMessage } = await withFreshModule({ SENTRY_DSN: undefined });
+    captureMessage('silent');
+    expect(mockWithScope).not.toHaveBeenCalled();
     expect(mockCaptureMessage).not.toHaveBeenCalled();
   });
 });
