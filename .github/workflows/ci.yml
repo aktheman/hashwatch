@@ -131,6 +131,26 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+  verify-deploy:
+    name: Verify Railway Deploy
+    needs: [deploy-web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for Railway deploy to be ready
+        run: |
+          for i in $(seq 1 10); do
+            STATUS=$(curl -fsS https://hashwatch-production-5b6e.up.railway.app/api/health || true)
+            if echo "$STATUS" | grep -q '"status":"ok"'; then
+              echo "Deploy OK: $STATUS"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "Deploy not ready after retries"
+          exit 1
+
   android-build:
     name: Android Build
     runs-on: ubuntu-latest
