@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -13,41 +14,37 @@ export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
   const { t } = useTranslation();
   const { isPro } = useSubscriptionStore();
   const theme = useTheme();
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrapper: {
-          position: 'relative',
-          opacity: 0.5,
-        },
-        overlay: {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.bg + 'A0',
-          borderRadius: 12,
-        },
-        lockIcon: {
-          fontSize: 24,
-        },
-        text: {
-          color: theme.text,
-          fontSize: 14,
-          fontWeight: '600',
-          marginTop: 4,
-        },
-        subtext: {
-          color: theme.textDim,
-          fontSize: 12,
-          marginTop: 2,
-        },
-      }),
-    [theme],
-  );
+  const styles = useMemo(() => {
+    const text = {
+      color: theme.text,
+      fontSize: fontSize.base,
+      fontWeight: fontWeight.semibold,
+      marginTop: spacing.xxs,
+    };
+    const subtext = { color: theme.textDim, fontSize: fontSize.sm, marginTop: spacing.xxs };
+    return StyleSheet.create({
+      wrapper: {
+        position: 'relative',
+        opacity: 0.5,
+      },
+      overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.bg + 'A0',
+        borderRadius: radius.md,
+      },
+      lockIcon: {
+        fontSize: fontSize.lg,
+      },
+      text,
+      subtext,
+    });
+  }, [theme]);
 
   if (isPro) {
     return <>{children}</>;
