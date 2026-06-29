@@ -16,7 +16,7 @@ const TIMEOUT = 5000;
 async function fetchJson(url: string): Promise<unknown | null> {
   try {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), TIMEOUT);
+    const id = setTimeout(() => controller.abort(), TIMEOUT).unref();
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(id);
     if (!res.ok) return null;
@@ -128,7 +128,7 @@ export function startMinerPoller(): void {
   if (intervalHandle) return;
   console.log(`Miner poller started (every ${POLL_INTERVAL / 1000}s)`);
   pollAll();
-  intervalHandle = setInterval(pollAll, POLL_INTERVAL);
+  intervalHandle = setInterval(pollAll, POLL_INTERVAL).unref();
 }
 
 export function stopMinerPoller(): void {
