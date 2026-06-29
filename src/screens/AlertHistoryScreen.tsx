@@ -222,7 +222,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
                 <View style={styles.eventBody}>
                   <Text style={styles.eventTitle}>{ev.title}</Text>
                   <Text style={styles.eventMeta}>
-                    {ev.minerName} · {ev.type.replace('_', ' ')}
+                    {ev.minerName} · {t(`alertHistory.${ev.type}`, ev.type.replace('_', ' '))}
                   </Text>
                 </View>
                 <Text style={styles.eventTime}>{formatTimestamp(ev.timestamp)}</Text>

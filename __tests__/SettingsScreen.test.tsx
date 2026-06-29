@@ -196,7 +196,7 @@ it('navigates to Groups', async () => {
 
 it('navigates to ImportData', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('settings.importData'));
+  fireEvent.press(screen.getAllByText('settings.importData')[0]);
   expect(navigation.navigate).toHaveBeenCalledWith('ImportData');
 });
 
@@ -413,8 +413,8 @@ it('saves proxy URL on web platform', async () => {
 
 it('toggles RevenueCat debug panel', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  expect(screen.queryByText('▼ RevenueCat Debug')).toBeTruthy();
-  await fireEvent.press(screen.getByText('▼ RevenueCat Debug'));
-  expect(screen.queryByText('▲ Hide Debug')).toBeTruthy();
+  expect(screen.queryByText('▼ settings.debugMenu')).toBeTruthy();
+  await fireEvent.press(screen.getByText('▼ settings.debugMenu'));
+  expect(screen.queryByText('▲ settings.hideDebug')).toBeTruthy();
   expect(screen.getByLabelText('Restore purchases')).toBeTruthy();
 });

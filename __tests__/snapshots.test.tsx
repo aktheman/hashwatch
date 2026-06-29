@@ -153,14 +153,53 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
+// Strips raw React element props (e.g. refreshControl={<RefreshControl />})
+// from the toJSON() tree, because pretty-format deeply serializes React elements'
+// fiber internals (_owner, _store, etc.), causing RangeError: Invalid string length.
+function stripReactElementProps(tree) {
+  if (!tree || typeof tree !== 'object') return tree;
+  if (String(tree.$$typeof) !== 'Symbol(react.test.json)') return null;
+
+  let propsClean = tree.props;
+  if (propsClean) {
+    const keys = Object.keys(propsClean);
+    for (let i = 0; i < keys.length; i++) {
+      const val = propsClean[keys[i]];
+      if (
+        val &&
+        typeof val === 'object' &&
+        typeof val.$$typeof === 'symbol' &&
+        String(val.$$typeof) !== 'Symbol(react.test.json)'
+      ) {
+        propsClean = { ...propsClean };
+        delete propsClean[keys[i]];
+      }
+    }
+  }
+  let childrenClean = tree.children;
+  if (childrenClean && Array.isArray(childrenClean)) {
+    childrenClean = childrenClean.map(stripReactElementProps);
+  }
+  if (propsClean !== tree.props || childrenClean !== tree.children) {
+    return { ...tree, props: propsClean, children: childrenClean };
+  }
+  return tree;
+}
+
 it('DashboardScreen empty state matches snapshot', async () => {
   const tree = await render(<DashboardScreen navigation={navigation} />);
-  expect(tree.toJSON()).toMatchSnapshot();
+  expect(stripReactElementProps(tree.toJSON())).toMatchSnapshot();
 });
 
 it('SettingsScreen matches snapshot', async () => {
-  const tree = await render(<SettingsScreen navigation={navigation} />);
-  expect(tree.toJSON()).toMatchSnapshot();
+  const { act } = require('react');
+  const TestRenderer = require('react-test-renderer');
+  let renderer;
+  await act(() => {
+    renderer = TestRenderer.create(<SettingsScreen navigation={navigation} />);
+  });
+  const cleaned = stripReactElementProps(renderer.toJSON());
+  expect(cleaned).toMatchSnapshot();
 });
 
 it('AnalyticsScreen renders empty state', async () => {
@@ -170,5 +209,5 @@ it('AnalyticsScreen renders empty state', async () => {
 
 it('PoolsScreen empty state matches snapshot', async () => {
   const tree = await render(<PoolsScreen navigation={navigation} />);
-  expect(tree.toJSON()).toMatchSnapshot();
+  expect(stripReactElementProps(tree.toJSON())).toMatchSnapshot();
 });

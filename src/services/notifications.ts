@@ -209,6 +209,9 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
 }
 
 async function send(title: string, body: string, data?: Record<string, string>) {
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.sendNotification(title, body);
+  }
   await Notifications.scheduleNotificationAsync({
     content: { title, body, data, categoryIdentifier: 'miner-alerts' },
     trigger: null,
