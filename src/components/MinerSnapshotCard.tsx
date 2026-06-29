@@ -8,6 +8,16 @@ import {
   formatPower,
   formatWTHs,
 } from '../utils/formatters';
+import {
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  cardStyle,
+  statLabel,
+  statValue,
+  headerSub,
+} from '../utils/design';
 
 interface MinerSnapshotCardProps {
   miner: Miner;
@@ -21,8 +31,8 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
     <View
       style={{
         backgroundColor: theme.surface,
-        borderRadius: 20,
-        padding: 24,
+        borderRadius: radius.xl,
+        padding: spacing.xl,
         borderWidth: 1,
         borderColor: theme.border,
         alignItems: 'center',
@@ -39,7 +49,7 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
           backgroundColor: miner.isOnline ? theme.success + '20' : theme.danger + '20',
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 12,
+          marginBottom: spacing.sm,
         }}
       >
         <Text style={{ fontSize: 24 }}>⬡</Text>
@@ -47,116 +57,98 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
       <Text
         style={{
           color: theme.text,
-          fontSize: 22,
-          fontWeight: '800',
+          fontSize: fontSize.h2,
+          fontWeight: fontWeight.extrabold,
           letterSpacing: -0.3,
-          marginBottom: 4,
+          marginBottom: spacing.xxs,
         }}
       >
         {miner.name}
       </Text>
       <Text
-        style={{ color: theme.textMuted, fontSize: 12, fontFamily: 'monospace', marginBottom: 16 }}
+        style={{
+          color: theme.textMuted,
+          ...headerSub,
+          fontFamily: 'monospace',
+          marginBottom: spacing.md,
+        }}
       >
         {miner.ip}
       </Text>
       <View
         style={{
-          flexDirection: 'row',
-          borderRadius: 8,
+          ...cardStyle(theme),
           backgroundColor: theme.surfaceLight,
-          padding: 12,
-          width: '100%',
-          marginBottom: 12,
+          padding: spacing.sm,
+          marginBottom: spacing.sm,
         }}
       >
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text
-            style={{
-              color: theme.textDim,
-              fontSize: 9,
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginBottom: 2,
-            }}
-          >
-            Hashrate
-          </Text>
-          <Text style={{ color: theme.primary, fontSize: 18, fontWeight: '800' }}>
-            {s ? formatHashrate(s.hashRate, s.hashRateUnit) : '---'}
-          </Text>
-        </View>
-        <View style={{ width: 1, backgroundColor: theme.border }} />
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text
-            style={{
-              color: theme.textDim,
-              fontSize: 9,
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginBottom: 2,
-            }}
-          >
-            Temp
-          </Text>
-          <Text
-            style={{
-              color: s && s.temperature > 70 ? theme.danger : theme.success,
-              fontSize: 18,
-              fontWeight: '800',
-            }}
-          >
-            {s ? formatTemperature(s.temperature) : '---'}
-          </Text>
-        </View>
-        <View style={{ width: 1, backgroundColor: theme.border }} />
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text
-            style={{
-              color: theme.textDim,
-              fontSize: 9,
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginBottom: 2,
-            }}
-          >
-            Uptime
-          </Text>
-          <Text style={{ color: theme.info, fontSize: 18, fontWeight: '800' }}>
-            {s ? formatUptime(s.uptimeSeconds) : '---'}
-          </Text>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={statLabel}>Hashrate</Text>
+            <Text
+              style={{
+                color: theme.primary,
+                ...statValue,
+              }}
+            >
+              {s ? formatHashrate(s.hashRate, s.hashRateUnit) : '---'}
+            </Text>
+          </View>
+          <View style={{ width: 1, backgroundColor: theme.border }} />
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={statLabel}>Temp</Text>
+            <Text
+              style={{
+                color: s && s.temperature > 70 ? theme.danger : theme.success,
+                ...statValue,
+              }}
+            >
+              {s ? formatTemperature(s.temperature) : '---'}
+            </Text>
+          </View>
+          <View style={{ width: 1, backgroundColor: theme.border }} />
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={statLabel}>Uptime</Text>
+            <Text style={{ color: theme.info, ...statValue }}>
+              {s ? formatUptime(s.uptimeSeconds) : '---'}
+            </Text>
+          </View>
         </View>
       </View>
       {s && (
-        <View style={{ width: '100%', gap: 6 }}>
+        <View style={{ width: '100%', gap: spacing.xxs }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: 11 }}>Power</Text>
-            <Text style={{ color: theme.text, fontSize: 11, fontWeight: '600' }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Power</Text>
+            <Text
+              style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
+            >
               {formatPower(s.power)}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: 11 }}>Efficiency</Text>
-            <Text style={{ color: theme.text, fontSize: 11, fontWeight: '600' }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Efficiency</Text>
+            <Text
+              style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
+            >
               {formatWTHs(s.power, s.hashRate, s.hashRateUnit)}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: 11 }}>Shares</Text>
-            <Text style={{ color: theme.text, fontSize: 11, fontWeight: '600' }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Shares</Text>
+            <Text
+              style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
+            >
               ✓{s.sharesAccepted} ✗{s.sharesRejected}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: 11 }}>Pool</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Pool</Text>
             <Text
               style={{
                 color: theme.text,
-                fontSize: 11,
-                fontWeight: '600',
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.semibold,
                 fontFamily: 'monospace',
               }}
               numberOfLines={1}
@@ -166,7 +158,7 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
           </View>
         </View>
       )}
-      <Text style={{ color: theme.textMuted, fontSize: 9, marginTop: 16 }}>
+      <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: spacing.md }}>
         Generated by HashWatch
       </Text>
     </View>
