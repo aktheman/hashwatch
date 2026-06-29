@@ -275,6 +275,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     };
   }, [miners, filteredMiners]);
 
+  const uptimeChartData = useMemo(
+    () => metrics.recentUptimes.map((u) => Math.round(u / 3600)),
+    [metrics.recentUptimes],
+  );
+
   const handleMinerPress = useCallback(
     (miner: Miner) => {
       if (selectionMode) {
@@ -1262,7 +1267,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 }
                 accent="primary"
                 chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
-                chartData={metrics.recentUptimes.map((u) => Math.round(u / 3600))}
+                chartData={uptimeChartData}
                 size="lg"
               />
             </View>

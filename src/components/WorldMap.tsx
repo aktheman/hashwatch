@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Path, Circle, G } from 'react-native-svg';
 import { useTheme } from '../theme';
@@ -46,7 +46,7 @@ const DOT_POSITIONS = [
 
 const CONTINENTS = [NA, SA, EU, AF, AS, OC];
 
-export function WorldMap() {
+export const WorldMap = React.memo(function WorldMap() {
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const count = Math.min(miners.length, DOT_POSITIONS.length);
@@ -115,4 +115,4 @@ export function WorldMap() {
       </Svg>
     </View>
   );
-}
+});

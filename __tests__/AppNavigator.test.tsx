@@ -291,3 +291,45 @@ it('navigates to Groups screen from Settings', async () => {
   fireEvent.press(screen.getByText('settings.groups'));
   expect(await screen.findByText(/groups.title/)).toBeTruthy();
 });
+
+it('handles notification tap to navigate to MinerDetail', async () => {
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
+  await render(<AppNavigator />);
+  expect(await screen.findByText('HashWatch')).toBeTruthy();
+
+  const notifs = require('expo-notifications');
+  const listenerFn = notifs.addNotificationResponseReceivedListener.mock.calls[0][0];
+  listenerFn({
+    notification: {
+      request: {
+        content: {
+          data: { minerId: 'm1' },
+        },
+      },
+    },
+  });
+});
+
+it('handles notification tap to navigate to MinerDetail', async () => {
+  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'onboarding_complete') return 'true';
+    return null;
+  });
+  await render(<AppNavigator />);
+  expect(await screen.findByText('HashWatch')).toBeTruthy();
+
+  const notifs = require('expo-notifications');
+  const listenerFn = notifs.addNotificationResponseReceivedListener.mock.calls[0][0];
+  listenerFn({
+    notification: {
+      request: {
+        content: {
+          data: { minerId: 'm1' },
+        },
+      },
+    },
+  });
+});

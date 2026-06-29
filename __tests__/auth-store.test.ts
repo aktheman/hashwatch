@@ -502,7 +502,7 @@ describe('processQueue dedup and retry', () => {
     expect(parsed[0].retries).toBeGreaterThan(0);
   });
 
-  it('removes item from queue after 3 retries', async () => {
+  it('keeps item in queue after retries for retry on reconnect', async () => {
     await queueSetting('theme_mode', 'dark');
 
     mockPutSetting.mockRejectedValue(new Error('network error'));
@@ -513,7 +513,8 @@ describe('processQueue dedup and retry', () => {
 
     const queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
     const lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
-    expect(lastSave).toHaveLength(0);
+    expect(lastSave).toHaveLength(1);
+    expect(lastSave[0].retries).toBe(3);
   });
 });
 
