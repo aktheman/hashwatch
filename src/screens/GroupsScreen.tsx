@@ -12,6 +12,7 @@ import {
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
+import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner } from '../types';
 import { useTranslation } from 'react-i18next';
 import * as DB from '../db/database';
@@ -40,10 +41,14 @@ export function GroupsScreen() {
 
   const [newGroupName, setNewGroupName] = useState('');
   const [emptyGroups, setEmptyGroups] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadEmptyGroups().then(setEmptyGroups);
+    loadEmptyGroups().then((eg) => {
+      setEmptyGroups(eg);
+      setLoading(false);
+    });
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -241,6 +246,15 @@ export function GroupsScreen() {
       }),
     [theme],
   );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { paddingTop: 16 }]}>
+        <SkeletonCard rows={4} />
+        <SkeletonCard rows={3} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

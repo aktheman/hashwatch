@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, dialog, Notification } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
 let tray = null;
@@ -23,7 +24,7 @@ function createWindow() {
   });
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:8081'); // Expo web dev server
+    mainWindow.loadURL('http://localhost:8081');
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
@@ -53,6 +54,37 @@ app.whenReady().then(() => {
     { label: 'Quit', click: () => { app.isQuitting = true; app.quit(); } },
   ]));
   tray.on('double-click', () => mainWindow.show());
+
+  ipcMain.handle('dialog:showSave', async (_event, options) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: options.defaultPath,
+      filters: options.filters || [{ name: 'JSON', extensions: ['json'] }],
+    });
+    if (!result.canceled && result.filePath && options.content) {
+      fs.writeFileSync(result.filePath, options.content, 'utf-8');
+    }
+    return { canceled: result.canceled, filePath: result.filePath };
+  });
+
+  ipcMain.handle('dialog:showOpen', async (_event, options) => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: options.filters || [{ name: 'JSON', extensions: ['json'] }],
+    });
+    let content = '';
+    if (!result.canceled && result.filePaths.length > 0) {
+      content = fs.readFileSync(result.filePaths[0], 'utf-8');
+    }
+    return { canceled: result.canceled, filePaths: result.filePaths, content };
+  });
+
+  ipcMain.on('notification:show', (_event, { title, body }) => {
+    if (Notification.isSupported()) {
+      new Notification({ title, body, icon: iconPath }).show();
+    }
+  });
+
+  ipcMain.handle('app:getVersion', () => app.getVersion());
 });
 
 app.on('window-all-closed', () => {

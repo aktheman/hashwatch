@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'rea
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
 import { MetricTile } from '../components/DashboardComponents';
+import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner, NavigationProp } from '../types';
 import {
   toHashesPerSecond,
@@ -28,6 +29,8 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
+  const loading = useMinerStore((s) => s.loading);
+  const initialized = useMinerStore((s) => s.initialized);
   const refreshAll = useMinerStore((s) => s.refreshAll);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -120,6 +123,15 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
   );
 
   const formatRate = (hashesPerSecond: number) => formatHashrateValue(hashesPerSecond);
+
+  if (!initialized || (loading && miners.length === 0)) {
+    return (
+      <View style={[styles.container, { paddingTop: 16 }]}>
+        <SkeletonCard rows={3} />
+        <SkeletonCard rows={3} />
+      </View>
+    );
+  }
 
   if (poolGroups.length === 0) {
     return (

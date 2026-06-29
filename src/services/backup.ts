@@ -19,6 +19,10 @@ const ALERT_HISTORY_KEY = 'hashwatch_alert_history';
 const NOTIFICATION_HISTORY_KEY = 'hashwatch_notification_history';
 
 function triggerDownload(content: string, filename: string, mime: string): void {
+  if (window.electronAPI?.isElectron) {
+    window.electronAPI.showSaveDialog({ defaultPath: filename, content });
+    return;
+  }
   if (Platform.OS === 'web') {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);

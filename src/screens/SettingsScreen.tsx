@@ -34,6 +34,7 @@ import i18n from '../i18n';
 
 function NotificationHistorySection() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const history = useNotificationHistoryStore((s) => s.history);
   const sent = history.filter((e) => e.status === 'sent').length;
   const failed = history.filter((e) => e.status === 'failed').length;
@@ -74,21 +75,21 @@ function NotificationHistorySection() {
   });
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Notification History</Text>
+      <Text style={styles.sectionTitle}>{t('notificationHistory.title')}</Text>
       <View style={styles.row}>
-        <Text style={styles.rowLabel}>Sent</Text>
+        <Text style={styles.rowLabel}>{t('notificationHistory.sent')}</Text>
         <Text style={[styles.rowValue, { color: theme.success }]}>{sent}</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.rowLabel}>Failed</Text>
+        <Text style={styles.rowLabel}>{t('notificationHistory.failed')}</Text>
         <Text style={[styles.rowValue, { color: theme.danger }]}>{failed}</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.rowLabel}>Last 50</Text>
+        <Text style={styles.rowLabel}>{t('notificationHistory.last50')}</Text>
         <Text style={styles.rowValue}>
           {recent.length > 0
             ? `${recent[0].title} · ${new Date(recent[0].sentAt).toLocaleDateString()}`
-            : 'No notifications yet'}
+            : t('notificationHistory.noNotifications')}
         </Text>
       </View>
     </View>
@@ -140,6 +141,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [customerInfo, setCustomerInfo] = useState<string | null>(null);
   const [entitlements, setEntitlements] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [electronUpdate, setElectronUpdate] = useState<{ version: string; url: string } | null>(
+    null,
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -181,6 +185,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
     });
     getSetting('auto_dark_hour').then((v) => setAutoDarkHour(v ? parseInt(v) : null));
     useNotificationHistoryStore.getState().loadHistory();
+  }, []);
+
+  useEffect(() => {
+    if (!window.electronAPI?.isElectron) return;
+    const unsub = window.electronAPI.onCheckForUpdate((info) => setElectronUpdate(info));
+    return unsub;
   }, []);
 
   const handleAuth = async () => {
@@ -439,7 +449,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={{ marginTop: 8 }}
         >
           <Text style={{ color: theme.textMuted, fontSize: 11, textAlign: 'center' }}>
-            {showDebugPanel ? '▲ Hide Debug' : '▼ RevenueCat Debug'}
+            {showDebugPanel ? `▲ ${t('settings.hideDebug')}` : `▼ ${t('settings.debugMenu')}`}
           </Text>
         </Pressable>
         {showDebugPanel && (
@@ -469,7 +479,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 }}
               >
                 <Text style={{ color: theme.primary, fontWeight: '600', fontSize: 13 }}>
-                  Restore Purchases
+                  {t('settings.restorePurchases')}
                 </Text>
               </Pressable>
               <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -489,7 +499,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                 >
                   <Text style={{ color: theme.success, fontWeight: '600', fontSize: 13 }}>
-                    Force Pro
+                    {t('settings.forcePro')}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -508,7 +518,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                 >
                   <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 13 }}>
-                    Force Free
+                    {t('settings.forceFree')}
                   </Text>
                 </Pressable>
               </View>
@@ -679,7 +689,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           </View>
         </View>
         <View style={{ ...styles.row, marginTop: 8 }}>
-          <Text style={styles.rowLabel}>Language / 语言 / Sprache</Text>
+          <Text style={styles.rowLabel}>{t('settings.language')}</Text>
         </View>
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -725,7 +735,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           </View>
         </View>
         <View style={{ ...styles.row, marginTop: 12 }}>
-          <Text style={styles.rowLabel}>Dark Mode Schedule</Text>
+          <Text style={styles.rowLabel}>{t('settings.darkModeSchedule')}</Text>
         </View>
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -753,7 +763,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   fontWeight: '600',
                 }}
               >
-                Off
+                {t('settings.off')}
               </Text>
             </Pressable>
             {[18, 19, 20, 21, 22, 23].map((hour) => (
@@ -826,7 +836,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       <View style={styles.section}>
         <View style={styles.sectionTitle}>
           <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>
-            🔔 Notifications
+            {t('settings.notifications')}
           </Text>
         </View>
         <View
@@ -841,7 +851,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             borderColor: theme.border,
           }}
         >
-          <Text style={{ color: theme.text, fontSize: 14 }}>Push Alerts</Text>
+          <Text style={{ color: theme.text, fontSize: 14 }}>{t('settings.pushAlerts')}</Text>
           <Switch
             value={notificationsEnabled}
             onValueChange={(val) => {
@@ -858,7 +868,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={[styles.row, { marginTop: 8 }]}
           onPress={() => navigation.navigate('AlertHistory')}
         >
-          <Text style={styles.rowLabel}>Alert History</Text>
+          <Text style={styles.rowLabel}>{t('settings.alertHistory')}</Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
@@ -973,14 +983,14 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           style={styles.row}
           onPress={() => setShowCsvImport(!showCsvImport)}
         >
-          <Text style={styles.rowLabel}>Import CSV</Text>
-          <Text style={styles.actionText}>{showCsvImport ? 'Cancel' : 'Import'}</Text>
+          <Text style={styles.rowLabel}>{t('settings.importCsv')}</Text>
+          <Text style={styles.actionText}>
+            {showCsvImport ? t('settings.cancel') : t('settings.import')}
+          </Text>
         </Pressable>
         {showCsvImport && (
           <View style={{ marginTop: 12, gap: 8 }}>
-            <Text style={{ color: theme.textDim, fontSize: 12 }}>
-              Paste CSV (columns: name, ip, port):
-            </Text>
+            <Text style={{ color: theme.textDim, fontSize: 12 }}>{t('settings.csvHelp')}</Text>
             <TextInput
               style={{
                 backgroundColor: theme.surface,
@@ -996,7 +1006,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               value={csvInput}
               onChangeText={setCsvInput}
               multiline
-              placeholder="name,ip,port&#10;Miner1,192.168.1.10,80"
+              placeholder={t('settings.csvPlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -1013,8 +1023,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 onPress={async () => {
                   const result = await importFromCSV(csvInput);
                   Alert.alert(
-                    'Import Complete',
-                    `Imported: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
+                    t('settings.importComplete'),
+                    `${t('settings.import')}: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
                     [{ text: 'OK' }],
                   );
                   if (result.errors.length > 0) {
@@ -1024,7 +1034,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setCsvInput('');
                 }}
               >
-                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>Import</Text>
+                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>
+                  {t('settings.import')}
+                </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -1042,7 +1054,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setCsvInput('');
                 }}
               >
-                <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>Cancel</Text>
+                <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>
+                  {t('settings.cancel')}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -1050,26 +1064,52 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Backup</Text>
+        <Text style={styles.sectionTitle}>{t('settings.backup')}</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export all data"
           style={styles.row}
           onPress={() => {
             exportBackup().catch((e) => {
-              Alert.alert('Export Failed', e instanceof Error ? e.message : 'Unknown error');
+              Alert.alert(
+                t('settings.exportFailed'),
+                e instanceof Error ? e.message : 'Unknown error',
+              );
             });
           }}
         >
-          <Text style={styles.rowLabel}>Export All Data</Text>
-          <Text style={styles.actionText}>Download</Text>
+          <Text style={styles.rowLabel}>{t('settings.exportAllData')}</Text>
+          <Text style={styles.actionText}>{t('settings.download')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Import data from file"
           style={styles.row}
           onPress={() => {
-            if (Platform.OS === 'web') {
+            if (window.electronAPI?.isElectron) {
+              window.electronAPI
+                .showOpenDialog({ filters: [{ name: 'JSON', extensions: ['json'] }] })
+                .then(async (result) => {
+                  if (result.canceled || !result.content) return;
+                  try {
+                    const r = await importBackup(result.content);
+                    if (r.success) {
+                      Alert.alert(t('settings.importComplete'), t('settings.restoreSuccess'));
+                      loadMiners();
+                    } else {
+                      Alert.alert(
+                        t('settings.importFailed'),
+                        (r.errors || []).join('\n') || 'Unknown error',
+                      );
+                    }
+                  } catch (e) {
+                    Alert.alert(
+                      t('settings.importFailed'),
+                      e instanceof Error ? e.message : t('settings.failedToReadFile'),
+                    );
+                  }
+                });
+            } else if (Platform.OS === 'web') {
               const input = window.document.createElement('input');
               input.type = 'file';
               input.accept = '.json';
@@ -1080,18 +1120,18 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   const text = await file.text();
                   const result = await importBackup(text);
                   if (result.success) {
-                    Alert.alert('Import Complete', 'All data has been restored successfully.');
+                    Alert.alert(t('settings.importComplete'), t('settings.restoreSuccess'));
                     loadMiners();
                   } else {
                     Alert.alert(
-                      'Import Failed',
+                      t('settings.importFailed'),
                       (result.errors || []).join('\n') || 'Unknown error',
                     );
                   }
                 } catch (e) {
                   Alert.alert(
-                    'Import Failed',
-                    e instanceof Error ? e.message : 'Failed to read file',
+                    t('settings.importFailed'),
+                    e instanceof Error ? e.message : t('settings.failedToReadFile'),
                   );
                 }
               };
@@ -1101,8 +1141,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             }
           }}
         >
-          <Text style={styles.rowLabel}>Import Data</Text>
-          <Text style={styles.actionText}>Restore</Text>
+          <Text style={styles.rowLabel}>{t('settings.importData')}</Text>
+          <Text style={styles.actionText}>{t('settings.restore')}</Text>
         </Pressable>
       </View>
 
@@ -1112,6 +1152,26 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={styles.rowLabel}>{t('settings.version')}</Text>
           <Text style={styles.rowValue}>1.0.0</Text>
         </View>
+        {electronUpdate && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Update available"
+            style={[
+              styles.row,
+              { backgroundColor: theme.primary + '20', borderColor: theme.primary },
+            ]}
+            onPress={() => {
+              if (window.electronAPI?.isElectron) {
+                window.open(electronUpdate.url, '_blank');
+              }
+            }}
+          >
+            <Text style={[styles.rowLabel, { color: theme.primary }]}>
+              Update v{electronUpdate.version} Available
+            </Text>
+            <Text style={[styles.actionText, { color: theme.primary }]}>Download</Text>
+          </Pressable>
+        )}
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.madeFor')}</Text>
           <Text style={styles.rowValue}>{t('settings.bitaxeMiners')}</Text>
