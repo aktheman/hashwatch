@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,11 @@ interface ErrorBannerProps {
   onRetry?: () => void;
 }
 
-export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
+export const ErrorBanner = React.memo(function ErrorBanner({
+  message,
+  onDismiss,
+  onRetry,
+}: ErrorBannerProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(
@@ -89,4 +94,4 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
       </View>
     </View>
   );
-}
+});

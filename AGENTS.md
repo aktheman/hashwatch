@@ -55,7 +55,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Current State
 
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 923 frontend (71 suites) + 105 backend (12 suites) = 1028 total
+- Tests: 1030 frontend (71 suites) + 105 backend (12 suites) = 1135 total
 - `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
 - `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
 - Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — currently 83.54/91.95/96.24/94.38 (all thresholds met)
@@ -89,11 +89,37 @@ The dev VM has a 100GB root partition that fills up to 99-100% frequently. When 
 
 - `rm -rf /tmp/jest_rs` (Jest cache, ~190MB)
 - `rm -rf /home/aktheman/.npm/_cacache` (npm cache, ~1GB)
+- `rm -rf /home/aktheman/.npm/_cacache` (npm cache, ~1GB)
 - `rm -rf /home/aktheman/.npm/_logs`
+- `rm -rf /home/aktheman/.npm/_npx` (npx cache, ~424MB)
+- `sudo apt-get clean` (apt cache, ~321MB)
+- `rm -rf /home/aktheman/.cache`
 
-## Railway Backend URL
+## Memoization
 
-The Railway deployment URL can change on each deploy. The correct URL is documented in README.md. As of June 2026: `https://hashwatch-production-5b6e.up.railway.app`. Both `.env` and Vercel env var `EXPO_PUBLIC_API_URL` must be kept in sync.
+- `MetricTile`, `ProfitabilityCard`, `ErrorBanner`, `WorldMap` all wrapped in `React.memo` to skip re-renders when parent re-renders but props haven't changed
+- `DashboardScreen.tsx` inline `metrics.recentUptimes.map(u => Math.round(u / 3600))` stabilized via `useMemo` — prevents MetricTile from re-rendering on every parent render (the map was creating a new array ref each time)
+
+## Desktop Polish
+
+- `electron/main.js`: Single-instance lock via `app.requestSingleInstanceLock()` — second instance focuses the first; window state persistence (position/size/maximized) saved to `userData/window-state.json`; full application menu (HashWatch, File, Edit, View, Help) with keyboard shortcuts for Settings/Import/Export
+- `electron/preload.js`: Exposes `checkForUpdate()` (sends IPC to main) and `onNavigate()` (listens for menu-triggered navigation)
+- `src/types/electron.d.ts`: Added `checkForUpdate` and `onNavigate` type declarations
+
+## Offline Queue
+
+- `src/store/auth.ts`: Added 5 more settings keys to `SYNCED_SETTINGS`: `notifications_enabled`, `language`, `auto_dark_hour`, `kiosk_mode`, `dashboard_sections`; login/register now call `pushSettingsToBackend()` after `syncSettingsFromBackend()` to push queued settings on auth; queue items that failed to sync are kept for retry on next reconnect (instead of discarded after 3 retries)
+- `__tests__/auth-store.test.ts`: Updated test to reflect queue keeps items for retry on reconnect
+
+## AppNavigator Coverage
+
+- `__tests__/AppNavigator.test.tsx`: Added test for notification tap handler (covers lines 182-184 in AppNavigator.tsx); total 14 tests (was 12)
+
+## E2E Tests
+
+- Playwright configured in `playwright.config.ts` (chromium, `serve dist` on port 4173)
+- Tests in `e2e/` (10 files, 27 tests): pre-existing dashboard, analytics, settings, pools, user-journey tests; `app.spec.ts` added with 4 tests using `skipOnboarding`/`seedLocalStorage` helpers
+- Verified: all 4 app.spec.ts e2e tests pass locally against the web build
 
 ## Test Debugging Notes
 

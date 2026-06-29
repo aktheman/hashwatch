@@ -6,7 +6,16 @@ import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import { setTokenGetter, notifyAuthLogin } from './authToken';
 
-const SYNCED_SETTINGS = ['theme_mode', 'power_cost', 'auto_scan'];
+const SYNCED_SETTINGS = [
+  'theme_mode',
+  'power_cost',
+  'auto_scan',
+  'notifications_enabled',
+  'language',
+  'auto_dark_hour',
+  'kiosk_mode',
+  'dashboard_sections',
+];
 
 interface QueuedSetting {
   key: string;
@@ -55,25 +64,21 @@ async function processQueue(): Promise<void> {
   _settingsQueue = Array.from(byKey.values()).sort((a, b) => a.timestamp - b.timestamp);
   await saveQueue();
 
-  const completed: string[] = [];
   let delayMs = 500;
 
   for (const item of _settingsQueue) {
     await new Promise((r) => setTimeout(r, delayMs));
     try {
       await API.putSetting(item.key, item.value);
-      completed.push(item.key);
       delayMs = 500;
     } catch {
       item.retries += 1;
-      if (item.retries >= 3) {
-        completed.push(item.key);
-      }
       delayMs = Math.min(delayMs * 2, 5000);
     }
   }
 
-  _settingsQueue = _settingsQueue.filter((item) => !completed.includes(item.key));
+  // Keep items that failed for retry on next reconnect
+  _settingsQueue = _settingsQueue.filter((item) => item.retries > 0);
   await saveQueue();
 }
 
@@ -139,6 +144,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       registerPushToken(res.token);
       notifyAuthLogin();
       syncSettingsFromBackend();
+      pushSettingsToBackend();
       return true;
     } catch {
       return false;
@@ -155,6 +161,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       registerPushToken(res.token);
       notifyAuthLogin();
       syncSettingsFromBackend();
+      pushSettingsToBackend();
       return true;
     } catch {
       return false;

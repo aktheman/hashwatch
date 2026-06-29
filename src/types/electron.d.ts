@@ -10,7 +10,9 @@ interface ElectronAPI {
   }) => Promise<{ canceled: boolean; filePaths: string[]; content: string }>;
   sendNotification: (title: string, body: string) => void;
   getAppVersion: () => Promise<string>;
+  checkForUpdate: () => void;
   onCheckForUpdate: (callback: (info: { version: string; url: string }) => void) => () => void;
+  onNavigate: (callback: (route: string) => void) => () => void;
 }
 
 interface Window {

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
@@ -16,7 +16,7 @@ interface MetricTileProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function MetricTile({
+export const MetricTile = React.memo(function MetricTile({
   title,
   value,
   unit,
@@ -125,7 +125,7 @@ export function MetricTile({
       <View style={[styles.accentBar, { backgroundColor: accentColor }]} />
     </View>
   );
-}
+});
 
 function SparklineMini({ data, color }: { data: number[]; color: string }) {
   const width = 120;
@@ -293,7 +293,13 @@ function GaugeArc({
   );
 }
 
-export function ProfitabilityCard({ miners, powerCost }: { miners: Miner[]; powerCost?: number }) {
+export const ProfitabilityCard = React.memo(function ProfitabilityCard({
+  miners,
+  powerCost,
+}: {
+  miners: Miner[];
+  powerCost?: number;
+}) {
   const theme = useTheme();
   const btcPrice = getBTCPrice();
 
@@ -432,7 +438,7 @@ export function ProfitabilityCard({ miners, powerCost }: { miners: Miner[]; powe
       )}
     </View>
   );
-}
+});
 
 import Svg, { Polygon, Polyline, Defs, Stop, LinearGradient, Circle } from 'react-native-svg';
 
