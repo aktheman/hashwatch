@@ -9,6 +9,7 @@ import {
   getFirmwareUrl,
   fetchLatestFirmware,
 } from '../utils/version';
+import { spacing, radius, fontWeight } from '../utils/design';
 
 interface FirmwareBannerProps {
   rawVersion: string | null | undefined;
@@ -33,7 +34,7 @@ export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
 
   const handlePress = () => {
     const url = getFirmwareUrl();
-    Linking.openURL(url).catch((e) => console.warn('Failed to open firmware URL:', e));
+    Linking.openURL(url).catch((e: unknown) => console.warn('Failed to open firmware URL:', e));
   };
 
   return (
@@ -60,22 +61,22 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 1,
-    padding: 12,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    gap: 10,
+    padding: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
   icon: {
-    fontSize: 20,
+    fontSize: 14,
   },
   textWrap: {
     flex: 1,
   },
   title: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
   },
   detail: {
     fontSize: 12,
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
   },
   arrow: {
     fontSize: 22,
-    fontWeight: '300',
+    fontWeight: fontWeight.regular,
   },
 });
