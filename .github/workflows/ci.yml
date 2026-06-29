@@ -61,9 +61,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.expo
+          key: expo-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: expo-
       - run: npm ci
       - run: npm run build:web
+        env:
+          EXPO_NO_TELEMETRY: 1
       - uses: actions/upload-artifact@v4
         with:
           name: web-dist
