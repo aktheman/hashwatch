@@ -3,6 +3,7 @@ import {
   sendMinerOnlineNotification,
   sendMinerHotNotification,
   sendHashrateDropNotification,
+  sendPoolChangeNotification,
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
 
@@ -54,13 +55,15 @@ export function checkMinerStatus(
   }
 
   const prevHr = prev.hashRate;
-  if (prevHr > hashRate * 2 && hashRate > 0 && canNotify(`${key}:hashrate_drop`)) {
+  if (prevHr > hashRate * 1.5 && hashRate > 0 && canNotify(`${key}:hashrate_drop`)) {
     const pct = Math.round((1 - hashRate / prevHr) * 100);
     sendHashrateDropNotification(userId, minerName, minerId, pct);
   }
 
   if (prev.pool && pool && prev.pool !== pool && canNotify(`${key}:pool_change`)) {
-    // Placeholder for future pool change notification
+    const oldPool = prev.pool || 'unknown';
+    const newPool = pool || 'unknown';
+    sendPoolChangeNotification(userId, minerName, minerId, oldPool, newPool);
   }
 
   minerStates.set(key, { isOnline, temperature, hashRate, pool });

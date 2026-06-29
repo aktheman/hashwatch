@@ -33,8 +33,8 @@ export async function sendPushNotification(
   for (const chunk of chunks) {
     try {
       await expo.sendPushNotificationsAsync(chunk);
-    } catch {
-      // silently fail individual push sending
+    } catch (error) {
+      console.error('Push send failed:', error);
     }
   }
 }
