@@ -7,6 +7,7 @@ import {
   sendMinerOnlineNotification,
   sendMinerHotNotification,
   sendHashrateDropNotification,
+  sendPoolChangeNotification,
 } from '../services/pushNotifications';
 
 const mockSendPushNotificationsAsync = jest.fn().mockResolvedValue([{ status: 'ok' }]);
@@ -126,5 +127,36 @@ describe('sendHashrateDropNotification', () => {
     await sendHashrateDropNotification('user-1', 'MyMiner', 'miner-1', 50);
 
     expect(mockSendPushNotificationsAsync).toHaveBeenCalled();
+  });
+});
+
+describe('sendPushNotification alert_types filtering', () => {
+  it('filters out rows that do not match requested type', async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ token: 'ExpoPushToken-abc', alert_types: 'online,hot' }],
+    });
+
+    await sendPushNotification('user-1', 'offline', 'T', 'B');
+
+    expect(mockChunkPushNotifications).toHaveBeenCalledWith([]);
+    expect(mockSendPushNotificationsAsync).toHaveBeenCalledWith([]);
+  });
+});
+
+describe('sendPoolChangeNotification', () => {
+  it('sends with defaulted pool names', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'ExpoPushToken-abc' }] });
+
+    await sendPoolChangeNotification('user-1', 'M1', 'miner-1', null, 'stratum+tcp://pool');
+
+    expect(mockSendPushNotificationsAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('covers branch when newPool is null', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'ExpoPushToken-abc' }] });
+
+    await sendPoolChangeNotification('user-1', 'M1', 'miner-1', 'stratum+tcp://old', null);
+
+    expect(mockSendPushNotificationsAsync).toHaveBeenCalledTimes(1);
   });
 });

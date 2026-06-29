@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { toHashesPerSecond, estimateBTCPerDay, formatBTC, formatUSD } from '../utils/hashrate';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Miner } from '../types';
 
 interface EarningsCardProps {
@@ -55,38 +56,38 @@ export function EarningsCard({ miners, title }: EarningsCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: radius.lg,
+    padding: spacing.md,
     marginHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     borderWidth: 1,
   },
   title: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   row: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.md,
   },
   stat: {
     flex: 1,
   },
   value: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: fontSize.h1,
+    fontWeight: fontWeight.extrabold,
   },
   label: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginTop: 2,
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    marginTop: spacing.xxs,
   },
   sats: {
-    fontSize: 12,
-    marginTop: 6,
+    fontSize: fontSize.sm,
+    marginTop: spacing.xxs,
     textAlign: 'right',
   },
 });

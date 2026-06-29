@@ -5,6 +5,7 @@ import { useTheme } from '../theme';
 import { useAuthStore } from '../store/auth';
 import { getNotificationPrefs, setNotificationPref } from '../api/client';
 import * as DB from '../db/database';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface NotificationPrefsProps {
   minerId: string;
@@ -92,27 +93,27 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
     borderWidth: 1,
   },
   title: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
   label: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.regular,
   },
 });
