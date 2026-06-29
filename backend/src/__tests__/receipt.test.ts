@@ -109,6 +109,6 @@ describe('POST /api/receipt/validate', () => {
       .send({ receipt: 'bad-receipt', productId: 'hashwatch_pro' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('receipt validation failed');
+    expect(res.body.error).toBe('RC API error');
   });
 });

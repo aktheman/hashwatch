@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
+import { spacing, radius, fontWeight } from '../utils/design';
 
 interface ErrorBannerProps {
   message: string | null;
@@ -19,12 +20,12 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
           backgroundColor: theme.danger + '18',
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal: 14,
-          paddingVertical: 10,
-          marginHorizontal: 16,
-          borderRadius: 12,
-          marginBottom: 8,
-          gap: 8,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.sm,
+          marginHorizontal: spacing.lg,
+          borderRadius: radius.md,
+          marginBottom: spacing.sm,
+          gap: spacing.sm,
           borderWidth: 1,
           borderColor: theme.danger + '30',
         },
@@ -35,28 +36,28 @@ export function ErrorBanner({ message, onDismiss, onRetry }: ErrorBannerProps) {
           color: theme.danger,
           fontSize: 13,
           flex: 1,
-          fontWeight: '500',
+          fontWeight: fontWeight.regular,
         },
         actions: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: spacing.sm,
         },
         btn: {
           backgroundColor: theme.danger + '30',
-          paddingHorizontal: 10,
-          paddingVertical: 4,
-          borderRadius: 6,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
         },
         btnText: {
           color: theme.danger,
           fontSize: 12,
-          fontWeight: '700',
+          fontWeight: fontWeight.bold,
         },
         dismiss: {
           color: theme.textMuted,
           fontSize: 14,
-          fontWeight: '300',
+          fontWeight: fontWeight.regular,
         },
       }),
     [theme],
