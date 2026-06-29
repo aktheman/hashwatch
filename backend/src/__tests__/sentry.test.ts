@@ -1,12 +1,3 @@
-const mockInit = jest.fn();
-const mockWithScope = jest.fn().mockImplementation((fn) => {
-  const scope = { setExtras: jest.fn(), setLevel: jest.fn() };
-  fn(scope);
-  return scope;
-});
-const mockCaptureException = jest.fn();
-const mockCaptureMessage = jest.fn();
-
 describe('sentry service', () => {
   const mockInit = jest.fn();
   const mockWithScope = jest.fn().mockImplementation((fn) => {
