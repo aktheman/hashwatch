@@ -146,7 +146,7 @@
     "responseTime": "応答時間",
     "hashrateHistory": "ハッシュレート履歴",
     "efficiencyTrend": "効率トレンド",
-    "shareStats": "シェア統計",
+    "shareStats": "統計を共有",
     "actions": "アクション",
     "restartMiner": "マイナーを再起動",
     "restartSent": "再起動を送信しました",
@@ -158,7 +158,6 @@
     "removeConfirm": "{{name}} とすべての履歴を完全に削除します。",
     "yesRemove": "はい、削除します",
     "minerRemoved": "{{name}} を削除しました",
-    "shareStats": "統計を共有",
     "sharedVia": "HashWatch 経由で共有"
   },
   "addMiner": {
@@ -267,7 +266,11 @@
     "light": "ライト",
     "neon": "ネオン",
     "matrix": "マトリックス",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "クリムゾン",
+    "ocean": "オーシャン",
+    "lavender": "ラベンダー",
+    "midnight": "ミッドナイト"
   },
   "tabs": {
     "dashboard": "ダッシュボード",

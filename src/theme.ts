@@ -103,6 +103,106 @@ export const stratumTheme: Theme = {
   glowWarning: 'rgba(245, 158, 11, 0.18)',
 };
 
+export const crimsonTheme: Theme = {
+  bg: '#0F0505',
+  surface: '#1A0A0A',
+  surfaceLight: '#2A1010',
+  border: '#3A1515',
+  primary: '#FF1A4A',
+  primaryLight: '#FF4D73',
+  primaryDark: '#CC0033',
+  accent: '#8B0000',
+  success: '#10B981',
+  successLight: '#34D399',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
+  info: '#FF6B8A',
+  text: '#F5E6E6',
+  textDim: '#A88080',
+  textMuted: '#705050',
+  glow: 'rgba(255, 26, 74, 0.25)',
+  glowSuccess: 'rgba(16, 185, 129, 0.25)',
+  glowDanger: 'rgba(239, 68, 68, 0.25)',
+  glowWarning: 'rgba(245, 158, 11, 0.25)',
+};
+
+export const oceanTheme: Theme = {
+  bg: '#050B14',
+  surface: '#0A1628',
+  surfaceLight: '#10203A',
+  border: '#1A2D4A',
+  primary: '#00B4D8',
+  primaryLight: '#48CAE4',
+  primaryDark: '#0096C7',
+  accent: '#0077B6',
+  success: '#00B981',
+  successLight: '#34D399',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
+  info: '#90E0EF',
+  text: '#E0EDF5',
+  textDim: '#8098B0',
+  textMuted: '#506880',
+  glow: 'rgba(0, 180, 216, 0.25)',
+  glowSuccess: 'rgba(0, 185, 129, 0.25)',
+  glowDanger: 'rgba(239, 68, 68, 0.25)',
+  glowWarning: 'rgba(245, 158, 11, 0.25)',
+};
+
+export const lavenderTheme: Theme = {
+  bg: '#0E0A1F',
+  surface: '#181230',
+  surfaceLight: '#221A40',
+  border: '#2D2250',
+  primary: '#B388FF',
+  primaryLight: '#CCAAFF',
+  primaryDark: '#9966FF',
+  accent: '#7C4DFF',
+  success: '#10B981',
+  successLight: '#34D399',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
+  info: '#D1B3FF',
+  text: '#EDE5F5',
+  textDim: '#9A88B8',
+  textMuted: '#6A5888',
+  glow: 'rgba(179, 136, 255, 0.25)',
+  glowSuccess: 'rgba(16, 185, 129, 0.25)',
+  glowDanger: 'rgba(239, 68, 68, 0.25)',
+  glowWarning: 'rgba(245, 158, 11, 0.25)',
+};
+
+export const midnightTheme: Theme = {
+  bg: '#060612',
+  surface: '#0C0C24',
+  surfaceLight: '#14143A',
+  border: '#1C1C4A',
+  primary: '#4488FF',
+  primaryLight: '#66AAFF',
+  primaryDark: '#2266DD',
+  accent: '#00B4D8',
+  success: '#10B981',
+  successLight: '#34D399',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
+  info: '#88BBFF',
+  text: '#DEE5F0',
+  textDim: '#7888A8',
+  textMuted: '#485878',
+  glow: 'rgba(68, 136, 255, 0.25)',
+  glowSuccess: 'rgba(16, 185, 129, 0.25)',
+  glowDanger: 'rgba(239, 68, 68, 0.25)',
+  glowWarning: 'rgba(245, 158, 11, 0.25)',
+};
+
 export const lightTheme: Theme = {
   bg: '#F8F9FC',
   surface: '#FFFFFF',
@@ -129,7 +229,17 @@ export const lightTheme: Theme = {
 };
 
 let _current: Theme = darkTheme;
-let _mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum' = 'dark';
+let _mode:
+  | 'dark'
+  | 'light'
+  | 'system'
+  | 'matrix'
+  | 'neon'
+  | '5tratum'
+  | 'crimson'
+  | 'ocean'
+  | 'lavender'
+  | 'midnight' = 'dark';
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -146,16 +256,42 @@ export function setTheme(t: Theme) {
   if (t === matrixTheme) _mode = 'matrix';
   else if (t === neonTheme) _mode = 'neon';
   else if (t === stratumTheme) _mode = '5tratum';
+  else if (t === crimsonTheme) _mode = 'crimson';
+  else if (t === oceanTheme) _mode = 'ocean';
+  else if (t === lavenderTheme) _mode = 'lavender';
+  else if (t === midnightTheme) _mode = 'midnight';
   else _mode = t === darkTheme ? 'dark' : 'light';
   listeners.forEach((cb) => cb());
 }
 
-export function setThemeMode(mode: 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum') {
+export function setThemeMode(
+  mode:
+    | 'dark'
+    | 'light'
+    | 'system'
+    | 'matrix'
+    | 'neon'
+    | '5tratum'
+    | 'crimson'
+    | 'ocean'
+    | 'lavender'
+    | 'midnight',
+) {
   _mode = mode;
   applyMode();
 }
 
-export function getThemeMode(): 'dark' | 'light' | 'system' | 'matrix' | 'neon' | '5tratum' {
+export function getThemeMode():
+  | 'dark'
+  | 'light'
+  | 'system'
+  | 'matrix'
+  | 'neon'
+  | '5tratum'
+  | 'crimson'
+  | 'ocean'
+  | 'lavender'
+  | 'midnight' {
   return _mode;
 }
 
@@ -170,6 +306,14 @@ function applyMode() {
     _current = neonTheme;
   } else if (_mode === '5tratum') {
     _current = stratumTheme;
+  } else if (_mode === 'crimson') {
+    _current = crimsonTheme;
+  } else if (_mode === 'ocean') {
+    _current = oceanTheme;
+  } else if (_mode === 'lavender') {
+    _current = lavenderTheme;
+  } else if (_mode === 'midnight') {
+    _current = midnightTheme;
   } else if (_mode === 'system') {
     const prefersDark =
       Platform.OS === 'web'
