@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: radius.lg,
     padding: spacing.md,
-    marginHorizontal: 16,
+    marginHorizontal: spacing.md,
     marginVertical: 6,
     borderWidth: 1,
     gap: spacing.md,
