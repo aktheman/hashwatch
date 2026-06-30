@@ -27,6 +27,33 @@ jest.mock('../src/api/bitaxe', () => ({
   })),
 }));
 
+jest.mock('../src/api/client', () => ({
+  BASE_URL: 'http://localhost:4000',
+  getBaseUrl: () => 'http://localhost:4000',
+  setBaseUrl: jest.fn(),
+  configureClient: jest.fn(),
+  clearCache: jest.fn(),
+  register: jest.fn(),
+  login: jest.fn(),
+  fetchMiners: jest.fn(),
+  createMiner: jest.fn(),
+  deleteMinerAPI: jest.fn(),
+  fetchStats: jest.fn().mockResolvedValue([]),
+  pushStats: jest.fn(),
+  updateMinerAPI: jest.fn(),
+  getSettings: jest.fn().mockResolvedValue({}),
+  putSetting: jest.fn(),
+  deleteSetting: jest.fn(),
+  validateReceipt: jest.fn(),
+  getNotificationPrefs: jest.fn().mockResolvedValue({}),
+  setNotificationPref: jest.fn(),
+  fetchPoolChanges: jest.fn().mockResolvedValue([]),
+  recordPoolChange: jest.fn(),
+  fetchAlertHistory: jest.fn().mockResolvedValue([]),
+  syncAlertsToBackend: jest.fn().mockResolvedValue({ ok: true, inserted: 0 }),
+  markAlertRead: jest.fn().mockResolvedValue({ ok: true }),
+}));
+
 jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(),
 }));

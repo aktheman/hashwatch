@@ -12,6 +12,7 @@ import {
   AppState,
   Platform,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
@@ -56,13 +57,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const scanning = useMinerStore((s) => s.scanning);
   const scanProgress = useMinerStore((s) => s.scanProgress);
   const error = useMinerStore((s) => s.error);
+  const minerErrors = useMinerStore((s) => s.minerErrors);
   const loadMiners = useMinerStore((s) => s.loadMiners);
   const startPolling = useMinerStore((s) => s.startPolling);
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const clearError = useMinerStore((s) => s.clearError);
+  const clearMinerErrors = useMinerStore((s) => s.clearMinerErrors);
   const removeMiner = useMinerStore((s) => s.removeMiner);
   const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
   const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
+  const setMinerLocation = useMinerStore((s) => s.setMinerLocation);
   const canAddMiner = useSubscriptionStore((s) => s.canAddMiner);
   const initSubscription = useSubscriptionStore((s) => s.initialize);
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -70,9 +74,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showWalletPicker, setShowWalletPicker] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [expandedPool, setExpandedPool] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [autoGroupBy, setAutoGroupBy] = useState<null | 'location' | 'tag'>(null);
@@ -134,9 +140,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         if (groupFilter && groupFilter !== 'Ungrouped' && m.group !== groupFilter) return false;
         if (locationFilter && m.location !== locationFilter) return false;
         if (tagFilter && !(m.tags || []).includes(tagFilter)) return false;
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const nameMatch = (m.name || '').toLowerCase().includes(q);
+          const ipMatch = m.ip.toLowerCase().includes(q);
+          if (!nameMatch && !ipMatch) return false;
+        }
         return true;
       }),
-    [miners, walletFilter, groupFilter, locationFilter, tagFilter],
+    [miners, walletFilter, groupFilter, locationFilter, tagFilter, searchQuery],
   );
 
   const pollingIntervalRef = useRef(30000);
@@ -295,6 +307,17 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       ],
     );
   }, [miners, selectedIds, removeMiner, clearSelection, t]);
+
+  const LOCATIONS = ['Home', 'Office', 'Lab', 'Garage', 'Data Center', 'Mining Farm'];
+
+  const handleBatchLocation = useCallback(
+    (location: string | undefined) => {
+      const selected = miners.filter((m) => selectedIds.has(m.id));
+      selected.forEach((m) => setMinerLocation(m.id, location));
+      setShowLocationPicker(false);
+    },
+    [miners, selectedIds, setMinerLocation],
+  );
 
   const handleToggleKiosk = useCallback((val: boolean) => {
     setKioskMode(val);
@@ -1441,6 +1464,17 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       <ErrorBanner message={error} onDismiss={clearError} onRetry={loadMiners} />
 
+      {Object.keys(minerErrors).length > 0 && (
+        <ErrorBanner
+          message={t('dashboard.minerErrors', {
+            count: Object.keys(minerErrors).length,
+            defaultValue: '{{count}} miner(s) unreachable',
+          })}
+          onDismiss={clearMinerErrors}
+          onRetry={loadMiners}
+        />
+      )}
+
       {scanning && (
         <View style={styles.scanningBanner}>
           <ActivityIndicator size="small" color={theme.primary} />
@@ -1450,6 +1484,47 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               total: scanProgress?.total || 254,
             })}
           </Text>
+        </View>
+      )}
+
+      {!kioskMode && miners.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 16,
+            marginBottom: 6,
+          }}
+        >
+          <Text style={{ color: theme.textMuted, fontSize: 14 }}>🔍</Text>
+          <TextInput
+            style={{
+              flex: 1,
+              borderWidth: 1,
+              borderColor: theme.border,
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              color: theme.text,
+              backgroundColor: theme.surface,
+              fontSize: 13,
+            }}
+            placeholder={t('dashboard.searchPlaceholder', 'Search miners...')}
+            placeholderTextColor={theme.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            accessibilityLabel="Search miners"
+          />
+          {searchQuery.length > 0 && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+              onPress={() => setSearchQuery('')}
+            >
+              <Text style={{ color: theme.textMuted, fontSize: 16 }}>✕</Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -1545,6 +1620,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             </Pressable>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Batch location"
+              style={styles.batchBtn}
+              onPress={() => setShowLocationPicker(true)}
+            >
+              <Text style={styles.batchBtnText}>{t('dashboard.location', 'Location')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
               accessibilityLabel="Batch delete"
               style={[styles.batchBtn, styles.batchDeleteBtn]}
               onPress={handleBatchDelete}
@@ -1603,6 +1686,45 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               >
                 <View style={[styles.walletDot, { backgroundColor: w.color }]} />
                 <Text style={styles.modalOptionText}>{w.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={showLocationPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLocationPicker(false)}
+        testID="location-picker-modal"
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLocationPicker(false)}
+          accessibilityLabel="Close location picker"
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {t('dashboard.assignLocation', 'Assign Location')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear location"
+              style={styles.modalOption}
+              onPress={() => handleBatchLocation(undefined)}
+            >
+              <Text style={styles.modalOptionText}>{t('common.clear', 'Clear')}</Text>
+            </Pressable>
+            {LOCATIONS.map((loc) => (
+              <Pressable
+                accessibilityRole="button"
+                key={loc}
+                accessibilityLabel={`Set location to ${loc}`}
+                style={styles.modalOption}
+                onPress={() => handleBatchLocation(loc)}
+              >
+                <Text style={styles.modalOptionText}>{loc}</Text>
               </Pressable>
             ))}
           </View>

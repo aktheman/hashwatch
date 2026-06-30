@@ -1,8 +1,17 @@
-import { useMemo, useState, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'react-native';
+import { useMemo, useState, useCallback, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useAlertHistoryStore, AlertEvent } from '../store/alertHistory';
+import { useAuthStore } from '../store/auth';
 import { NavigationProp } from '../types';
 
 function formatTimestamp(ts: number): string {
@@ -52,17 +61,32 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
   const theme = useTheme();
   const { t } = useTranslation();
   const events = useAlertHistoryStore((s) => s.events);
+  const syncing = useAlertHistoryStore((s) => s.syncing);
   const markRead = useAlertHistoryStore((s) => s.markRead);
   const markAllRead = useAlertHistoryStore((s) => s.markAllRead);
   const clearAll = useAlertHistoryStore((s) => s.clearAll);
-
   const loadEvents = useAlertHistoryStore((s) => s.loadEvents);
+  const syncFromBackend = useAlertHistoryStore((s) => s.syncFromBackend);
+  const syncToBackend = useAlertHistoryStore((s) => s.syncToBackend);
+  const isAuthed = !!useAuthStore.getState().token;
+
+  useEffect(() => {
+    if (isAuthed) {
+      syncFromBackend();
+      syncToBackend();
+    }
+  }, [isAuthed, syncFromBackend, syncToBackend]);
+
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadEvents();
+    if (isAuthed) {
+      await syncFromBackend();
+      await syncToBackend();
+    }
     setRefreshing(false);
-  }, [loadEvents]);
+  }, [loadEvents, isAuthed, syncFromBackend, syncToBackend]);
 
   const sections = useMemo(() => groupByDate(events), [events]);
 
@@ -181,22 +205,40 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
 
   return (
     <View style={styles.container}>
-      {events.length > 0 && (
+      {(events.length > 0 || isAuthed) && (
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" style={styles.headerBtn} onPress={markAllRead}>
-            <Text style={styles.headerBtnText}>
-              {t('alertHistory.markAllRead', 'Mark All Read')}
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            style={styles.clearBtn}
-            onPress={() => {
-              if (events.length > 0) clearAll();
-            }}
-          >
-            <Text style={styles.clearBtnText}>{t('alertHistory.clearAll', 'Clear All')}</Text>
-          </Pressable>
+          {isAuthed && (
+            <Pressable
+              accessibilityRole="button"
+              style={styles.headerBtn}
+              onPress={syncFromBackend}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <ActivityIndicator size="small" color={theme.primary} />
+              ) : (
+                <Text style={styles.headerBtnText}>{t('alertHistory.sync', 'Sync')}</Text>
+              )}
+            </Pressable>
+          )}
+          {events.length > 0 && (
+            <>
+              <Pressable accessibilityRole="button" style={styles.headerBtn} onPress={markAllRead}>
+                <Text style={styles.headerBtnText}>
+                  {t('alertHistory.markAllRead', 'Mark All Read')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                style={styles.clearBtn}
+                onPress={() => {
+                  if (events.length > 0) clearAll();
+                }}
+              >
+                <Text style={styles.clearBtnText}>{t('alertHistory.clearAll', 'Clear All')}</Text>
+              </Pressable>
+            </>
+          )}
         </View>
       )}
       <FlatList

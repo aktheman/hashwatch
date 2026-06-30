@@ -1168,13 +1168,6 @@ it('rename miner calls setMinerName', async () => {
 });
 
 it('applies preset sections via customizer', async () => {
-  const LS: Record<string, string> = {};
-  (globalThis as any).localStorage = {
-    getItem: (key: string) => LS[key] ?? null,
-    setItem: (key: string, val: string) => {
-      LS[key] = val;
-    },
-  };
   const presetSections: Record<string, boolean> = {
     earnings: false,
     ticker: true,
@@ -1186,18 +1179,19 @@ it('applies preset sections via customizer', async () => {
     sort: true,
     profitability: true,
   };
-  LS['hashwatch_dashboard_presets'] = JSON.stringify([
-    { name: 'Test Preset', sections: presetSections },
-  ]);
-  const { setSetting } = require('../src/db/database');
-  (setSetting as jest.Mock).mockClear();
+  const { getSetting, setSetting } = require('../src/db/database');
+  (getSetting as jest.Mock).mockImplementation((key: string) => {
+    if (key === 'dashboard_presets') {
+      return Promise.resolve(JSON.stringify([{ name: 'Test Preset', sections: presetSections }]));
+    }
+    return Promise.resolve(null);
+  });
   useMinerStore.setState({ miners: [makeMiner()] });
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Customize dashboard'));
   await fireEvent.press(r.getByText('Load Preset (1)'));
   await fireEvent.press(r.getByText('Test Preset'));
   expect(setSetting).toHaveBeenCalledWith('dashboard_sections', JSON.stringify(presetSections));
-  delete (globalThis as any).localStorage;
 });
 
 it('modal overlay closes wallet picker', async () => {

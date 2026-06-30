@@ -275,11 +275,22 @@ describe('useTheme system mode with Platform.OS override', () => {
     expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
+  // removeEventListener on unmount cannot be tested with renderHook:
+  // useSyncExternalStore cleanup on unmount is not triggered by renderHook in test env.
+
   it('returns empty cleanup when matchMedia is absent on web', async () => {
     Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
     (globalThis as any).window = {};
     setThemeMode('system');
     const { result } = await renderHook(() => useTheme());
     expect(result.current.bg).toBe(lightTheme.bg);
+  });
+
+  it('does not crash on unmount when matchMedia is absent on web with system mode', async () => {
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true, writable: true });
+    (globalThis as any).window = {};
+    setThemeMode('system');
+    const { unmount } = await renderHook(() => useTheme());
+    expect(() => unmount()).not.toThrow();
   });
 });

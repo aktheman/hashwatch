@@ -49,7 +49,11 @@
     "hashrate": "Taux de hachage",
     "estDaily": "Est. Quotidien",
     "miners": "Mineurs",
-    "poolCount": "{{pools}} pool(s) · {{miners}} mineur(s)"
+    "poolCount": "{{pools}} pool(s) · {{miners}} mineur(s)",
+    "shares": "Parts",
+    "acceptRate": "Taux d'acceptation",
+    "bestDiff": "Meilleure Diff",
+    "poolChanged": "Pool Changé"
   },
   "analytics": {
     "title": "Analyses",

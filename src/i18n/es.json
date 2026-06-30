@@ -32,7 +32,14 @@
     "avgTemp": "Temp. Prom.",
     "efficiency": "Eficiencia",
     "ungrouped": "Sin Grupo",
-    "minerRemoved": "{{name}} eliminado"
+    "minerRemoved": "{{name}} eliminado",
+    "profitability": "Rentabilidad",
+    "btcDay": "BTC/Día",
+    "btcWeek": "BTC/Semana",
+    "btcMonth": "BTC/Mes",
+    "usdEquivalent": "Equiv. USD",
+    "perMiner": "Por Minero",
+    "total": "Total"
   },
   "pools": {
     "title": "Pools",
@@ -42,7 +49,11 @@
     "hashrate": "Hashrate",
     "estDaily": "Est. Diario",
     "miners": "Mineros",
-    "poolCount": "{{pools}} pool(s) · {{miners}} minero(s)"
+    "poolCount": "{{pools}} pool(s) · {{miners}} minero(s)",
+    "shares": "Shares",
+    "acceptRate": "Tasa de Aceptación",
+    "bestDiff": "Mejor Diff",
+    "poolChanged": "Pool Cambiado"
   },
   "analytics": {
     "title": "Analíticas",
@@ -59,7 +70,8 @@
     "netDay": "Neto/Día",
     "hashrateHistory": "Historial de Hashrate",
     "uptimeHistory": "Historial de Uptime",
-    "notEnoughData": "Datos insuficientes. Mantén los mineros encendidos."
+    "notEnoughData": "Datos insuficientes. Mantén los mineros encendidos.",
+    "efficiencyHistory": "Historial de Eficiencia"
   },
   "settings": {
     "title": "Configuración",

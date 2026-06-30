@@ -1,8 +1,16 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Polyline, Polygon, Circle, Defs, Stop, LinearGradient } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { Miner } from '../types';
-import { estimateBTCPerDay, formatBTC, getBTCPrice } from '../utils/hashrate';
+import {
+  estimateBTCPerDay,
+  formatBTC,
+  formatHashrateValue,
+  getBTCPrice,
+  getBTCPriceHistory,
+  getNetworkHashrate,
+} from '../utils/hashrate';
 
 interface MetricTileProps {
   title: string;
@@ -302,6 +310,11 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
 }) {
   const theme = useTheme();
   const btcPrice = getBTCPrice();
+  const priceHistory = getBTCPriceHistory();
+  const netHash = getNetworkHashrate();
+
+  const priceTrend =
+    priceHistory.length >= 2 ? priceHistory[priceHistory.length - 1] - priceHistory[0] : 0;
 
   const perMiner = useMemo(
     () =>
@@ -340,7 +353,67 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         gap: 10,
       }}
     >
-      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>≡ Profitability</Text>
+      {/* Header row */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>≡ Profitability</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {priceHistory.length >= 4 && (
+            <Svg width={36} height={20}>
+              <Polyline
+                points={priceHistory
+                  .map((p, i) => {
+                    const x = (i / (priceHistory.length - 1)) * 34;
+                    const min = Math.min(...priceHistory);
+                    const max = Math.max(...priceHistory);
+                    const range = max - min || 1;
+                    const y = 18 - ((p - min) / range) * 16;
+                    return `${x},${y}`;
+                  })
+                  .join(' ')}
+                fill="none"
+                stroke={priceTrend >= 0 ? theme.success : theme.danger}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          )}
+          <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: '600' }}>BTC</Text>
+          <Text style={{ color: theme.text, fontSize: 14, fontWeight: '800' }}>
+            ${btcPrice.toLocaleString()}
+          </Text>
+          {priceHistory.length >= 2 && (
+            <Text
+              style={{
+                color: priceTrend >= 0 ? theme.success : theme.danger,
+                fontSize: 11,
+                fontWeight: '700',
+              }}
+            >
+              {priceTrend >= 0 ? '▲' : '▼'}{' '}
+              {((Math.abs(priceTrend) / priceHistory[0]) * 100).toFixed(1)}%
+            </Text>
+          )}
+        </View>
+      </View>
+      {/* Network hashrate row */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          backgroundColor: theme.surfaceLight,
+          borderRadius: 10,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+        }}
+      >
+        <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: '600' }}>
+          Network Hashrate
+        </Text>
+        <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+          {formatHashrateValue(netHash)}
+        </Text>
+      </View>
       {perMiner.map((m) => (
         <View
           key={m.id}
@@ -439,8 +512,6 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
     </View>
   );
 });
-
-import Svg, { Polygon, Polyline, Defs, Stop, LinearGradient, Circle } from 'react-native-svg';
 
 const styles = StyleSheet.create({
   container: {

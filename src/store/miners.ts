@@ -44,6 +44,7 @@ interface MinersState {
   scanning: boolean;
   scanProgress: { found: number; scanned: number; total: number } | null;
   error: string | null;
+  minerErrors: Record<string, string>;
 
   loadMiners: () => Promise<void>;
   syncWithBackend: () => Promise<void>;
@@ -71,6 +72,7 @@ interface MinersState {
     info?: MinerInfo;
   }) => void;
   clearError: () => void;
+  clearMinerErrors: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
 }
 
@@ -81,6 +83,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   scanning: false,
   scanProgress: null,
   error: null,
+  minerErrors: {},
 
   loadMiners: async () => {
     set({ loading: true, error: null });
@@ -195,7 +198,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         set((s) => ({
           miners: s.miners.map((m) => (m.id === id ? updated : m)),
         }));
-      } catch {
+      } catch (e) {
         const current = get().miners.find((m) => m.id === id);
         if (!current) return;
         if (!current.apiPath) {
@@ -219,8 +222,10 @@ export const useMinerStore = create<MinersState>((set, get) => ({
             }));
           }
         }
+        const msg = e instanceof Error ? e.message : String(e);
         set((s) => ({
           miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
+          minerErrors: { ...s.minerErrors, [id]: msg },
         }));
 
         const nav = navigator as Navigator & { onLine?: boolean };
@@ -448,6 +453,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+  clearMinerErrors: () => set({ minerErrors: {} }),
 
   getSnapshots: async (minerId: string, limit: number = 100) => {
     const local = await DB.getSnapshots(minerId, limit);

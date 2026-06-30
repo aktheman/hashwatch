@@ -6,23 +6,14 @@ import {
   DEFAULT_VISIBLE,
 } from '../src/components/DashboardCustomizer';
 
-let localStorageStore: Record<string, string> = {};
-Object.defineProperty(globalThis, 'localStorage', {
-  value: {
-    getItem: jest.fn((k: string) => localStorageStore[k] ?? null),
-    setItem: jest.fn((k: string, v: string) => {
-      localStorageStore[k] = v;
-    }),
-    removeItem: jest.fn((k: string) => {
-      delete localStorageStore[k];
-    }),
-    clear: jest.fn(() => {
-      localStorageStore = {};
-    }),
-  },
-  writable: true,
-  configurable: true,
-});
+let mockDbStore: Record<string, string> = {};
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn((key: string) => Promise.resolve(mockDbStore[key] ?? null)),
+  setSetting: jest.fn((key: string, value: string) => {
+    mockDbStore[key] = value;
+    return Promise.resolve();
+  }),
+}));
 
 jest.mock('../src/theme', () => ({
   useTheme: () => ({
@@ -53,7 +44,7 @@ let mockAlert: jest.SpyInstance;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  localStorageStore = {};
+  mockDbStore = {};
   mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
 
@@ -131,13 +122,13 @@ describe('DashboardCustomizer', () => {
     await fireEvent.changeText(input, 'My Preset');
     await fireEvent.press(r.getByText('Save'));
     expect(mockAlert).toHaveBeenCalledWith('Saved', 'Preset "My Preset" saved.');
-    const saved = JSON.parse(localStorageStore['hashwatch_dashboard_presets']);
+    const saved = JSON.parse(mockDbStore['dashboard_presets']);
     expect(saved).toHaveLength(1);
     expect(saved[0].name).toBe('My Preset');
   });
 
   it('overwrites existing preset with same name', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'My Preset', sections: { ...DEFAULT_VISIBLE, earnings: false } },
     ]);
 
@@ -149,13 +140,13 @@ describe('DashboardCustomizer', () => {
     await fireEvent.changeText(input, 'My Preset');
     await fireEvent.press(r.getByText('Save'));
 
-    const saved = JSON.parse(localStorageStore['hashwatch_dashboard_presets']);
+    const saved = JSON.parse(mockDbStore['dashboard_presets']);
     expect(saved).toHaveLength(1);
     expect(saved[0].sections.earnings).toBe(true);
   });
 
   it('shows Load Preset button with count', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'Preset 1', sections: DEFAULT_VISIBLE },
       { name: 'Preset 2', sections: DEFAULT_VISIBLE },
     ]);
@@ -167,7 +158,7 @@ describe('DashboardCustomizer', () => {
   });
 
   it('shows presets list when Load Preset is pressed', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'My Preset', sections: DEFAULT_VISIBLE },
     ]);
 
@@ -182,7 +173,7 @@ describe('DashboardCustomizer', () => {
   });
 
   it('hides presets list on second press', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'My Preset', sections: DEFAULT_VISIBLE },
     ]);
 
@@ -202,7 +193,7 @@ describe('DashboardCustomizer', () => {
 
   it('loads a preset on press', async () => {
     const presetSections = { ...DEFAULT_VISIBLE, earnings: false };
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'My Preset', sections: presetSections },
     ]);
 
@@ -219,7 +210,7 @@ describe('DashboardCustomizer', () => {
   });
 
   it('deletes a preset', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = JSON.stringify([
+    mockDbStore['dashboard_presets'] = JSON.stringify([
       { name: 'Preset 1', sections: DEFAULT_VISIBLE },
       { name: 'Preset 2', sections: DEFAULT_VISIBLE },
     ]);
@@ -237,7 +228,7 @@ describe('DashboardCustomizer', () => {
     expect(deleteButtons).toHaveLength(2);
     await fireEvent.press(deleteButtons[0]);
 
-    const saved = JSON.parse(localStorageStore['hashwatch_dashboard_presets']);
+    const saved = JSON.parse(mockDbStore['dashboard_presets']);
     expect(saved).toHaveLength(1);
     expect(saved[0].name).toBe('Preset 2');
   });
@@ -279,8 +270,8 @@ describe('DashboardCustomizer', () => {
     );
   });
 
-  it('handles corrupt localStorage gracefully', async () => {
-    localStorageStore['hashwatch_dashboard_presets'] = 'not json';
+  it('handles corrupt preset data gracefully', async () => {
+    mockDbStore['dashboard_presets'] = 'not json';
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
