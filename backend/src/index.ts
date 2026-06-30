@@ -69,11 +69,14 @@ app.use('/api/pool-changes', poolChangesRouter);
 app.use('/api/alert-history', alertHistoryRouter);
 
 app.get('/api/health', async (_req, res) => {
+  const commitSha = process.env.COMMIT_SHA || null;
   try {
     await query('SELECT 1');
-    res.json({ status: 'ok', timestamp: Date.now(), db: 'connected' });
+    res.json({ status: 'ok', timestamp: Date.now(), db: 'connected', commitSha });
   } catch {
-    res.status(503).json({ status: 'degraded', timestamp: Date.now(), db: 'disconnected' });
+    res
+      .status(503)
+      .json({ status: 'degraded', timestamp: Date.now(), db: 'disconnected', commitSha });
   }
 });
 
