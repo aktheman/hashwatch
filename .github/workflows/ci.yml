@@ -192,7 +192,7 @@ jobs:
   e2e-maestro:
     name: E2E (Maestro Cloud)
     if: github.ref == 'refs/heads/master'
-    needs: [android-lockfile]
+    needs: [android-lockfile, android-build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
