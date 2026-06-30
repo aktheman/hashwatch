@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useTheme } from '../theme';
-import { buttonText } from '../utils/design';
+import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 
 interface Props {
   children: ReactNode;
@@ -92,41 +92,41 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: spacing.xl,
   },
   icon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: fontSize.h1,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: spacing.sm,
   },
   message: {
-    fontSize: 14,
+    fontSize: fontSize.base,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   retryBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginBottom: 12,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.lg,
+    marginBottom: spacing.sm,
   },
   retryText: {
-    fontWeight: '700',
-    fontSize: 15,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.md,
   },
   goBackBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
   },
   goBackText: {
-    fontWeight: '700',
-    fontSize: 15,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.md,
   },
 });
