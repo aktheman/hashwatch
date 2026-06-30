@@ -87,3 +87,13 @@ CREATE TABLE IF NOT EXISTS alert_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_alert_history_user ON alert_history(userId, timestamp DESC);
+
+CREATE TABLE IF NOT EXISTS miner_notes (
+  id BIGSERIAL PRIMARY KEY,
+  minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_miner_notes_miner ON miner_notes(minerId, createdAt DESC);
