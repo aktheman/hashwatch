@@ -167,13 +167,13 @@ it('shows loading state', async () => {
 
 it('navigates to AddMiner from empty state', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('dashboard.addMiner'));
+  await fireEvent.press(screen.getByText('dashboard.addMiner'));
   expect(navigation.navigate).toHaveBeenCalledWith('AddMiner');
 });
 
 it('navigates to Settings', async () => {
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('⚙'));
+  await fireEvent.press(screen.getByText('⚙'));
   expect(navigation.navigate).toHaveBeenCalledWith('Settings');
 });
 
