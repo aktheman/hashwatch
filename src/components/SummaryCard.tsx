@@ -26,8 +26,8 @@ export function SummaryCard({ icon, value, label, color, accent }: SummaryCardPr
           borderColor: theme.border,
         },
         icon: {
-          fontSize: 18,
-          marginBottom: 2,
+          fontSize: fontSize.h2,
+          marginBottom: spacing.xxs,
         },
         value: {
           fontSize: fontSize.h2,
