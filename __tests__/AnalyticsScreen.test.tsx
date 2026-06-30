@@ -99,7 +99,7 @@ it('shows range selector buttons including 30d', async () => {
 
 it('switches range on button press', async () => {
   await render(<AnalyticsScreen />);
-  fireEvent.press(screen.getByText('1h'));
+  await fireEvent.press(screen.getByText('1h'));
   expect(screen.getByText('1h')).toBeTruthy();
 });
 
@@ -208,7 +208,7 @@ it('switches to efficiency chart on button press', async () => {
   );
   await render(<AnalyticsScreen />);
 
-  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+  await fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
 
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
 });
@@ -236,7 +236,7 @@ it('shows efficiency chart with data', async () => {
   );
   await render(<AnalyticsScreen />);
 
-  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+  await fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
 
   await waitFor(() => {
     expect(screen.queryByText('analytics.notEnoughData')).toBeNull();
@@ -254,7 +254,7 @@ it('shows efficiency chart not enough data with no snapshots', async () => {
   mockGetSnapshots.mockResolvedValue([]);
   await render(<AnalyticsScreen />);
 
-  fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
+  await fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
 
   await waitFor(() => {
     expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1);
@@ -289,7 +289,7 @@ it('switches to uptime chart on button press', async () => {
   );
   await render(<AnalyticsScreen />);
 
-  fireEvent.press(screen.getByText('analytics.uptimeHistory'));
+  await fireEvent.press(screen.getByText('analytics.uptimeHistory'));
 
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
 });
@@ -305,7 +305,7 @@ it('shows uptime chart not enough data with no snapshots', async () => {
   mockGetSnapshots.mockResolvedValue([]);
   await render(<AnalyticsScreen />);
 
-  fireEvent.press(screen.getByText('analytics.uptimeHistory'));
+  await fireEvent.press(screen.getByText('analytics.uptimeHistory'));
 
   await waitFor(() => {
     expect(screen.getAllByText('analytics.notEnoughData').length).toBeGreaterThanOrEqual(1);
