@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Polyline, Polygon, Circle, Defs, Stop, LinearGradient } from 'react-native-svg';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Miner } from '../types';
 import {
   estimateBTCPerDay,
@@ -52,9 +53,9 @@ export const MetricTile = React.memo(function MetricTile({
   }, [theme, accent]);
 
   const sizeStyles = {
-    sm: { padding: 10, minHeight: 80 },
-    md: { padding: 14, minHeight: 110 },
-    lg: { padding: 18, minHeight: 140 },
+    sm: { padding: spacing.md, minHeight: 80 },
+    md: { padding: spacing.lg, minHeight: 110 },
+    lg: { padding: spacing.xl, minHeight: 140 },
   };
 
   const valueSize = {
