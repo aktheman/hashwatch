@@ -37,6 +37,7 @@ import {
   formatDifficulty,
 } from '../utils/formatters';
 import { useTheme } from '../theme';
+import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { useTranslation } from 'react-i18next';
 
 interface MinerDetailScreenProps {
@@ -55,7 +56,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           backgroundColor: theme.bg,
         },
         content: {
-          paddingBottom: 40,
+          paddingBottom: spacing.xxl,
         },
         center: {
           flex: 1,

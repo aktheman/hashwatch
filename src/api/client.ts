@@ -261,3 +261,22 @@ export async function markAlertRead(id: number): Promise<OkResponse> {
   const res = await client.put<OkResponse>(`/api/alert-history/${id}/read`);
   return res.data;
 }
+
+export interface MinerNoteItem {
+  id: number;
+  minerid: string;
+  text: string;
+  createdat: string;
+}
+
+export async function fetchMinerNotes(minerId: string): Promise<MinerNoteItem[]> {
+  const res = await client.get<MinerNoteItem[]>(`/api/miners/${minerId}/notes`);
+  return res.data;
+}
+
+export async function addMinerNote(minerId: string, text: string): Promise<MinerNoteItem> {
+  const res = await client.post<MinerNoteItem>(`/api/miners/${minerId}/notes`, {
+    text,
+  });
+  return res.data;
+}
