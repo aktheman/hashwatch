@@ -92,7 +92,7 @@ describe('WalletsScreen', () => {
     mockLoadWallets.mockResolvedValue([]);
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
   });
@@ -116,7 +116,7 @@ describe('WalletsScreen', () => {
     await render(<WalletsScreen />);
 
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
@@ -145,7 +145,7 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
@@ -168,7 +168,7 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
@@ -192,7 +192,7 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
@@ -283,7 +283,7 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
@@ -331,7 +331,7 @@ describe('WalletsScreen', () => {
 
     await render(<WalletsScreen />);
     await act(async () => {
-      fireEvent.press(await screen.findByText('wallets.createWallet'));
+      await fireEvent.press(await screen.findByText('wallets.createWallet'));
     });
     await waitFor(() => expect(screen.getByText('wallets.newWallet')).toBeTruthy());
 
