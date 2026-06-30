@@ -71,7 +71,7 @@ jest.mock('../src/store/toast', () => ({
   ),
 }));
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { Share, Alert } from 'react-native';
 import { MinerDetailScreen } from '../src/screens/MinerDetailScreen';
