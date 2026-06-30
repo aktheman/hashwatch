@@ -32,7 +32,14 @@
     "avgTemp": "Temp. moy.",
     "efficiency": "Efficacité",
     "ungrouped": "Non groupé",
-    "minerRemoved": "{{name}} supprimé"
+    "minerRemoved": "{{name}} supprimé",
+    "profitability": "Rentabilité",
+    "btcDay": "BTC/jour",
+    "btcWeek": "BTC/semaine",
+    "btcMonth": "BTC/mois",
+    "usdEquivalent": "Équivalent USD",
+    "perMiner": "Par Mineur",
+    "total": "Total"
   },
   "pools": {
     "title": "Pools",
@@ -59,7 +66,8 @@
     "netDay": "Net/Jour",
     "hashrateHistory": "Historique du taux de hachage",
     "uptimeHistory": "Historique de disponibilité",
-    "notEnoughData": "Pas assez de données. Laissez les mineurs fonctionner."
+    "notEnoughData": "Pas assez de données. Laissez les mineurs fonctionner.",
+    "efficiencyHistory": "Historique d'efficacité"
   },
   "settings": {
     "title": "Paramètres",
@@ -110,7 +118,32 @@
     "about": "À propos",
     "version": "Version",
     "madeFor": "Conçu pour",
-    "bitaxeMiners": "Mineurs BitAxe"
+    "bitaxeMiners": "Mineurs BitAxe",
+    "syncNow": "Synchroniser",
+    "syncing": "Synchronisation...",
+    "lastSync": "Dernière synchro il y a {{time}}",
+    "notifications": "Notifications",
+    "pushAlerts": "Alertes Push",
+    "alertHistory": "Historique des alertes",
+    "language": "Langue",
+    "darkModeSchedule": "Programmation mode sombre",
+    "importCsv": "Importer CSV",
+    "csvHelp": "Collez le CSV (colonnes : nom, ip, port) :",
+    "csvPlaceholder": "nom,ip,port\nMiner1,192.168.1.10,80",
+    "backup": "Sauvegarde",
+    "exportAllData": "Exporter toutes les données",
+    "download": "Télécharger",
+    "import": "Importer",
+    "cancel": "Annuler",
+    "importComplete": "Import terminé",
+    "importFailed": "Échec d'importation",
+    "failedToReadFile": "Impossible de lire le fichier",
+    "restoreSuccess": "Toutes les données ont été restaurées.",
+    "debugMenu": "Débogage RevenueCat",
+    "hideDebug": "Masquer le débogage",
+    "forcePro": "Forcer Pro",
+    "forceFree": "Forcer Gratuit",
+    "restorePurchases": "Restaurer les achats"
   },
   "minerDetail": {
     "notFound": "Mineur non trouvé",
@@ -146,7 +179,7 @@
     "responseTime": "Temps de réponse",
     "hashrateHistory": "Historique du taux de hachage",
     "efficiencyTrend": "Tendance d'efficacité",
-    "shareStats": "Statistiques des parts",
+    "shareStats": "Partager les statistiques",
     "actions": "Actions",
     "restartMiner": "Redémarrer le mineur",
     "restartSent": "Redémarrage envoyé",
@@ -158,7 +191,6 @@
     "removeConfirm": "Cela supprime définitivement {{name}} et tout son historique.",
     "yesRemove": "Oui, supprimer",
     "minerRemoved": "{{name}} supprimé",
-    "shareStats": "Partager les statistiques",
     "sharedVia": "Partagé via HashWatch"
   },
   "addMiner": {
@@ -277,7 +309,11 @@
     "light": "Clair",
     "neon": "Néon",
     "matrix": "Matrix",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "Pourpre",
+    "ocean": "Océan",
+    "lavender": "Lavande",
+    "midnight": "Minuit"
   },
   "tabs": {
     "dashboard": "Tableau de bord",
@@ -337,5 +373,41 @@
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Passez à Pro pour débloquer"
+  },
+  "comparison": {
+    "title": "Comparaison des mineurs",
+    "selectAtLeastTwo": "Sélectionnez au moins 2 mineurs",
+    "miner": "Mineur",
+    "hashrate": "Taux de hachage",
+    "temp": "Température",
+    "power": "Puissance",
+    "efficiency": "Efficacité",
+    "uptime": "Disponibilité",
+    "sharesAccepted": "Actions acceptées",
+    "sharesRejected": "Actions rejetées",
+    "frequency": "Fréquence",
+    "voltage": "Tension",
+    "bestDiff": "Meilleure difficulté",
+    "pool": "Pool"
+  },
+  "alertHistory": {
+    "title": "Historique des alertes",
+    "noAlerts": "Aucun historique d'alerte",
+    "markAllRead": "Tout marquer comme lu",
+    "clearAll": "Tout effacer",
+    "offline": "Hors ligne",
+    "offline_reminder": "Toujours hors ligne",
+    "online": "Reconnecté",
+    "hot": "Température élevée",
+    "hashrate_drop": "Baisse du taux de hachage",
+    "pool_lost": "Pool perdu",
+    "long_uptime": "Longue disponibilité"
+  },
+  "notificationHistory": {
+    "title": "Historique des notifications",
+    "sent": "Envoyée",
+    "failed": "Échouée",
+    "last50": "50 dernières",
+    "noNotifications": "Aucune notification"
   }
 }

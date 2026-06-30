@@ -638,7 +638,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.theme')}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(['system', 'dark', 'light', 'neon', 'matrix', '5tratum'] as const).map((mode) => (
+            {(
+              [
+                'system',
+                'dark',
+                'light',
+                'neon',
+                'matrix',
+                '5tratum',
+                'crimson',
+                'ocean',
+                'lavender',
+                'midnight',
+              ] as const
+            ).map((mode) => (
               <Pressable
                 accessibilityRole="button"
                 key={mode}
@@ -681,7 +694,15 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                           ? '💚'
                           : mode === '5tratum'
                             ? '🔶'
-                            : '🔄'}{' '}
+                            : mode === 'crimson'
+                              ? '🔴'
+                              : mode === 'ocean'
+                                ? '🌊'
+                                : mode === 'lavender'
+                                  ? '🌸'
+                                  : mode === 'midnight'
+                                    ? '🌃'
+                                    : '🔄'}{' '}
                   {t(`themes.${mode}`)}
                 </Text>
               </Pressable>

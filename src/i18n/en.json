@@ -338,7 +338,11 @@
     "light": "Light",
     "neon": "Neon",
     "matrix": "Matrix",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "Crimson",
+    "ocean": "Ocean",
+    "lavender": "Lavender",
+    "midnight": "Midnight"
   },
   "tabs": {
     "dashboard": "Dashboard",

@@ -146,7 +146,7 @@
     "responseTime": "响应时间",
     "hashrateHistory": "算力历史",
     "efficiencyTrend": "能效趋势",
-    "shareStats": "份额统计",
+    "shareStats": "分享统计",
     "actions": "操作",
     "restartMiner": "重启矿机",
     "restartSent": "重启命令已发送",
@@ -158,7 +158,6 @@
     "removeConfirm": "这将永久删除 {{name}} 及其所有历史数据。",
     "yesRemove": "是的，移除",
     "minerRemoved": "{{name}} 已移除",
-    "shareStats": "分享统计",
     "sharedVia": "通过 HashWatch 分享"
   },
   "addMiner": {
@@ -267,7 +266,11 @@
     "light": "浅色",
     "neon": "霓虹",
     "matrix": "矩阵",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "深红",
+    "ocean": "海洋",
+    "lavender": "薰衣草",
+    "midnight": "午夜"
   },
   "tabs": {
     "dashboard": "仪表盘",

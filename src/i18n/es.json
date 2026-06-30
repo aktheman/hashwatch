@@ -76,7 +76,7 @@
     "free": "Gratis",
     "remoteSync": "Sincronización Remota",
     "connected": "Conectado",
-    "off": "Desactivado",
+    "off": "Apagado",
     "disconnect": "Desconectar",
     "emailPlaceholder": "Correo electrónico",
     "passwordPlaceholder": "Contraseña (mín 8 caracteres)",
@@ -119,7 +119,6 @@
     "alertHistory": "Historial de Alertas",
     "language": "Idioma / Language / Sprache",
     "darkModeSchedule": "Programar Modo Oscuro",
-    "off": "Apagado",
     "importCsv": "Importar CSV",
     "csvHelp": "Pega CSV (columnas: nombre, ip, puerto):",
     "csvPlaceholder": "nombre,ip,puerto\nMinero1,192.168.1.10,80",
@@ -128,7 +127,6 @@
     "download": "Descargar",
     "import": "Importar",
     "cancel": "Cancelar",
-    "restore": "Restaurar",
     "importComplete": "Importación Completa",
     "importFailed": "Importación Fallida",
     "failedToReadFile": "Error al leer archivo",
@@ -173,7 +171,7 @@
     "responseTime": "Tiempo de Respuesta",
     "hashrateHistory": "Historial de Hashrate",
     "efficiencyTrend": "Tendencia de Eficiencia",
-    "shareStats": "Estadísticas de Shares",
+    "shareStats": "Compartir Estadísticas",
     "actions": "Acciones",
     "restartMiner": "Reiniciar Minero",
     "restartSent": "Reinicio Enviado",
@@ -185,7 +183,6 @@
     "removeConfirm": "Esto elimina permanentemente {{name}} y todo su historial.",
     "yesRemove": "Sí, Eliminar",
     "minerRemoved": "{{name}} eliminado",
-    "shareStats": "Compartir Estadísticas",
     "sharedVia": "Compartido vía HashWatch"
   },
   "addMiner": {
@@ -340,7 +337,11 @@
     "light": "Claro",
     "neon": "Neón",
     "matrix": "Matrix",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "Carmesí",
+    "ocean": "Océano",
+    "lavender": "Lavanda",
+    "midnight": "Medianoche"
   },
   "tabs": {
     "dashboard": "Dashboard",
@@ -396,7 +397,7 @@
     "longUptime": "Uptime Largo"
   },
   "offlineBanner": {
-    "offline": "Estás desconectado \u2014 mostrando datos en caché"
+    "offline": "Estás desconectado — mostrando datos en caché"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Actualiza a Pro para desbloquear"

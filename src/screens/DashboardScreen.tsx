@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useSubscriptionStore } from '../store/subscription';
+import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
@@ -202,83 +203,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
   }, [miners]);
 
-  const [metrics, setMetrics] = useState({
-    hashrateHistory: [] as number[],
-    powerHistory: [] as number[],
-    uptimeHistory: [] as number[],
-    hashrateTrend: '',
-    powerTrend: '',
-    workerTrend: '',
-    uptimeAvg: 0,
-    efficiencyPct: 0,
-    recentHashrates: [] as number[],
-    recentPower: [] as number[],
-    recentUptimes: [] as number[],
-  });
-
-  useEffect(() => {
-    if (miners.length === 0) return;
-    let cancelled = false;
-    (async () => {
-      const snapshots = (await Promise.all(miners.map((m) => DB.getSnapshots(m.id, 100))))
-        .flat()
-        .sort((a, b) => a.timestamp - b.timestamp);
-
-      if (cancelled) return;
-
-      const recent = snapshots.slice(-20);
-      const hashrateHistory = recent.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit));
-      const powerHistory = recent.map((s) => s.power);
-      const uptimeHistory = recent.map((s) => s.uptimeSeconds);
-
-      const totalHr = filteredMiners.reduce(
-        (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-        0,
-      );
-      const totalPw = filteredMiners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
-
-      const computeTrend = (vals: number[]): string => {
-        if (vals.length < 2) return '';
-        const first = vals[0];
-        const last = vals[vals.length - 1];
-        if (first === 0) return '';
-        const pct = ((last - first) / first) * 100;
-        const sign = pct >= 0 ? '+' : '';
-        return `${sign}${pct.toFixed(1)}%`;
-      };
-
-      const avgUptime =
-        filteredMiners.length > 0
-          ? filteredMiners.reduce((s, m) => s + (m.status?.uptimeSeconds ?? 0), 0) /
-            filteredMiners.length
-          : 0;
-
-      const efficiencyPct =
-        totalPw > 0 && totalHr > 0 ? Math.min(100, (totalHr / 1e12 / totalPw) * 100) : 0;
-
-      setMetrics({
-        hashrateHistory,
-        powerHistory,
-        uptimeHistory,
-        hashrateTrend: computeTrend(hashrateHistory),
-        powerTrend: computeTrend(powerHistory),
-        workerTrend: snapshots.length > 0 ? `+${filteredMiners.length}` : '',
-        uptimeAvg: avgUptime,
-        efficiencyPct,
-        recentHashrates: hashrateHistory.slice(-7),
-        recentPower: powerHistory.slice(-7),
-        recentUptimes: uptimeHistory.slice(-7),
-      });
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [miners, filteredMiners]);
-
-  const uptimeChartData = useMemo(
-    () => metrics.recentUptimes.map((u) => Math.round(u / 3600)),
-    [metrics.recentUptimes],
-  );
+  const { metrics, uptimeChartData, totalHashrate, totalPower, avgTemp } =
+    useDashboardMetrics(filteredMiners);
 
   const handleMinerPress = useCallback(
     (miner: Miner) => {
@@ -501,20 +427,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     },
     [handleMinerPress, t, collapsedGroups, theme],
   );
-
-  const { totalHashrate, totalPower, avgTemp } = useMemo(() => {
-    const hr = filteredMiners.reduce(
-      (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-      0,
-    );
-    const pw = filteredMiners.reduce((sum, m) => sum + (m.status?.power ?? 0), 0);
-    const withTemp = filteredMiners.filter((m) => m.status?.temperature);
-    const at =
-      withTemp.length > 0
-        ? withTemp.reduce((sum, m) => sum + (m.status?.temperature ?? 0), 0) / withTemp.length
-        : 0;
-    return { totalHashrate: hr, totalPower: pw, avgTemp: at };
-  }, [filteredMiners]);
 
   const canAdd = canAddMiner(miners.length);
 

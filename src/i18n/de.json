@@ -32,7 +32,14 @@
     "avgTemp": "Ø Temp",
     "efficiency": "Effizienz",
     "ungrouped": "Ungruppiert",
-    "minerRemoved": "{{name}} entfernt"
+    "minerRemoved": "{{name}} entfernt",
+    "profitability": "Rentabilität",
+    "btcDay": "BTC/Tag",
+    "btcWeek": "BTC/Woche",
+    "btcMonth": "BTC/Monat",
+    "usdEquivalent": "USD-Äquivalent",
+    "perMiner": "Pro Miner",
+    "total": "Gesamt"
   },
   "pools": {
     "title": "Pools",
@@ -59,7 +66,8 @@
     "netDay": "Netto/Tag",
     "hashrateHistory": "Hashrate-Verlauf",
     "uptimeHistory": "Betriebszeit-Verlauf",
-    "notEnoughData": "Noch nicht genügend Daten. Lasse die Miner laufen."
+    "notEnoughData": "Noch nicht genügend Daten. Lasse die Miner laufen.",
+    "efficiencyHistory": "Effizienzverlauf"
   },
   "settings": {
     "title": "Einstellungen",
@@ -110,7 +118,32 @@
     "about": "Über",
     "version": "Version",
     "madeFor": "Entwickelt für",
-    "bitaxeMiners": "BitAxe Miner"
+    "bitaxeMiners": "BitAxe Miner",
+    "syncNow": "Synchronisieren",
+    "syncing": "Synchronisiere...",
+    "lastSync": "Letzte Sync vor {{time}}",
+    "notifications": "Benachrichtigungen",
+    "pushAlerts": "Push-Benachrichtigungen",
+    "alertHistory": "Alert-Verlauf",
+    "language": "Sprache",
+    "darkModeSchedule": "Dark-Modus-Zeitplan",
+    "importCsv": "CSV importieren",
+    "csvHelp": "CSV einfügen (Spalten: name, ip, port):",
+    "csvPlaceholder": "name,ip,port\nMiner1,192.168.1.10,80",
+    "backup": "Backup",
+    "exportAllData": "Alle Daten exportieren",
+    "download": "Herunterladen",
+    "import": "Importieren",
+    "cancel": "Abbrechen",
+    "importComplete": "Import abgeschlossen",
+    "importFailed": "Import fehlgeschlagen",
+    "failedToReadFile": "Datei konnte nicht gelesen werden",
+    "restoreSuccess": "Alle Daten wurden wiederhergestellt.",
+    "debugMenu": "RevenueCat-Debug",
+    "hideDebug": "Debug ausblenden",
+    "forcePro": "Pro erzwingen",
+    "forceFree": "Free erzwingen",
+    "restorePurchases": "Käufe wiederherstellen"
   },
   "minerDetail": {
     "notFound": "Miner nicht gefunden",
@@ -146,7 +179,7 @@
     "responseTime": "Antwortzeit",
     "hashrateHistory": "Hashrate-Verlauf",
     "efficiencyTrend": "Effizienz-Trend",
-    "shareStats": "Anteilstabellen",
+    "shareStats": "Statistiken teilen",
     "actions": "Aktionen",
     "restartMiner": "Miner neu starten",
     "restartSent": "Neustart gesendet",
@@ -158,7 +191,6 @@
     "removeConfirm": "Dies löscht {{name}} und den gesamten Verlauf endgültig.",
     "yesRemove": "Ja, entfernen",
     "minerRemoved": "{{name}} entfernt",
-    "shareStats": "Statistiken teilen",
     "sharedVia": "Geteilt über HashWatch"
   },
   "addMiner": {
@@ -277,7 +309,11 @@
     "light": "Hell",
     "neon": "Neon",
     "matrix": "Matrix",
-    "5tratum": "5tratum"
+    "5tratum": "5tratum",
+    "crimson": "Purpurrot",
+    "ocean": "Ozean",
+    "lavender": "Lavendel",
+    "midnight": "Mitternacht"
   },
   "tabs": {
     "dashboard": "Dashboard",
@@ -337,5 +373,41 @@
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Upgrade auf Pro, um freizuschalten"
+  },
+  "comparison": {
+    "title": "Miner-Vergleich",
+    "selectAtLeastTwo": "Wählen Sie mindestens 2 Miner",
+    "miner": "Miner",
+    "hashrate": "Hashrate",
+    "temp": "Temp",
+    "power": "Leistung",
+    "efficiency": "Effizienz",
+    "uptime": "Betriebszeit",
+    "sharesAccepted": "Akzeptierte Shares",
+    "sharesRejected": "Abgelehnte Shares",
+    "frequency": "Frequenz",
+    "voltage": "Spannung",
+    "bestDiff": "Beste Diff",
+    "pool": "Pool"
+  },
+  "alertHistory": {
+    "title": "Alert-Verlauf",
+    "noAlerts": "Kein Alert-Verlauf",
+    "markAllRead": "Alle als gelesen markieren",
+    "clearAll": "Alle löschen",
+    "offline": "Offline",
+    "offline_reminder": "Immer noch offline",
+    "online": "Wieder verbunden",
+    "hot": "Hohe Temperatur",
+    "hashrate_drop": "Hashrate-Abfall",
+    "pool_lost": "Pool verloren",
+    "long_uptime": "Lange Betriebszeit"
+  },
+  "notificationHistory": {
+    "title": "Benachrichtigungsverlauf",
+    "sent": "Gesendet",
+    "failed": "Fehlgeschlagen",
+    "last50": "Letzte 50",
+    "noNotifications": "Keine Benachrichtigungen"
   }
 }
