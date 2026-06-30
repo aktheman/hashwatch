@@ -197,3 +197,67 @@ export async function setNotificationPref(
   });
   return res.data;
 }
+
+export interface PoolChangeEntry {
+  previouspool: string;
+  newpool: string;
+  changedat: number;
+}
+
+export async function fetchPoolChanges(
+  minerId: string,
+  limit?: number,
+): Promise<PoolChangeEntry[]> {
+  const res = await client.get<PoolChangeEntry[]>(`/api/pool-changes/${minerId}`, {
+    params: { limit },
+  });
+  return res.data;
+}
+
+export async function recordPoolChange(
+  minerId: string,
+  previousPool: string,
+  newPool: string,
+  changedAt?: number,
+): Promise<OkResponse> {
+  const res = await client.post<OkResponse>('/api/pool-changes', {
+    minerId,
+    previousPool,
+    newPool,
+    changedAt,
+  });
+  return res.data;
+}
+
+export interface AlertHistoryItem {
+  id: number;
+  minerid: string;
+  eventtype: string;
+  title: string;
+  timestamp: number;
+  read: boolean;
+}
+
+export async function fetchAlertHistory(
+  limit?: number,
+  offset?: number,
+): Promise<AlertHistoryItem[]> {
+  const res = await client.get<AlertHistoryItem[]>('/api/alert-history', {
+    params: { limit, offset },
+  });
+  return res.data;
+}
+
+export async function syncAlertsToBackend(
+  alerts: { minerId: string; eventType: string; title: string; timestamp: number; read: boolean }[],
+): Promise<{ ok: boolean; inserted: number }> {
+  const res = await client.post<{ ok: boolean; inserted: number }>('/api/alert-history/sync', {
+    alerts,
+  });
+  return res.data;
+}
+
+export async function markAlertRead(id: number): Promise<OkResponse> {
+  const res = await client.put<OkResponse>(`/api/alert-history/${id}/read`);
+  return res.data;
+}

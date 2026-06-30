@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../theme';
+import { getSetting, setSetting } from '../db/database';
 
 export type SectionKey =
   | 'earnings'
@@ -42,20 +43,20 @@ interface DashboardPreset {
   sections: Record<SectionKey, boolean>;
 }
 
-const PRESETS_KEY = 'hashwatch_dashboard_presets';
+const PRESETS_KEY = 'dashboard_presets';
 
-function loadPresets(): DashboardPreset[] {
+async function loadPresets(): Promise<DashboardPreset[]> {
   try {
-    const raw = localStorage.getItem(PRESETS_KEY);
+    const raw = await getSetting(PRESETS_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
-function savePresets(presets: DashboardPreset[]): void {
+async function savePresets(presets: DashboardPreset[]): Promise<void> {
   try {
-    localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+    await setSetting(PRESETS_KEY, JSON.stringify(presets));
   } catch {}
 }
 
@@ -87,7 +88,7 @@ export function DashboardCustomizer({
 
   useEffect(() => {
     if (visible) {
-      setPresets(loadPresets());
+      loadPresets().then(setPresets);
       setShowPresets(false);
       setPresetName('');
     }
@@ -95,13 +96,13 @@ export function DashboardCustomizer({
 
   if (!visible) return null;
 
-  const handleSavePreset = () => {
+  const handleSavePreset = async () => {
     const name = presetName.trim();
     if (!name) {
       Alert.alert('Name required', 'Enter a name for this preset.');
       return;
     }
-    const existing = loadPresets();
+    const existing = await loadPresets();
     const idx = existing.findIndex((p) => p.name === name);
     const preset: DashboardPreset = { name, sections: { ...visibleSections } };
     if (idx >= 0) {
@@ -109,7 +110,7 @@ export function DashboardCustomizer({
     } else {
       existing.push(preset);
     }
-    savePresets(existing);
+    await savePresets(existing);
     setPresets(existing);
     setPresetName('');
     Alert.alert('Saved', `Preset "${name}" saved.`);
@@ -120,9 +121,9 @@ export function DashboardCustomizer({
     setShowPresets(false);
   };
 
-  const handleDeletePreset = (name: string) => {
+  const handleDeletePreset = async (name: string) => {
     const updated = presets.filter((p) => p.name !== name);
-    savePresets(updated);
+    await savePresets(updated);
     setPresets(updated);
   };
 

@@ -1160,6 +1160,65 @@
             "enum": [true]
           }
         }
+      },
+      "PoolChange": {
+        "type": "object",
+        "properties": {
+          "previouspool": { "type": "string" },
+          "newpool": { "type": "string" },
+          "changedat": { "type": "integer", "description": "Unix ms timestamp" }
+        }
+      },
+      "CreatePoolChangeRequest": {
+        "type": "object",
+        "required": ["minerId", "newPool"],
+        "properties": {
+          "minerId": { "type": "string", "format": "uuid" },
+          "previousPool": { "type": "string" },
+          "newPool": { "type": "string" },
+          "changedAt": { "type": "integer", "description": "Unix ms timestamp (defaults to now)" }
+        }
+      },
+      "AlertHistoryItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "minerid": { "type": "string", "format": "uuid" },
+          "eventtype": { "type": "string" },
+          "title": { "type": "string" },
+          "timestamp": { "type": "integer" },
+          "read": { "type": "boolean" }
+        }
+      },
+      "SyncAlertsRequest": {
+        "type": "object",
+        "required": ["alerts"],
+        "properties": {
+          "alerts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["minerId", "eventType", "timestamp"],
+              "properties": {
+                "minerId": { "type": "string", "format": "uuid" },
+                "eventType": {
+                  "type": "string",
+                  "enum": ["offline", "online", "hot", "hashrate_drop", "pool_lost", "long_uptime"]
+                },
+                "title": { "type": "string" },
+                "timestamp": { "type": "integer" },
+                "read": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "SyncAlertsResponse": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "enum": [true] },
+          "inserted": { "type": "integer" }
+        }
       }
     }
   },

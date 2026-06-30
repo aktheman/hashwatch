@@ -16,6 +16,8 @@ import { pushRouter } from './routes/push';
 import { settingsRouter } from './routes/settings';
 import { receiptRouter } from './routes/receipt';
 import { notificationPrefsRouter } from './routes/notificationPrefs';
+import { poolChangesRouter } from './routes/poolChanges';
+import { alertHistoryRouter } from './routes/alertHistory';
 import { createWebSocketServer } from './ws';
 import { query } from './db';
 import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
@@ -63,6 +65,8 @@ app.use('/api/push', pushRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/receipt', receiptRouter);
 app.use('/api/notification-prefs', notificationPrefsRouter);
+app.use('/api/pool-changes', poolChangesRouter);
+app.use('/api/alert-history', alertHistoryRouter);
 
 app.get('/api/health', async (_req, res) => {
   try {

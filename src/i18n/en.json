@@ -49,7 +49,11 @@
     "hashrate": "Hashrate",
     "estDaily": "Est. Daily",
     "miners": "Miners",
-    "poolCount": "{{pools}} pool(s) · {{miners}} miner(s)"
+    "poolCount": "{{pools}} pool(s) · {{miners}} miner(s)",
+    "shares": "Shares",
+    "acceptRate": "Accept Rate",
+    "bestDiff": "Best Diff",
+    "poolChanged": "Pool Changed"
   },
   "analytics": {
     "title": "Analytics",

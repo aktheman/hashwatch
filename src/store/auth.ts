@@ -15,6 +15,7 @@ const SYNCED_SETTINGS = [
   'auto_dark_hour',
   'kiosk_mode',
   'dashboard_sections',
+  'empty_groups',
 ];
 
 interface QueuedSetting {

@@ -64,3 +64,26 @@ CREATE TABLE IF NOT EXISTS notification_prefs (
 
 CREATE INDEX IF NOT EXISTS idx_miners_userId ON miners(userId);
 CREATE INDEX IF NOT EXISTS idx_snapshots_minerId ON miner_snapshots(minerId, timestamp);
+
+CREATE TABLE IF NOT EXISTS pool_changes (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+  previousPool TEXT NOT NULL DEFAULT '',
+  newPool TEXT NOT NULL DEFAULT '',
+  changedAt BIGINT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_pool_changes_miner ON pool_changes(minerId, changedAt);
+
+CREATE TABLE IF NOT EXISTS alert_history (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+  eventType TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  timestamp BIGINT NOT NULL,
+  read BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE INDEX IF NOT EXISTS idx_alert_history_user ON alert_history(userId, timestamp DESC);

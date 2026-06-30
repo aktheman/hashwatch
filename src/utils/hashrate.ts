@@ -57,11 +57,16 @@ export function formatBTC(value: number): string {
 }
 
 let _btcPrice = 85000;
+let _btcPriceHistory: number[] = [];
 let _btcPricePromise: Promise<number> | null = null;
 let _btcPriceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function getBTCPrice(): number {
   return _btcPrice;
+}
+
+export function getBTCPriceHistory(): number[] {
+  return _btcPriceHistory;
 }
 
 export function setBTCPrice(price: number): void {
@@ -85,6 +90,7 @@ export async function fetchBTCPrice(): Promise<number> {
       if (!res.ok) return _btcPrice;
       const data = await res.json();
       _btcPrice = data?.bitcoin?.usd ?? _btcPrice;
+      _btcPriceHistory = [..._btcPriceHistory.slice(-479), _btcPrice];
       return _btcPrice;
     } catch {
       clearTimeout(id);

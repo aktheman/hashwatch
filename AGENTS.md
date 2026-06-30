@@ -52,10 +52,36 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, Android build, deploy, e2e, coverage threshold verification, `workflow_dispatch` trigger
 - `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
 
+## Latest Round (Session 2026-06-30)
+
+### Changes (Round 5 — AlertHistory + PoolChanges)
+
+- **AlertHistoryScreen.tsx**: Added Sync button (ActivityIndicator while syncing, hidden when not authenticated), auto-sync on mount + refresh via `useEffect` checking `useAuthStore.getState().token`, imports `useAuthStore`
+- **alertHistory.ts store**: Added `syncFromBackend()` (merges remote alerts with local, dedup by minerId+type+timestamp), `syncToBackend()` (pushes unread local alerts), `syncing` flag, auto-sync on mount when authenticated
+- **client.ts**: Added `fetchAlertHistory()`, `syncAlertsToBackend()`, `markAlertRead()` API functions
+- **PoolsScreen.tsx**: Added shares (total), accept rate %, best diff, pool change detection badge (warning "Pool Changed" label when a miner switches pools)
+- **PoolChangeHistory.tsx**: New component showing last 5 pool switches (previous→new pool with relative time)
+- **ProfitabilityCard**: BTC price with mini sparkline (Svg Polyline) + trend arrow ▲/▼ + %, network hashrate row
+- **MinerDetailScreen.test.tsx**: Updated mock to include new alert API functions
+
+### Changes (Round 6 — ErrorBanner Fan-out)
+
+- **miners.ts store**: Added `minerErrors: Record<string, string>`, captures per-miner probe failure messages in `refreshMiner` catch block (`e instanceof Error ? e.message : String(e)`), `clearMinerErrors()` action
+- **DashboardScreen.tsx**: Renders a second `ErrorBanner` when `Object.keys(minerErrors).length > 0` showing `"{{count}} miner(s) unreachable"` with retry/loadMiners and dismiss/clearMinerErrors
+- Fixed pre-existing eslint warning (unused `e` in scanNetwork catch)
+
+### Test results
+
+- Frontend: 1033 passing, 72 suites
+- Backend: 126 passing, 14 suites
+- TypeScript: `npx tsc --noEmit` clean
+- ESLint: 0 errors, 0 warnings (frontend + backend)
+
 ## Current State
 
+- All 6 planned tasks complete (WorldMap, PoolsScreen, Profitability, Backend pool/alert tracking, AlertHistory UI, ErrorBanner fan-out)
 - React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 1030 frontend (71 suites) + 105 backend (12 suites) = 1135 total
+- Tests: 1033 frontend (72 suites) + 126 backend (14 suites) = 1159 total
 - `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
 - `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
 - Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — currently 83.54/91.95/96.24/94.38 (all thresholds met)
