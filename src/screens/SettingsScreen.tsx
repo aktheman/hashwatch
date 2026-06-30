@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { useNetworkStatus } from '../services/networkStatus';
 import { useNotificationHistoryStore } from '../store/notificationHistory';
 import i18n from '../i18n';
+import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 
 function NotificationHistorySection() {
   const theme = useTheme();
@@ -213,47 +214,47 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         container: {
           flex: 1,
           backgroundColor: theme.bg,
-          padding: 16,
+          padding: spacing.md,
         },
         title: {
           color: theme.text,
-          fontSize: 24,
-          fontWeight: '800',
-          marginBottom: 20,
-          marginTop: 8,
+          fontSize: fontSize.h3,
+          fontWeight: fontWeight.bold,
+          marginBottom: spacing.lg,
+          marginTop: spacing.xs,
           letterSpacing: -0.5,
         },
         section: {
-          marginBottom: 24,
+          marginBottom: spacing.lg,
         },
         sectionTitle: {
           color: theme.textDim,
-          fontSize: 11,
-          fontWeight: '700',
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.bold,
           textTransform: 'uppercase',
           letterSpacing: 0.8,
-          marginBottom: 8,
-          marginLeft: 4,
+          marginBottom: spacing.xs,
+          marginLeft: spacing.xs,
         },
         row: {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
           backgroundColor: theme.surface,
-          padding: 14,
-          borderRadius: 12,
+          padding: spacing.md,
+          borderRadius: radius.lg,
           marginBottom: 2,
           borderWidth: 1,
           borderColor: theme.border,
         },
         rowLabel: {
           color: theme.text,
-          fontSize: 15,
-          fontWeight: '500',
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.semibold,
         },
         rowValue: {
           color: theme.textDim,
-          fontSize: 15,
+          fontSize: fontSize.md,
         },
         rowRight: {
           flexDirection: 'row',
@@ -308,9 +309,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           alignItems: 'center',
         },
         authBtnText: {
-          color: '#FFF',
-          fontWeight: '700',
-          fontSize: 15,
+          color: buttonText,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.md,
         },
         authToggle: {
           color: theme.primary,
@@ -446,9 +447,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             setShowDebugPanel(!showDebugPanel);
             if (!showDebugPanel) loadDebugInfo();
           }}
-          style={{ marginTop: 8 }}
+          style={{ marginTop: spacing.xs }}
         >
-          <Text style={{ color: theme.textMuted, fontSize: 11, textAlign: 'center' }}>
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, textAlign: 'center' }}>
             {showDebugPanel ? `▲ ${t('settings.hideDebug')}` : `▼ ${t('settings.debugMenu')}`}
           </Text>
         </Pressable>
@@ -456,21 +457,21 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <View
             style={{
               backgroundColor: theme.surface,
-              borderRadius: 12,
-              padding: 12,
-              marginTop: 8,
+              borderRadius: radius.lg,
+              padding: spacing.md,
+              marginTop: spacing.xs,
               borderWidth: 1,
               borderColor: theme.border,
             }}
           >
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: spacing.xs }}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Restore purchases"
                 style={{
                   backgroundColor: theme.primary + '20',
-                  borderRadius: 8,
-                  padding: 10,
+                  borderRadius: radius.md,
+                  padding: spacing.sm,
                   alignItems: 'center',
                 }}
                 onPress={() => {
@@ -856,7 +857,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
       <View style={styles.section}>
         <View style={styles.sectionTitle}>
-          <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>
+          <Text style={{ color: theme.text, fontSize: fontSize.md, fontWeight: fontWeight.bold }}>
             {t('settings.notifications')}
           </Text>
         </View>
