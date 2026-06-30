@@ -148,7 +148,7 @@ it('shows plan as Free by default', async () => {
 
 it('navigates to Subscription on plan press', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('settings.plan'));
+  await fireEvent.press(screen.getByText('settings.plan'));
   expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
 });
 
@@ -184,19 +184,19 @@ it('shows version', async () => {
 
 it('navigates to Wallets', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('settings.wallets'));
+  await fireEvent.press(screen.getByText('settings.wallets'));
   expect(navigation.navigate).toHaveBeenCalledWith('Wallets');
 });
 
 it('navigates to Groups', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('settings.groups'));
+  await fireEvent.press(screen.getByText('settings.groups'));
   expect(navigation.navigate).toHaveBeenCalledWith('Groups');
 });
 
 it('navigates to ImportData', async () => {
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getAllByText('settings.importData')[0]);
+  await fireEvent.press(screen.getAllByText('settings.importData')[0]);
   expect(navigation.navigate).toHaveBeenCalledWith('ImportData');
 });
 
@@ -292,7 +292,7 @@ it('presses a theme button', async () => {
   const { setThemeMode } = require('../src/theme');
   await render(<SettingsScreen navigation={navigation} />);
   const lightThemeBtn = screen.getByLabelText('light theme');
-  fireEvent.press(lightThemeBtn);
+  await fireEvent.press(lightThemeBtn);
   expect(getThemeMode()).toBe('light');
 });
 
@@ -316,7 +316,7 @@ it('calls loadMiners on Refresh All press', async () => {
   const mockLoadMiners = jest.fn().mockResolvedValue(undefined);
   useMinerStore.setState({ loadMiners: mockLoadMiners } as any);
   await render(<SettingsScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('settings.refreshAll'));
+  await fireEvent.press(screen.getByText('settings.refreshAll'));
   expect(mockLoadMiners).toHaveBeenCalled();
 });
 
