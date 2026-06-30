@@ -28,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm install
       - run: npm run build
       - run: npm run lint
       - run: npx tsc --noEmit
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format
@@ -66,7 +66,7 @@ jobs:
           path: ~/.expo
           key: expo-${{ hashFiles('**/package-lock.json') }}
           restore-keys: expo-
-      - run: npm ci
+      - run: npm install
       - run: npm run build:web
         env:
           EXPO_NO_TELEMETRY: 1
@@ -89,7 +89,7 @@ jobs:
         with:
           name: web-dist
           path: dist/
-      - run: npm ci
+      - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
@@ -102,7 +102,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npx expo prebuild --platform ios --clean
       - name: Verify iOS project builds
         run: |
@@ -124,7 +124,7 @@ jobs:
         with:
           name: web-dist
           path: dist/
-      - run: npm ci
+      - run: npm install
       - name: Deploy to Hosting
         run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
@@ -165,7 +165,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - run: npm ci
+      - run: npm install
       - run: npx expo prebuild --platform android --clean
       - run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
