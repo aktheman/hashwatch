@@ -139,16 +139,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Wait for Railway deploy to be ready
         run: |
+          COMMIT_SHA="${{ github.sha }}"
           for i in $(seq 1 10); do
             STATUS=$(curl -fsS https://hashwatch-production-5b6e.up.railway.app/api/health || true)
-            if echo "$STATUS" | grep -q '"status":"ok"'; then
+            HEALTH_OK=$(node -e "try{process.stdout.write((JSON.parse(require('fs').readFileSync(0,'utf8'))||{}).status==='ok'?'ok':'')}catch(e){process.stdout.write('')}" <<< "$STATUS")
+            COMMIT=$(node -e "try{process.stdout.write((JSON.parse(require('fs').readFileSync(0,'utf8'))||{}).commitSha||'')}catch(e){process.stdout.write('')}" <<< "$STATUS")
+            if [ "$HEALTH_OK" = "ok" ] && [ "$COMMIT" = "$COMMIT_SHA" ]; then
               echo "Deploy OK: $STATUS"
               exit 0
             fi
             echo "Attempt $i failed, retrying..."
             sleep 10
           done
-          echo "Deploy not ready after retries"
+          echo "Deploy not ready or commit mismatch after retries"
           exit 1
 
   web-lockfile:
