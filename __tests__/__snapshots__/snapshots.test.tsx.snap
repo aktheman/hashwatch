@@ -59,7 +59,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
             "alignItems": "center",
             "backgroundColor": "#1A1A3E",
             "borderColor": "#8B85FF",
-            "borderRadius": 14,
+            "borderRadius": 12,
             "borderWidth": 1.5,
             "height": 44,
             "justifyContent": "center",
@@ -75,7 +75,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
       <Text
         style={
           {
-            "fontSize": 20,
+            "fontSize": 15,
           }
         }
       >
@@ -94,8 +94,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           [
             {
               "color": "#FFFFFF",
-              "fontSize": 30,
-              "fontWeight": "800",
+              "fontSize": 26,
+              "fontWeight": "700",
               "letterSpacing": -0.5,
             },
             {
@@ -112,8 +112,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
             "alignItems": "center",
             "color": "#8B8FA3",
             "flexDirection": "row",
-            "fontSize": 12,
-            "marginTop": 2,
+            "fontSize": 10,
+            "marginTop": 4,
           }
         }
       >
@@ -121,7 +121,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           style={
             {
               "color": "#10B981",
-              "fontSize": 8,
+              "fontSize": 10,
               "marginRight": 4,
             }
           }
@@ -179,7 +179,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#1A1A3E",
               "borderColor": "#8B85FF",
-              "borderRadius": 14,
+              "borderRadius": 12,
               "borderWidth": 1.5,
               "height": 44,
               "justifyContent": "center",
@@ -195,7 +195,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         <Text
           style={
             {
-              "fontSize": 20,
+              "fontSize": 15,
             }
           }
         >
@@ -240,7 +240,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#1A1A3E",
               "borderColor": "#8B85FF",
-              "borderRadius": 14,
+              "borderRadius": 12,
               "borderWidth": 1.5,
               "height": 44,
               "justifyContent": "center",
@@ -256,7 +256,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         <Text
           style={
             {
-              "fontSize": 20,
+              "fontSize": 15,
             }
           }
         >
@@ -301,7 +301,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#1A1A3E",
               "borderColor": "#8B85FF",
-              "borderRadius": 14,
+              "borderRadius": 12,
               "borderWidth": 1.5,
               "height": 44,
               "justifyContent": "center",
@@ -317,7 +317,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         <Text
           style={
             {
-              "fontSize": 20,
+              "fontSize": 15,
             }
           }
         >
@@ -362,7 +362,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#1A1A3E",
               "borderColor": "#8B85FF",
-              "borderRadius": 14,
+              "borderRadius": 12,
               "borderWidth": 1.5,
               "height": 44,
               "justifyContent": "center",
@@ -378,7 +378,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         <Text
           style={
             {
-              "fontSize": 20,
+              "fontSize": 15,
             }
           }
         >
@@ -1673,7 +1673,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         "alignItems": "center",
         "flex": 1,
         "justifyContent": "center",
-        "padding": 32,
+        "padding": 24,
       }
     }
   >
@@ -1704,7 +1704,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
       style={
         {
           "color": "#8B8FA3",
-          "fontSize": 14,
+          "fontSize": 13,
           "lineHeight": 20,
           "marginBottom": 16,
           "textAlign": "center",
@@ -1716,8 +1716,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
     <View
       style={
         {
-          "gap": 6,
-          "marginBottom": 24,
+          "gap": 4,
+          "marginBottom": 20,
         }
       }
     >
@@ -1725,7 +1725,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         style={
           {
             "color": "#5C5F7A",
-            "fontSize": 13,
+            "fontSize": 11,
             "textAlign": "center",
           }
         }
@@ -1736,7 +1736,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         style={
           {
             "color": "#5C5F7A",
-            "fontSize": 13,
+            "fontSize": 11,
             "textAlign": "center",
           }
         }
@@ -1747,7 +1747,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         style={
           {
             "color": "#5C5F7A",
-            "fontSize": 13,
+            "fontSize": 11,
             "textAlign": "center",
           }
         }
@@ -1759,7 +1759,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
       style={
         {
           "flexDirection": "row",
-          "gap": 12,
+          "gap": 16,
         }
       }
     >
@@ -1864,7 +1864,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
             {
               "color": "#FFFFFF",
               "fontSize": 15,
-              "fontWeight": "600",
+              "fontWeight": "700",
             }
           }
         >
@@ -1911,14 +1911,14 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
           "alignItems": "center",
           "backgroundColor": "#6C63FF",
           "borderColor": "#8B85FF40",
-          "borderRadius": 18,
+          "borderRadius": 24,
           "borderWidth": 1,
-          "bottom": 24,
-          "boxShadow": "0 4px 20px rgba(108, 99, 255, 0.3)",
+          "bottom": 20,
+          "elevation": 4,
           "height": 60,
           "justifyContent": "center",
           "position": "absolute",
-          "right": 20,
+          "right": 16,
           "width": 60,
         },
         false,
@@ -1930,7 +1930,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         {
           "color": "#FFF",
           "fontSize": 28,
-          "fontWeight": "400",
+          "fontWeight": "500",
           "lineHeight": 30,
         }
       }
@@ -2049,8 +2049,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
           "props": {
             "style": {
               "color": "#FFFFFF",
-              "fontSize": 24,
-              "fontWeight": "800",
+              "fontSize": 20,
+              "fontWeight": "700",
               "letterSpacing": -0.5,
               "marginBottom": 20,
               "marginTop": 8,
@@ -2067,11 +2067,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -2087,7 +2087,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -2150,12 +2150,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -2170,7 +2170,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -2267,12 +2267,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -2286,7 +2286,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "props": {
                     "style": {
                       "color": "#5C5F7A",
-                      "fontSize": 11,
+                      "fontSize": 10,
                       "textAlign": "center",
                     },
                   },
@@ -2335,7 +2335,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -2413,12 +2413,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -2426,7 +2426,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -2440,11 +2440,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -2460,7 +2460,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -3132,12 +3132,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -3152,7 +3152,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -3163,13 +3163,13 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
                   "marginTop": 8,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -3537,7 +3537,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -3548,13 +3548,13 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
                   "marginTop": 12,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -3976,7 +3976,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -3990,11 +3990,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -4028,7 +4028,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4067,12 +4067,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4080,7 +4080,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -4096,7 +4096,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "props": {
                     "style": {
                       "color": "#FFFFFF",
-                      "fontSize": 16,
+                      "fontSize": 15,
                       "fontWeight": "700",
                     },
                   },
@@ -4106,11 +4106,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -4171,7 +4171,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4234,12 +4234,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "alignItems": "center",
                     "backgroundColor": "#13132B",
                     "borderColor": "#1E1E42",
-                    "borderRadius": 12,
+                    "borderRadius": 16,
                     "borderWidth": 1,
                     "flexDirection": "row",
                     "justifyContent": "space-between",
                     "marginBottom": 2,
-                    "padding": 14,
+                    "padding": 16,
                   },
                   {
                     "marginTop": 8,
@@ -4251,7 +4251,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -4431,11 +4431,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -4451,7 +4451,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4474,12 +4474,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4494,7 +4494,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4522,12 +4522,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4542,7 +4542,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4569,12 +4569,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4589,7 +4589,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4639,12 +4639,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4659,7 +4659,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4709,12 +4709,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4729,7 +4729,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4805,12 +4805,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4825,7 +4825,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4876,12 +4876,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4896,7 +4896,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -4947,12 +4947,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4967,7 +4967,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5043,12 +5043,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5063,7 +5063,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5114,12 +5114,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5127,7 +5127,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -5141,11 +5141,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -5161,7 +5161,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5212,12 +5212,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5232,7 +5232,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5283,12 +5283,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5296,7 +5296,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
@@ -5310,11 +5310,11 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
-                  "marginLeft": 4,
+                  "marginLeft": 8,
                   "textTransform": "uppercase",
                 },
               },
@@ -5330,7 +5330,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5353,12 +5353,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5373,7 +5373,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                     "style": {
                       "color": "#FFFFFF",
                       "fontSize": 15,
-                      "fontWeight": "500",
+                      "fontWeight": "600",
                     },
                   },
                   "type": "Text",
@@ -5396,12 +5396,12 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#13132B",
                   "borderColor": "#1E1E42",
-                  "borderRadius": 12,
+                  "borderRadius": 16,
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -5409,7 +5409,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           ],
           "props": {
             "style": {
-              "marginBottom": 24,
+              "marginBottom": 20,
             },
           },
           "type": "View",
