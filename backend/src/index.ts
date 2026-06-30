@@ -89,6 +89,18 @@ async function initSchema() {
 }
 
 const PORT = process.env.PORT || 4000;
+
+function validateEnv() {
+  if (process.env.NODE_ENV === 'test') return;
+  const required = ['DATABASE_URL', 'JWT_SECRET', 'RAILWAY_API_TOKEN'];
+  for (const key of required) {
+    if (!process.env[key] || process.env[key].trim() === '') {
+      throw new Error(`Missing required env var: ${key}`);
+    }
+  }
+}
+validateEnv();
+
 initSentry();
 initSchema().then(() => {
   server.listen(PORT, () => {
