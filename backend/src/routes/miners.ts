@@ -108,3 +108,44 @@ minersRouter.get('/pools', async (_req: AuthRequest, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 });
+
+minersRouter.get('/:minerId/notes', async (req: AuthRequest, res) => {
+  try {
+    const { minerId } = req.params;
+    const result = await query(
+      `SELECT id, minerId, userId, text, createdAt
+       FROM miner_notes
+       WHERE minerId = $1 AND userId = $2
+       ORDER BY createdAt DESC`,
+      [minerId, getUserId(req)],
+    );
+    res.json(result.rows);
+  } catch (e: unknown) {
+    captureException(e);
+    res.status(500).json({ error: 'internal server error' });
+  }
+});
+
+const noteSchema = z.object({
+  text: z.string().min(1).max(500),
+});
+
+minersRouter.post('/:minerId/notes', async (req: AuthRequest, res) => {
+  try {
+    const { minerId } = req.params;
+    const data = noteSchema.parse(req.body);
+    const result = await query(
+      `INSERT INTO miner_notes (minerId, userId, text)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [minerId, getUserId(req), data.text],
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (e: unknown) {
+    if (e instanceof z.ZodError) {
+      return res.status(400).json({ error: e.errors });
+    }
+    captureException(e);
+    res.status(500).json({ error: 'internal server error' });
+  }
+});
