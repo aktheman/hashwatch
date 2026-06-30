@@ -682,7 +682,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
@@ -804,7 +804,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
@@ -1070,7 +1070,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
@@ -1192,7 +1192,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
@@ -1454,7 +1454,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
@@ -1561,7 +1561,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
               },
               {
                 "minHeight": 140,
-                "padding": 18,
+                "padding": 24,
               },
               {
                 "backgroundColor": "#13132B",
