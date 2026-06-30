@@ -469,7 +469,7 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     expect(await screen.findByLabelText('Cancel selection')).toBeTruthy();
   });
 
@@ -479,7 +479,7 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     expect(await screen.findByText('comparison.nSelected')).toBeTruthy();
   });
 
@@ -489,9 +489,9 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     const [, miner1] = await screen.findAllByText('Miner1');
-    fireEvent.press(miner1);
+    await fireEvent.press(miner1);
     expect(await screen.findByText('comparison.compare')).toBeTruthy();
   });
 
@@ -501,7 +501,7 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     const compareBtn = await screen.findByLabelText('Compare');
     await waitFor(() => {
       expect(compareBtn.props.accessibilityState.disabled).toBe(true);
@@ -514,13 +514,13 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     const [, miner1] = await screen.findAllByText('Miner1');
-    fireEvent.press(miner1);
+    await fireEvent.press(miner1);
     const [, miner2] = await screen.findAllByText('Miner2');
-    fireEvent.press(miner2);
+    await fireEvent.press(miner2);
     const compareAction = await screen.findByText('comparison.compare');
-    fireEvent.press(compareAction);
+    await fireEvent.press(compareAction);
     await waitFor(() => {
       expect(navigation.navigate).toHaveBeenCalledWith('MinerComparison', {
         minerIds: ['m1', 'm2'],
@@ -534,11 +534,11 @@ describe('comparison selection mode', () => {
     });
     await render(<DashboardScreen navigation={navigation} />);
     const btn = await screen.findByLabelText('Compare miners');
-    fireEvent.press(btn);
+    await fireEvent.press(btn);
     const [, miner1] = await screen.findAllByText('Miner1');
-    fireEvent.press(miner1);
+    await fireEvent.press(miner1);
     expect(await screen.findByLabelText('Cancel selection')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Cancel selection'));
+    await fireEvent.press(screen.getByLabelText('Cancel selection'));
     expect(await screen.findByLabelText('Compare miners')).toBeTruthy();
   });
 });
@@ -549,7 +549,7 @@ describe('batch operations', () => {
       miners: [makeMiner()],
     });
     await render(<DashboardScreen navigation={navigation} />);
-    fireEvent.press(await screen.findByLabelText('Compare miners'));
+    await fireEvent.press(await screen.findByLabelText('Compare miners'));
     expect(await screen.findByLabelText('Batch group')).toBeTruthy();
     expect(await screen.findByLabelText('Batch wallet')).toBeTruthy();
     expect(await screen.findByLabelText('Batch delete')).toBeTruthy();
@@ -563,10 +563,10 @@ describe('batch operations', () => {
     });
     const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation(() => {});
     await render(<DashboardScreen navigation={navigation} />);
-    fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
-    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
-    fireEvent.press(await screen.findByLabelText('Batch group'));
+    await fireEvent.press(await screen.findByLabelText('Compare miners'));
+    await fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    await fireEvent.press((await screen.findAllByText('Miner2'))[1]);
+    await fireEvent.press(await screen.findByLabelText('Batch group'));
     const promptArgs = promptSpy.mock.calls[0];
     const okButton = promptArgs?.[2]?.find((b: any) => b.text === 'common.ok');
     okButton?.onPress?.('Rack-A');
@@ -587,12 +587,12 @@ describe('batch operations', () => {
       setMinerWallet: mockSetWallet,
     });
     await render(<DashboardScreen navigation={navigation} />);
-    fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
-    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
-    fireEvent.press(await screen.findByLabelText('Batch wallet'));
+    await fireEvent.press(await screen.findByLabelText('Compare miners'));
+    await fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    await fireEvent.press((await screen.findAllByText('Miner2'))[1]);
+    await fireEvent.press(await screen.findByLabelText('Batch wallet'));
     expect(await screen.findByLabelText('Assign wallet: Test Wallet')).toBeTruthy();
-    fireEvent.press(screen.getByLabelText('Assign wallet: Test Wallet'));
+    await fireEvent.press(screen.getByLabelText('Assign wallet: Test Wallet'));
     await waitFor(() => {
       expect(mockSetWallet).toHaveBeenNthCalledWith(1, 'm1', 'w1');
       expect(mockSetWallet).toHaveBeenNthCalledWith(2, 'm2', 'w1');
@@ -610,10 +610,10 @@ describe('batch operations', () => {
     useToastStore.setState({ showUndo: mockShowUndo });
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     await render(<DashboardScreen navigation={navigation} />);
-    fireEvent.press(await screen.findByLabelText('Compare miners'));
-    fireEvent.press((await screen.findAllByText('Miner1'))[1]);
-    fireEvent.press((await screen.findAllByText('Miner2'))[1]);
-    fireEvent.press(await screen.findByLabelText('Batch delete'));
+    await fireEvent.press(await screen.findByLabelText('Compare miners'));
+    await fireEvent.press((await screen.findAllByText('Miner1'))[1]);
+    await fireEvent.press((await screen.findAllByText('Miner2'))[1]);
+    await fireEvent.press(await screen.findByLabelText('Batch delete'));
     const alertArgs = alertSpy.mock.calls[0];
     const deleteButton = alertArgs?.[2]?.find((b: any) => b.text === 'common.delete');
     deleteButton?.onPress?.();
