@@ -229,7 +229,7 @@ it('navigates to MinerDetail on miner press', async () => {
     ] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('TestMiner, online, 500.0 GH/s'));
+  await fireEvent.press(screen.getByLabelText('TestMiner, online, 500.0 GH/s'));
   expect(navigation.navigate).toHaveBeenCalledWith('MinerDetail', { minerId: 'm1' });
 });
 
@@ -246,7 +246,7 @@ it('navigates to AddMiner from FAB', async () => {
     miners: [{ id: 'm1' }] as any[],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('+'));
+  await fireEvent.press(screen.getByText('+'));
   expect(navigation.navigate).toHaveBeenCalledWith('AddMiner');
 });
 
@@ -256,7 +256,7 @@ it('navigates to Subscription when miner limit reached', async () => {
     miners: [makeMiner()],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('+'));
+  await fireEvent.press(screen.getByText('+'));
   expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
 });
 
@@ -275,7 +275,7 @@ it('upgrade banner navigates to Subscription', async () => {
     miners: [makeMiner()],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Upgrade to Pro'));
+  await fireEvent.press(screen.getByLabelText('Upgrade to Pro'));
   expect(navigation.navigate).toHaveBeenCalledWith('Subscription');
 });
 
@@ -289,7 +289,7 @@ it('error banner retry calls loadMiners', async () => {
   const loadMinersMock = jest.fn().mockResolvedValue(undefined);
   useMinerStore.setState({ error: 'Failed', loadMiners: loadMinersMock });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByText('common.retry'));
+  await fireEvent.press(screen.getByText('common.retry'));
   expect(loadMinersMock).toHaveBeenCalled();
 });
 
@@ -297,7 +297,7 @@ it('error banner dismiss calls clearError', async () => {
   const clearErrorMock = jest.fn();
   useMinerStore.setState({ error: 'Failed', clearError: clearErrorMock });
   await render(<DashboardScreen />);
-  fireEvent.press(screen.getByLabelText('errorBoundary.unexpectedError'));
+  await fireEvent.press(screen.getByLabelText('errorBoundary.unexpectedError'));
   expect(clearErrorMock).toHaveBeenCalled();
 });
 
@@ -340,7 +340,7 @@ it('filters miners by wallet', async () => {
   expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
 
-  fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
+  await fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
   await waitFor(() => {
     expect(screen.queryAllByText('Miner2').length).toBe(0);
@@ -360,11 +360,11 @@ it('toggles wallet filter off on second press', async () => {
     ],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
+  await fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   await waitFor(() => {
     expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
-  fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
+  await fireEvent.press(screen.getByLabelText('Filter by wallet: Wallet1'));
   await waitFor(() => {
     expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
@@ -405,11 +405,11 @@ it('toggles group filter off on second press', async () => {
     ],
   });
   await render(<DashboardScreen navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
+  await fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
   await waitFor(() => {
     expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
-  fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
+  await fireEvent.press(screen.getByLabelText('Filter by group: rack-a'));
   await waitFor(() => {
     expect(screen.getAllByText('Miner1').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
@@ -430,7 +430,7 @@ it('All chip resets both wallet and group filters', async () => {
   await waitFor(() => {
     expect(screen.queryAllByText('Miner2').length).toBe(0);
   });
-  fireEvent.press(screen.getByLabelText('Filter: All'));
+  await fireEvent.press(screen.getByLabelText('Filter: All'));
   await waitFor(() => {
     expect(screen.getAllByText('Miner2').length).toBeGreaterThanOrEqual(1);
   });
