@@ -45,7 +45,7 @@ alertHistoryRouter.post('/sync', async (req: AuthRequest, res) => {
 });
 
 alertHistoryRouter.put('/:id/read', async (req: AuthRequest, res) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) return res.status(400).json({ error: 'invalid id' });
   const result = await query(
     `UPDATE alert_history SET read = true WHERE id = $1 AND userId = $2 RETURNING id`,
