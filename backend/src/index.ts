@@ -95,11 +95,16 @@ const PORT = process.env.PORT || 4000;
 
 function validateEnv() {
   if (process.env.NODE_ENV === 'test') return;
-  const required = ['DATABASE_URL', 'JWT_SECRET', 'RAILWAY_API_TOKEN'];
+  const required = ['DATABASE_URL', 'JWT_SECRET'];
   for (const key of required) {
     if (!process.env[key] || process.env[key].trim() === '') {
       throw new Error(`Missing required env var: ${key}`);
     }
+  }
+  if (!process.env.RAILWAY_API_TOKEN || process.env.RAILWAY_API_TOKEN.trim() === '') {
+    console.warn(
+      'Optional env var RAILWAY_API_TOKEN is missing; Railway-specific features are disabled',
+    );
   }
 }
 validateEnv();

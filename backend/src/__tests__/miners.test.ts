@@ -178,3 +178,55 @@ describe('PUT /api/miners/:id', () => {
     expect(res.body.error).toBe('internal server error');
   });
 });
+
+describe('GET /api/miners/:minerId/notes', () => {
+  it('returns notes for miner', async () => {
+    const fixed = new Date().toISOString();
+    const notes = [{ id: 1, minerId: 'm1', userId: 'test-user-id', text: 'foo', createdAt: fixed }];
+    mockQuery.mockResolvedValueOnce({ rows: notes });
+
+    const res = await request(app).get('/api/miners/m1/notes');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(notes);
+    expect(mockQuery).toHaveBeenCalledWith(expect.any(String), ['m1', 'test-user-id']);
+  });
+
+  it('returns 500 on notes query error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB down'));
+
+    const res = await request(app).get('/api/miners/m1/notes');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
+});
+
+describe('POST /api/miners/:minerId/notes', () => {
+  it('creates a note', async () => {
+    const fixed = new Date().toISOString();
+    const note = { id: 2, minerId: 'm1', userId: 'test-user-id', text: 'hello', createdAt: fixed };
+    mockQuery.mockResolvedValueOnce({ rows: [note] });
+
+    const res = await request(app).post('/api/miners/m1/notes').send({ text: 'hello' });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual(note);
+    expect(mockQuery).toHaveBeenCalledWith(expect.any(String), ['m1', 'test-user-id', 'hello']);
+  });
+
+  it('returns 400 for empty note text', async () => {
+    const res = await request(app).post('/api/miners/m1/notes').send({ text: '' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 500 on note insert error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB down'));
+
+    const res = await request(app).post('/api/miners/m1/notes').send({ text: 'x' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
+});
