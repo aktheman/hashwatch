@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { theme } from '../theme';
+import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -62,30 +63,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: spacing.xl,
   },
   icon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: fontSize.h1,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: spacing.sm,
   },
   message: {
-    fontSize: 14,
+    fontSize: fontSize.base,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   retryBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: radius.lg,
   },
   retryText: {
-    fontWeight: '700',
-    fontSize: 15,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.md,
   },
 });
