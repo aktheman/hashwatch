@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import { getSetting, setSetting } from '../db/database';
 
 export type SectionKey =
@@ -133,10 +134,10 @@ export function DashboardCustomizer({
         <View
           style={{
             backgroundColor: theme.surface,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            padding: 20,
-            paddingBottom: 40,
+            borderTopLeftRadius: radius.xxl,
+            borderTopRightRadius: radius.xxl,
+            padding: spacing.xl,
+            paddingBottom: spacing.xxl,
             maxHeight: '80%',
           }}
         >
@@ -145,14 +146,14 @@ export function DashboardCustomizer({
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 16,
+              marginBottom: spacing.lg,
             }}
           >
-            <Text style={{ color: theme.text, fontSize: 18, fontWeight: '700' }}>
+            <Text style={{ color: theme.text, fontSize: fontSize.xl, fontWeight: fontWeight.bold }}>
               Customize Dashboard
             </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={{ color: theme.primary, fontSize: 16 }}>Done</Text>
+              <Text style={{ color: theme.primary, fontSize: fontSize.lg }}>Done</Text>
             </Pressable>
           </View>
           <ScrollView>
@@ -163,12 +164,12 @@ export function DashboardCustomizer({
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingVertical: 10,
+                  paddingVertical: spacing.sm,
                   borderBottomWidth: 1,
                   borderBottomColor: theme.border,
                 }}
               >
-                <Text style={{ color: theme.text, fontSize: 14 }}>{label}</Text>
+                <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
                 <Switch
                   value={visibleSections[key as SectionKey]}
                   onValueChange={() => onToggle(key as SectionKey)}
