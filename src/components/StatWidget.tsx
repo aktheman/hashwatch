@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useTheme } from '../theme';
+import { spacing, fontSize, fontWeight, radius, cardStyle } from '../utils/design';
 
 interface StatWidgetProps {
   label: string;
@@ -16,13 +17,10 @@ export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetP
     () =>
       StyleSheet.create({
         container: {
-          flex: 1,
+          ...cardStyle(theme),
           minWidth: '45%',
-          backgroundColor: theme.surface,
-          borderRadius: 16,
-          padding: 14,
-          margin: 5,
-          borderWidth: 1,
+          padding: spacing.md,
+          margin: spacing.xs,
           gap: 2,
         },
         iconCircle: {
@@ -31,22 +29,22 @@ export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetP
           borderRadius: 14,
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 6,
+          marginBottom: spacing.xxs,
         },
         iconText: {
-          fontSize: 12,
-          fontWeight: '700',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.bold,
         },
         label: {
           color: theme.textDim,
-          fontSize: 10,
-          fontWeight: '600',
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
         },
         value: {
-          fontSize: 22,
-          fontWeight: '800',
+          fontSize: fontSize.h2,
+          fontWeight: fontWeight.extrabold,
         },
       }),
     [theme],
