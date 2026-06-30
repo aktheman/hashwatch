@@ -186,7 +186,7 @@ it('shows Danger Zone with remove button', async () => {
 
 it('shows confirm dialog when remove is tapped', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  await fireEvent.press(screen.getByText('minerDetail.removeMiner'));
   expect(await screen.findByText(/minerDetail.removeConfirm/)).toBeTruthy();
   expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy();
 });
@@ -216,7 +216,7 @@ it('shows not found state for unknown miner', async () => {
 it('calls goBack when Go Back is pressed in not found state', async () => {
   const badRoute = { params: { minerId: 'nonexistent' } };
   await render(<MinerDetailScreen route={badRoute} navigation={navigation} />);
-  fireEvent.press(screen.getByText('common.goBack'));
+  await fireEvent.press(screen.getByText('common.goBack'));
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
@@ -234,7 +234,7 @@ it('calls refreshMiner when Retry is pressed in offline state', async () => {
   useMinerStore.setState({ miners: [offlineMiner] });
   const offlineRoute = { params: { minerId: 'm3' } };
   await render(<MinerDetailScreen route={offlineRoute} navigation={navigation} />);
-  fireEvent.press(screen.getByText('common.retry'));
+  await fireEvent.press(screen.getByText('common.retry'));
   expect(refreshMinerSpy).toHaveBeenCalledWith('m3');
   refreshMinerSpy.mockRestore();
 });
@@ -242,7 +242,7 @@ it('calls refreshMiner when Retry is pressed in offline state', async () => {
 it('shows Share Stats button and calls Share.share on press', async () => {
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
   expect(screen.getByText('minerDetail.shareStats')).toBeTruthy();
-  fireEvent.press(screen.getByLabelText('Share Stats'));
+  await fireEvent.press(screen.getByLabelText('Share Stats'));
   await waitFor(() => {
     expect(Share.share).toHaveBeenCalledWith(
       expect.objectContaining({ message: expect.stringContaining('TestMiner') }),
@@ -254,9 +254,9 @@ it('navigates back and removes miner after confirming remove', async () => {
   const removeMiner = jest.fn().mockResolvedValue(undefined);
   useMinerStore.setState({ removeMiner } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  await fireEvent.press(screen.getByText('minerDetail.removeMiner'));
   await waitFor(() => expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy());
-  fireEvent.press(screen.getByLabelText('Yes, Remove'));
+  await fireEvent.press(screen.getByLabelText('Yes, Remove'));
   await waitFor(() => expect(navigation.goBack).toHaveBeenCalled());
   expect(removeMiner).toHaveBeenCalledWith('m1');
 });
@@ -264,9 +264,9 @@ it('navigates back and removes miner after confirming remove', async () => {
 it('shows undo toast after removing miner', async () => {
   useMinerStore.setState({ removeMiner: jest.fn().mockResolvedValue(undefined) } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByText('minerDetail.removeMiner'));
+  await fireEvent.press(screen.getByText('minerDetail.removeMiner'));
   await waitFor(() => expect(screen.getByText('minerDetail.yesRemove')).toBeTruthy());
-  fireEvent.press(screen.getByLabelText('Yes, Remove'));
+  await fireEvent.press(screen.getByLabelText('Yes, Remove'));
   await waitFor(() =>
     expect(mockShowUndo).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -281,9 +281,9 @@ it('shows wallet picker with No wallet option and selects none', async () => {
   useMinerStore.setState({ setMinerWallet: mockSetMinerWallet } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
   const assignButton = screen.getByLabelText('Assign wallet');
-  fireEvent.press(assignButton);
+  await fireEvent.press(assignButton);
   expect(await screen.findByText('common.none')).toBeTruthy();
-  fireEvent.press(screen.getByLabelText('No wallet'));
+  await fireEvent.press(screen.getByLabelText('No wallet'));
   expect(mockSetMinerWallet).toHaveBeenCalledWith('m1', undefined);
 });
 
@@ -315,7 +315,7 @@ it('shows efficiency trend when snapshots exist', async () => {
 it('shows restart miner button and calls restart API', async () => {
   const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Restart Miner'));
+  await fireEvent.press(screen.getByLabelText('Restart Miner'));
   await waitFor(() => {
     expect(mockAlert).toHaveBeenCalledWith(
       'minerDetail.restartSent',
@@ -330,10 +330,10 @@ it('opens and selects emoji from picker', async () => {
   useMinerStore.setState({ setMinerIcon: mockSetMinerIcon } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  fireEvent.press(screen.getByLabelText('Choose icon'));
+  await fireEvent.press(screen.getByLabelText('Choose icon'));
   expect(await screen.findByLabelText('Set icon ⚡')).toBeTruthy();
 
-  fireEvent.press(screen.getByLabelText('Set icon ⚡'));
+  await fireEvent.press(screen.getByLabelText('Set icon ⚡'));
   expect(mockSetMinerIcon).toHaveBeenCalledWith('m1', '⚡');
 });
 
@@ -356,7 +356,7 @@ it('sets temp threshold via alert chip', async () => {
   const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  fireEvent.press(screen.getByLabelText('Set temp alert to 75°C'));
+  await fireEvent.press(screen.getByLabelText('Set temp alert to 75°C'));
 
   expect(mockAlertRules).toHaveBeenCalledWith('m1', expect.objectContaining({ tempThreshold: 75 }));
 });
@@ -365,7 +365,7 @@ it('sets hashrate drop alert via chip', async () => {
   const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  fireEvent.press(screen.getByLabelText('Set hashrate drop alert to 60%'));
+  await fireEvent.press(screen.getByLabelText('Set hashrate drop alert to 60%'));
 
   expect(mockAlertRules).toHaveBeenCalledWith(
     'm1',
@@ -381,9 +381,9 @@ it('selects a specific wallet from wallet picker', async () => {
   mockLoadWallets.mockResolvedValue([{ id: 'w1', name: 'Main Wallet', color: '#FF0000' }]);
 
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  fireEvent.press(screen.getByLabelText('Assign wallet'));
+  await fireEvent.press(screen.getByLabelText('Assign wallet'));
   expect(await screen.findByLabelText('Select wallet: Main Wallet')).toBeTruthy();
-  fireEvent.press(screen.getByLabelText('Select wallet: Main Wallet'));
+  await fireEvent.press(screen.getByLabelText('Select wallet: Main Wallet'));
 
   expect(mockSetMinerWallet).toHaveBeenCalledWith('m1', 'w1');
 });
@@ -393,10 +393,10 @@ it('opens location picker and selects a location', async () => {
   useMinerStore.setState({ setMinerLocation: mockSetMinerLocation } as any);
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  fireEvent.press(screen.getByText('Set location...'));
+  await fireEvent.press(screen.getByText('Set location...'));
   expect(await screen.findByLabelText('Set location to Data Center')).toBeTruthy();
 
-  fireEvent.press(screen.getByLabelText('Set location to Data Center'));
+  await fireEvent.press(screen.getByLabelText('Set location to Data Center'));
   expect(mockSetMinerLocation).toHaveBeenCalledWith('m1', 'Data Center');
 });
 
@@ -428,7 +428,7 @@ it('adds and removes tags', async () => {
 
   expect(screen.getByLabelText('Remove tag existing-tag')).toBeTruthy();
 
-  fireEvent.press(screen.getByLabelText('Remove tag existing-tag'));
+  await fireEvent.press(screen.getByLabelText('Remove tag existing-tag'));
   expect(mockSetMinerTags).toHaveBeenCalledWith('m1', []);
 });
 
