@@ -20,7 +20,7 @@ export function SummaryCard({ icon, value, label, color, accent }: SummaryCardPr
           flex: 1,
           backgroundColor: theme.surface,
           borderRadius: radius.lg,
-          padding: 14,
+          padding: spacing.md,
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.border,
