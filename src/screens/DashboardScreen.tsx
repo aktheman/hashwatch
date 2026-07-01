@@ -1516,7 +1516,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             marginBottom: 4,
           }}
         >
-          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Sort:</Text>
+          <Text
+            style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+          >
+            Sort:
+          </Text>
           {(['name', 'hashrate', 'temp'] as const).map((s) => (
             <Pressable
               key={s}
@@ -1524,8 +1528,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               accessibilityLabel={`Sort by ${s}`}
               onPress={() => setSortBy(s)}
               style={{
-                paddingHorizontal: 8,
-                paddingVertical: 3,
+                paddingHorizontal: spacing.xs,
+                paddingVertical: spacing.xxs,
                 borderRadius: radius.sm,
                 backgroundColor: sortBy === s ? theme.primaryLight : theme.surface,
                 borderWidth: 1,
@@ -1534,8 +1538,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             >
               <Text
                 style={{
-                  fontSize: 10,
-                  fontWeight: '700',
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.bold,
                   color: sortBy === s ? '#FFF' : theme.textMuted,
                 }}
               >
@@ -1563,8 +1567,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               accessibilityRole="button"
               onPress={() => setAutoGroupBy(g)}
               style={{
-                paddingHorizontal: 8,
-                paddingVertical: 3,
+                paddingHorizontal: spacing.xs,
+                paddingVertical: spacing.xxs,
                 borderRadius: radius.sm,
                 backgroundColor: autoGroupBy === g ? theme.accent : theme.surface,
                 borderWidth: 1,
