@@ -10,6 +10,7 @@ import {
   formatWTHs,
 } from '../utils/formatters';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface MinerCardProps {
   miner: Miner;
@@ -29,9 +30,9 @@ export const MinerCard = memo(
         StyleSheet.create({
           card: {
             backgroundColor: theme.surface,
-            borderRadius: 20,
-            padding: 16,
-            marginHorizontal: 16,
+            borderRadius: radius.xl,
+            padding: spacing.md,
+            marginHorizontal: spacing.md,
             marginVertical: 6,
             borderWidth: 1,
             borderColor: theme.border,
@@ -58,7 +59,7 @@ export const MinerCard = memo(
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 4,
+            marginBottom: spacing.xxs,
             paddingLeft: 4,
           },
           nameRow: {
@@ -70,12 +71,12 @@ export const MinerCard = memo(
             width: 8,
             height: 8,
             borderRadius: 4,
-            marginRight: 8,
+            marginRight: spacing.xs,
           },
           name: {
             color: theme.text,
-            fontSize: 16,
-            fontWeight: '700',
+            fontSize: fontSize.lg,
+            fontWeight: fontWeight.bold,
             flex: 1,
             letterSpacing: -0.3,
           },
@@ -96,15 +97,15 @@ export const MinerCard = memo(
           },
           ip: {
             color: theme.textMuted,
-            fontSize: 11,
+            fontSize: fontSize.sm,
             fontFamily: 'monospace',
             marginBottom: 10,
-            marginLeft: 12,
+            marginLeft: spacing.sm,
           },
           divider: {
             height: 1,
             backgroundColor: theme.border,
-            marginBottom: 12,
+            marginBottom: spacing.sm,
           },
           stats: {
             flexDirection: 'row',
@@ -122,14 +123,14 @@ export const MinerCard = memo(
           statLabel: {
             color: theme.textDim,
             fontSize: 9,
-            fontWeight: '700',
+            fontWeight: fontWeight.bold,
             textTransform: 'uppercase',
             letterSpacing: 0.8,
             marginBottom: 2,
           },
           statValue: {
-            fontSize: 18,
-            fontWeight: '800',
+            fontSize: fontSize.xl,
+            fontWeight: fontWeight.extrabold,
           },
           footer: {
             flexDirection: 'row',
@@ -142,34 +143,34 @@ export const MinerCard = memo(
           footerItem: {
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 4,
+            gap: spacing.xxs,
           },
           footerIcon: {
-            fontSize: 10,
+            fontSize: fontSize.xs,
             color: theme.textMuted,
           },
           footerText: {
             color: theme.textDim,
-            fontSize: 11,
-            fontWeight: '600',
+            fontSize: fontSize.sm,
+            fontWeight: fontWeight.semibold,
           },
           subFooter: {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 8,
-            paddingTop: 8,
+            marginTop: spacing.xs,
+            paddingTop: spacing.xs,
             borderTopWidth: 1,
             borderTopColor: theme.border,
           },
           powerText: {
             color: theme.textDim,
-            fontSize: 11,
-            fontWeight: '600',
+            fontSize: fontSize.sm,
+            fontWeight: fontWeight.semibold,
           },
           poolText: {
             color: theme.textMuted,
-            fontSize: 10,
+            fontSize: fontSize.xs,
             fontFamily: 'monospace',
             flex: 1,
             textAlign: 'right',
@@ -255,7 +256,7 @@ export const MinerCard = memo(
             ) : (
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                 {miner.icon ? (
-                  <Text style={{ fontSize: 16, marginRight: 4 }}>{miner.icon}</Text>
+                  <Text style={{ fontSize: fontSize.lg, marginRight: 4 }}>{miner.icon}</Text>
                 ) : null}
                 <Text style={styles.name} numberOfLines={1}>
                   {miner.name}
@@ -285,9 +286,9 @@ export const MinerCard = memo(
             style={{
               flexDirection: 'row',
               flexWrap: 'wrap',
-              gap: 4,
-              marginLeft: 12,
-              marginBottom: 4,
+              gap: spacing.xxs,
+              marginLeft: spacing.sm,
+              marginBottom: spacing.xxs,
             }}
           >
             {miner.tags.slice(0, 3).map((tag) => (
