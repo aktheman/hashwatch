@@ -59,9 +59,9 @@ export const MetricTile = React.memo(function MetricTile({
   };
 
   const valueSize = {
-    sm: 16,
-    md: 22,
-    lg: 28,
+    sm: fontSize.lg,
+    md: fontSize.h2,
+    lg: fontSize.hero,
   }[size];
 
   return (
@@ -186,7 +186,7 @@ function MiniBars({ data, color }: { data: number[]; color: string }) {
             width: barWidth,
             height: Math.max((v / max) * height, 3),
             backgroundColor: color,
-            borderRadius: 2,
+            borderRadius: radius.xxs,
             opacity: 0.9,
           }}
         />
