@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useNetworkStatus } from '../services/networkStatus';
+import { spacing, fontSize, fontWeight } from '../utils/design';
 
 export function OfflineBanner() {
   const { t } = useTranslation();
@@ -14,14 +15,14 @@ export function OfflineBanner() {
       StyleSheet.create({
         container: {
           backgroundColor: theme.warning,
-          paddingVertical: 6,
-          paddingHorizontal: 16,
+          paddingVertical: spacing.xxs,
+          paddingHorizontal: spacing.lg,
           alignItems: 'center',
         },
         text: {
           color: '#000',
-          fontSize: 12,
-          fontWeight: '700',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.bold,
         },
       }),
     [theme],
