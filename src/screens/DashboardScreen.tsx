@@ -1065,7 +1065,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       {visibleSections.ticker && miners.length > 0 && (
         <View
           style={{
-            paddingHorizontal: 16,
+            paddingHorizontal: spacing.md,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -1082,20 +1082,37 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 opacity: 0.8,
               }}
             />
-            <Text style={{ color: theme.textMuted, fontSize: 11, fontWeight: '600' }}>
+            <Text
+              style={{
+                color: theme.textMuted,
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.semibold,
+              }}
+            >
               BTC ${btcPrice.toLocaleString()}
             </Text>
-            <Text style={{ color: theme.textDim, fontSize: 11 }}>·</Text>
-            <Text style={{ color: theme.textMuted, fontSize: 11, fontWeight: '600' }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>·</Text>
+            <Text
+              style={{
+                color: theme.textMuted,
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.semibold,
+              }}
+            >
               {formatHashrateWithUnit(networkHashrate, 'H/s')}/s
             </Text>
           </View>
-          <TimeAgo timestamp={lastRefreshTime} style={{ color: theme.textDim, fontSize: 10 }} />
+          <TimeAgo
+            timestamp={lastRefreshTime}
+            style={{ color: theme.textDim, fontSize: fontSize.xs }}
+          />
         </View>
       )}
 
       {visibleSections.map && (
-        <View style={{ paddingHorizontal: 16, gap: 10, marginTop: 4, alignItems: 'center' }}>
+        <View
+          style={{ paddingHorizontal: spacing.md, gap: 10, marginTop: 4, alignItems: 'center' }}
+        >
           <WorldMap />
         </View>
       )}
@@ -1106,7 +1123,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             flexDirection: 'row',
             justifyContent: 'center',
             gap: 16,
-            paddingHorizontal: 16,
+            paddingHorizontal: spacing.md,
             marginTop: 2,
           }}
         >
@@ -1144,7 +1161,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {visibleSections.pools && miners.length > 0 && poolInfo.size > 0 && (
-        <View style={{ paddingHorizontal: 16, marginTop: 6, gap: 4 }}>
+        <View style={{ paddingHorizontal: spacing.md, marginTop: 6, gap: 4 }}>
           {Array.from(poolInfo.entries()).map(([pool, info]) => {
             const isExpanded = expandedPool === pool;
             const totalShares = info.accepted + info.rejected;
@@ -1176,7 +1193,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                     >
                       {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
                     </Text>
-                    <Text style={{ color: theme.textDim, fontSize: 10 }}>
+                    <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
                       {info.miners} miner{info.miners > 1 ? 's' : ''} · {info.responseTime}ms ·{' '}
                       {rejectRate}% rejected
                     </Text>
@@ -1249,7 +1266,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {visibleSections.metrics && (
-        <View style={{ paddingHorizontal: 16, gap: 14, marginTop: 4 }}>
+        <View style={{ paddingHorizontal: spacing.md, gap: 14, marginTop: 4 }}>
           <View style={{ flexDirection: 'row', gap: 14 }}>
             <View style={{ flex: 1 }}>
               <MetricTile
@@ -1331,8 +1348,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
-        <View style={{ paddingHorizontal: 16, marginBottom: 6 }}>
-          <Text style={{ color: theme.warning, fontSize: 11, fontWeight: '600' }}>
+        <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
+          <Text
+            style={{ color: theme.warning, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
+          >
             {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
             {t('dashboard.staleData') || 'stale'}
           </Text>
@@ -1345,7 +1364,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <View
             style={{
               flexDirection: 'row',
-              paddingHorizontal: 16,
+              paddingHorizontal: spacing.md,
               gap: spacing.xs,
               marginBottom: 6,
               flexWrap: 'wrap',
@@ -1493,7 +1512,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.xs,
-            paddingHorizontal: 16,
+            paddingHorizontal: spacing.md,
             marginBottom: 4,
           }}
         >
@@ -1533,7 +1552,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.xs,
-            paddingHorizontal: 16,
+            paddingHorizontal: spacing.md,
             marginBottom: 4,
           }}
         >
@@ -1608,7 +1627,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.xs,
-            paddingHorizontal: 16,
+            paddingHorizontal: spacing.md,
             marginBottom: 6,
           }}
         >
