@@ -164,12 +164,12 @@ export function DashboardCustomizer({
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingVertical: spacing.sm,
+                  paddingVertical: spacing.xs,
                   borderBottomWidth: 1,
                   borderBottomColor: theme.border,
                 }}
               >
-                <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
+                <Text style={{ color: theme.text, fontSize: 14 }}>{label}</Text>
                 <Switch
                   value={visibleSections[key as SectionKey]}
                   onValueChange={() => onToggle(key as SectionKey)}
@@ -183,7 +183,7 @@ export function DashboardCustomizer({
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                paddingVertical: 10,
+                paddingVertical: spacing.xs,
                 borderBottomWidth: 1,
                 borderBottomColor: theme.border,
               }}
