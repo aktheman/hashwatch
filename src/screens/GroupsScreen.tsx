@@ -41,20 +41,49 @@ export function GroupsScreen() {
 
   const [newGroupName, setNewGroupName] = useState('');
   const [emptyGroups, setEmptyGroups] = useState<string[]>([]);
+  const [groupOrder, setGroupOrder] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadEmptyGroups().then((eg) => {
+    Promise.all([
+      loadEmptyGroups(),
+      DB.getSetting('groups_order').then((raw) => {
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      }),
+    ]).then(([eg, go]) => {
       setEmptyGroups(eg);
+      setGroupOrder(go);
       setLoading(false);
     });
   }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    const eg = await loadEmptyGroups();
+    const [eg, go] = await Promise.all([
+      loadEmptyGroups(),
+      DB.getSetting('groups_order').then((raw) => {
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      }),
+    ]);
     setEmptyGroups(eg);
+    setGroupOrder(go);
     setRefreshing(false);
   }, []);
 
@@ -68,11 +97,20 @@ export function GroupsScreen() {
     for (const g of emptyGroups) {
       if (!map.has(g)) map.set(g, []);
     }
-    const arr = Array.from(map.entries()).sort(([a], [b]) =>
-      a === 'Ungrouped' ? 1 : b === 'Ungrouped' ? -1 : a.localeCompare(b),
-    );
+    const allNames = Array.from(map.keys());
+    const ordered = groupOrder.filter((n) => allNames.includes(n));
+    const remaining = allNames
+      .filter((n) => !ordered.includes(n) && n !== 'Ungrouped')
+      .sort((a, b) => a.localeCompare(b));
+    const arr = ordered.map((name) => [name, map.get(name)!] as [string, Miner[]]);
+    for (const name of remaining) {
+      arr.push([name, map.get(name)!]);
+    }
+    if (map.has('Ungrouped')) {
+      arr.push(['Ungrouped', map.get('Ungrouped')!]);
+    }
     return arr;
-  }, [miners, emptyGroups]);
+  }, [miners, emptyGroups, groupOrder]);
 
   const groupStats = useMemo(() => {
     const map = new Map<string, { totalHash: number; avgTemp: number; count: number }>();
@@ -138,6 +176,36 @@ export function GroupsScreen() {
       ]);
     },
     [miners, emptyGroups, setMinerGroup, t],
+  );
+
+  const moveGroup = useCallback(
+    (name: string, direction: 'up' | 'down') => {
+      const idx = groups.findIndex(([g]) => g === name);
+      if (idx === -1) return;
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= groups.length) return;
+      const names = groups.map(([g]) => g);
+      const namesNoUngrouped = names.filter((g) => g !== 'Ungrouped');
+      const srcIdx = namesNoUngrouped.indexOf(name);
+      const tgtIdx = direction === 'up' ? srcIdx - 1 : srcIdx + 1;
+      if (tgtIdx < 0 || tgtIdx >= namesNoUngrouped.length) return;
+      const newOrder = [...namesNoUngrouped];
+      [newOrder[srcIdx], newOrder[tgtIdx]] = [newOrder[tgtIdx], newOrder[srcIdx]];
+      setGroupOrder(newOrder);
+      DB.setSetting('groups_order', JSON.stringify(newOrder));
+      useToastStore.getState().showUndo({
+        id: `group-reorder-${Date.now()}`,
+        message: t('groups.orderSaved') || '',
+        onUndo: () => {
+          const reverted = [...newOrder];
+          [reverted[srcIdx], reverted[tgtIdx]] = [reverted[tgtIdx], reverted[srcIdx]];
+          setGroupOrder(reverted);
+          DB.setSetting('groups_order', JSON.stringify(reverted));
+        },
+        onConfirm: () => {},
+      });
+    },
+    [groups, t],
   );
 
   const renameGroup = useCallback(
@@ -334,6 +402,26 @@ export function GroupsScreen() {
               )}
               {name !== 'Ungrouped' && (
                 <View style={styles.actions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move group ${name} up`}
+                    style={[styles.actionBtn, { borderColor: theme.textMuted }]}
+                    onPress={() => moveGroup(name, 'up')}
+                  >
+                    <Text style={[styles.actionBtnText, { color: theme.textMuted }]}>
+                      {'\u25B2'}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move group ${name} down`}
+                    style={[styles.actionBtn, { borderColor: theme.textMuted }]}
+                    onPress={() => moveGroup(name, 'down')}
+                  >
+                    <Text style={[styles.actionBtnText, { color: theme.textMuted }]}>
+                      {'\u25BC'}
+                    </Text>
+                  </Pressable>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Rename group ${name}`}

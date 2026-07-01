@@ -44,3 +44,8 @@ export async function fetchLatestFirmware(): Promise<string | null> {
 export function getFirmwareChangelogUrl(version: string): string {
   return `https://github.com/skot/bitaxe/releases/tag/${version}`;
 }
+
+export function getFirmwareBinaryUrl(version: string): string {
+  const v = version.startsWith('v') ? version : `v${version}`;
+  return `https://github.com/skot/bitaxe/releases/download/${v}/bitaxe-${v}.bin`;
+}

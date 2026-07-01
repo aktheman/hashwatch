@@ -53,7 +53,9 @@ export function AnalyticsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<Range>('24h');
   const [powerCost, setPowerCost] = useState(0);
-  const [chartView, setChartView] = useState<'hashrate' | 'uptime' | 'efficiency'>('hashrate');
+  const [chartView, setChartView] = useState<'hashrate' | 'uptime' | 'efficiency' | 'profit'>(
+    'hashrate',
+  );
   const [btcPrice, setBtcPrice] = useState(getBTCPrice);
   const [selectedMinerIds, setSelectedMinerIds] = useState<Set<string>>(new Set());
   const [showMinerFilter, setShowMinerFilter] = useState(false);
@@ -396,6 +398,57 @@ export function AnalyticsScreen() {
     } as ChartDataWithLegend;
   }, [snapshots, range, selectedMinerIds, miners, theme.warning]);
 
+  const profitChartData = useMemo(() => {
+    if (snapshots.length < 2 || powerCost <= 0) return null;
+    const interval =
+      range === '1h' ? 60000 : range === '24h' ? 3600000 : range === '7d' ? 3600000 * 4 : 86400000;
+
+    const btcPrice = getBTCPrice();
+    const allGrouped: Record<number, { hashrate: number[]; power: number[] }> = {};
+    for (const s of snapshots) {
+      const bucket = Math.floor(s.timestamp / interval) * interval;
+      if (!allGrouped[bucket]) allGrouped[bucket] = { hashrate: [], power: [] };
+      const hps = toHashesPerSecond(s.hashRate, s.hashRateUnit);
+      allGrouped[bucket].hashrate.push(hps);
+      allGrouped[bucket].power.push(s.power);
+    }
+
+    const bucketTimes = Object.keys(allGrouped).map(Number).sort();
+    let sampledTimes = bucketTimes;
+    if (bucketTimes.length > 30) {
+      const step = Math.ceil(bucketTimes.length / 30);
+      sampledTimes = bucketTimes.filter((_, i) => i % step === 0);
+    }
+
+    const labels = sampledTimes.map((b) => {
+      const d = new Date(b);
+      return range === '7d' || range === '30d'
+        ? `${d.getMonth() + 1}/${d.getDate()}`
+        : `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    const data = sampledTimes.map((time) => {
+      const g = allGrouped[time];
+      const avgHashrate = g.hashrate.reduce((a, b) => a + b, 0) / g.hashrate.length;
+      const avgPower = g.power.reduce((a, b) => a + b, 0) / g.power.length;
+      const btcDay = estimateBTCPerDay(avgHashrate);
+      const dailyEarnings = btcDay * btcPrice;
+      const dailyPowerCost = (avgPower / 1000) * 24 * powerCost;
+      return Number((dailyEarnings - dailyPowerCost).toFixed(4));
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          data,
+          color: () => theme.success,
+          strokeWidth: 2,
+        },
+      ],
+    } as ChartDataWithLegend;
+  }, [snapshots, range, powerCost]);
+
   const chartConfig = {
     backgroundColor: theme.surface,
     backgroundGradientFrom: theme.surface,
@@ -638,7 +691,7 @@ export function AnalyticsScreen() {
 
         <View style={styles.chartCard}>
           <View style={styles.rangeRow}>
-            {(['hashrate', 'uptime', 'efficiency'] as const).map((view) => (
+            {(['hashrate', 'uptime', 'efficiency', 'profit'] as const).map((view) => (
               <Pressable
                 accessibilityRole="button"
                 key={view}
@@ -658,7 +711,9 @@ export function AnalyticsScreen() {
                     ? t('analytics.hashrateHistory')
                     : view === 'uptime'
                       ? t('analytics.uptimeHistory')
-                      : t('analytics.efficiencyHistory')}
+                      : view === 'efficiency'
+                        ? t('analytics.efficiencyHistory')
+                        : t('analytics.profitHistory')}
                 </Text>
               </Pressable>
             ))}
@@ -815,6 +870,25 @@ export function AnalyticsScreen() {
                     )}
                   </View>
                 )}
+            </>
+          ) : chartView === 'profit' && profitChartData ? (
+            <>
+              <LineChart
+                data={profitChartData}
+                width={screenWidth - 64}
+                height={200}
+                chartConfig={chartConfig}
+                bezier
+                style={{ borderRadius: 8 }}
+                withInnerLines={false}
+                withOuterLines={false}
+                fromZero
+              />
+              {powerCost <= 0 && (
+                <Text style={[styles.emptyText, { paddingVertical: 8 }]}>
+                  {String(t('analytics.setPowerCost')) || 'Set power cost in Settings'}
+                </Text>
+              )}
             </>
           ) : (
             <Text style={[styles.emptyText, { paddingVertical: 40 }]}>

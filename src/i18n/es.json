@@ -33,6 +33,12 @@
     "efficiency": "Eficiencia",
     "ungrouped": "Sin Grupo",
     "minerRemoved": "{{name}} eliminado",
+    "group": "Grupo",
+    "assignGroup": "Asignar Grupo",
+    "assignGroupBody": "Ingresa un nombre de grupo para los mineros seleccionados",
+    "removeGroup": "Eliminar Grupo",
+    "minerErrors": "{{count}} minero(s) inaccesible(s)",
+    "staleData": "obsoleto",
     "profitability": "Rentabilidad",
     "btcDay": "BTC/Día",
     "btcWeek": "BTC/Semana",
@@ -71,7 +77,9 @@
     "hashrateHistory": "Historial de Hashrate",
     "uptimeHistory": "Historial de Uptime",
     "notEnoughData": "Datos insuficientes. Mantén los mineros encendidos.",
-    "efficiencyHistory": "Historial de Eficiencia"
+    "efficiencyHistory": "Historial de Eficiencia",
+    "profitHistory": "Ganancias",
+    "setPowerCost": "Establecer costo eléctrico en Configuración"
   },
   "settings": {
     "title": "Configuración",
@@ -113,6 +121,8 @@
     "groups": "Grupos",
     "manage": "Gestionar",
     "exportCsv": "Exportar CSV",
+    "exportStatus": "Exportar CSV de Estado",
+    "currentStatus": "Estado Actual",
     "snapshots": "Snapshots",
     "exportJson": "Exportar JSON",
     "fullBackup": "Respaldo Completo",
@@ -252,7 +262,10 @@
     "groupRemoved": "{{groupName}} eliminado",
     "renameGroup": "Renombrar Grupo",
     "renamePrompt": "Nuevo nombre:",
-    "editInDetails": "Editar nombre de grupo en Detalles del Minero"
+    "editInDetails": "Editar nombre de grupo en Detalles del Minero",
+    "moveUp": "Mover arriba",
+    "moveDown": "Mover abajo",
+    "orderSaved": "Orden de grupos guardado"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -394,7 +407,19 @@
     "screenError": "Error de Pantalla"
   },
   "firmwareBanner": {
-    "updateAvailable": "Actualización de Firmware Disponible"
+    "updateAvailable": "Actualización de Firmware Disponible",
+    "title": "Firmware",
+    "currentVersion": "Actual",
+    "latestVersion": "Última",
+    "cached": "en caché",
+    "viewReleaseNotes": "Ver notas de la versión",
+    "updateTo": "Actualizar a {{version}}",
+    "checkForUpdates": "Buscar actualizaciones",
+    "flashingHint": "Actualizando firmware... El minero se reiniciará.",
+    "flashSent": "Envío de actualización exitoso",
+    "flashSentBody": "El minero se está actualizando. Se reiniciará automáticamente.",
+    "flashFailed": "Falló la actualización",
+    "flashFailedBody": "No se pudo actualizar el firmware. Verifica la conectividad del minero."
   },
   "hashrateChart": {
     "notEnoughData": "Datos insuficientes para el gráfico"

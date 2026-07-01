@@ -64,6 +64,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const scanNetwork = useMinerStore((s) => s.scanNetwork);
   const clearError = useMinerStore((s) => s.clearError);
   const clearMinerErrors = useMinerStore((s) => s.clearMinerErrors);
+  const lastRefreshTimestamp = useMinerStore((s) => s.lastRefreshTimestamp);
   const removeMiner = useMinerStore((s) => s.removeMiner);
   const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
   const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
@@ -83,6 +84,22 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [expandedPool, setExpandedPool] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [autoGroupBy, setAutoGroupBy] = useState<null | 'location' | 'tag'>(null);
+  const [groupOrder, setGroupOrder] = useState<string[]>([]);
+
+  useEffect(() => {
+    import('../db/database').then((DB) =>
+      DB.getSetting('groups_order').then((raw) => {
+        if (raw) {
+          try {
+            const p = JSON.parse(raw);
+            if (Array.isArray(p)) setGroupOrder(p);
+          } catch {
+            /* ignore */
+          }
+        }
+      }),
+    );
+  }, []);
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Record<SectionKey, boolean>>({
     ...DEFAULT_VISIBLE,
@@ -175,9 +192,20 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         scanNetwork();
       }
     }, 300000);
+    const unsubReconnect = (async () => {
+      try {
+        const { onNetworkReconnect } = await import('../services/networkStatus');
+        return onNetworkReconnect(() => {
+          useMinerStore.getState().refreshAll();
+        });
+      } catch {
+        return () => {};
+      }
+    })();
     return () => {
       stopPollingRef.current?.();
       clearInterval(autoScanInterval);
+      unsubReconnect.then((fn) => fn());
     };
   }, []);
 
@@ -362,6 +390,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   type GroupedItem =
     { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
 
+  const handleRename = useCallback((id: string, name: string) => {
+    useMinerStore.getState().setMinerName(id, name);
+  }, []);
+
+  const handleDelete = useCallback((minerId: string, minerName: string) => {
+    useToastStore.getState().showUndo({
+      id: `delete-${minerId}`,
+      message: `Dashboard: ${minerName} removed`,
+      onUndo: () => {},
+      onConfirm: () => useMinerStore.getState().removeMiner(minerId),
+    });
+  }, []);
+
   const renderGroupedItem = useCallback(
     ({ item }: { item: GroupedItem }) => {
       if (item.type === 'header') {
@@ -406,7 +447,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 width: 12,
               }}
             >
-              {isCollapsed ? '▶' : '▼'}
+              {isCollapsed ? '\u25B6' : '\u25BC'}
             </Text>
             <Text
               style={{ color: theme.text, fontSize: 13, fontWeight: '700', flex: 1 }}
@@ -432,7 +473,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   fontWeight: '600',
                 }}
               >
-                {avgT.toFixed(0)}°
+                {avgT.toFixed(0)}
+                {'\u00B0'}
               </Text>
             )}
           </Pressable>
@@ -443,19 +485,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         <MinerCard
           miner={m}
           onPress={handleMinerPress}
-          onRename={(id, name) => useMinerStore.getState().setMinerName(id, name)}
-          onDelete={() =>
-            useToastStore.getState().showUndo({
-              id: `delete-${m.id}`,
-              message: t('dashboard.minerRemoved', { name: m.name }),
-              onUndo: () => {},
-              onConfirm: () => useMinerStore.getState().removeMiner(m.id),
-            })
-          }
+          onRename={handleRename}
+          onDelete={() => handleDelete(m.id, m.name)}
         />
       );
     },
-    [handleMinerPress, t, collapsedGroups, theme],
+    [handleMinerPress, handleRename, handleDelete, collapsedGroups, theme],
   );
 
   const canAdd = canAddMiner(miners.length);
@@ -524,14 +559,21 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     const items: (
       { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
     )[] = [];
-    for (const [group, miners] of groups) {
+    const orderedGroups = groupOrder.filter((g) => groups.has(g));
+    const remaining = Array.from(groups.keys())
+      .filter((g) => !orderedGroups.includes(g) && g !== 'Ungrouped')
+      .sort((a, b) => a.localeCompare(b));
+    const sortedKeys = [...orderedGroups, ...remaining];
+    if (groups.has('Ungrouped')) sortedKeys.push('Ungrouped');
+    for (const group of sortedKeys) {
+      const miners = groups.get(group)!;
       items.push({ type: 'header', group, miners });
       if (!collapsedGroups.has(group)) {
         for (const m of miners) items.push({ type: 'miner', miner: m });
       }
     }
     return items;
-  }, [sortedMiners, collapsedGroups, autoGroupBy]);
+  }, [sortedMiners, collapsedGroups, autoGroupBy, groupOrder]);
 
   const styles = useMemo(
     () =>
@@ -1228,6 +1270,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {visibleSections.profitability && miners.length > 0 && (
         <ProfitabilityCard miners={filteredMiners} powerCost={powerCost} />
+      )}
+
+      {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
+        <View style={{ paddingHorizontal: 16, marginBottom: 6 }}>
+          <Text style={{ color: theme.warning, fontSize: 11, fontWeight: '600' }}>
+            {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
+            {t('dashboard.staleData') || 'stale'}
+          </Text>
+        </View>
       )}
 
       {!kioskMode &&

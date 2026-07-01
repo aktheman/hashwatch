@@ -280,3 +280,24 @@ export async function addMinerNote(minerId: string, text: string): Promise<Miner
   });
   return res.data;
 }
+
+export interface MinerAlertRule {
+  enabled: boolean;
+  tempThreshold: number;
+  hashrateDropPercent: number;
+  offlineReminderMinutes: number;
+  uptimeThresholdHours: number;
+}
+
+export async function fetchMinerAlertRules(minerId: string): Promise<MinerAlertRule> {
+  const res = await client.get<MinerAlertRule>(`/api/miner-alert-rules/${minerId}`);
+  return res.data;
+}
+
+export async function putMinerAlertRules(
+  minerId: string,
+  rules: MinerAlertRule,
+): Promise<OkResponse> {
+  const res = await client.put<OkResponse>(`/api/miner-alert-rules/${minerId}`, rules);
+  return res.data;
+}

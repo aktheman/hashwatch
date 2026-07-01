@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from 'react';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
@@ -28,6 +28,10 @@ interface PoolsScreenProps {
   navigation: NavigationProp;
 }
 
+function formatRate(hashesPerSecond: number): string {
+  return formatHashrateValue(hashesPerSecond);
+}
+
 export function PoolsScreen({ navigation }: PoolsScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -38,8 +42,8 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
 
   const previousPools = useRef<Record<string, string>>({});
   const [changedPools, setChangedPools] = useState<Set<string>>(new Set());
-
   const [refreshing, setRefreshing] = useState(false);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refreshAll();
@@ -73,9 +77,12 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         groups[key].bestDiff = m.status.bestDiff;
       }
     }
-    // detect pool changes
+    return Object.values(groups).sort((a, b) => b.totalHashrate - a.totalHashrate);
+  }, [miners]);
+
+  useEffect(() => {
     const freshChanged = new Set<string>();
-    for (const g of Object.values(groups)) {
+    for (const g of poolGroups) {
       for (const m of g.miners) {
         const prev = previousPools.current[m.id];
         if (prev && prev !== g.pool) {
@@ -85,8 +92,102 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
       }
     }
     setChangedPools(freshChanged);
-    return Object.values(groups).sort((a, b) => b.totalHashrate - a.totalHashrate);
-  }, [miners]);
+  }, [poolGroups]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: PoolGroup }) => {
+      const totalShares = item.totalSharesAccepted + item.totalSharesRejected;
+      const acceptRate =
+        totalShares > 0 ? ((item.totalSharesAccepted / totalShares) * 100).toFixed(1) : '\u2014';
+      const hasChanged = changedPools.has(item.pool);
+      return (
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.poolName} numberOfLines={1}>
+                  {item.pool}:{item.poolPort}
+                </Text>
+                {hasChanged && (
+                  <View style={styles.changeBadge}>
+                    <Text style={styles.changeBadgeText}>{String(t('pools.poolChanged'))}</Text>
+                  </View>
+                )}
+              </View>
+              {item.poolUser && (
+                <Text style={styles.poolUser} numberOfLines={1}>
+                  {item.poolUser}
+                </Text>
+              )}
+            </View>
+          </View>
+          <View style={styles.statRow}>
+            <MetricTile
+              title={String(t('pools.hashrate'))}
+              value={formatRate(item.totalHashrate)}
+              accent="info"
+            />
+            <MetricTile
+              title={String(t('pools.estDaily'))}
+              value={
+                estimateBTCPerDay(item.totalHashrate) > 0
+                  ? formatBTC(estimateBTCPerDay(item.totalHashrate))
+                  : '\u2014'
+              }
+              accent="success"
+            />
+            <MetricTile
+              title={String(t('pools.miners'))}
+              value={String(item.miners.length)}
+              accent="primary"
+            />
+          </View>
+          <View style={styles.statRow}>
+            <MetricTile
+              title={String(t('pools.shares'))}
+              value={totalShares.toLocaleString()}
+              accent="warning"
+            />
+            <MetricTile
+              title={String(t('pools.acceptRate'))}
+              value={`${acceptRate}%`}
+              accent="success"
+            />
+            <MetricTile
+              title={String(t('pools.bestDiff'))}
+              value={item.bestDiff}
+              accent="primary"
+            />
+          </View>
+          <View style={styles.minerList}>
+            {item.miners.map((m) => (
+              <Pressable
+                accessibilityRole="button"
+                key={m.id}
+                accessibilityLabel={`View miner: ${m.name}`}
+                style={styles.minerRow}
+                onPress={() => navigation.navigate('MinerDetail', { minerId: m.id })}
+              >
+                <View
+                  style={[
+                    styles.minerDot,
+                    { backgroundColor: m.isOnline ? theme.success : theme.danger },
+                  ]}
+                />
+                <Text style={styles.minerName} numberOfLines={1}>
+                  {m.name}
+                </Text>
+                <Text style={styles.minerHash}>
+                  {formatRate(toHashesPerSecond(m.status?.hashRate || 0, m.status?.hashRateUnit))}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      );
+    },
+    [changedPools, theme, t, navigation.navigate],
+  );
 
   const styles = useMemo(
     () =>
@@ -162,8 +263,6 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
     [theme],
   );
 
-  const formatRate = (hashesPerSecond: number) => formatHashrateValue(hashesPerSecond);
-
   if (!initialized || (loading && miners.length === 0)) {
     return (
       <View style={[styles.container, { paddingTop: 16 }]}>
@@ -183,7 +282,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
           </View>
         </View>
         <View style={styles.empty}>
-          <Text style={styles.emptyIcon}>🌊</Text>
+          <Text style={styles.emptyIcon}>{'\uD83C\uDF0A'}</Text>
           <Text style={styles.emptyTitle}>{t('pools.noPools')}</Text>
           <Text style={styles.emptyText}>{t('pools.noPoolsBody')}</Text>
         </View>
@@ -203,7 +302,7 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
       </View>
       <FlatList
         data={poolGroups}
-        keyExtractor={(item) => `${item.pool}:${item.poolPort}`}
+        keyExtractor={keyExtractor}
         contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         windowSize={7}
@@ -212,100 +311,12 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
         }
-        renderItem={({ item }) => {
-          const totalShares = item.totalSharesAccepted + item.totalSharesRejected;
-          const acceptRate =
-            totalShares > 0 ? ((item.totalSharesAccepted / totalShares) * 100).toFixed(1) : '—';
-          const hasChanged = changedPools.has(item.pool);
-          return (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={styles.poolName} numberOfLines={1}>
-                      {item.pool}:{item.poolPort}
-                    </Text>
-                    {hasChanged && (
-                      <View style={styles.changeBadge}>
-                        <Text style={styles.changeBadgeText}>{String(t('pools.poolChanged'))}</Text>
-                      </View>
-                    )}
-                  </View>
-                  {item.poolUser && (
-                    <Text style={styles.poolUser} numberOfLines={1}>
-                      {item.poolUser}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              <View style={styles.statRow}>
-                <MetricTile
-                  title={String(t('pools.hashrate'))}
-                  value={formatRate(item.totalHashrate)}
-                  accent="info"
-                />
-                <MetricTile
-                  title={String(t('pools.estDaily'))}
-                  value={
-                    estimateBTCPerDay(item.totalHashrate) > 0
-                      ? formatBTC(estimateBTCPerDay(item.totalHashrate))
-                      : '—'
-                  }
-                  accent="success"
-                />
-                <MetricTile
-                  title={String(t('pools.miners'))}
-                  value={String(item.miners.length)}
-                  accent="primary"
-                />
-              </View>
-              <View style={styles.statRow}>
-                <MetricTile
-                  title={String(t('pools.shares'))}
-                  value={totalShares.toLocaleString()}
-                  accent="warning"
-                />
-                <MetricTile
-                  title={String(t('pools.acceptRate'))}
-                  value={`${acceptRate}%`}
-                  accent="success"
-                />
-                <MetricTile
-                  title={String(t('pools.bestDiff'))}
-                  value={item.bestDiff}
-                  accent="primary"
-                />
-              </View>
-              <View style={styles.minerList}>
-                {item.miners.map((m) => (
-                  <Pressable
-                    accessibilityRole="button"
-                    key={m.id}
-                    accessibilityLabel={`View miner: ${m.name}`}
-                    style={styles.minerRow}
-                    onPress={() => navigation.navigate('MinerDetail', { minerId: m.id })}
-                  >
-                    <View
-                      style={[
-                        styles.minerDot,
-                        { backgroundColor: m.isOnline ? theme.success : theme.danger },
-                      ]}
-                    />
-                    <Text style={styles.minerName} numberOfLines={1}>
-                      {m.name}
-                    </Text>
-                    <Text style={styles.minerHash}>
-                      {formatRate(
-                        toHashesPerSecond(m.status?.hashRate || 0, m.status?.hashRateUnit),
-                      )}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          );
-        }}
+        renderItem={renderItem}
       />
     </View>
   );
+}
+
+function keyExtractor(item: PoolGroup): string {
+  return `${item.pool}:${item.poolPort}`;
 }

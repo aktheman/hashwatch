@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Pressable, Linking, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Linking,
+  StyleSheet,
+  ActivityIndicator,
+  Alert as RNAlert,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import {
@@ -7,84 +15,234 @@ import {
   needsUpdate,
   LATEST_FIRMWARE,
   getFirmwareUrl,
+  getFirmwareBinaryUrl,
   fetchLatestFirmware,
 } from '../utils/version';
+import { BitAxeClient } from '../api/bitaxe';
 import { spacing, radius, fontWeight, fontSize } from '../utils/design';
 
 interface FirmwareBannerProps {
   rawVersion: string | null | undefined;
+  minerIp: string;
+  minerPort: number;
+  apiPath?: string | null;
+  statusPath?: string | null;
 }
 
-export function FirmwareBanner({ rawVersion }: FirmwareBannerProps) {
+export function FirmwareBanner({
+  rawVersion,
+  minerIp,
+  minerPort,
+  apiPath,
+  statusPath,
+}: FirmwareBannerProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const [latest, setLatest] = useState<string | null>(null);
+  const [flashing, setFlashing] = useState(false);
+  const [flashResult, setFlashResult] = useState<'success' | 'fail' | null>(null);
 
   useEffect(() => {
     fetchLatestFirmware().then((v) => setLatest(v));
   }, []);
 
-  if (!rawVersion) return null;
-
-  const parsed = parseVersion(rawVersion);
+  const parsed = parseVersion(rawVersion ?? '');
+  if (!parsed && !rawVersion) return null;
   if (!parsed) return null;
 
   const target = latest || LATEST_FIRMWARE;
-  if (!needsUpdate(parsed, target)) return null;
+  const hasUpdate = needsUpdate(parsed, target);
+  const currentVersion = rawVersion && parseVersion(rawVersion);
 
-  const handlePress = () => {
-    const url = getFirmwareUrl();
-    Linking.openURL(url).catch((e: unknown) => console.warn('Failed to open firmware URL:', e));
+  const handleOpenReleases = () => {
+    Linking.openURL(getFirmwareUrl()).catch((e: unknown) =>
+      console.warn('Failed to open firmware URL:', e),
+    );
+  };
+
+  const handleFlash = async () => {
+    if (flashing) return;
+    setFlashing(true);
+    setFlashResult(null);
+    try {
+      const client = new BitAxeClient(
+        minerIp,
+        minerPort,
+        apiPath ?? undefined,
+        statusPath ?? undefined,
+      );
+      const binUrl = getFirmwareBinaryUrl(target);
+      const ok = await client.flashFirmware(binUrl);
+      setFlashResult(ok ? 'success' : 'fail');
+      if (ok) {
+        RNAlert.alert(t('firmwareBanner.flashSent'), t('firmwareBanner.flashSentBody'));
+      } else {
+        RNAlert.alert(t('firmwareBanner.flashFailed'), t('firmwareBanner.flashFailedBody'));
+      }
+    } catch {
+      setFlashResult('fail');
+      RNAlert.alert(t('firmwareBanner.flashFailed'), t('firmwareBanner.flashFailedBody'));
+    } finally {
+      setFlashing(false);
+    }
   };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      style={[styles.banner, { backgroundColor: theme.warning + '1A', borderColor: theme.warning }]}
-      onPress={handlePress}
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: hasUpdate ? theme.warning + '12' : theme.surfaceLight,
+          borderColor: hasUpdate ? theme.warning + '40' : theme.border,
+        },
+      ]}
     >
-      <Text style={styles.icon}>⬆</Text>
-      <View style={styles.textWrap}>
-        <Text style={[styles.title, { color: theme.warning }]}>
-          {t('firmwareBanner.updateAvailable')}
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.text }]}>{t('firmwareBanner.title')}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: theme.textMuted }]}>
+          {t('firmwareBanner.currentVersion')}
         </Text>
-        <Text style={[styles.detail, { color: theme.textDim }]}>
-          {parsed} → {target}
+        <Text style={[styles.value, { color: theme.text }]}>
+          {currentVersion ?? rawVersion ?? '-'}
         </Text>
       </View>
-      <Text style={[styles.arrow, { color: theme.textMuted }]}>›</Text>
-    </Pressable>
+
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: theme.textMuted }]}>
+          {t('firmwareBanner.latestVersion')}
+        </Text>
+        <Text style={[styles.value, { color: hasUpdate ? theme.warning : theme.success }]}>
+          {latest ? target : LATEST_FIRMWARE}
+          {!latest && (
+            <Text style={[styles.hint, { color: theme.textDim }]}>
+              {' '}
+              ({t('firmwareBanner.cached')})
+            </Text>
+          )}
+        </Text>
+      </View>
+
+      {hasUpdate && (
+        <Pressable
+          accessibilityRole="button"
+          style={styles.releaseLink}
+          onPress={handleOpenReleases}
+        >
+          <Text style={[styles.releaseLinkText, { color: theme.primary }]}>
+            {t('firmwareBanner.viewReleaseNotes')} ›
+          </Text>
+        </Pressable>
+      )}
+
+      {hasUpdate && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={String(t('firmwareBanner.updateTo', { version: target }))}
+          style={[
+            styles.flashBtn,
+            {
+              backgroundColor: theme.primary,
+              opacity: flashing ? 0.6 : 1,
+            },
+          ]}
+          disabled={flashing}
+          onPress={handleFlash}
+        >
+          {flashing ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.flashBtnText}>
+              {flashResult === 'success' ? '✓ ' : flashResult === 'fail' ? '✗ ' : ''}
+              {t('firmwareBanner.updateTo', { version: target })}
+            </Text>
+          )}
+        </Pressable>
+      )}
+
+      {!latest && (
+        <Pressable
+          accessibilityRole="button"
+          style={{ marginTop: spacing.xs, alignSelf: 'flex-start' }}
+          onPress={() => fetchLatestFirmware().then((v) => setLatest(v))}
+        >
+          <Text style={[styles.releaseLinkText, { color: theme.primary }]}>
+            {t('firmwareBanner.checkForUpdates')}
+          </Text>
+        </Pressable>
+      )}
+
+      {flashing && (
+        <Text style={[styles.flashingHint, { color: theme.textDim }]}>
+          {t('firmwareBanner.flashingHint')}
+        </Text>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  container: {
     borderRadius: radius.md,
     borderWidth: 1,
-    padding: spacing.sm,
+    padding: spacing.md,
     marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
-  icon: {
-    fontSize: fontSize.base,
+  header: {
+    marginBottom: spacing.xs,
   },
-  textWrap: {
-    flex: 1,
   },
   title: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
   },
-  detail: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.xxs,
-    fontFamily: 'monospace',
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  arrow: {
-    fontSize: fontSize.h2,
+  label: {
+    fontSize: 13,
+  },
+  value: {
+    fontSize: 13,
+    fontFamily: 'monospace',
+    fontWeight: fontWeight.semibold,
+  },
+  hint: {
+    fontSize: 11,
+    fontFamily: 'monospace',
     fontWeight: fontWeight.regular,
+  },
+  releaseLink: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.xs,
+  },
+  releaseLinkText: {
+    fontSize: 13,
+    fontWeight: fontWeight.semibold,
+  },
+  flashBtn: {
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+    minHeight: 40,
+  },
+  flashBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: fontWeight.bold,
+  },
+  flashingHint: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
 });

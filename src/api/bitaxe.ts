@@ -223,6 +223,34 @@ export class BitAxeClient {
     }
   }
 
+  async flashFirmware(url: string): Promise<boolean> {
+    try {
+      const path = '/api/system/ota';
+      if (isWeb) {
+        const headers: Record<string, string> = {};
+        const apiUrl = getExtra().apiUrl;
+        if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
+          const token = getAuthToken();
+          if (token) headers.Authorization = `Bearer ${token}`;
+        }
+        const { data } = await axios.post(
+          `${getProxyUrl()}/api/proxy/flash`,
+          {
+            url: `http://${formatIp(this.ip)}:${this.port}${path}`,
+            method: 'POST',
+            body: JSON.stringify({ url }),
+          },
+          { timeout: 120000, headers, validateStatus: () => true },
+        );
+        return data?.success === true;
+      }
+      await this.client.post(path, { url }, { timeout: 120000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   static async probe(ip: string, port: number = 80): Promise<FoundPaths | null> {
     const paths = await findPaths(ip, port);
     if (!paths.infoPath) return null;

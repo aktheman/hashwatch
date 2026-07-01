@@ -561,7 +561,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Pressable>
           )}
           {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
-          {miner.info?.version && <FirmwareBanner rawVersion={miner.info.version} />}
+          {miner.info?.version && (
+            <FirmwareBanner
+              rawVersion={miner.info.version}
+              minerIp={miner.ip}
+              minerPort={miner.port}
+              apiPath={miner.apiPath}
+              statusPath={miner.statusPath}
+            />
+          )}
           {showEmojiPicker && (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
               {[

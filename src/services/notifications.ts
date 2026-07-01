@@ -49,6 +49,22 @@ export async function getAlertRules(minerId: string): Promise<AlertRule> {
 
 export async function setAlertRules(minerId: string, rules: AlertRule): Promise<void> {
   await DB.setSetting(`alert_rules_${minerId}`, JSON.stringify(rules));
+  try {
+    const { useAuthStore } = await import('../store/auth');
+    const token = useAuthStore.getState().token;
+    if (token) {
+      const { putMinerAlertRules } = await import('../api/client');
+      await putMinerAlertRules(minerId, {
+        enabled: rules.enabled,
+        tempThreshold: rules.tempThreshold,
+        hashrateDropPercent: rules.hashrateDropPercent,
+        offlineReminderMinutes: rules.offlineReminderMinutes,
+        uptimeThresholdHours: rules.uptimeThresholdHours,
+      });
+    }
+  } catch {
+    // silent — offline or not authenticated
+  }
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {

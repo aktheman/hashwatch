@@ -70,6 +70,7 @@ jest.mock('../src/api/bitaxe', () => ({
 jest.mock('../src/utils/export', () => ({
   exportAllData: jest.fn().mockResolvedValue(undefined),
   exportJSON: jest.fn().mockResolvedValue(undefined),
+  exportMinerStatusCSV: jest.fn().mockResolvedValue(undefined),
 }));
 
 let mockAuthToken: string | null = null;
@@ -377,6 +378,13 @@ it('schedules dark mode at selected hour', async () => {
   await render(<SettingsScreen navigation={navigation} />);
   await fireEvent.press(screen.getByLabelText('Schedule dark mode at 20:00'));
   expect(mockSetSetting).toHaveBeenCalledWith('auto_dark_hour', '20');
+});
+
+it('calls exportMinerStatusCSV on Export Status CSV press', async () => {
+  const { exportMinerStatusCSV: mockExport } = jest.requireMock('../src/utils/export');
+  await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Export Status CSV'));
+  expect(mockExport).toHaveBeenCalled();
 });
 
 it('shows alert when exportAllData fails', async () => {

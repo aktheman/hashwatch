@@ -22,7 +22,7 @@ import {
   clearThemeSchedule,
 } from '../theme';
 import { getSetting, setSetting } from '../db/database';
-import { exportAllData, exportJSON, importFromCSV } from '../utils/export';
+import { exportAllData, exportJSON, exportMinerStatusCSV, importFromCSV } from '../utils/export';
 import { exportBackup, importBackup } from '../services/backup';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
@@ -973,6 +973,19 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         >
           <Text style={styles.rowLabel}>{t('settings.exportCsv')}</Text>
           <Text style={styles.actionText}>{t('settings.snapshots')}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Export Status CSV"
+          style={styles.row}
+          onPress={() => {
+            exportMinerStatusCSV().catch(() => {
+              Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
+            });
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('settings.exportStatus')}</Text>
+          <Text style={styles.actionText}>{t('settings.currentStatus')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"

@@ -58,7 +58,7 @@ async function pollMiner(miner: MinerRow): Promise<void> {
         : 0;
   const pool = extractPool(info, status);
 
-  checkMinerStatus(
+  await checkMinerStatus(
     miner.userid,
     miner.id,
     miner.name,
