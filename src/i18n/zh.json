@@ -31,8 +31,21 @@
     "power": "功率 (W)",
     "avgTemp": "平均温度",
     "efficiency": "能效",
+    "profitability": "收益",
+    "btcDay": "BTC/天",
+    "btcWeek": "BTC/周",
+    "btcMonth": "BTC/月",
+    "usdEquivalent": "美元等价",
+    "perMiner": "每台矿机",
+    "total": "总计",
     "ungrouped": "未分组",
-    "minerRemoved": "{{name}} 已移除"
+    "minerRemoved": "{{name}} 已移除",
+    "group": "分组",
+    "assignGroup": "分配分组",
+    "assignGroupBody": "为选中的矿机输入分组名称",
+    "removeGroup": "移除分组",
+    "minerErrors": "{{count}} 台矿机无法访问",
+    "staleData": "过期"
   },
   "pools": {
     "title": "矿池",
@@ -42,7 +55,11 @@
     "hashrate": "算力",
     "estDaily": "预计日收益",
     "miners": "矿机",
-    "poolCount": "{{pools}} 个矿池 · {{miners}} 台矿机"
+    "poolCount": "{{pools}} 个矿池 · {{miners}} 台矿机",
+    "shares": "份额",
+    "acceptRate": "接受率",
+    "bestDiff": "最佳难度",
+    "poolChanged": "矿池已变更"
   },
   "analytics": {
     "title": "分析",
@@ -59,6 +76,9 @@
     "netDay": "每日净收益",
     "hashrateHistory": "算力历史",
     "uptimeHistory": "在线历史",
+    "efficiencyHistory": "能效历史",
+    "profitHistory": "收益",
+    "setPowerCost": "在设置中设置电费",
     "notEnoughData": "数据不足。请保持矿机运行。"
   },
   "settings": {
@@ -101,6 +121,8 @@
     "groups": "分组",
     "manage": "管理",
     "exportCsv": "导出 CSV",
+    "exportStatus": "导出状态 CSV",
+    "currentStatus": "当前状态",
     "snapshots": "快照",
     "exportJson": "导出 JSON",
     "fullBackup": "完整备份",
@@ -110,7 +132,31 @@
     "about": "关于",
     "version": "版本",
     "madeFor": "专为",
-    "bitaxeMiners": "BitAxe 矿机制作"
+    "bitaxeMiners": "BitAxe 矿机制作",
+    "syncNow": "立即同步",
+    "syncing": "同步中...",
+    "lastSync": "上次同步 {{time}} 前",
+    "notifications": "通知",
+    "pushAlerts": "推送通知",
+    "alertHistory": "告警历史",
+    "language": "语言 / Language / Sprache",
+    "darkModeSchedule": "深色模式定时",
+    "importCsv": "导入 CSV",
+    "csvHelp": "粘贴 CSV（列名: name, ip, port）:",
+    "csvPlaceholder": "name,ip,port\nMiner1,192.168.1.10,80",
+    "backup": "备份",
+    "exportAllData": "导出所有数据",
+    "download": "下载",
+    "import": "导入",
+    "importComplete": "导入完成",
+    "importFailed": "导入失败",
+    "failedToReadFile": "读取文件失败",
+    "restoreSuccess": "所有数据已成功恢复。",
+    "debugMenu": "RevenueCat 调试",
+    "hideDebug": "隐藏调试",
+    "forcePro": "强制 Pro",
+    "forceFree": "强制免费",
+    "restorePurchases": "恢复购买"
   },
   "minerDetail": {
     "notFound": "未找到矿机",
@@ -215,7 +261,10 @@
     "groupRemoved": "{{groupName}} 已移除",
     "renameGroup": "重命名分组",
     "renamePrompt": "新名称：",
-    "editInDetails": "在矿机详情中编辑分组名称"
+    "editInDetails": "在矿机详情中编辑分组名称",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "orderSaved": "分组顺序已保存"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -311,7 +360,19 @@
     "screenError": "屏幕错误"
   },
   "firmwareBanner": {
-    "updateAvailable": "固件更新可用"
+    "updateAvailable": "固件更新可用",
+    "title": "固件",
+    "currentVersion": "当前",
+    "latestVersion": "最新",
+    "cached": "已缓存",
+    "viewReleaseNotes": "查看发行说明",
+    "updateTo": "更新到 {{version}}",
+    "checkForUpdates": "检查更新",
+    "flashingHint": "正在刷写固件... 矿机将重启。",
+    "flashSent": "固件更新已发送",
+    "flashSentBody": "矿机正在更新，将自动重启。",
+    "flashFailed": "刷写失败",
+    "flashFailedBody": "无法刷写固件，请检查矿机连接。"
   },
   "hashrateChart": {
     "notEnoughData": "数据不足，无法显示图表"
@@ -330,5 +391,41 @@
   },
   "subscriptionGate": {
     "upgradeToUnlock": "升级到 Pro 以解锁"
+  },
+  "comparison": {
+    "title": "矿机对比",
+    "selectAtLeastTwo": "请至少选择2台矿机进行对比",
+    "miner": "矿机",
+    "hashrate": "算力",
+    "temp": "温度",
+    "power": "功率",
+    "efficiency": "能效",
+    "uptime": "运行时间",
+    "sharesAccepted": "接受份额",
+    "sharesRejected": "拒绝份额",
+    "frequency": "频率",
+    "voltage": "电压",
+    "bestDiff": "最佳难度",
+    "pool": "矿池"
+  },
+  "alertHistory": {
+    "title": "告警历史",
+    "noAlerts": "暂无告警历史",
+    "markAllRead": "全部标为已读",
+    "clearAll": "清除全部",
+    "offline": "离线",
+    "offline_reminder": "仍离线",
+    "online": "重新连接",
+    "hot": "高温",
+    "hashrate_drop": "算力下降",
+    "pool_lost": "矿池丢失",
+    "long_uptime": "长时间运行"
+  },
+  "notificationHistory": {
+    "title": "通知历史",
+    "sent": "已发送",
+    "failed": "失败",
+    "last50": "最近50条",
+    "noNotifications": "暂无通知"
   }
 }

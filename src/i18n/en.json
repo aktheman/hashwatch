@@ -39,7 +39,13 @@
     "perMiner": "Per Miner",
     "total": "Total",
     "ungrouped": "Ungrouped",
-    "minerRemoved": "{{name}} removed"
+    "minerRemoved": "{{name}} removed",
+    "group": "Group",
+    "assignGroup": "Assign Group",
+    "assignGroupBody": "Enter a group name for the selected miners",
+    "removeGroup": "Remove Group",
+    "minerErrors": "{{count}} miner(s) unreachable",
+    "staleData": "stale"
   },
   "pools": {
     "title": "Pools",
@@ -71,6 +77,8 @@
     "hashrateHistory": "Hashrate History",
     "uptimeHistory": "Uptime History",
     "efficiencyHistory": "Efficiency History",
+    "profitHistory": "Profit",
+    "setPowerCost": "Set power cost in Settings",
     "notEnoughData": "Not enough data yet. Keep miners running."
   },
   "settings": {
@@ -113,6 +121,8 @@
     "groups": "Groups",
     "manage": "Manage",
     "exportCsv": "Export CSV",
+    "exportStatus": "Export Status CSV",
+    "currentStatus": "Current Status",
     "snapshots": "Snapshots",
     "exportJson": "Export JSON",
     "fullBackup": "Full Backup",
@@ -255,7 +265,10 @@
     "groupRemoved": "{{groupName}} removed",
     "renameGroup": "Rename Group",
     "renamePrompt": "New name:",
-    "editInDetails": "Edit group name in Miner Details"
+    "editInDetails": "Edit group name in Miner Details",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "orderSaved": "Group order saved"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -387,7 +400,19 @@
     "screenError": "Screen Error"
   },
   "firmwareBanner": {
-    "updateAvailable": "Firmware Update Available"
+    "updateAvailable": "Firmware Update Available",
+    "title": "Firmware",
+    "currentVersion": "Current",
+    "latestVersion": "Latest",
+    "cached": "cached",
+    "viewReleaseNotes": "View Release Notes",
+    "updateTo": "Update to {{version}}",
+    "checkForUpdates": "Check for Updates",
+    "flashingHint": "Flashing firmware... Miner will reboot.",
+    "flashSent": "Firmware Update Sent",
+    "flashSentBody": "The miner is being updated. It will reboot automatically.",
+    "flashFailed": "Flash Failed",
+    "flashFailedBody": "Could not flash firmware. Check miner connectivity."
   },
   "hashrateChart": {
     "notEnoughData": "Not enough data for chart"

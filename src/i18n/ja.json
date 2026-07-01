@@ -31,8 +31,21 @@
     "power": "消費電力 (W)",
     "avgTemp": "平均温度",
     "efficiency": "効率",
+    "profitability": "収益性",
+    "btcDay": "BTC/日",
+    "btcWeek": "BTC/週",
+    "btcMonth": "BTC/月",
+    "usdEquivalent": "USD相当",
+    "perMiner": "マイナーあたり",
+    "total": "合計",
     "ungrouped": "未グループ",
-    "minerRemoved": "{{name}} を削除しました"
+    "minerRemoved": "{{name}} を削除しました",
+    "group": "グループ",
+    "assignGroup": "グループを割り当て",
+    "assignGroupBody": "選択したマイナーにグループ名を入力",
+    "removeGroup": "グループを削除",
+    "minerErrors": "{{count}} 台のマイナーに到達できません",
+    "staleData": "古い"
   },
   "pools": {
     "title": "プール",
@@ -42,7 +55,11 @@
     "hashrate": "ハッシュレート",
     "estDaily": "推定日次",
     "miners": "マイナー",
-    "poolCount": "{{pools}} プール · {{miners}} マイナー"
+    "poolCount": "{{pools}} プール · {{miners}} マイナー",
+    "shares": "シェア",
+    "acceptRate": "受入率",
+    "bestDiff": "最高難易度",
+    "poolChanged": "プール変更"
   },
   "analytics": {
     "title": "分析",
@@ -59,6 +76,9 @@
     "netDay": "1日あたりの純利益",
     "hashrateHistory": "ハッシュレート履歴",
     "uptimeHistory": "稼働履歴",
+    "efficiencyHistory": "効率履歴",
+    "profitHistory": "利益",
+    "setPowerCost": "設定で電気代を設定",
     "notEnoughData": "データが十分ではありません。マイナーを稼働させ続けてください。"
   },
   "settings": {
@@ -101,6 +121,8 @@
     "groups": "グループ",
     "manage": "管理",
     "exportCsv": "CSV エクスポート",
+    "exportStatus": "ステータスCSVをエクスポート",
+    "currentStatus": "現在のステータス",
     "snapshots": "スナップショット",
     "exportJson": "JSON エクスポート",
     "fullBackup": "完全バックアップ",
@@ -110,7 +132,31 @@
     "about": "このアプリについて",
     "version": "バージョン",
     "madeFor": "対象",
-    "bitaxeMiners": "BitAxe マイナー"
+    "bitaxeMiners": "BitAxe マイナー",
+    "syncNow": "今すぐ同期",
+    "syncing": "同期中...",
+    "lastSync": "最終同期 {{time}} 前",
+    "notifications": "通知",
+    "pushAlerts": "プッシュ通知",
+    "alertHistory": "アラート履歴",
+    "language": "言語 / Language / Sprache",
+    "darkModeSchedule": "ダークモード設定",
+    "importCsv": "CSV インポート",
+    "csvHelp": "CSV を貼り付け（列: name, ip, port）:",
+    "csvPlaceholder": "name,ip,port\nMiner1,192.168.1.10,80",
+    "backup": "バックアップ",
+    "exportAllData": "全データをエクスポート",
+    "download": "ダウンロード",
+    "import": "インポート",
+    "importComplete": "インポート完了",
+    "importFailed": "インポート失敗",
+    "failedToReadFile": "ファイルの読み取りに失敗しました",
+    "restoreSuccess": "すべてのデータが正常に復元されました。",
+    "debugMenu": "RevenueCat デバッグ",
+    "hideDebug": "デバッグを隠す",
+    "forcePro": "Pro を強制",
+    "forceFree": "無料を強制",
+    "restorePurchases": "購入を復元"
   },
   "minerDetail": {
     "notFound": "マイナーが見つかりません",
@@ -215,7 +261,10 @@
     "groupRemoved": "{{groupName}} を削除しました",
     "renameGroup": "グループ名を変更",
     "renamePrompt": "新しい名前：",
-    "editInDetails": "マイナー詳細でグループ名を編集"
+    "editInDetails": "マイナー詳細でグループ名を編集",
+    "moveUp": "上に移動",
+    "moveDown": "下に移動",
+    "orderSaved": "グループの順序を保存しました"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -311,7 +360,19 @@
     "screenError": "画面エラー"
   },
   "firmwareBanner": {
-    "updateAvailable": "ファームウェアアップデートがあります"
+    "updateAvailable": "ファームウェアアップデートがあります",
+    "title": "ファームウェア",
+    "currentVersion": "現在",
+    "latestVersion": "最新",
+    "cached": "キャッシュ",
+    "viewReleaseNotes": "リリースノートを見る",
+    "updateTo": "{{version}}に更新",
+    "checkForUpdates": "更新を確認",
+    "flashingHint": "ファームウェアをフラッシュ中... マイナーが再起動します。",
+    "flashSent": "ファームウェア更新を送信",
+    "flashSentBody": "マイナーを更新中です。自動的に再起動します。",
+    "flashFailed": "フラッシュ失敗",
+    "flashFailedBody": "ファームウェアをフラッシュできませんでした。マイナーの接続を確認してください。"
   },
   "hashrateChart": {
     "notEnoughData": "チャートに十分なデータがありません"
@@ -330,5 +391,41 @@
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Pro にアップグレードしてアンロック"
+  },
+  "comparison": {
+    "title": "マイナー比較",
+    "selectAtLeastTwo": "比較するには少なくとも2台のマイナーを選択",
+    "miner": "マイナー",
+    "hashrate": "ハッシュレート",
+    "temp": "温度",
+    "power": "消費電力",
+    "efficiency": "効率",
+    "uptime": "稼働時間",
+    "sharesAccepted": "承認済みシェア",
+    "sharesRejected": "拒否シェア",
+    "frequency": "周波数",
+    "voltage": "電圧",
+    "bestDiff": "最高難易度",
+    "pool": "プール"
+  },
+  "alertHistory": {
+    "title": "アラート履歴",
+    "noAlerts": "アラート履歴はまだありません",
+    "markAllRead": "すべて既読にする",
+    "clearAll": "すべてクリア",
+    "offline": "オフライン",
+    "offline_reminder": "まだオフライン",
+    "online": "再接続",
+    "hot": "高温",
+    "hashrate_drop": "ハッシュレート低下",
+    "pool_lost": "プール喪失",
+    "long_uptime": "長時間稼働"
+  },
+  "notificationHistory": {
+    "title": "通知履歴",
+    "sent": "送信済み",
+    "failed": "失敗",
+    "last50": "最新50件",
+    "noNotifications": "通知はまだありません"
   }
 }

@@ -33,6 +33,12 @@
     "efficiency": "Efficacité",
     "ungrouped": "Non groupé",
     "minerRemoved": "{{name}} supprimé",
+    "group": "Groupe",
+    "assignGroup": "Assigner un groupe",
+    "assignGroupBody": "Entrez un nom de groupe pour les mineurs sélectionnés",
+    "removeGroup": "Supprimer le groupe",
+    "minerErrors": "{{count}} mineur(s) inaccessible(s)",
+    "staleData": "obsolète",
     "profitability": "Rentabilité",
     "btcDay": "BTC/jour",
     "btcWeek": "BTC/semaine",
@@ -71,7 +77,9 @@
     "hashrateHistory": "Historique du taux de hachage",
     "uptimeHistory": "Historique de disponibilité",
     "notEnoughData": "Pas assez de données. Laissez les mineurs fonctionner.",
-    "efficiencyHistory": "Historique d'efficacité"
+    "efficiencyHistory": "Historique d'efficacité",
+    "profitHistory": "Profit",
+    "setPowerCost": "Définir le coût électrique dans les paramètres"
   },
   "settings": {
     "title": "Paramètres",
@@ -113,6 +121,8 @@
     "groups": "Groupes",
     "manage": "Gérer",
     "exportCsv": "Exporter CSV",
+    "exportStatus": "Exporter CSV d'état",
+    "currentStatus": "État Actuel",
     "snapshots": "Instantanés",
     "exportJson": "Exporter JSON",
     "fullBackup": "Sauvegarde complète",
@@ -252,7 +262,10 @@
     "groupRemoved": "{{groupName}} supprimé",
     "renameGroup": "Renommer le groupe",
     "renamePrompt": "Nouveau nom :",
-    "editInDetails": "Modifier le nom du groupe dans les détails du mineur"
+    "editInDetails": "Modifier le nom du groupe dans les détails du mineur",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "orderSaved": "Ordre des groupes enregistré"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -358,7 +371,19 @@
     "screenError": "Erreur d'écran"
   },
   "firmwareBanner": {
-    "updateAvailable": "Mise à jour du firmware disponible"
+    "updateAvailable": "Mise à jour du firmware disponible",
+    "title": "Firmware",
+    "currentVersion": "Actuelle",
+    "latestVersion": "Dernière",
+    "cached": "en cache",
+    "viewReleaseNotes": "Voir les notes de version",
+    "updateTo": "Mettre à jour vers {{version}}",
+    "checkForUpdates": "Rechercher des mises à jour",
+    "flashingHint": "Flash du firmware... Le mineur va redémarrer.",
+    "flashSent": "Mise à jour envoyée",
+    "flashSentBody": "Le mineur est en cours de mise à jour. Il redémarrera automatiquement.",
+    "flashFailed": "Échec du flash",
+    "flashFailedBody": "Impossible de flasher le firmware. Vérifiez la connectivité du mineur."
   },
   "hashrateChart": {
     "notEnoughData": "Pas assez de données pour le graphique"

@@ -45,6 +45,7 @@ interface MinersState {
   scanProgress: { found: number; scanned: number; total: number } | null;
   error: string | null;
   minerErrors: Record<string, string>;
+  lastRefreshTimestamp: number;
 
   loadMiners: () => Promise<void>;
   syncWithBackend: () => Promise<void>;
@@ -84,6 +85,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   scanProgress: null,
   error: null,
   minerErrors: {},
+  lastRefreshTimestamp: 0,
 
   loadMiners: async () => {
     set({ loading: true, error: null });
@@ -240,6 +242,25 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
   refreshAll: async () => {
     const prev = get().miners;
+    const now = Date.now();
+    const nav = navigator as Navigator & { onLine?: boolean };
+    if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+      const current = get().miners;
+      const totalHash = current.reduce(
+        (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+        0,
+      );
+      const online = current.filter((m) => m.isOnline).length;
+      const btc = estimateBTCPerDay(totalHash);
+      updateWidget(
+        totalHash > 0 ? formatHashrateValue(totalHash) : '---',
+        online,
+        current.length,
+        btc > 0 ? formatBTC(btc) : '---',
+      );
+      set({ lastRefreshTimestamp: now });
+      return;
+    }
     const limit = pLimit(20);
     await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
     const current = get().miners;
@@ -258,6 +279,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       current.length,
       btc > 0 ? formatBTC(btc) : '---',
     );
+    set({ lastRefreshTimestamp: now });
   },
 
   startPolling: (intervalMs: number = 30000) => {

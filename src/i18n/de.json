@@ -33,6 +33,12 @@
     "efficiency": "Effizienz",
     "ungrouped": "Ungruppiert",
     "minerRemoved": "{{name}} entfernt",
+    "group": "Gruppe",
+    "assignGroup": "Gruppe zuweisen",
+    "assignGroupBody": "Gruppennamen für ausgewählte Miner eingeben",
+    "removeGroup": "Gruppe entfernen",
+    "minerErrors": "{{count}} Miner nicht erreichbar",
+    "staleData": "veraltet",
     "profitability": "Rentabilität",
     "btcDay": "BTC/Tag",
     "btcWeek": "BTC/Woche",
@@ -71,7 +77,9 @@
     "hashrateHistory": "Hashrate-Verlauf",
     "uptimeHistory": "Betriebszeit-Verlauf",
     "notEnoughData": "Noch nicht genügend Daten. Lasse die Miner laufen.",
-    "efficiencyHistory": "Effizienzverlauf"
+    "efficiencyHistory": "Effizienzverlauf",
+    "profitHistory": "Gewinn",
+    "setPowerCost": "Stromkosten in Einstellungen festlegen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -113,6 +121,8 @@
     "groups": "Gruppen",
     "manage": "Verwalten",
     "exportCsv": "CSV exportieren",
+    "exportStatus": "Status-CSV exportieren",
+    "currentStatus": "Aktueller Status",
     "snapshots": "Schnappschüsse",
     "exportJson": "JSON exportieren",
     "fullBackup": "Vollständiges Backup",
@@ -252,7 +262,10 @@
     "groupRemoved": "{{groupName}} entfernt",
     "renameGroup": "Gruppe umbenennen",
     "renamePrompt": "Neuer Name:",
-    "editInDetails": "Gruppennamen in Minerdetails bearbeiten"
+    "editInDetails": "Gruppennamen in Minerdetails bearbeiten",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "orderSaved": "Gruppenreihenfolge gespeichert"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -358,7 +371,19 @@
     "screenError": "Bildschirmfehler"
   },
   "firmwareBanner": {
-    "updateAvailable": "Firmware-Update verfügbar"
+    "updateAvailable": "Firmware-Update verfügbar",
+    "title": "Firmware",
+    "currentVersion": "Aktuell",
+    "latestVersion": "Neueste",
+    "cached": "zwischengespeichert",
+    "viewReleaseNotes": "Versionshinweise anzeigen",
+    "updateTo": "Aktualisieren auf {{version}}",
+    "checkForUpdates": "Nach Updates suchen",
+    "flashingHint": "Firmware wird geflasht... Miner wird neu starten.",
+    "flashSent": "Firmware-Update gesendet",
+    "flashSentBody": "Der Miner wird aktualisiert. Er startet automatisch neu.",
+    "flashFailed": "Update fehlgeschlagen",
+    "flashFailedBody": "Firmware konnte nicht geflasht werden. Überprüfe die Miner-Verbindung."
   },
   "hashrateChart": {
     "notEnoughData": "Nicht genügend Daten für das Diagramm"

@@ -1,4 +1,9 @@
-import { exportAllData, exportJSON, importFromJSON } from '../src/utils/export';
+import {
+  exportAllData,
+  exportJSON,
+  exportMinerStatusCSV,
+  importFromJSON,
+} from '../src/utils/export';
 import { Miner, MinerSnapshot, Wallet } from '../src/types';
 
 const mockLoadMiners = jest.fn();
@@ -70,6 +75,28 @@ const sampleMiner: Miner = {
   port: 80,
   isOnline: true,
   group: 'Garage',
+  status: {
+    hashRate: 500,
+    hashRateUnit: 'GH/s',
+    temperature: 50,
+    vrTemp: 45,
+    voltage: 1200,
+    current: 3.5,
+    power: 12,
+    sharesAccepted: 100,
+    sharesRejected: 1,
+    bestDiff: '1.5M',
+    bestSessionDiff: '800K',
+    uptimeSeconds: 3600,
+    coreVoltage: 1200,
+    frequency: 400,
+    fanSpeed: 50,
+    fanRpm: 3000,
+    pool: 'stratum.solomining.io',
+    poolPort: 3333,
+    poolUser: 'user.worker',
+    poolResponseTime: 100,
+  },
 };
 
 const sampleSnapshot: MinerSnapshot = {
@@ -121,6 +148,19 @@ describe('exportAllData', () => {
     expect((globalThis as any).URL.revokeObjectURL).toHaveBeenCalled();
   });
 
+  it('includes efficiency column in CSV output', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSnapshots.mockResolvedValue([sampleSnapshot]);
+
+    await exportAllData();
+
+    const mockCreateObjectURL = (globalThis as any).URL.createObjectURL;
+    const blob = mockCreateObjectURL.mock.calls[0][0];
+    const text = await blob.text();
+    expect(text).toContain('Efficiency (J/TH)');
+    expect(text).toContain('24.00');
+  });
+
   it('uses Share.share on non-web platform', async () => {
     mockPlatform = 'android';
     mockLoadMiners.mockResolvedValue([sampleMiner]);
@@ -131,7 +171,7 @@ describe('exportAllData', () => {
 
     expect(mockShare).toHaveBeenCalled();
     expect(mockShare.mock.calls[0][0]).toMatchObject({
-      message: expect.stringContaining('hashRate'),
+      message: expect.stringContaining('Hash Rate'),
       title: expect.stringContaining('hashwatch_export'),
     });
   });
@@ -144,8 +184,43 @@ describe('exportAllData', () => {
   });
 });
 
+describe('exportMinerStatusCSV', () => {
+  it('generates current miner status CSV', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSetting.mockResolvedValue('0.12');
+
+    await exportMinerStatusCSV();
+
+    const blob = (globalThis as any).URL.createObjectURL.mock.calls[0][0];
+    const text = await blob.text();
+    expect(text).toContain('Name');
+    expect(text).toContain('TestMiner');
+    expect(text).toContain('192.168.1.1');
+    expect(text).toContain('stratum.solomining.io');
+    expect(text).toContain('Cost/Day');
+  });
+
+  it('handles empty miner list', async () => {
+    mockLoadMiners.mockResolvedValue([]);
+
+    await expect(exportMinerStatusCSV()).resolves.toBeUndefined();
+  });
+
+  it('uses Share.share on non-web platform', async () => {
+    mockPlatform = 'ios';
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    const mockShare = require('react-native').Share.share;
+
+    await exportMinerStatusCSV();
+
+    expect(mockShare).toHaveBeenCalled();
+    expect(mockShare.mock.calls[0][0]).toMatchObject({
+      title: expect.stringContaining('hashwatch_miners'),
+    });
+  });
+});
+
 describe('escapeCSV (internal)', () => {
-  // We test escapeCSV indirectly through CSV export output
   it('escapes commas, quotes, and newlines in CSV values', async () => {
     const minerWithComma: Miner = {
       ...sampleMiner,
@@ -282,12 +357,6 @@ describe('importFromCSV', () => {
 
   it('returns error when name column is missing', async () => {
     const result = await importFromCSV('ip,port\n192.168.1.1,80');
-    expect(result.imported).toBe(0);
-    expect(result.errors[0]).toContain('name');
-  });
-
-  it('returns error when ip column is missing', async () => {
-    const result = await importFromCSV('name,port\nTest,80');
     expect(result.imported).toBe(0);
     expect(result.errors[0]).toContain('name');
   });

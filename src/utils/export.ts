@@ -1,6 +1,7 @@
 import { Platform, Share } from 'react-native';
 import * as DB from '../db/database';
 import { Miner, MinerSnapshot, Wallet } from '../types';
+import { toHashesPerSecond } from './hashrate';
 
 type SnapshotKey = keyof MinerSnapshot;
 
@@ -13,32 +14,119 @@ function escapeCSV(val: string | number | null | undefined): string {
   return s;
 }
 
+function computeEfficiency(power: number, hashRate: number, hashRateUnit?: string): number {
+  if (power <= 0 || hashRate <= 0) return 0;
+  const ths = hashRate * (hashRateUnit?.toLowerCase().includes('t') ? 1 : 0.001);
+  return ths > 0 ? power / ths : 0;
+}
+
 function snapshotsToCSV(snapshots: MinerSnapshot[], miners: Miner[]): string {
   const minerMap = new Map(miners.map((m) => [m.id, m.name || m.ip]));
-  const headers: SnapshotKey[] = [
-    'miner' as SnapshotKey,
-    'timestamp',
-    'hashRate',
-    'hashRateUnit',
-    'temperature',
-    'voltage',
-    'current',
-    'power',
-    'sharesAccepted',
-    'sharesRejected',
-    'uptimeSeconds',
-    'frequency',
+  const headers: string[] = [
+    'Miner',
+    'Timestamp',
+    'Hash Rate',
+    'Unit',
+    'Temperature',
+    'Voltage',
+    'Current',
+    'Power',
+    'Efficiency (J/TH)',
+    'Shares Accepted',
+    'Shares Rejected',
+    'Uptime (s)',
+    'Frequency',
   ];
-  const rows = snapshots.map((snap) =>
-    headers
-      .map((h) => {
-        if (h === ('miner' as SnapshotKey))
-          return escapeCSV(minerMap.get(snap.minerId) || snap.minerId);
-        if (h === 'timestamp') return escapeCSV(new Date(snap.timestamp).toISOString());
-        return escapeCSV(snap[h]);
-      })
-      .join(','),
-  );
+  const rows = snapshots.map((snap) => {
+    const eff = computeEfficiency(snap.power, snap.hashRate, snap.hashRateUnit);
+    return [
+      escapeCSV(minerMap.get(snap.minerId) || snap.minerId),
+      escapeCSV(new Date(snap.timestamp).toISOString()),
+      escapeCSV(snap.hashRate),
+      escapeCSV(snap.hashRateUnit),
+      escapeCSV(snap.temperature),
+      escapeCSV(snap.voltage),
+      escapeCSV(snap.current),
+      escapeCSV(snap.power),
+      escapeCSV(eff.toFixed(2)),
+      escapeCSV(snap.sharesAccepted),
+      escapeCSV(snap.sharesRejected),
+      escapeCSV(snap.uptimeSeconds),
+      escapeCSV(snap.frequency),
+    ].join(',');
+  });
+  return [headers.join(','), ...rows].join('\n');
+}
+
+function minersToCSV(miners: Miner[], powerCost: number): string {
+  const headers: string[] = [
+    'Name',
+    'IP',
+    'Port',
+    'Online',
+    'Hash Rate',
+    'Unit',
+    'Temperature',
+    'VR Temp',
+    'Voltage',
+    'Current',
+    'Power',
+    'Efficiency (J/TH)',
+    'Core Voltage',
+    'Frequency',
+    'Fan Speed',
+    'Fan RPM',
+    'Shares Accepted',
+    'Shares Rejected',
+    'Best Diff',
+    'Best Session Diff',
+    'Uptime (s)',
+    'Pool',
+    'Pool Port',
+    'Pool User',
+    'Pool Response (ms)',
+    'Group',
+    'Wallet',
+    'Cost/Day ($)',
+  ];
+  const rows = miners.map((m) => {
+    const hr = m.status?.hashRate ?? 0;
+    const unit = m.status?.hashRateUnit ?? 'GH/s';
+    const power = m.status?.power ?? 0;
+    const eff = computeEfficiency(power, hr, unit);
+    const hps = toHashesPerSecond(hr, unit);
+    const costPerDay = power > 0 ? (power / 1000) * powerCost * 24 : 0;
+    return [
+      escapeCSV(m.name),
+      escapeCSV(m.ip),
+      escapeCSV(m.port),
+      escapeCSV(m.isOnline ? 'Yes' : 'No'),
+      escapeCSV(hr),
+      escapeCSV(unit),
+      escapeCSV(m.status?.temperature),
+      escapeCSV(m.status?.vrTemp),
+      escapeCSV(m.status?.voltage),
+      escapeCSV(m.status?.current),
+      escapeCSV(power),
+      escapeCSV(eff.toFixed(2)),
+      escapeCSV(m.status?.coreVoltage),
+      escapeCSV(m.status?.frequency),
+      escapeCSV(m.status?.fanSpeed),
+      escapeCSV(m.status?.fanRpm),
+      escapeCSV(m.status?.sharesAccepted),
+      escapeCSV(m.status?.sharesRejected),
+      escapeCSV(m.status?.bestDiff),
+      escapeCSV(m.status?.bestSessionDiff),
+      escapeCSV(m.status?.uptimeSeconds),
+      escapeCSV(m.status?.pool),
+      escapeCSV(m.status?.poolPort),
+      escapeCSV(m.status?.poolUser),
+      escapeCSV(m.status?.poolResponseTime),
+      escapeCSV(m.group),
+      escapeCSV(m.walletId),
+      escapeCSV(costPerDay.toFixed(4)),
+    ].join(',');
+  });
   return [headers.join(','), ...rows].join('\n');
 }
 
@@ -67,6 +155,16 @@ export async function exportAllData(): Promise<void> {
 
   const csv = snapshotsToCSV(allSnapshots, miners);
   const filename = `hashwatch_export_${Date.now()}.csv`;
+  triggerDownload(csv, filename, 'text/csv');
+}
+
+export async function exportMinerStatusCSV(): Promise<void> {
+  const miners = await DB.loadMiners();
+  const powerCostRaw = await DB.getSetting('power_cost');
+  const powerCost = parseFloat(powerCostRaw || '0');
+
+  const csv = minersToCSV(miners, powerCost);
+  const filename = `hashwatch_miners_${Date.now()}.csv`;
   triggerDownload(csv, filename, 'text/csv');
 }
 
