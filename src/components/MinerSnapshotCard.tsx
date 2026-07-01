@@ -45,7 +45,7 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
         style={{
           width: 48,
           height: 48,
-          borderRadius: 24,
+          borderRadius: radius.xxl,
           backgroundColor: miner.isOnline ? theme.success + '20' : theme.danger + '20',
           justifyContent: 'center',
           alignItems: 'center',
