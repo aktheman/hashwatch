@@ -9,7 +9,7 @@ import {
   getFirmwareUrl,
   fetchLatestFirmware,
 } from '../utils/version';
-import { spacing, radius, fontWeight } from '../utils/design';
+import { spacing, radius, fontWeight, fontSize } from '../utils/design';
 
 interface FirmwareBannerProps {
   rawVersion: string | null | undefined;
@@ -69,22 +69,22 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   icon: {
-    fontSize: 14,
+    fontSize: fontSize.base,
   },
   textWrap: {
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
   },
   detail: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: fontSize.sm,
+    marginTop: spacing.xxs,
     fontFamily: 'monospace',
   },
   arrow: {
-    fontSize: 22,
+    fontSize: fontSize.h2,
     fontWeight: fontWeight.regular,
   },
 });
