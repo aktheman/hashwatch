@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
-import { spacing, radius, fontWeight } from '../utils/design';
+import { spacing, radius, fontWeight, fontSize } from '../utils/design';
 
 interface ErrorBannerProps {
   message: string | null;
@@ -35,11 +35,11 @@ export const ErrorBanner = React.memo(function ErrorBanner({
           borderColor: theme.danger + '30',
         },
         icon: {
-          fontSize: 14,
+          fontSize: fontSize.base,
         },
         text: {
           color: theme.danger,
-          fontSize: 13,
+          fontSize: fontSize.base,
           flex: 1,
           fontWeight: fontWeight.regular,
         },
@@ -56,12 +56,12 @@ export const ErrorBanner = React.memo(function ErrorBanner({
         },
         btnText: {
           color: theme.danger,
-          fontSize: 12,
+          fontSize: fontSize.base,
           fontWeight: fontWeight.bold,
         },
         dismiss: {
           color: theme.textMuted,
-          fontSize: 14,
+          fontSize: fontSize.base,
           fontWeight: fontWeight.regular,
         },
       }),
