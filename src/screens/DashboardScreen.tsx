@@ -432,8 +432,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    | { type: 'header'; group: string; miners: Miner[] }
-    | { type: 'miner'; miner: Miner };
+    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -495,17 +494,27 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               {isCollapsed ? '\u25B6' : '\u25BC'}
             </Text>
             <Text
-              style={{ color: theme.text, fontSize: 13, fontWeight: '700', flex: 1 }}
+              style={{
+                color: theme.text,
+                fontSize: fontSize.base,
+                fontWeight: fontWeight.bold,
+                flex: 1,
+              }}
               numberOfLines={1}
             >
               {item.group}
             </Text>
-            <Text style={{ color: theme.textDim, fontSize: 10, marginRight: 8 }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs, marginRight: spacing.xs }}>
               {item.miners.length} miner{item.miners.length !== 1 ? 's' : ''}
             </Text>
             {totalHash > 0 && (
               <Text
-                style={{ color: theme.primary, fontSize: 11, fontWeight: '600', marginRight: 8 }}
+                style={{
+                  color: theme.primary,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.semibold,
+                  marginRight: spacing.xs,
+                }}
               >
                 {formatHashrateValue(totalHash)}
               </Text>
@@ -514,8 +523,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <Text
                 style={{
                   color: avgT > 70 ? theme.danger : theme.success,
-                  fontSize: 11,
-                  fontWeight: '600',
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.semibold,
                 }}
               >
                 {avgT.toFixed(0)}
@@ -602,8 +611,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      | { type: 'header'; group: string; miners: Miner[] }
-      | { type: 'miner'; miner: Miner }
+      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -746,7 +754,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           fontWeight: fontWeight.regular,
         },
         emptyIcon: {
-          fontSize: 48,
+          fontSize: fontSize.hero,
           color: theme.textMuted,
           marginBottom: spacing.md,
         },
@@ -916,7 +924,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         walletDot: {
           width: 12,
           height: 12,
-          borderRadius: 6,
+          borderRadius: radius.sm,
         },
         fabText: {
           color: buttonText,
@@ -957,7 +965,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             zIndex: 100,
             width: 24,
             height: 24,
-            borderRadius: 12,
+            borderRadius: radius.md,
             backgroundColor: theme.textMuted + '40',
             justifyContent: 'center',
             alignItems: 'center',
@@ -969,7 +977,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             ]);
           }}
         >
-          <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>✕</Text>
+          <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
+            ✕
+          </Text>
         </Pressable>
       ) : (
         <View style={styles.headerBar}>
@@ -1004,7 +1014,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   <Text style={styles.liveDot}>●</Text> live monitor
                 </Text>
               </View>
-              <View style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: 6 }}>
+              <View
+                style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: spacing.xs }}
+              >
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Customize dashboard"
@@ -1060,7 +1072,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             marginTop: 6,
           }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
             <View
               style={{
                 width: 6,
@@ -1334,7 +1346,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             style={{
               flexDirection: 'row',
               paddingHorizontal: 16,
-              gap: 6,
+              gap: spacing.xs,
               marginBottom: 6,
               flexWrap: 'wrap',
             }}
@@ -1480,7 +1492,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 6,
+            gap: spacing.xs,
             paddingHorizontal: 16,
             marginBottom: 4,
           }}
@@ -1495,7 +1507,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               style={{
                 paddingHorizontal: 8,
                 paddingVertical: 3,
-                borderRadius: 6,
+                borderRadius: radius.sm,
                 backgroundColor: sortBy === s ? theme.primaryLight : theme.surface,
                 borderWidth: 1,
                 borderColor: sortBy === s ? theme.primaryLight : theme.border,
@@ -1520,7 +1532,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 6,
+            gap: spacing.xs,
             paddingHorizontal: 16,
             marginBottom: 4,
           }}
@@ -1534,7 +1546,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               style={{
                 paddingHorizontal: 8,
                 paddingVertical: 3,
-                borderRadius: 6,
+                borderRadius: radius.sm,
                 backgroundColor: autoGroupBy === g ? theme.accent : theme.surface,
                 borderWidth: 1,
                 borderColor: autoGroupBy === g ? theme.accent : theme.border,
@@ -1595,7 +1607,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 6,
+            gap: spacing.xs,
             paddingHorizontal: 16,
             marginBottom: 6,
           }}
