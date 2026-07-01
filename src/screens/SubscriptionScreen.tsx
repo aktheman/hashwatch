@@ -3,6 +3,7 @@ import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-nati
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
+import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 
 export function SubscriptionScreen() {
   const { t } = useTranslation();
@@ -15,34 +16,34 @@ export function SubscriptionScreen() {
         container: {
           flex: 1,
           backgroundColor: theme.bg,
-          padding: 16,
+          padding: spacing.md,
         },
         hero: {
           alignItems: 'center',
-          marginTop: 12,
-          marginBottom: 28,
+          marginTop: spacing.sm,
+          marginBottom: spacing.xxl,
         },
         heroIcon: {
-          fontSize: 40,
-          marginBottom: 12,
+          fontSize: fontSize.h1,
+          marginBottom: spacing.sm,
         },
         heroTitle: {
           color: theme.text,
-          fontSize: 28,
-          fontWeight: '800',
+          fontSize: fontSize.hero,
+          fontWeight: fontWeight.extrabold,
           letterSpacing: -0.5,
         },
         heroSub: {
           color: theme.textDim,
-          fontSize: 14,
-          marginTop: 6,
+          fontSize: fontSize.base,
+          marginTop: spacing.xs,
           textAlign: 'center',
         },
         planCard: {
           backgroundColor: theme.surface,
-          borderRadius: 16,
-          padding: 20,
-          marginBottom: 12,
+          borderRadius: radius.lg,
+          padding: spacing.xl,
+          marginBottom: spacing.sm,
           borderWidth: 1,
           borderColor: theme.border,
           boxShadow: `0 2px 12px ${theme.glow}`,
@@ -57,16 +58,16 @@ export function SubscriptionScreen() {
         proBadge: {
           position: 'absolute',
           top: -10,
-          right: 20,
+          right: spacing.lg,
           backgroundColor: theme.primary,
-          paddingHorizontal: 12,
-          paddingVertical: 4,
-          borderRadius: 10,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.md,
         },
         proBadgeText: {
-          color: '#FFF',
-          fontSize: 10,
-          fontWeight: '800',
+          color: buttonText,
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.extrabold,
           letterSpacing: 0.5,
         },
         planHeader: {
@@ -76,8 +77,8 @@ export function SubscriptionScreen() {
         },
         planName: {
           color: theme.text,
-          fontSize: 20,
-          fontWeight: '700',
+          fontSize: fontSize.h3,
+          fontWeight: fontWeight.bold,
         },
         priceRow: {
           flexDirection: 'row',
@@ -86,33 +87,33 @@ export function SubscriptionScreen() {
         },
         planPrice: {
           color: theme.text,
-          fontSize: 32,
-          fontWeight: '800',
+          fontSize: fontSize.h1,
+          fontWeight: fontWeight.extrabold,
         },
         planPeriod: {
           color: theme.textDim,
-          fontSize: 14,
+          fontSize: fontSize.base,
         },
         featureList: {
-          marginTop: 16,
-          gap: 8,
+          marginTop: spacing.md,
+          gap: spacing.xs,
         },
         featureItem: {
           color: theme.textDim,
-          fontSize: 14,
-          fontWeight: '500',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
         },
         featureCheck: {
           color: theme.success,
-          fontWeight: '700',
-          marginRight: 4,
+          fontWeight: fontWeight.bold,
+          marginRight: spacing.xxs,
         },
         currentBadge: {
           backgroundColor: theme.surfaceLight,
-          borderRadius: 8,
-          padding: 10,
+          borderRadius: radius.sm,
+          padding: spacing.sm,
           alignItems: 'center',
-          marginTop: 16,
+          marginTop: spacing.md,
           borderWidth: 1,
           borderColor: theme.border,
         },
@@ -122,33 +123,33 @@ export function SubscriptionScreen() {
         },
         currentBadgeText: {
           color: theme.textMuted,
-          fontWeight: '700',
-          fontSize: 13,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.sm,
         },
         upgradeBtn: {
           backgroundColor: theme.primary,
-          borderRadius: 12,
-          padding: 14,
+          borderRadius: radius.md,
+          padding: spacing.md,
           alignItems: 'center',
-          marginTop: 16,
+          marginTop: spacing.md,
         },
         upgradeBtnText: {
-          color: '#FFF',
-          fontWeight: '800',
-          fontSize: 16,
+          color: buttonText,
+          fontWeight: fontWeight.extrabold,
+          fontSize: fontSize.lg,
         },
         btnDisabled: {
           opacity: 0.5,
         },
         restoreBtn: {
-          padding: 14,
+          padding: spacing.md,
           alignItems: 'center',
-          marginTop: 4,
+          marginTop: spacing.xxs,
         },
         restoreBtnText: {
           color: theme.textDim,
-          fontSize: 14,
-          fontWeight: '600',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
         },
       }),
     [theme],
