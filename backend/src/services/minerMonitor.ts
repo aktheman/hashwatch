@@ -5,6 +5,7 @@ import {
   sendMinerHotNotification,
   sendHashrateDropNotification,
   sendPoolChangeNotification,
+  sendLongUptimeNotification,
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
 
@@ -13,6 +14,7 @@ interface MinerState {
   temperature: number;
   hashRate: number;
   pool: string | null;
+  uptimeSeconds?: number;
 }
 
 interface AlertRuleRow {
@@ -30,6 +32,35 @@ const COOLDOWN_MS = 15 * 60 * 1000;
 const RULE_CACHE_TTL = 300_000;
 
 let lastRuleFetch = 0;
+
+let notifPrefsCache = new Map<string, Record<string, boolean>>();
+let notifPrefsCacheTime = 0;
+
+async function getNotificationPrefs(
+  userId: string,
+  minerId: string,
+): Promise<Record<string, boolean>> {
+  const cacheKey = `${userId}:${minerId}`;
+  if (Date.now() - notifPrefsCacheTime < RULE_CACHE_TTL) {
+    const cached = notifPrefsCache.get(cacheKey);
+    if (cached) return cached;
+  }
+  try {
+    const result = await query(
+      'SELECT alertType, enabled FROM notification_prefs WHERE userId = $1 AND minerId = $2',
+      [userId, minerId],
+    );
+    const prefs: Record<string, boolean> = {};
+    for (const row of result.rows) {
+      prefs[row.alerttype] = row.enabled;
+    }
+    notifPrefsCache.set(cacheKey, prefs);
+    notifPrefsCacheTime = Date.now();
+    return prefs;
+  } catch {
+    return {};
+  }
+}
 
 async function getAlertRules(minerId: string, userId: string): Promise<AlertRuleRow> {
   const cacheKey = `${userId}:${minerId}`;
@@ -82,12 +113,13 @@ export async function checkMinerStatus(
   temperature: number,
   hashRate: number = 0,
   pool: string | null = null,
+  uptimeSeconds: number = 0,
 ): Promise<void> {
   const key = `${userId}:${minerId}`;
   const prev = minerStates.get(key) as MinerState | undefined;
 
   if (!prev) {
-    minerStates.set(key, { isOnline, temperature, hashRate, pool });
+    minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
     setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
     return;
   }
@@ -95,19 +127,26 @@ export async function checkMinerStatus(
   const rules = await getAlertRules(minerId, userId);
 
   if (!rules.enabled) {
-    minerStates.set(key, { isOnline, temperature, hashRate, pool });
+    minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
     setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
     return;
   }
 
-  if (prev.isOnline && !isOnline && canNotify(`${key}:offline`)) {
+  const prefs = await getNotificationPrefs(userId, minerId);
+
+  if (prev.isOnline && !isOnline && canNotify(`${key}:offline`) && prefs.offline !== false) {
     sendMinerOfflineNotification(userId, minerName, ip, minerId);
-  } else if (!prev.isOnline && isOnline && canNotify(`${key}:online`)) {
+  } else if (!prev.isOnline && isOnline && canNotify(`${key}:online`) && prefs.online !== false) {
     sendMinerOnlineNotification(userId, minerName, ip, minerId);
   }
 
   const tempThreshold = rules.tempthreshold;
-  if (temperature > tempThreshold && prev.temperature <= tempThreshold && canNotify(`${key}:hot`)) {
+  if (
+    temperature > tempThreshold &&
+    prev.temperature <= tempThreshold &&
+    canNotify(`${key}:hot`) &&
+    prefs.hot !== false
+  ) {
     sendMinerHotNotification(userId, minerName, ip, temperature, minerId);
   }
 
@@ -117,18 +156,38 @@ export async function checkMinerStatus(
     prevHr > 0 &&
     hashRate > 0 &&
     prevHr / hashRate > dropRatio &&
-    canNotify(`${key}:hashrate_drop`)
+    canNotify(`${key}:hashrate_drop`) &&
+    prefs.hashrate_drop !== false
   ) {
     const pct = Math.round((1 - hashRate / prevHr) * 100);
     sendHashrateDropNotification(userId, minerName, minerId, pct);
   }
 
-  if (prev.pool && pool && prev.pool !== pool && canNotify(`${key}:pool_change`)) {
+  if (
+    prev.pool &&
+    pool &&
+    prev.pool !== pool &&
+    canNotify(`${key}:pool_change`) &&
+    prefs.pool_lost !== false
+  ) {
     const oldPool = prev.pool || 'unknown';
     const newPool = pool || 'unknown';
     sendPoolChangeNotification(userId, minerName, minerId, oldPool, newPool);
   }
 
-  minerStates.set(key, { isOnline, temperature, hashRate, pool });
+  if (
+    isOnline &&
+    prev.isOnline &&
+    rules.uptimethresholdhours > 0 &&
+    canNotify(`${key}:long_uptime`) &&
+    prefs.long_uptime !== false
+  ) {
+    const uptimeSec = prev.uptimeSeconds ?? 0;
+    if (uptimeSec > 0 && uptimeSec >= rules.uptimethresholdhours * 3600) {
+      sendLongUptimeNotification(userId, minerName, minerId, uptimeSec);
+    }
+  }
+
+  minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
   setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
 }

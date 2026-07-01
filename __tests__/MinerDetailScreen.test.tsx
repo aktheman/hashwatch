@@ -52,6 +52,9 @@ jest.mock('../src/api/client', () => ({
   fetchAlertHistory: jest.fn().mockResolvedValue([]),
   syncAlertsToBackend: jest.fn().mockResolvedValue({ ok: true, inserted: 0 }),
   markAlertRead: jest.fn().mockResolvedValue({ ok: true }),
+  fetchMinerNotes: jest.fn().mockResolvedValue([]),
+  addMinerNote: jest.fn().mockResolvedValue({ id: 1, minerid: 'm1', text: '', createdat: '' }),
+  deleteMinerNote: jest.fn().mockResolvedValue({ deleted: true }),
 }));
 
 jest.mock('expo-sqlite', () => ({
@@ -459,16 +462,12 @@ it('adds and removes tags', async () => {
   expect(mockSetMinerTags).toHaveBeenCalledWith('m1', []);
 });
 
-it('edits notes with debounce', async () => {
-  jest.useFakeTimers();
-  const mockSetMinerNotes = jest.fn();
-  useMinerStore.setState({ setMinerNotes: mockSetMinerNotes } as any);
+it('shows notes input and add button', async () => {
   const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  const notesInput = r.getByLabelText('Miner notes input');
-  await fireEvent.changeText(notesInput, 'New notes content');
-  jest.advanceTimersByTime(600);
+  const notesInput = r.getByLabelText('New note input');
+  expect(notesInput).toBeTruthy();
 
-  expect(mockSetMinerNotes).toHaveBeenCalledWith('m1', 'New notes content');
-  jest.useRealTimers();
+  const addButton = r.getByLabelText('Add note');
+  expect(addButton).toBeTruthy();
 });

@@ -35,6 +35,8 @@ import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { spacing, radius, fontSize, fontWeight, buttonText, cardShadow } from '../utils/design';
 import { exportAllData } from '../utils/export';
 import { checkMinerAlerts } from '../services/notifications';
+import { BitAxeClient } from '../api/bitaxe';
+import { LATEST_FIRMWARE, getFirmwareBinaryUrl } from '../utils/version';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
 import { WorldMap } from '../components/WorldMap';
 import { TimeAgo } from '../components/TimeAgo';
@@ -348,6 +350,48 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     [miners, selectedIds, setMinerLocation],
   );
 
+  const handleBatchFlash = useCallback(() => {
+    const selected = miners.filter((m) => selectedIds.has(m.id));
+    if (selected.length === 0) return;
+    const target = LATEST_FIRMWARE;
+    Alert.alert(
+      t('dashboard.batchFlashTitle'),
+      t('dashboard.batchFlashBody', { count: selected.length, version: target }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('dashboard.batchFlashConfirm'),
+          style: 'default',
+          onPress: async () => {
+            let success = 0;
+            let fail = 0;
+            for (const m of selected) {
+              try {
+                const client = new BitAxeClient(
+                  m.ip,
+                  m.port,
+                  m.apiPath ?? undefined,
+                  m.statusPath ?? undefined,
+                );
+                const binUrl = getFirmwareBinaryUrl(target);
+                const ok = await client.flashFirmware(binUrl);
+                if (ok) success++;
+                else fail++;
+              } catch {
+                fail++;
+              }
+            }
+            Alert.alert(
+              t('dashboard.batchFlashResult'),
+              t('dashboard.batchFlashResultBody', { success, fail }),
+            );
+            clearSelection();
+          },
+        },
+      ],
+    );
+  }, [miners, selectedIds, clearSelection, t]);
+
   const handleToggleKiosk = useCallback((val: boolean) => {
     setKioskMode(val);
     DB.setSetting('kiosk_mode', String(val));
@@ -388,7 +432,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
+    | { type: 'header'; group: string; miners: Miner[] }
+    | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -557,7 +602,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
+      | { type: 'header'; group: string; miners: Miner[] }
+      | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1682,6 +1728,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               onPress={() => setShowLocationPicker(true)}
             >
               <Text style={styles.batchBtnText}>{t('dashboard.location', 'Location')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Batch flash"
+              style={styles.batchBtn}
+              onPress={handleBatchFlash}
+            >
+              <Text style={styles.batchBtnText}>{t('dashboard.flash')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"

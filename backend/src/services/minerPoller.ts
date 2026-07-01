@@ -57,6 +57,7 @@ async function pollMiner(miner: MinerRow): Promise<void> {
         ? info.hashRate
         : 0;
   const pool = extractPool(info, status);
+  const uptimeSeconds = typeof status?.uptimeSeconds === 'number' ? status.uptimeSeconds : 0;
 
   await checkMinerStatus(
     miner.userid,
@@ -67,6 +68,7 @@ async function pollMiner(miner: MinerRow): Promise<void> {
     temperature,
     hashRate,
     pool,
+    uptimeSeconds,
   );
 
   if (isOnline) {

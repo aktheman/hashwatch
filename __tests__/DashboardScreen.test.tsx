@@ -974,7 +974,7 @@ it('customize dashboard button opens customizer', async () => {
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Customize dashboard'));
-  expect(r.getByText('Customize Dashboard')).toBeTruthy();
+  expect(r.getByText('dashboardCustomizer.title')).toBeTruthy();
 });
 
 it('"No wallet" option clears wallet assignment in batch picker', async () => {
@@ -1047,9 +1047,9 @@ it('customizer Done button closes the customizer', async () => {
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Customize dashboard'));
-  expect(r.getByText('Customize Dashboard')).toBeTruthy();
-  await fireEvent.press(r.getByText('Done'));
-  expect(r.queryByText('Customize Dashboard')).toBeNull();
+  expect(r.getByText('dashboardCustomizer.title')).toBeTruthy();
+  await fireEvent.press(r.getByText('dashboardCustomizer.done'));
+  expect(r.queryByText('dashboardCustomizer.title')).toBeNull();
 });
 
 it('customizer Reset button resets sections to defaults', async () => {
@@ -1059,9 +1059,9 @@ it('customizer Reset button resets sections to defaults', async () => {
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Customize dashboard'));
   const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  await fireEvent.press(r.getByText('Reset to Defaults'));
+  await fireEvent.press(r.getByText('dashboardCustomizer.resetToDefaults'));
   const alertArgs = alertSpy.mock.calls[0];
-  const resetButton = alertArgs?.[2]?.find((b: any) => b.text === 'Reset');
+  const resetButton = alertArgs?.[2]?.find((b: any) => b.text === 'dashboardCustomizer.reset');
   resetButton?.onPress?.();
   const { setSetting } = jest.requireMock('../src/db/database');
   expect(setSetting).toHaveBeenCalledWith('dashboard_sections', expect.any(String));
@@ -1079,7 +1079,7 @@ it('toggle section via customizer switch hides that section', async () => {
   const switches = r.getAllByRole('switch');
   expect(switches.length).toBeGreaterThanOrEqual(1);
   await fireEvent(switches[0], 'onValueChange', false);
-  await fireEvent.press(r.getByText('Done'));
+  await fireEvent.press(r.getByText('dashboardCustomizer.done'));
   const { setSetting } = jest.requireMock('../src/db/database');
   const lastCall = setSetting.mock.calls[setSetting.mock.calls.length - 1];
   const saved = JSON.parse(lastCall[1]);
@@ -1189,7 +1189,7 @@ it('applies preset sections via customizer', async () => {
   useMinerStore.setState({ miners: [makeMiner()] });
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Customize dashboard'));
-  await fireEvent.press(r.getByText('Load Preset (1)'));
+  await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
   await fireEvent.press(r.getByText('Test Preset'));
   expect(setSetting).toHaveBeenCalledWith('dashboard_sections', JSON.stringify(presetSections));
 });

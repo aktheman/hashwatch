@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import { getSetting, setSetting } from '../db/database';
@@ -83,6 +84,7 @@ export function DashboardCustomizer({
   onToggleKiosk,
 }: DashboardCustomizerProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [presets, setPresets] = useState<DashboardPreset[]>([]);
   const [presetName, setPresetName] = useState('');
   const [showPresets, setShowPresets] = useState(false);
@@ -100,7 +102,7 @@ export function DashboardCustomizer({
   const handleSavePreset = async () => {
     const name = presetName.trim();
     if (!name) {
-      Alert.alert('Name required', 'Enter a name for this preset.');
+      Alert.alert(t('dashboardCustomizer.nameRequired'), t('dashboardCustomizer.nameRequiredBody'));
       return;
     }
     const existing = await loadPresets();
@@ -114,7 +116,7 @@ export function DashboardCustomizer({
     await savePresets(existing);
     setPresets(existing);
     setPresetName('');
-    Alert.alert('Saved', `Preset "${name}" saved.`);
+    Alert.alert(t('dashboardCustomizer.saved'), t('dashboardCustomizer.savedBody', { name }));
   };
 
   const handleLoadPreset = (preset: DashboardPreset) => {
@@ -150,10 +152,12 @@ export function DashboardCustomizer({
             }}
           >
             <Text style={{ color: theme.text, fontSize: fontSize.xl, fontWeight: fontWeight.bold }}>
-              Customize Dashboard
+              {t('dashboardCustomizer.title')}
             </Text>
             <Pressable accessibilityRole="button" onPress={onClose}>
-              <Text style={{ color: theme.primary, fontSize: fontSize.lg }}>Done</Text>
+              <Text style={{ color: theme.primary, fontSize: fontSize.lg }}>
+                {t('dashboardCustomizer.done')}
+              </Text>
             </Pressable>
           </View>
           <ScrollView>
@@ -169,7 +173,9 @@ export function DashboardCustomizer({
                   borderBottomColor: theme.border,
                 }}
               >
-                <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
+                <Text style={{ color: theme.text, fontSize: fontSize.base }}>
+                  {t(`dashboardCustomizer.section.${key}` as const, label)}
+                </Text>
                 <Switch
                   value={visibleSections[key as SectionKey]}
                   onValueChange={() => onToggle(key as SectionKey)}
@@ -188,7 +194,9 @@ export function DashboardCustomizer({
                 borderBottomColor: theme.border,
               }}
             >
-              <Text style={{ color: theme.text, fontSize: 14 }}>📺 Kiosk Mode</Text>
+              <Text style={{ color: theme.text, fontSize: 14 }}>
+                📺 {t('dashboardCustomizer.kioskMode')}
+              </Text>
               <Switch
                 value={kioskMode}
                 onValueChange={(val) => onToggleKiosk(val)}
@@ -198,7 +206,9 @@ export function DashboardCustomizer({
             </View>
 
             <View style={{ marginTop: 16, gap: 8 }}>
-              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700' }}>Presets</Text>
+              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700' }}>
+                {t('dashboardCustomizer.presets')}
+              </Text>
               <View style={{ flexDirection: 'row', gap: 6 }}>
                 <TextInput
                   style={{
@@ -212,7 +222,7 @@ export function DashboardCustomizer({
                     backgroundColor: theme.surfaceLight,
                     fontSize: 14,
                   }}
-                  placeholder="Preset name..."
+                  placeholder={String(t('dashboardCustomizer.presetPlaceholder'))}
                   placeholderTextColor={theme.textMuted}
                   value={presetName}
                   onChangeText={setPresetName}
@@ -227,7 +237,9 @@ export function DashboardCustomizer({
                   }}
                   onPress={handleSavePreset}
                 >
-                  <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 13 }}>Save</Text>
+                  <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 13 }}>
+                    {t('dashboardCustomizer.save')}
+                  </Text>
                 </Pressable>
               </View>
               <Pressable
@@ -243,12 +255,14 @@ export function DashboardCustomizer({
                 onPress={() => setShowPresets((p) => !p)}
               >
                 <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>
-                  {showPresets ? 'Hide Presets' : `Load Preset (${presets.length})`}
+                  {showPresets
+                    ? t('dashboardCustomizer.hidePresets')
+                    : t('dashboardCustomizer.loadPreset', { count: presets.length })}
                 </Text>
               </Pressable>
               {showPresets && presets.length === 0 && (
                 <Text style={{ color: theme.textMuted, fontSize: 12, textAlign: 'center' }}>
-                  No saved presets yet.
+                  {t('dashboardCustomizer.noPresets')}
                 </Text>
               )}
               {showPresets &&
@@ -310,12 +324,12 @@ export function DashboardCustomizer({
                 }}
                 onPress={() => {
                   Alert.alert(
-                    'Reset to Defaults',
-                    'This will reset all dashboard sections to their default visibility.',
+                    t('dashboardCustomizer.resetTitle'),
+                    t('dashboardCustomizer.resetBody'),
                     [
-                      { text: 'Cancel', style: 'cancel' },
+                      { text: t('common.cancel'), style: 'cancel' },
                       {
-                        text: 'Reset',
+                        text: t('dashboardCustomizer.reset'),
                         style: 'destructive',
                         onPress: () => onReset(),
                       },
@@ -324,7 +338,7 @@ export function DashboardCustomizer({
                 }}
               >
                 <Text style={{ color: theme.danger, fontWeight: '700', fontSize: 13 }}>
-                  Reset to Defaults
+                  {t('dashboardCustomizer.resetToDefaults')}
                 </Text>
               </Pressable>
             </View>
