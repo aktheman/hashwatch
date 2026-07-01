@@ -1560,7 +1560,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             marginBottom: 4,
           }}
         >
-          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Group:</Text>
+          <Text
+            style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+          >
+            Group:
+          </Text>
           {([null, 'location', 'tag'] as const).map((g) => (
             <Pressable
               key={g ?? 'off'}
@@ -1577,8 +1581,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             >
               <Text
                 style={{
-                  fontSize: 10,
-                  fontWeight: '700',
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.bold,
                   color: autoGroupBy === g ? '#FFF' : theme.textMuted,
                 }}
               >
@@ -1635,18 +1639,18 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             marginBottom: 6,
           }}
         >
-          <Text style={{ color: theme.textMuted, fontSize: 14 }}>🔍</Text>
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.md }}>🔍</Text>
           <TextInput
             style={{
               flex: 1,
               borderWidth: 1,
               borderColor: theme.border,
-              borderRadius: 8,
-              paddingHorizontal: 10,
-              paddingVertical: 6,
+              borderRadius: radius.sm,
+              paddingHorizontal: spacing.sm,
+              paddingVertical: spacing.xs,
               color: theme.text,
               backgroundColor: theme.surface,
-              fontSize: 13,
+              fontSize: fontSize.base,
             }}
             placeholder={t('dashboard.searchPlaceholder', 'Search miners...')}
             placeholderTextColor={theme.textMuted}
@@ -1660,7 +1664,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               accessibilityLabel="Clear search"
               onPress={() => setSearchQuery('')}
             >
-              <Text style={{ color: theme.textMuted, fontSize: 16 }}>✕</Text>
+              <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>✕</Text>
             </Pressable>
           )}
         </View>
