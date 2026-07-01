@@ -21,7 +21,7 @@ export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetP
           minWidth: '45%',
           padding: spacing.md,
           margin: spacing.xs,
-          gap: 2,
+          gap: spacing.xxs,
         },
         iconCircle: {
           width: 28,
