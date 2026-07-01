@@ -390,15 +390,22 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              paddingHorizontal: 20,
-              paddingVertical: 10,
+              paddingHorizontal: spacing.lg,
+              paddingVertical: spacing.xs,
               backgroundColor: theme.surfaceLight,
-              marginTop: 8,
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
+              marginTop: spacing.sm,
+              borderTopLeftRadius: radius.md,
+              borderTopRightRadius: radius.md,
             }}
           >
-            <Text style={{ color: theme.primary, fontSize: 10, marginRight: 6, width: 12 }}>
+            <Text
+              style={{
+                color: theme.primary,
+                fontSize: fontSize.xs,
+                marginRight: spacing.xs,
+                width: 12,
+              }}
+            >
               {isCollapsed ? '▶' : '▼'}
             </Text>
             <Text
