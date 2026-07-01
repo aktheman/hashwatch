@@ -292,33 +292,33 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         },
         deleteBtnText: {
           color: theme.danger,
-          fontWeight: '700',
-          fontSize: 15,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.md,
         },
         confirmBox: {
           backgroundColor: theme.surface,
-          borderRadius: 12,
-          padding: 14,
-          marginTop: 8,
+          borderRadius: radius.lg,
+          padding: spacing.md,
+          marginTop: spacing.sm,
           borderWidth: 1,
           borderColor: theme.border,
         },
         confirmText: {
           color: theme.textDim,
-          fontSize: 13,
-          marginBottom: 10,
-          lineHeight: 18,
+          fontSize: fontSize.sm,
+          marginBottom: spacing.sm,
+          lineHeight: fontSize.base,
         },
         confirmBtn: {
           backgroundColor: theme.danger,
-          padding: 10,
-          borderRadius: 10,
+          padding: spacing.sm,
+          borderRadius: radius.md,
           alignItems: 'center',
         },
         confirmBtnText: {
-          color: '#FFF',
-          fontWeight: '700',
-          fontSize: 14,
+          color: buttonText,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.md,
         },
       }),
     [theme],
@@ -488,9 +488,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 onPress={() => setShowEmojiPicker(!showEmojiPicker)}
                 style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
               >
-                <Text style={{ fontSize: 22, marginRight: 4 }}>{miner.icon || '⬡'}</Text>
+                <Text style={{ fontSize: fontSize.h2, marginRight: spacing.xxs }}>
+                  {miner.icon || '⬡'}
+                </Text>
                 <Text style={styles.name}>{miner.name}</Text>
-                <Text style={{ fontSize: 10, color: theme.primary, marginLeft: 2 }}>✎</Text>
+                <Text
+                  style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: spacing.xxs }}
+                >
+                  ✎
+                </Text>
               </Pressable>
             </View>
             <View
@@ -629,18 +635,18 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                         setAlertRules(minerId, next);
                       }}
                       style={{
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 6,
+                        paddingHorizontal: spacing.sm,
+                        paddingVertical: spacing.xxs,
+                        borderRadius: radius.sm,
                         backgroundColor:
                           alertRules.tempThreshold === t ? theme.danger : theme.surfaceLight,
                       }}
                     >
                       <Text
                         style={{
-                          color: alertRules.tempThreshold === t ? '#FFF' : theme.text,
-                          fontSize: 12,
-                          fontWeight: '600',
+                          color: alertRules.tempThreshold === t ? buttonText : theme.text,
+                          fontSize: fontSize.xs,
+                          fontWeight: fontWeight.semibold,
                         }}
                       >
                         {t}°
@@ -669,18 +675,18 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                         setAlertRules(minerId, next);
                       }}
                       style={{
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 6,
+                        paddingHorizontal: spacing.sm,
+                        paddingVertical: spacing.xxs,
+                        borderRadius: radius.sm,
                         backgroundColor:
                           alertRules.hashrateDropPercent === p ? theme.warning : theme.surfaceLight,
                       }}
                     >
                       <Text
                         style={{
-                          color: alertRules.hashrateDropPercent === p ? '#FFF' : theme.text,
-                          fontSize: 12,
-                          fontWeight: '600',
+                          color: alertRules.hashrateDropPercent === p ? buttonText : theme.text,
+                          fontSize: fontSize.xs,
+                          fontWeight: fontWeight.semibold,
                         }}
                       >
                         {p}%
@@ -825,12 +831,18 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 }
                 style={{
                   backgroundColor: theme.primary + '30',
-                  borderRadius: 8,
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
+                  borderRadius: radius.sm,
+                  paddingHorizontal: spacing.sm,
+                  paddingVertical: spacing.xxs,
                 }}
               >
-                <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: theme.primary,
+                    fontSize: fontSize.xs,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
                   {tag} ✕
                 </Text>
               </Pressable>
@@ -849,10 +861,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             }}
             style={{
               backgroundColor: theme.surfaceLight,
-              borderRadius: 10,
-              padding: 10,
+              borderRadius: radius.md,
+              padding: spacing.sm,
               color: theme.text,
-              fontSize: 13,
+              fontSize: fontSize.xs,
               borderWidth: 1,
               borderColor: theme.border,
             }}
