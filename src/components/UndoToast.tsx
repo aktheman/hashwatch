@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
 
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
+
 export function UndoToast() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -49,31 +51,29 @@ export function UndoToast() {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 100,
-    left: 16,
-    right: 16,
+    bottom: spacing.xxl,
+    left: spacing.md,
+    right: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-    elevation: 6,
   },
   message: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.semibold,
   },
   undoBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 8,
-    marginLeft: 12,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    marginLeft: spacing.sm,
   },
   undoText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.bold,
   },
 });
