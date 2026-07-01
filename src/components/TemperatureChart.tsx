@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
+import { spacing, fontSize, fontWeight, radius } from '../utils/design';
 
 interface TemperatureChartProps {
   snapshots: MinerSnapshot[];
@@ -22,46 +23,46 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
         },
         title: {
           color: theme.text,
-          fontSize: 15,
-          fontWeight: '700',
-          marginBottom: 12,
-          marginLeft: 4,
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.bold,
+          marginBottom: spacing.sm,
+          marginLeft: spacing.xxs,
         },
         yLabel: {
           position: 'absolute',
           top: 12,
           right: 14,
           color: theme.textMuted,
-          fontSize: 10,
-          fontWeight: '600',
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.semibold,
           zIndex: 10,
         },
         chartWrapper: {
           backgroundColor: theme.surface,
-          borderRadius: 16,
-          padding: 12,
+          borderRadius: radius.lg,
+          padding: spacing.md,
           borderWidth: 1,
           borderColor: theme.border,
         },
         chart: {
-          borderRadius: 12,
+          borderRadius: radius.md,
         },
         empty: {
           backgroundColor: theme.surface,
-          borderRadius: 16,
+          borderRadius: radius.lg,
           borderWidth: 1,
           borderColor: theme.border,
-          padding: 28,
+          padding: spacing.lg,
           alignItems: 'center',
           marginVertical: 8,
-          gap: 8,
+          gap: spacing.xs,
         },
         emptyIcon: {
-          fontSize: 32,
+          fontSize: fontSize.h1,
         },
         emptyText: {
           color: theme.textDim,
-          fontSize: 14,
+          fontSize: fontSize.base,
         },
       }),
     [theme],
@@ -137,7 +138,7 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
               strokeWidth: 1,
             },
             propsForLabels: {
-              fontSize: 10,
+              fontSize: fontSize.xs,
             },
           }}
           bezier
