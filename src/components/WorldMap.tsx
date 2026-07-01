@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Path, Circle, G, Line } from 'react-native-svg';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useMinerStore } from '../store/miners';
 import { NA, SA, EU, AF, AS, OC } from '../data/worldMap';
 
@@ -168,18 +169,21 @@ export const WorldMap = React.memo(function WorldMap() {
             backgroundColor: theme.surface,
             borderWidth: 1,
             borderColor: selected.color,
-            borderRadius: 8,
-            paddingHorizontal: 10,
+            borderRadius: radius.sm,
+            paddingHorizontal: spacing.sm,
             paddingVertical: 5,
             minWidth: 100,
             alignItems: 'center',
           }}
         >
-          <Text style={{ color: theme.text, fontSize: 11, fontWeight: '700' }} numberOfLines={1}>
+          <Text
+            style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}
+            numberOfLines={1}
+          >
             {miners[selected.minerIndex].name}
           </Text>
           {selected.location && (
-            <Text style={{ color: selected.color, fontSize: 9, fontWeight: '600' }}>
+            <Text style={{ color: selected.color, fontSize: 9, fontWeight: fontWeight.semibold }}>
               {selected.location}
             </Text>
           )}
