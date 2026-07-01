@@ -195,7 +195,6 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: spacing.xs,
   },
-  },
   title: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
