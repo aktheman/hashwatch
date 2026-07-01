@@ -13,7 +13,7 @@ import {
 import { captureRef } from 'react-native-view-shot';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
-import { MinerSnapshot, Wallet, NavigationProp } from '../types';
+import { MinerSnapshot, Wallet, NavigationProp, MinerNoteItem } from '../types';
 import * as DB from '../db/database';
 import { StatWidget } from '../components/StatWidget';
 import { BitAxeClient } from '../api/bitaxe';
@@ -22,6 +22,8 @@ import { TemperatureChart } from '../components/TemperatureChart';
 import { EfficiencyTrend } from '../components/EfficiencyTrend';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
+import { fetchMinerNotes, addMinerNote, deleteMinerNote } from '../api/client';
+import { useAuthStore } from '../store/auth';
 import { NotificationPrefs } from '../components/NotificationPrefs';
 import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
 import { PoolChangeHistory } from '../components/PoolChangeHistory';
@@ -344,6 +346,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [editIPValue, setEditIPValue] = useState('');
   const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [notes, setNotes] = useState<MinerNoteItem[]>([]);
+  const [noteText, setNoteText] = useState('');
   const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tagInputRef = useRef<TextInput>(null);
 
@@ -382,6 +386,20 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
       cancelled = true;
     };
   }, [minerId, miner?.lastSeen]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const token = useAuthStore.getState().token;
+    if (token && minerId) {
+      fetchMinerNotes(minerId).then((ns) => {
+        if (cancelled) return;
+        setNotes(ns);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [minerId]);
 
   if (!miner) {
     return (
@@ -880,21 +898,99 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📝 Notes</Text>
-          <TextInput
-            style={[styles.groupTagInput, { minHeight: 80, textAlignVertical: 'top' }]}
-            value={miner.notes || ''}
-            onChangeText={(text) => {
-              if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
-              groupDebounceRef.current = setTimeout(() => {
-                setMinerNotes(minerId, text);
-              }, 500);
-            }}
-            placeholder="Add notes about this miner..."
-            placeholderTextColor={theme.textMuted}
-            multiline
-            accessibilityLabel="Miner notes input"
-          />
+          <Text style={styles.sectionTitle}>
+            <Text style={styles.sectionIcon}>📝</Text> {t('minerDetail.notes')}
+          </Text>
+          {notes.length > 0 && (
+            <View style={{ gap: spacing.xs, marginBottom: spacing.sm }}>
+              {notes.map((note) => (
+                <View
+                  key={note.id}
+                  style={{
+                    flexDirection: 'row',
+                    backgroundColor: theme.surfaceLight,
+                    borderRadius: radius.md,
+                    padding: spacing.sm,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  <Text style={{ flex: 1, color: theme.text, fontSize: 13 }}>{note.text}</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Delete note"
+                    hitSlop={8}
+                    onPress={async () => {
+                      try {
+                        await deleteMinerNote(minerId, note.id);
+                        setNotes((prev) => prev.filter((n) => n.id !== note.id));
+                      } catch {
+                        Alert.alert(t('minerDetail.error'), t('minerDetail.deleteNoteFailed'));
+                      }
+                    }}
+                  >
+                    <Text style={{ color: theme.danger, fontSize: 16, marginLeft: 8 }}>✕</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <TextInput
+              style={[
+                styles.groupTagInput,
+                {
+                  flex: 1,
+                  minHeight: 36,
+                  maxHeight: 80,
+                  textAlignVertical: 'top',
+                },
+              ]}
+              value={noteText}
+              onChangeText={setNoteText}
+              placeholder={String(t('minerDetail.addNotePlaceholder'))}
+              placeholderTextColor={theme.textMuted}
+              multiline
+              accessibilityLabel="New note input"
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add note"
+              style={[
+                styles.actionBtn,
+                {
+                  backgroundColor: theme.primary + '15',
+                  borderColor: theme.primary + '30',
+                  paddingHorizontal: spacing.md,
+                  justifyContent: 'center',
+                  opacity: noteText.trim().length === 0 ? 0.5 : 1,
+                },
+              ]}
+              disabled={noteText.trim().length === 0}
+              onPress={async () => {
+                const text = noteText.trim();
+                if (!text) return;
+                try {
+                  const token = useAuthStore.getState().token;
+                  if (token) {
+                    const newNote = await addMinerNote(minerId, text);
+                    setNotes((prev) => [newNote, ...prev]);
+                  } else {
+                    setMinerNotes(
+                      minerId,
+                      notes.length > 0 ? `${notes.map((n) => n.text).join('\n')}\n${text}` : text,
+                    );
+                  }
+                  setNoteText('');
+                } catch {
+                  Alert.alert(t('minerDetail.error'), t('minerDetail.addNoteFailed'));
+                }
+              }}
+            >
+              <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+                {t('minerDetail.addNote')}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.section}>

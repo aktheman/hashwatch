@@ -133,3 +133,10 @@ export interface DeleteResponse {
 export interface OkResponse {
   ok: boolean;
 }
+
+export interface MinerNoteItem {
+  id: number;
+  minerid: string;
+  text: string;
+  createdat: string;
+}

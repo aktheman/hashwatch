@@ -96,6 +96,21 @@ export async function sendHashrateDropNotification(
   );
 }
 
+export async function sendLongUptimeNotification(
+  userId: string,
+  minerName: string,
+  _minerId: string,
+  uptimeSeconds: number,
+): Promise<void> {
+  const hours = Math.round(uptimeSeconds / 3600);
+  await sendPushNotification(
+    userId,
+    'long_uptime',
+    'Long Uptime',
+    `${minerName} has been running for ${hours}h`,
+  );
+}
+
 export async function sendPoolChangeNotification(
   userId: string,
   minerName: string,
@@ -107,7 +122,7 @@ export async function sendPoolChangeNotification(
   const to = newPool || 'unknown';
   await sendPushNotification(
     userId,
-    'pool_change',
+    'pool_lost',
     'Pool Changed',
     `${minerName} moved from ${from} to ${to}`,
   );

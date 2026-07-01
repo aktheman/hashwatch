@@ -24,7 +24,6 @@ jest.mock('../src/theme', () => ({
     textDim: '#888',
     textMuted: '#666',
     primary: '#6C63FF',
-    primary: '#6C63FF',
     danger: '#EF4444',
   }),
 }));
@@ -48,10 +47,6 @@ beforeEach(() => {
   mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
 
-function withQueries(result: ReturnType<typeof render>) {
-  return result;
-}
-
 describe('DashboardCustomizer', () => {
   it('returns null when not visible', async () => {
     const { container } = await render(<DashboardCustomizer {...defaultProps} visible={false} />);
@@ -60,26 +55,26 @@ describe('DashboardCustomizer', () => {
 
   it('renders modal when visible', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    expect(await r.findByText('Customize Dashboard', {}, { timeout: 15000 })).toBeTruthy();
-    expect(r.getByText('Done')).toBeTruthy();
+    expect(await r.findByText('dashboardCustomizer.title', {}, { timeout: 15000 })).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.done')).toBeTruthy();
   }, 20000);
 
   it('renders all section toggles', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    expect(r.getByText('Earnings Card')).toBeTruthy();
-    expect(r.getByText('BTC / Network Ticker')).toBeTruthy();
-    expect(r.getByText('World Map')).toBeTruthy();
-    expect(r.getByText('Map Legend')).toBeTruthy();
-    expect(r.getByText('Pool Stats')).toBeTruthy();
-    expect(r.getByText('Metric Tiles')).toBeTruthy();
-    expect(r.getByText('Wallet / Group Filters')).toBeTruthy();
-    expect(r.getByText('Sort Controls')).toBeTruthy();
-    expect(r.getByText('Profitability')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.earnings')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.ticker')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.map')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.legend')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.pools')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.metrics')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.filters')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.sort')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.section.profitability')).toBeTruthy();
   });
 
   it('renders kiosk mode switch', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    expect(r.getByText('📺 Kiosk Mode')).toBeTruthy();
+    expect(r.getByText('📺 dashboardCustomizer.kioskMode')).toBeTruthy();
   });
 
   it('calls onToggle when section is toggled', async () => {
@@ -98,30 +93,36 @@ describe('DashboardCustomizer', () => {
 
   it('calls onClose when Done is pressed', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    fireEvent.press(r.getByText('Done'));
+    fireEvent.press(r.getByText('dashboardCustomizer.done'));
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
   it('shows Save button for presets', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    expect(r.getByText('Save')).toBeTruthy();
+    expect(r.getByText('dashboardCustomizer.save')).toBeTruthy();
   });
 
   it('shows alert when saving preset with empty name', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    fireEvent.press(r.getByText('Save'));
-    expect(mockAlert).toHaveBeenCalledWith('Name required', 'Enter a name for this preset.');
+    fireEvent.press(r.getByText('dashboardCustomizer.save'));
+    expect(mockAlert).toHaveBeenCalledWith(
+      'dashboardCustomizer.nameRequired',
+      'dashboardCustomizer.nameRequiredBody',
+    );
   });
 
   it('saves a new preset with name', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByPlaceholderText('Preset name...')).toBeTruthy();
+      expect(r.getByPlaceholderText('dashboardCustomizer.presetPlaceholder')).toBeTruthy();
     });
-    const input = r.getByPlaceholderText('Preset name...');
+    const input = r.getByPlaceholderText('dashboardCustomizer.presetPlaceholder');
     await fireEvent.changeText(input, 'My Preset');
-    await fireEvent.press(r.getByText('Save'));
-    expect(mockAlert).toHaveBeenCalledWith('Saved', 'Preset "My Preset" saved.');
+    await fireEvent.press(r.getByText('dashboardCustomizer.save'));
+    expect(mockAlert).toHaveBeenCalledWith(
+      'dashboardCustomizer.saved',
+      'dashboardCustomizer.savedBody',
+    );
     const saved = JSON.parse(mockDbStore['dashboard_presets']);
     expect(saved).toHaveLength(1);
     expect(saved[0].name).toBe('My Preset');
@@ -134,11 +135,11 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByPlaceholderText('Preset name...')).toBeTruthy();
+      expect(r.getByPlaceholderText('dashboardCustomizer.presetPlaceholder')).toBeTruthy();
     });
-    const input = r.getByPlaceholderText('Preset name...');
+    const input = r.getByPlaceholderText('dashboardCustomizer.presetPlaceholder');
     await fireEvent.changeText(input, 'My Preset');
-    await fireEvent.press(r.getByText('Save'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.save'));
 
     const saved = JSON.parse(mockDbStore['dashboard_presets']);
     expect(saved).toHaveLength(1);
@@ -153,7 +154,7 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (2)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
   });
 
@@ -164,9 +165,9 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (1)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Load Preset (1)'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
     await waitFor(() => {
       expect(r.getByText('My Preset')).toBeTruthy();
     });
@@ -179,15 +180,15 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (1)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Load Preset (1)'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
     await waitFor(() => {
-      expect(r.getByText('Hide Presets')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.hidePresets')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Hide Presets'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.hidePresets'));
     await waitFor(() => {
-      expect(r.getByText('Load Preset (1)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
   });
 
@@ -199,9 +200,9 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (1)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Load Preset (1)'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
     await waitFor(() => {
       expect(r.getByText('My Preset')).toBeTruthy();
     });
@@ -217,9 +218,9 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (2)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Load Preset (2)'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
 
     await waitFor(() => {
       expect(r.getAllByText('✕')).toHaveLength(2);
@@ -236,36 +237,36 @@ describe('DashboardCustomizer', () => {
   it('shows empty state when no presets', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (0)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    await fireEvent.press(r.getByText('Load Preset (0)'));
+    await fireEvent.press(r.getByText('dashboardCustomizer.loadPreset'));
     await waitFor(() => {
-      expect(r.getByText('No saved presets yet.')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.noPresets')).toBeTruthy();
     });
   });
 
   it('shows Reset to Defaults button', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Customize Dashboard')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.title')).toBeTruthy();
     });
     await waitFor(() => {
-      expect(r.getByText('Reset to Defaults')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.resetToDefaults')).toBeTruthy();
     });
   });
 
   it('shows alert on Reset press', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (0)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
-    fireEvent.press(r.getByText('Reset to Defaults'));
+    fireEvent.press(r.getByText('dashboardCustomizer.resetToDefaults'));
     expect(mockAlert).toHaveBeenCalledWith(
-      'Reset to Defaults',
-      'This will reset all dashboard sections to their default visibility.',
+      'dashboardCustomizer.resetTitle',
+      'dashboardCustomizer.resetBody',
       expect.arrayContaining([
-        expect.objectContaining({ text: 'Cancel' }),
-        expect.objectContaining({ text: 'Reset' }),
+        expect.objectContaining({ text: 'common.cancel' }),
+        expect.objectContaining({ text: 'dashboardCustomizer.reset' }),
       ]),
     );
   });
@@ -275,7 +276,7 @@ describe('DashboardCustomizer', () => {
 
     const r = await render(<DashboardCustomizer {...defaultProps} />);
     await waitFor(() => {
-      expect(r.getByText('Load Preset (0)')).toBeTruthy();
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
   });
 });

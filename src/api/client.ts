@@ -281,6 +281,14 @@ export async function addMinerNote(minerId: string, text: string): Promise<Miner
   return res.data;
 }
 
+export async function deleteMinerNote(
+  minerId: string,
+  noteId: number,
+): Promise<{ deleted: boolean }> {
+  const res = await client.delete<{ deleted: boolean }>(`/api/miners/${minerId}/notes/${noteId}`);
+  return res.data;
+}
+
 export interface MinerAlertRule {
   enabled: boolean;
   tempThreshold: number;

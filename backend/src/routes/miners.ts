@@ -149,3 +149,20 @@ minersRouter.post('/:minerId/notes', async (req: AuthRequest, res) => {
     res.status(500).json({ error: 'internal server error' });
   }
 });
+
+minersRouter.delete('/:minerId/notes/:noteId', async (req: AuthRequest, res) => {
+  try {
+    const { minerId, noteId } = req.params;
+    const result = await query(
+      `DELETE FROM miner_notes WHERE id = $1 AND minerId = $2 AND userId = $3 RETURNING id`,
+      [noteId, minerId, getUserId(req)],
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'note not found' });
+    }
+    res.json({ deleted: true });
+  } catch (e: unknown) {
+    captureException(e);
+    res.status(500).json({ error: 'internal server error' });
+  }
+});
