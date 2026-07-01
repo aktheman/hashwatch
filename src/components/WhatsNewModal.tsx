@@ -1,6 +1,7 @@
-import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
+import { View, Text, Pressable, Modal, ScrollView, StyleSheet } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as DB from '../db/database';
 
 const APP_VERSION = '1.1.0';
@@ -46,6 +47,53 @@ const CHANGELOG = [
   },
 ];
 
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: spacing.xl,
+  },
+  modal: {
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '70%',
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    borderWidth: 1,
+  },
+  title: {
+    marginBottom: spacing.xxs,
+  },
+  version: {
+    marginBottom: spacing.lg,
+  },
+  section: {
+    marginBottom: spacing.lg,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  changeRow: {
+    flexDirection: 'row',
+    marginBottom: spacing.xxs,
+    paddingLeft: spacing.xs,
+  },
+  changeText: {
+    flex: 1,
+    lineHeight: 18,
+  },
+  closeButton: {
+    borderRadius: radius.md,
+    padding: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+});
+
 export function WhatsNewModal() {
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
@@ -66,48 +114,60 @@ export function WhatsNewModal() {
       animationType="fade"
       onRequestClose={() => setVisible(false)}
     >
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          padding: 24,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: theme.surface,
-            borderRadius: 20,
-            padding: 24,
-            maxHeight: '70%',
-            width: '100%',
-            maxWidth: 400,
-            borderWidth: 1,
-            borderColor: theme.border,
-          }}
-        >
-          <Text style={{ color: theme.text, fontSize: 20, fontWeight: '800', marginBottom: 4 }}>
+      <View style={styles.backdrop}>
+        <View style={[styles.modal, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <Text
+            style={[
+              styles.title,
+              { color: theme.text, fontSize: fontSize.h3, fontWeight: fontWeight.extrabold },
+            ]}
+          >
             What's New
           </Text>
-          <Text style={{ color: theme.textDim, fontSize: 12, marginBottom: 16 }}>
+          <Text style={[styles.version, { color: theme.textDim, fontSize: fontSize.sm }]}>
             Version {APP_VERSION}
           </Text>
           <ScrollView showsVerticalScrollIndicator={false}>
             {CHANGELOG.map((entry) => (
-              <View key={entry.version} style={{ marginBottom: 16 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ color: theme.primary, fontSize: 14, fontWeight: '700' }}>
+              <View key={entry.version} style={styles.section}>
+                <View style={styles.headerRow}>
+                  <Text
+                    style={[
+                      styles.version,
+                      {
+                        color: theme.primary,
+                        fontSize: fontSize.base,
+                        fontWeight: fontWeight.bold,
+                        marginBottom: 0,
+                      },
+                    ]}
+                  >
                     v{entry.version}
                   </Text>
-                  <Text style={{ color: theme.textMuted, fontSize: 11, marginLeft: 8 }}>
+                  <Text
+                    style={{
+                      color: theme.textMuted,
+                      fontSize: fontSize.xs,
+                      marginLeft: spacing.xs,
+                    }}
+                  >
                     {entry.date}
                   </Text>
                 </View>
                 {entry.changes.map((change, i) => (
-                  <View key={i} style={{ flexDirection: 'row', marginBottom: 4, paddingLeft: 8 }}>
-                    <Text style={{ color: theme.success, fontSize: 12, marginRight: 6 }}>✓</Text>
-                    <Text style={{ color: theme.textDim, fontSize: 12, flex: 1, lineHeight: 18 }}>
+                  <View key={i} style={styles.changeRow}>
+                    <Text
+                      style={{
+                        color: theme.success,
+                        fontSize: fontSize.xs,
+                        marginRight: spacing.xxs,
+                      }}
+                    >
+                      ✓
+                    </Text>
+                    <Text
+                      style={[styles.changeText, { color: theme.textDim, fontSize: fontSize.xs }]}
+                    >
                       {change}
                     </Text>
                   </View>
@@ -116,16 +176,12 @@ export function WhatsNewModal() {
             ))}
           </ScrollView>
           <Pressable
-            style={{
-              backgroundColor: theme.primary,
-              borderRadius: 12,
-              padding: 14,
-              alignItems: 'center',
-              marginTop: 8,
-            }}
+            style={[styles.closeButton, { backgroundColor: theme.primary }]}
             onPress={() => setVisible(false)}
           >
-            <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 15 }}>Got it!</Text>
+            <Text style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.md }}>
+              Got it!
+            </Text>
           </Pressable>
         </View>
       </View>
