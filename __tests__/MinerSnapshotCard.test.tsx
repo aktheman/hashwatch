@@ -1,0 +1,188 @@
+import { render, screen, cleanup } from '@testing-library/react-native';
+import React from 'react';
+import { MinerSnapshotCard } from '../src/components/MinerSnapshotCard';
+import { Miner } from '../src/types';
+
+jest.mock('../src/theme', () => ({
+  useTheme: () => ({
+    surface: '#1a1a2e',
+    surfaceLight: '#2a2a4e',
+    border: '#2a2a4e',
+    text: '#fff',
+    textDim: '#888',
+    textMuted: '#666',
+    primary: '#6C63FF',
+    success: '#10B981',
+    info: '#06B6D4',
+    danger: '#EF4444',
+    glow: 'rgba(108,99,255,0.15)',
+  }),
+}));
+
+function makeMiner(overrides: Partial<Miner> = {}): Miner {
+  return {
+    id: 'm1',
+    name: 'Test Miner',
+    ip: '192.168.1.10',
+    port: 80,
+    isOnline: true,
+    info: null,
+    status: null,
+    ...overrides,
+  } as Miner;
+}
+
+beforeEach(() => {
+  cleanup();
+});
+
+it('renders miner name and ip', async () => {
+  const miner = makeMiner();
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText('Test Miner')).toBeTruthy();
+  expect(screen.getByText('192.168.1.10')).toBeTruthy();
+});
+
+it('renders hashrate, temp, uptime when status is present', async () => {
+  const miner = makeMiner({
+    isOnline: true,
+    status: {
+      hashRate: 1.2,
+      hashRateUnit: 'TH/s',
+      temperature: 55,
+      vrTemp: 0,
+      voltage: 1200,
+      current: 5000,
+      power: 12.5,
+      sharesAccepted: 100,
+      sharesRejected: 2,
+      bestDiff: '1.5M',
+      bestSessionDiff: '2.0M',
+      uptimeSeconds: 3600,
+      coreVoltage: 1200,
+      frequency: 400,
+      fanSpeed: 50,
+      fanRpm: 3000,
+      pool: 'stratum.example.com',
+      poolPort: 3333,
+      poolUser: 'user.worker',
+      poolResponseTime: 150,
+    },
+  });
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText('1.2 TH/s')).toBeTruthy();
+  expect(screen.getByText('55°C')).toBeTruthy();
+});
+
+it('shows --- for hashrate, temp, uptime when status is null', async () => {
+  const miner = makeMiner({ status: null });
+  await render(<MinerSnapshotCard miner={miner} />);
+  const dashes = screen.getAllByText('---');
+  expect(dashes.length).toBeGreaterThanOrEqual(1);
+});
+
+it('shows --- when miner is offline', async () => {
+  const miner = makeMiner({ isOnline: false, status: null });
+  await render(<MinerSnapshotCard miner={miner} />);
+  const dashes = screen.getAllByText('---');
+  expect(dashes.length).toBeGreaterThanOrEqual(1);
+});
+
+it('renders power, efficiency, shares and pool when status exists', async () => {
+  const miner = makeMiner({
+    isOnline: true,
+    status: {
+      hashRate: 500,
+      hashRateUnit: 'GH/s',
+      temperature: 60,
+      vrTemp: 0,
+      voltage: 1200,
+      current: 3500,
+      power: 12,
+      sharesAccepted: 100,
+      sharesRejected: 1,
+      bestDiff: '850M',
+      bestSessionDiff: '1.2G',
+      uptimeSeconds: 7200,
+      coreVoltage: 1200,
+      frequency: 400,
+      fanSpeed: 50,
+      fanRpm: 3000,
+      pool: 'stratum+tcp://pool.example.com:3333',
+      poolPort: 3333,
+      poolUser: 'user.worker',
+      poolResponseTime: 120,
+    },
+  });
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText(/Power/)).toBeTruthy();
+  expect(screen.getByText(/Efficiency/)).toBeTruthy();
+  expect(screen.getByText(/Shares/)).toBeTruthy();
+  expect(screen.getByText(/pool\.example\.com/)).toBeTruthy();
+});
+
+it('shows N/A for pool when it is empty', async () => {
+  const miner = makeMiner({
+    isOnline: true,
+    status: {
+      hashRate: 500,
+      hashRateUnit: 'GH/s',
+      temperature: 60,
+      vrTemp: 0,
+      voltage: 1200,
+      current: 3500,
+      power: 12,
+      sharesAccepted: 100,
+      sharesRejected: 1,
+      bestDiff: '850M',
+      bestSessionDiff: '1.2G',
+      uptimeSeconds: 7200,
+      coreVoltage: 1200,
+      frequency: 400,
+      fanSpeed: 50,
+      fanRpm: 3000,
+      pool: '',
+      poolPort: 0,
+      poolUser: '',
+      poolResponseTime: 0,
+    },
+  });
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText('N/A')).toBeTruthy();
+});
+
+it('renders share stats with accepted and rejected counts', async () => {
+  const miner = makeMiner({
+    isOnline: true,
+    status: {
+      hashRate: 500,
+      hashRateUnit: 'GH/s',
+      temperature: 60,
+      vrTemp: 0,
+      voltage: 1200,
+      current: 3500,
+      power: 12,
+      sharesAccepted: 250,
+      sharesRejected: 3,
+      bestDiff: '850M',
+      bestSessionDiff: '1.2G',
+      uptimeSeconds: 7200,
+      coreVoltage: 1200,
+      frequency: 400,
+      fanSpeed: 50,
+      fanRpm: 3000,
+      pool: 'stratum+tcp://pool.example.com:3333',
+      poolPort: 3333,
+      poolUser: 'user.worker',
+      poolResponseTime: 120,
+    },
+  });
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText('✓250 ✗3')).toBeTruthy();
+});
+
+it('renders generated by HashWatch footer', async () => {
+  const miner = makeMiner();
+  await render(<MinerSnapshotCard miner={miner} />);
+  expect(screen.getByText('Generated by HashWatch')).toBeTruthy();
+});

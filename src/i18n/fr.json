@@ -10,7 +10,11 @@
     "all": "Tout",
     "none": "Aucun",
     "na": "N/D",
-    "undo": "Annuler"
+    "undo": "Annuler",
+    "ok": "OK",
+    "clear": "Effacer",
+    "online": "En ligne",
+    "offline": "Hors ligne"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -45,6 +49,15 @@
     "batchFlashConfirm": "Mettre à jour",
     "batchFlashResult": "Flash terminé",
     "batchFlashResultBody": "{{success}} réussi(s), {{fail}} échoué(s)",
+    "temp": "Temp",
+    "uptime": "Temps de fonctionnement",
+    "workers": "Travailleurs",
+    "searchPlaceholder": "Rechercher des mineurs...",
+    "wallet": "Portefeuille",
+    "location": "Emplacement",
+    "assignWallet": "Attribuer un portefeuille",
+    "noWallet": "Aucun portefeuille",
+    "assignLocation": "Attribuer un emplacement",
     "profitability": "Rentabilité",
     "btcDay": "BTC/jour",
     "btcWeek": "BTC/semaine",
@@ -193,7 +206,12 @@
     "hideDebug": "Masquer le débogage",
     "forcePro": "Forcer Pro",
     "forceFree": "Forcer Gratuit",
-    "restorePurchases": "Restaurer les achats"
+    "restorePurchases": "Restaurer les achats",
+    "restoreTitle": "Restaurer",
+    "restoreBody": "Restauration des achats déclenchée",
+    "debugProTitle": "Débogage",
+    "debugProBody": "Statut Pro défini",
+    "debugFreeBody": "Statut Free défini"
   },
   "minerDetail": {
     "notFound": "Mineur non trouvé",
@@ -246,7 +264,13 @@
     "removeConfirm": "Cela supprime définitivement {{name}} et tout son historique.",
     "yesRemove": "Oui, supprimer",
     "minerRemoved": "{{name}} supprimé",
-    "sharedVia": "Partagé via HashWatch"
+    "sharedVia": "Partagé via HashWatch",
+    "error": "Erreur",
+    "temperatureHistory": "Historique des températures",
+    "wifiNetwork": "WiFi",
+    "wifiSignal": "Signal",
+    "powerMode": "Mode",
+    "recentPoolChanges": "Changements de pool récents"
   },
   "addMiner": {
     "addByIp": "Ajouter par IP",
@@ -385,7 +409,8 @@
     "subscription": "HashWatch Pro",
     "wallets": "Portefeuilles",
     "groups": "Groupes",
-    "importData": "Importer des données"
+    "importData": "Importer des données",
+    "minerComparison": "Comparaison de mineurs"
   },
   "minerCard": {
     "hashrate": "Taux de hachage",
@@ -458,7 +483,9 @@
     "frequency": "Fréquence",
     "voltage": "Tension",
     "bestDiff": "Meilleure difficulté",
-    "pool": "Pool"
+    "pool": "Pool",
+    "nSelected": "{{count}} sélectionné(s)",
+    "compare": "Comparer"
   },
   "alertHistory": {
     "title": "Historique des alertes",
@@ -471,7 +498,8 @@
     "hot": "Température élevée",
     "hashrate_drop": "Baisse du taux de hachage",
     "pool_lost": "Pool perdu",
-    "long_uptime": "Longue disponibilité"
+    "long_uptime": "Longue disponibilité",
+    "sync": "Synchroniser"
   },
   "notificationHistory": {
     "title": "Historique des notifications",
@@ -479,5 +507,9 @@
     "failed": "Échouée",
     "last50": "50 dernières",
     "noNotifications": "Aucune notification"
+  },
+  "temperatureChart": {
+    "notEnoughData": "Pas assez de données pour le graphique de température",
+    "title": "Historique des températures"
   }
 }

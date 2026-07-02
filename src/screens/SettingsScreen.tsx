@@ -476,7 +476,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 }}
                 onPress={() => {
                   useSubscriptionStore.getState().restore();
-                  Alert.alert('Restore', 'Restore purchases triggered');
+                  Alert.alert(t('settings.restoreTitle'), t('settings.restoreBody'));
                 }}
               >
                 <Text style={{ color: theme.primary, fontWeight: '600', fontSize: 13 }}>
@@ -496,7 +496,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                   onPress={() => {
                     useSubscriptionStore.getState().setPro();
-                    Alert.alert('Debug', 'Pro status set');
+                    Alert.alert(t('settings.debugProTitle'), t('settings.debugProBody'));
                   }}
                 >
                   <Text style={{ color: theme.success, fontWeight: '600', fontSize: 13 }}>
@@ -515,7 +515,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                   onPress={() => {
                     useSubscriptionStore.getState().setFree();
-                    Alert.alert('Debug', 'Free status set');
+                    Alert.alert(t('settings.debugProTitle'), t('settings.debugFreeBody'));
                   }}
                 >
                   <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 13 }}>

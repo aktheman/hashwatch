@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import { Text, TextStyle } from 'react-native';
 
 interface TimeAgoProps {
   timestamp: number | null;
-  style?: Record<string, unknown>;
+  style?: TextStyle;
 }
 
 export function TimeAgo({ timestamp, style }: TimeAgoProps) {
