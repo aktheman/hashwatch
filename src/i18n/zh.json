@@ -10,7 +10,11 @@
     "all": "全部",
     "none": "无",
     "na": "无",
-    "undo": "撤销"
+    "undo": "撤销",
+    "ok": "确定",
+    "clear": "清除",
+    "online": "在线",
+    "offline": "离线"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -51,7 +55,16 @@
     "batchFlashBody": "将 {{count}} 台矿机更新到 {{version}}？刷写后矿机将重启。",
     "batchFlashConfirm": "更新",
     "batchFlashResult": "刷写完成",
-    "batchFlashResultBody": "{{success}} 成功, {{fail}} 失败"
+    "batchFlashResultBody": "{{success}} 成功, {{fail}} 失败",
+    "temp": "温度",
+    "uptime": "运行时间",
+    "workers": "矿工",
+    "searchPlaceholder": "搜索矿机...",
+    "wallet": "钱包",
+    "location": "位置",
+    "assignWallet": "分配钱包",
+    "noWallet": "无钱包",
+    "assignLocation": "分配位置"
   },
   "dashboardCustomizer": {
     "title": "自定义仪表盘",
@@ -192,7 +205,13 @@
     "hideDebug": "隐藏调试",
     "forcePro": "强制 Pro",
     "forceFree": "强制免费",
-    "restorePurchases": "恢复购买"
+    "restorePurchases": "恢复购买",
+    "restoreTitle": "恢复",
+    "restoreBody": "已触发恢复购买",
+    "debugProTitle": "调试",
+    "debugProBody": "Pro 状态已设置",
+    "debugFreeBody": "Free 状态已设置",
+    "cancel": "取消"
   },
   "minerDetail": {
     "notFound": "未找到矿机",
@@ -245,7 +264,13 @@
     "removeConfirm": "这将永久删除 {{name}} 及其所有历史数据。",
     "yesRemove": "是的，移除",
     "minerRemoved": "{{name}} 已移除",
-    "sharedVia": "通过 HashWatch 分享"
+    "sharedVia": "通过 HashWatch 分享",
+    "error": "错误",
+    "temperatureHistory": "温度历史",
+    "wifiNetwork": "WiFi",
+    "wifiSignal": "信号",
+    "powerMode": "模式",
+    "recentPoolChanges": "最近的矿池变更"
   },
   "addMiner": {
     "addByIp": "通过 IP 添加",
@@ -374,7 +399,8 @@
     "subscription": "HashWatch Pro",
     "wallets": "钱包",
     "groups": "分组",
-    "importData": "导入数据"
+    "importData": "导入数据",
+    "minerComparison": "矿机比较"
   },
   "minerCard": {
     "hashrate": "算力",
@@ -433,6 +459,10 @@
   "subscriptionGate": {
     "upgradeToUnlock": "升级到 Pro 以解锁"
   },
+  "temperatureChart": {
+    "notEnoughData": "温度图表数据不足",
+    "title": "温度历史"
+  },
   "comparison": {
     "title": "矿机对比",
     "selectAtLeastTwo": "请至少选择2台矿机进行对比",
@@ -447,7 +477,9 @@
     "frequency": "频率",
     "voltage": "电压",
     "bestDiff": "最佳难度",
-    "pool": "矿池"
+    "pool": "矿池",
+    "nSelected": "已选 {{count}} 个",
+    "compare": "比较"
   },
   "alertHistory": {
     "title": "告警历史",
@@ -460,7 +492,8 @@
     "hot": "高温",
     "hashrate_drop": "算力下降",
     "pool_lost": "矿池丢失",
-    "long_uptime": "长时间运行"
+    "long_uptime": "长时间运行",
+    "sync": "同步"
   },
   "notificationHistory": {
     "title": "通知历史",

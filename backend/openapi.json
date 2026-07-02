@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "HashWatch API",
-    "description": "Backend API for HashWatch — monitor and manage cryptocurrency miners in real-time.",
+    "description": "Backend API for HashWatch \u2014 monitor and manage cryptocurrency miners in real-time.",
     "version": "1.0.0"
   },
   "servers": [
@@ -139,7 +139,11 @@
       "get": {
         "tags": ["Miners"],
         "summary": "List all miners for the authenticated user",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of miners",
@@ -159,7 +163,11 @@
       "post": {
         "tags": ["Miners"],
         "summary": "Register a new miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -198,7 +206,11 @@
       "put": {
         "tags": ["Miners"],
         "summary": "Update a miner (partial)",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -256,7 +268,11 @@
       "delete": {
         "tags": ["Miners"],
         "summary": "Delete a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -296,7 +312,11 @@
       "get": {
         "tags": ["Stats"],
         "summary": "Get snapshots for a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "minerId",
@@ -337,7 +357,11 @@
       "post": {
         "tags": ["Stats"],
         "summary": "Submit a new snapshot for a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "minerId",
@@ -397,7 +421,11 @@
       "post": {
         "tags": ["Proxy"],
         "summary": "Proxy an HTTP request to a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -454,7 +482,11 @@
       "post": {
         "tags": ["Proxy"],
         "summary": "Send restart command to a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -493,7 +525,11 @@
       "post": {
         "tags": ["Push"],
         "summary": "Register a push notification token",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -532,7 +568,11 @@
       "delete": {
         "tags": ["Push"],
         "summary": "Unregister a push notification token",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -581,7 +621,11 @@
       "get": {
         "tags": ["Settings"],
         "summary": "Get all settings for the authenticated user",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Settings key-value map",
@@ -605,7 +649,11 @@
       "put": {
         "tags": ["Settings"],
         "summary": "Set a setting key/value pair",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -644,7 +692,11 @@
       "delete": {
         "tags": ["Settings"],
         "summary": "Delete a setting",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "key",
@@ -673,7 +725,11 @@
       "post": {
         "tags": ["Receipt"],
         "summary": "Validate an in-app purchase receipt via RevenueCat",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -735,7 +791,11 @@
       "get": {
         "tags": ["Notification Preferences"],
         "summary": "Get notification preferences for a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "minerId",
@@ -773,7 +833,11 @@
       "put": {
         "tags": ["Notification Preferences"],
         "summary": "Update a notification preference for a miner",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "minerId",
@@ -808,6 +872,533 @@
           },
           "400": {
             "description": "Invalid alert type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/miners/pools": {
+      "get": {
+        "tags": ["Miners"],
+        "summary": "List pool statistics for all miners",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of pool stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoolStat"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/miners/{minerId}/notes": {
+      "get": {
+        "tags": ["Miner Notes"],
+        "summary": "List notes for a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of notes (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MinerNote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Miner Notes"],
+        "summary": "Add a note to a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Note created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinerNote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Text is required (1-500 chars)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/miners/{minerId}/notes/{noteId}": {
+      "delete": {
+        "tags": ["Miner Notes"],
+        "summary": "Delete a note from a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "noteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Note not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alert-history": {
+      "get": {
+        "tags": ["Alert History"],
+        "summary": "List alert history for the authenticated user",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of alert history items (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertHistoryItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alert-history/sync": {
+      "post": {
+        "tags": ["Alert History"],
+        "summary": "Sync alerts to the server",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncAlertsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Alerts synced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncAlertsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid alerts data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alert-history/{id}/read": {
+      "put": {
+        "tags": ["Alert History"],
+        "summary": "Mark an alert as read",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert marked as read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Alert not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alert-rules/{minerId}": {
+      "get": {
+        "tags": ["Alert Rules"],
+        "summary": "Get alert rules for a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alert rules (default values if none set)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRules"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Alert Rules"],
+        "summary": "Update alert rules for a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRulesUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Alert rules updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pool-changes/{minerId}": {
+      "get": {
+        "tags": ["Pool Changes"],
+        "summary": "List pool changes for a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "minerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of pool changes (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PoolChange"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Miner not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pool-changes": {
+      "post": {
+        "tags": ["Pool Changes"],
+        "summary": "Record a pool change for a miner",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePoolChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pool change recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields (minerId, newPool)",
             "content": {
               "application/json": {
                 "schema": {
@@ -873,13 +1464,34 @@
         "type": "object",
         "required": ["id", "userId", "name", "ip", "port", "addedat"],
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "userid": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
-          "ip": { "type": "string", "format": "ip" },
-          "port": { "type": "integer", "default": 80 },
-          "addedat": { "type": "string", "format": "date-time" },
-          "lastseen": { "type": "string", "format": "date-time", "nullable": true }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string",
+            "format": "ip"
+          },
+          "port": {
+            "type": "integer",
+            "default": 80
+          },
+          "addedat": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastseen": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
         }
       },
       "CreateMinerRequest": {
@@ -936,18 +1548,44 @@
           "frequency"
         ],
         "properties": {
-          "id": { "type": "integer" },
-          "minerid": { "type": "string", "format": "uuid" },
-          "timestamp": { "type": "integer", "description": "Unix ms timestamp" },
-          "hashrate": { "type": "number" },
-          "temperature": { "type": "number" },
-          "voltage": { "type": "number" },
-          "current": { "type": "number" },
-          "power": { "type": "number" },
-          "sharesaccepted": { "type": "integer" },
-          "sharesrejected": { "type": "integer" },
-          "uptimeseconds": { "type": "integer" },
-          "frequency": { "type": "number" }
+          "id": {
+            "type": "integer"
+          },
+          "minerid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix ms timestamp"
+          },
+          "hashrate": {
+            "type": "number"
+          },
+          "temperature": {
+            "type": "number"
+          },
+          "voltage": {
+            "type": "number"
+          },
+          "current": {
+            "type": "number"
+          },
+          "power": {
+            "type": "number"
+          },
+          "sharesaccepted": {
+            "type": "integer"
+          },
+          "sharesrejected": {
+            "type": "integer"
+          },
+          "uptimeseconds": {
+            "type": "integer"
+          },
+          "frequency": {
+            "type": "number"
+          }
         }
       },
       "CreateSnapshotRequest": {
@@ -964,15 +1602,33 @@
           "frequency"
         ],
         "properties": {
-          "hashRate": { "type": "number" },
-          "temperature": { "type": "number" },
-          "voltage": { "type": "number" },
-          "current": { "type": "number" },
-          "power": { "type": "number" },
-          "sharesAccepted": { "type": "integer" },
-          "sharesRejected": { "type": "integer" },
-          "uptimeSeconds": { "type": "integer" },
-          "frequency": { "type": "number" }
+          "hashRate": {
+            "type": "number"
+          },
+          "temperature": {
+            "type": "number"
+          },
+          "voltage": {
+            "type": "number"
+          },
+          "current": {
+            "type": "number"
+          },
+          "power": {
+            "type": "number"
+          },
+          "sharesAccepted": {
+            "type": "integer"
+          },
+          "sharesRejected": {
+            "type": "integer"
+          },
+          "uptimeSeconds": {
+            "type": "integer"
+          },
+          "frequency": {
+            "type": "number"
+          }
         }
       },
       "ProxyRequest": {
@@ -991,7 +1647,9 @@
           },
           "headers": {
             "type": "object",
-            "additionalProperties": { "type": "string" },
+            "additionalProperties": {
+              "type": "string"
+            },
             "description": "Headers to forward (blocked: host, authorization, cookie, etc.)"
           },
           "data": {
@@ -1067,14 +1725,34 @@
         "type": "object",
         "description": "Map of alert type to enabled status",
         "properties": {
-          "offline": { "type": "boolean", "default": true },
-          "online": { "type": "boolean", "default": true },
-          "hot": { "type": "boolean", "default": true },
-          "hashrate_drop": { "type": "boolean", "default": true },
-          "pool_lost": { "type": "boolean", "default": true },
-          "long_uptime": { "type": "boolean", "default": true }
+          "offline": {
+            "type": "boolean",
+            "default": true
+          },
+          "online": {
+            "type": "boolean",
+            "default": true
+          },
+          "hot": {
+            "type": "boolean",
+            "default": true
+          },
+          "hashrate_drop": {
+            "type": "boolean",
+            "default": true
+          },
+          "pool_lost": {
+            "type": "boolean",
+            "default": true
+          },
+          "long_uptime": {
+            "type": "boolean",
+            "default": true
+          }
         },
-        "additionalProperties": { "type": "boolean" }
+        "additionalProperties": {
+          "type": "boolean"
+        }
       },
       "NotificationPrefUpdateRequest": {
         "type": "object",
@@ -1117,7 +1795,9 @@
       "ValidationErrorResponse": {
         "type": "object",
         "properties": {
-          "error": { "type": "string" },
+          "error": {
+            "type": "string"
+          },
           "details": {
             "type": "array",
             "items": {
@@ -1129,9 +1809,15 @@
       "ProxyErrorResponse": {
         "type": "object",
         "properties": {
-          "error": { "type": "string" },
-          "message": { "type": "string" },
-          "upstreamStatus": { "type": "integer" }
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "upstreamStatus": {
+            "type": "integer"
+          }
         }
       },
       "OkResponse": {
@@ -1164,30 +1850,60 @@
       "PoolChange": {
         "type": "object",
         "properties": {
-          "previouspool": { "type": "string" },
-          "newpool": { "type": "string" },
-          "changedat": { "type": "integer", "description": "Unix ms timestamp" }
+          "previouspool": {
+            "type": "string"
+          },
+          "newpool": {
+            "type": "string"
+          },
+          "changedat": {
+            "type": "integer",
+            "description": "Unix ms timestamp"
+          }
         }
       },
       "CreatePoolChangeRequest": {
         "type": "object",
         "required": ["minerId", "newPool"],
         "properties": {
-          "minerId": { "type": "string", "format": "uuid" },
-          "previousPool": { "type": "string" },
-          "newPool": { "type": "string" },
-          "changedAt": { "type": "integer", "description": "Unix ms timestamp (defaults to now)" }
+          "minerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "previousPool": {
+            "type": "string"
+          },
+          "newPool": {
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "integer",
+            "description": "Unix ms timestamp (defaults to now)"
+          }
         }
       },
       "AlertHistoryItem": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "minerid": { "type": "string", "format": "uuid" },
-          "eventtype": { "type": "string" },
-          "title": { "type": "string" },
-          "timestamp": { "type": "integer" },
-          "read": { "type": "boolean" }
+          "id": {
+            "type": "integer"
+          },
+          "minerid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventtype": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "integer"
+          },
+          "read": {
+            "type": "boolean"
+          }
         }
       },
       "SyncAlertsRequest": {
@@ -1200,14 +1916,23 @@
               "type": "object",
               "required": ["minerId", "eventType", "timestamp"],
               "properties": {
-                "minerId": { "type": "string", "format": "uuid" },
+                "minerId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
                 "eventType": {
                   "type": "string",
                   "enum": ["offline", "online", "hot", "hashrate_drop", "pool_lost", "long_uptime"]
                 },
-                "title": { "type": "string" },
-                "timestamp": { "type": "integer" },
-                "read": { "type": "boolean" }
+                "title": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "integer"
+                },
+                "read": {
+                  "type": "boolean"
+                }
               }
             }
           }
@@ -1216,8 +1941,117 @@
       "SyncAlertsResponse": {
         "type": "object",
         "properties": {
-          "ok": { "type": "boolean", "enum": [true] },
-          "inserted": { "type": "integer" }
+          "ok": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "inserted": {
+            "type": "integer"
+          }
+        }
+      },
+      "PoolStat": {
+        "type": "object",
+        "properties": {
+          "pool": {
+            "type": "string"
+          },
+          "minerCount": {
+            "type": "integer"
+          },
+          "totalHashrate": {
+            "type": "number"
+          },
+          "totalShares": {
+            "type": "integer"
+          },
+          "bestDiff": {
+            "type": "string"
+          },
+          "acceptRate": {
+            "type": "number"
+          }
+        }
+      },
+      "MinerNote": {
+        "type": "object",
+        "required": ["id", "minerId", "userId", "text", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "text": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Unix ms timestamp"
+          }
+        }
+      },
+      "CreateNoteRequest": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "AlertRules": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "tempThreshold": {
+            "type": "number",
+            "default": 70
+          },
+          "hashrateDropPercent": {
+            "type": "number",
+            "default": 50
+          },
+          "offlineReminderMinutes": {
+            "type": "integer",
+            "default": 5
+          },
+          "uptimeThresholdHours": {
+            "type": "integer",
+            "default": 24
+          }
+        }
+      },
+      "AlertRulesUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "tempThreshold": {
+            "type": "number"
+          },
+          "hashrateDropPercent": {
+            "type": "number"
+          },
+          "offlineReminderMinutes": {
+            "type": "integer"
+          },
+          "uptimeThresholdHours": {
+            "type": "integer"
+          }
         }
       }
     }
@@ -1236,8 +2070,14 @@
             "type": "object",
             "required": ["type", "token"],
             "properties": {
-              "type": { "type": "string", "enum": ["auth"] },
-              "token": { "type": "string", "description": "JWT Bearer token" }
+              "type": {
+                "type": "string",
+                "enum": ["auth"]
+              },
+              "token": {
+                "type": "string",
+                "description": "JWT Bearer token"
+              }
             }
           }
         },
@@ -1248,8 +2088,14 @@
             "type": "object",
             "required": ["type", "minerId"],
             "properties": {
-              "type": { "type": "string", "enum": ["subscribe"] },
-              "minerId": { "type": "string", "format": "uuid" }
+              "type": {
+                "type": "string",
+                "enum": ["subscribe"]
+              },
+              "minerId": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           }
         },
@@ -1260,7 +2106,10 @@
             "type": "object",
             "required": ["type"],
             "properties": {
-              "type": { "type": "string", "enum": ["pong"] }
+              "type": {
+                "type": "string",
+                "enum": ["pong"]
+              }
             }
           }
         }
@@ -1273,7 +2122,10 @@
             "type": "object",
             "required": ["type"],
             "properties": {
-              "type": { "type": "string", "enum": ["auth_ok"] }
+              "type": {
+                "type": "string",
+                "enum": ["auth_ok"]
+              }
             }
           }
         },
@@ -1284,8 +2136,13 @@
             "type": "object",
             "required": ["type", "message"],
             "properties": {
-              "type": { "type": "string", "enum": ["auth_error"] },
-              "message": { "type": "string" }
+              "type": {
+                "type": "string",
+                "enum": ["auth_error"]
+              },
+              "message": {
+                "type": "string"
+              }
             }
           }
         },
@@ -1296,8 +2153,14 @@
             "type": "object",
             "required": ["type", "minerId"],
             "properties": {
-              "type": { "type": "string", "enum": ["subscribed"] },
-              "minerId": { "type": "string", "format": "uuid" }
+              "type": {
+                "type": "string",
+                "enum": ["subscribed"]
+              },
+              "minerId": {
+                "type": "string",
+                "format": "uuid"
+              }
             }
           }
         },
@@ -1308,8 +2171,13 @@
             "type": "object",
             "required": ["type", "snapshot"],
             "properties": {
-              "type": { "type": "string", "enum": ["snapshot"] },
-              "snapshot": { "$ref": "#/components/schemas/MinerSnapshot" }
+              "type": {
+                "type": "string",
+                "enum": ["snapshot"]
+              },
+              "snapshot": {
+                "$ref": "#/components/schemas/MinerSnapshot"
+              }
             }
           }
         },
@@ -1320,8 +2188,13 @@
             "type": "object",
             "required": ["type", "message"],
             "properties": {
-              "type": { "type": "string", "enum": ["error"] },
-              "message": { "type": "string" }
+              "type": {
+                "type": "string",
+                "enum": ["error"]
+              },
+              "message": {
+                "type": "string"
+              }
             }
           }
         }

@@ -10,7 +10,11 @@
     "all": "すべて",
     "none": "なし",
     "na": "N/A",
-    "undo": "元に戻す"
+    "undo": "元に戻す",
+    "ok": "OK",
+    "clear": "クリア",
+    "online": "オンライン",
+    "offline": "オフライン"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -51,7 +55,16 @@
     "batchFlashBody": "{{count}}台のマイナーを{{version}}に更新しますか？フラッシュ後、マイナーは再起動します。",
     "batchFlashConfirm": "更新",
     "batchFlashResult": "フラッシュ完了",
-    "batchFlashResultBody": "{{success}}成功、{{fail}}失敗"
+    "batchFlashResultBody": "{{success}}成功、{{fail}}失敗",
+    "temp": "温度",
+    "uptime": "稼働時間",
+    "workers": "ワーカー",
+    "searchPlaceholder": "マイナーを検索...",
+    "wallet": "ウォレット",
+    "location": "場所",
+    "assignWallet": "ウォレットを割り当て",
+    "noWallet": "ウォレットなし",
+    "assignLocation": "場所を割り当て"
   },
   "dashboardCustomizer": {
     "title": "ダッシュボードをカスタマイズ",
@@ -192,7 +205,13 @@
     "hideDebug": "デバッグを隠す",
     "forcePro": "Pro を強制",
     "forceFree": "無料を強制",
-    "restorePurchases": "購入を復元"
+    "restorePurchases": "購入を復元",
+    "restoreTitle": "復元",
+    "restoreBody": "購入の復元がトリガーされました",
+    "debugProTitle": "デバッグ",
+    "debugProBody": "Proステータスが設定されました",
+    "debugFreeBody": "Freeステータスが設定されました",
+    "cancel": "キャンセル"
   },
   "minerDetail": {
     "notFound": "マイナーが見つかりません",
@@ -245,7 +264,13 @@
     "removeConfirm": "{{name}} とすべての履歴を完全に削除します。",
     "yesRemove": "はい、削除します",
     "minerRemoved": "{{name}} を削除しました",
-    "sharedVia": "HashWatch 経由で共有"
+    "sharedVia": "HashWatch 経由で共有",
+    "error": "エラー",
+    "temperatureHistory": "温度履歴",
+    "wifiNetwork": "WiFi",
+    "wifiSignal": "信号",
+    "powerMode": "モード",
+    "recentPoolChanges": "最近のプール変更"
   },
   "addMiner": {
     "addByIp": "IP で追加",
@@ -374,7 +399,8 @@
     "subscription": "HashWatch Pro",
     "wallets": "ウォレット",
     "groups": "グループ",
-    "importData": "データをインポート"
+    "importData": "データをインポート",
+    "minerComparison": "マイナー比較"
   },
   "minerCard": {
     "hashrate": "ハッシュレート",
@@ -433,6 +459,10 @@
   "subscriptionGate": {
     "upgradeToUnlock": "Pro にアップグレードしてアンロック"
   },
+  "temperatureChart": {
+    "notEnoughData": "温度チャートに十分なデータがありません",
+    "title": "温度履歴"
+  },
   "comparison": {
     "title": "マイナー比較",
     "selectAtLeastTwo": "比較するには少なくとも2台のマイナーを選択",
@@ -447,7 +477,9 @@
     "frequency": "周波数",
     "voltage": "電圧",
     "bestDiff": "最高難易度",
-    "pool": "プール"
+    "pool": "プール",
+    "nSelected": "{{count}}件選択",
+    "compare": "比較"
   },
   "alertHistory": {
     "title": "アラート履歴",
@@ -460,7 +492,8 @@
     "hot": "高温",
     "hashrate_drop": "ハッシュレート低下",
     "pool_lost": "プール喪失",
-    "long_uptime": "長時間稼働"
+    "long_uptime": "長時間稼働",
+    "sync": "同期"
   },
   "notificationHistory": {
     "title": "通知履歴",

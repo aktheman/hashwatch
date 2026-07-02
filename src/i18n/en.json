@@ -10,7 +10,11 @@
     "all": "All",
     "none": "None",
     "na": "N/A",
-    "undo": "Undo"
+    "undo": "Undo",
+    "ok": "OK",
+    "clear": "Clear",
+    "online": "Online",
+    "offline": "Offline"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -51,7 +55,16 @@
     "batchFlashBody": "Update {{count}} miner(s) to {{version}}? Miner will reboot after flashing.",
     "batchFlashConfirm": "Flash",
     "batchFlashResult": "Flash Complete",
-    "batchFlashResultBody": "{{success}} succeeded, {{fail}} failed"
+    "batchFlashResultBody": "{{success}} succeeded, {{fail}} failed",
+    "temp": "Temp",
+    "uptime": "Uptime",
+    "workers": "Workers",
+    "searchPlaceholder": "Search miners...",
+    "wallet": "Wallet",
+    "location": "Location",
+    "assignWallet": "Assign Wallet",
+    "noWallet": "No Wallet",
+    "assignLocation": "Assign Location"
   },
   "dashboardCustomizer": {
     "title": "Customize Dashboard",
@@ -195,7 +208,12 @@
     "hideDebug": "Hide Debug",
     "forcePro": "Force Pro",
     "forceFree": "Force Free",
-    "restorePurchases": "Restore Purchases"
+    "restorePurchases": "Restore Purchases",
+    "restoreTitle": "Restore",
+    "restoreBody": "Restore purchases triggered",
+    "debugProTitle": "Debug",
+    "debugProBody": "Pro status set",
+    "debugFreeBody": "Free status set"
   },
   "minerDetail": {
     "notFound": "Miner Not Found",
@@ -249,7 +267,13 @@
     "yesRemove": "Yes, Remove",
     "minerRemoved": "{{name}} removed",
     "shareStats": "Share Stats",
-    "sharedVia": "Shared via HashWatch"
+    "sharedVia": "Shared via HashWatch",
+    "error": "Error",
+    "temperatureHistory": "Temperature History",
+    "wifiNetwork": "WiFi",
+    "wifiSignal": "Signal",
+    "powerMode": "Mode",
+    "recentPoolChanges": "Recent Pool Changes"
   },
   "addMiner": {
     "addByIp": "Add by IP",
@@ -369,7 +393,9 @@
     "frequency": "Frequency",
     "voltage": "Voltage",
     "bestDiff": "Best Diff",
-    "pool": "Pool"
+    "pool": "Pool",
+    "nSelected": "{{count}} selected",
+    "compare": "Compare"
   },
   "alertHistory": {
     "title": "Alert History",
@@ -382,7 +408,8 @@
     "hot": "High Temperature",
     "hashrate_drop": "Hashrate Drop",
     "pool_lost": "Pool Lost",
-    "long_uptime": "Long Uptime"
+    "long_uptime": "Long Uptime",
+    "sync": "Sync"
   },
   "notificationHistory": {
     "title": "Notification History",
@@ -414,7 +441,8 @@
     "subscription": "HashWatch Pro",
     "wallets": "Wallets",
     "groups": "Groups",
-    "importData": "Import Data"
+    "importData": "Import Data",
+    "minerComparison": "Miner Comparison"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -472,5 +500,9 @@
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Upgrade to Pro to unlock"
+  },
+  "temperatureChart": {
+    "notEnoughData": "Not enough data for temperature chart",
+    "title": "Temperature History"
   }
 }
