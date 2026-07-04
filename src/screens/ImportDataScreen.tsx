@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import { importFromJSON } from '../utils/export';
 import { useTranslation } from 'react-i18next';
 
@@ -52,27 +53,27 @@ export function ImportDataScreen() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.bg, padding: 16 },
+    container: { flex: 1, backgroundColor: theme.bg, padding: spacing.md },
     title: {
       color: theme.text,
-      fontSize: 24,
-      fontWeight: '800',
-      marginBottom: 8,
-      marginTop: 8,
+      fontSize: fontSize.h2,
+      fontWeight: fontWeight.extrabold,
+      marginBottom: spacing.xs,
+      marginTop: spacing.xs,
       letterSpacing: -0.5,
     },
     subtitle: {
       color: theme.textDim,
-      fontSize: 13,
+      fontSize: fontSize.base,
       lineHeight: 20,
-      marginBottom: 16,
+      marginBottom: spacing.md,
     },
     input: {
       backgroundColor: theme.surfaceLight,
-      borderRadius: 12,
-      padding: 14,
+      borderRadius: radius.md,
+      padding: spacing.sm,
       color: theme.text,
-      fontSize: 13,
+      fontSize: fontSize.base,
       fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
       borderWidth: 1,
       borderColor: theme.border,
@@ -81,36 +82,36 @@ export function ImportDataScreen() {
     },
     importBtn: {
       backgroundColor: theme.primary,
-      borderRadius: 12,
-      padding: 14,
+      borderRadius: radius.md,
+      padding: spacing.sm,
       alignItems: 'center',
-      marginTop: 16,
+      marginTop: spacing.md,
     },
     importBtnDisabled: {
       opacity: 0.5,
     },
     importBtnText: {
-      color: '#FFF',
-      fontWeight: '700',
-      fontSize: 16,
+      color: buttonText,
+      fontWeight: fontWeight.bold,
+      fontSize: fontSize.lg,
     },
     resultBox: {
       backgroundColor: theme.success + '15',
-      borderRadius: 12,
-      padding: 14,
-      marginTop: 16,
+      borderRadius: radius.md,
+      padding: spacing.sm,
+      marginTop: spacing.md,
       borderWidth: 1,
       borderColor: theme.success + '40',
     },
     resultTitle: {
       color: theme.success,
-      fontSize: 15,
-      fontWeight: '700',
-      marginBottom: 4,
+      fontSize: fontSize.md,
+      fontWeight: fontWeight.bold,
+      marginBottom: spacing.xxs,
     },
     resultText: {
       color: theme.text,
-      fontSize: 13,
+      fontSize: fontSize.base,
     },
   });
 

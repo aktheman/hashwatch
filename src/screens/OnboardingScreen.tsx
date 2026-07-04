@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { setSetting } from '../db/database';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -67,19 +68,19 @@ export function OnboardingScreen({ onComplete }: Props) {
         skipBtn: {
           position: 'absolute',
           top: 60,
-          right: 20,
+          right: spacing.lg,
           zIndex: 10,
-          paddingHorizontal: 16,
-          paddingVertical: 8,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
           backgroundColor: theme.surface,
-          borderRadius: 20,
+          borderRadius: radius.xl,
           borderWidth: 1,
           borderColor: theme.border,
         },
         skipText: {
           color: theme.textDim,
-          fontSize: 13,
-          fontWeight: '600',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
         },
         slide: {
           width,
@@ -105,15 +106,15 @@ export function OnboardingScreen({ onComplete }: Props) {
         },
         title: {
           color: theme.text,
-          fontSize: 24,
-          fontWeight: '800',
+          fontSize: fontSize.h1,
+          fontWeight: fontWeight.extrabold,
           textAlign: 'center',
-          marginBottom: 12,
+          marginBottom: spacing.sm,
           letterSpacing: -0.3,
         },
         subtitle: {
           color: theme.textDim,
-          fontSize: 15,
+          fontSize: fontSize.md,
           textAlign: 'center',
           lineHeight: 22,
           maxWidth: 300,
@@ -137,16 +138,16 @@ export function OnboardingScreen({ onComplete }: Props) {
         btn: {
           backgroundColor: theme.primary,
           paddingHorizontal: 48,
-          paddingVertical: 16,
-          borderRadius: 16,
+          paddingVertical: spacing.md,
+          borderRadius: radius.lg,
           width: '100%',
           alignItems: 'center',
           boxShadow: `0 4px 20px ${theme.glow}`,
         },
         btnText: {
-          color: '#FFF',
-          fontSize: 17,
-          fontWeight: '700',
+          color: buttonText,
+          fontSize: fontSize.xl,
+          fontWeight: fontWeight.bold,
         },
       }),
     [theme],

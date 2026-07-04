@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.md,
     marginHorizontal: spacing.md,
-    marginVertical: 6,
+    marginVertical: spacing.xxs,
     borderWidth: 1,
     gap: spacing.md,
   },

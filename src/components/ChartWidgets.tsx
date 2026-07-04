@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Polygon, Polyline, Defs, Stop, LinearGradient, Circle } from 'react-native-svg';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 const absoluteFillStyle = { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 } as const;
 
@@ -64,7 +65,7 @@ export function MiniBarChart({ data, width = 120, height = 40, color }: MiniBarC
             width: barWidth,
             height: Math.max((v / max) * height, 4),
             backgroundColor: stroke,
-            borderRadius: 2,
+            borderRadius: radius.xxs,
           }}
         />
       ))}
@@ -112,7 +113,9 @@ export function Donut({ value, max = 100, color, size = 100 }: DonutProps) {
         />
       </Svg>
       <View style={[absoluteFillStyle, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: theme.text, fontSize: 14, fontWeight: '800' }}>
+        <Text
+          style={{ color: theme.text, fontSize: fontSize.md, fontWeight: fontWeight.extrabold }}
+        >
           {Math.round(value)}%
         </Text>
       </View>
@@ -191,11 +194,13 @@ export function Timeline({ data, width = 140, height = 220 }: TimelineProps) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            height: (height - data.length * 8) / data.length,
-            gap: 8,
+            height: (height - data.length * spacing.xs) / data.length,
+            gap: spacing.xs,
           }}
         >
-          <Text style={{ color: theme.textMuted, fontSize: 10, width: 24 }}>{item.month}</Text>
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, width: spacing.xl }}>
+            {item.month}
+          </Text>
           <View
             style={{
               width: dotSize,
@@ -207,7 +212,9 @@ export function Timeline({ data, width = 140, height = 220 }: TimelineProps) {
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: theme.text, fontSize: 8, fontWeight: '700' }}>{item.value}%</Text>
+            <Text style={{ color: theme.text, fontSize: fontSize.xs, fontWeight: fontWeight.bold }}>
+              {item.value}%
+            </Text>
           </View>
         </View>
       ))}

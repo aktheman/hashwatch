@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { useTheme } from '../theme';
-import { spacing, fontSize, fontWeight, radius, cardStyle } from '../utils/design';
+import { spacing, fontSize, fontWeight, cardStyle } from '../utils/design';
 
 interface StatWidgetProps {
   label: string;

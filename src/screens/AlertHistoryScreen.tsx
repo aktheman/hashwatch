@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useAlertHistoryStore, AlertEvent } from '../store/alertHistory';
 import { useAuthStore } from '../store/auth';
 import { NavigationProp } from '../types';
@@ -100,43 +101,43 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
         header: {
           flexDirection: 'row',
           justifyContent: 'flex-end',
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-          gap: 12,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+          gap: spacing.sm,
         },
         headerBtn: {
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          borderRadius: 8,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
           backgroundColor: theme.surface,
           borderWidth: 1,
           borderColor: theme.border,
         },
         headerBtnText: {
           color: theme.primary,
-          fontSize: 13,
-          fontWeight: '600',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
         },
         dateHeader: {
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 6,
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.md,
+          paddingBottom: spacing.xxs,
         },
         dateHeaderText: {
           color: theme.textDim,
-          fontSize: 13,
-          fontWeight: '700',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.bold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
         },
         eventRow: {
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          marginHorizontal: 12,
-          marginBottom: 4,
-          borderRadius: 10,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.sm,
+          marginHorizontal: spacing.sm,
+          marginBottom: spacing.xxs,
+          borderRadius: radius.sm,
           backgroundColor: theme.surface,
           borderWidth: 1,
           borderColor: theme.border,
@@ -146,58 +147,58 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
           borderLeftColor: theme.primary,
         },
         iconBox: {
-          width: 32,
-          height: 32,
-          borderRadius: 8,
+          width: spacing.xxl,
+          height: spacing.xxl,
+          borderRadius: radius.sm,
           alignItems: 'center',
           justifyContent: 'center',
-          marginRight: 12,
+          marginRight: spacing.sm,
           backgroundColor: theme.surfaceLight,
         },
         icon: {
-          fontSize: 16,
+          fontSize: fontSize.lg,
         },
         eventBody: {
           flex: 1,
         },
         eventTitle: {
           color: theme.text,
-          fontSize: 14,
-          fontWeight: '600',
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.semibold,
         },
         eventMeta: {
           color: theme.textDim,
-          fontSize: 12,
-          marginTop: 2,
+          fontSize: fontSize.sm,
+          marginTop: spacing.xxs,
         },
         eventTime: {
           color: theme.textMuted,
-          fontSize: 11,
-          marginLeft: 8,
+          fontSize: fontSize.sm,
+          marginLeft: spacing.xs,
         },
         emptyBox: {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 40,
+          padding: spacing.xxl,
         },
         emptyText: {
           color: theme.textDim,
-          fontSize: 15,
+          fontSize: fontSize.md,
           textAlign: 'center',
         },
         clearBtn: {
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          borderRadius: 8,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
           backgroundColor: theme.danger + '1A',
           borderWidth: 1,
           borderColor: theme.danger + '4D',
         },
         clearBtnText: {
           color: theme.danger,
-          fontSize: 13,
-          fontWeight: '600',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
         },
       }),
     [theme],
@@ -279,7 +280,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
             </Text>
           </View>
         }
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: spacing.xxl }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
         }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { fetchPoolChanges, type PoolChangeEntry } from '../api/client';
 
 interface Props {
@@ -43,18 +44,24 @@ export function PoolChangeHistory({ minerId }: Props) {
   }, [minerId]);
 
   if (loading) {
-    return <ActivityIndicator size="small" color={theme.textMuted} style={{ marginVertical: 8 }} />;
+    return (
+      <ActivityIndicator
+        size="small"
+        color={theme.textMuted}
+        style={{ marginVertical: spacing.xs }}
+      />
+    );
   }
 
   if (error || changes.length === 0) return null;
 
   return (
-    <View style={{ marginTop: 8, gap: 4 }}>
+    <View style={{ marginTop: spacing.xs, gap: spacing.xxs }}>
       <Text
         style={{
           color: theme.textDim,
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
         }}
@@ -69,30 +76,30 @@ export function PoolChangeHistory({ minerId }: Props) {
             alignItems: 'center',
             justifyContent: 'space-between',
             backgroundColor: theme.surfaceLight,
-            borderRadius: 8,
-            paddingHorizontal: 10,
-            paddingVertical: 6,
+            borderRadius: radius.sm,
+            paddingHorizontal: spacing.xs,
+            paddingVertical: spacing.xxs,
           }}
         >
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             {c.previouspool && (
-              <Text style={{ color: theme.textMuted, fontSize: 12 }} numberOfLines={1}>
+              <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }} numberOfLines={1}>
                 {c.previouspool}
               </Text>
             )}
-            <Text style={{ color: theme.textMuted, fontSize: 12 }}>→</Text>
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>→</Text>
             <Text
               style={{
                 color: theme.warning,
-                fontSize: 12,
-                fontWeight: '700',
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.bold,
               }}
               numberOfLines={1}
             >
               {c.newpool}
             </Text>
           </View>
-          <Text style={{ color: theme.textDim, fontSize: 10, marginLeft: 8 }}>
+          <Text style={{ color: theme.textDim, fontSize: fontSize.xs, marginLeft: spacing.xs }}>
             {formatTime(c.changedat)}
           </Text>
         </View>

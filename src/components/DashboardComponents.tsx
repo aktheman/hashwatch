@@ -230,7 +230,7 @@ function DonutRing({ value, color, size = 64 }: { value: number; color: string; 
           style={{
             color: '#FFFFFF',
             fontSize: 11,
-            fontWeight: '800',
+            fontWeight: fontWeight.extrabold,
             textAlign: 'center',
             marginTop: size / 2 - 8,
           }}
@@ -290,7 +290,7 @@ function GaugeArc({
           style={{
             color: '#FFFFFF',
             fontSize: 14,
-            fontWeight: '800',
+            fontWeight: fontWeight.extrabold,
             textAlign: 'center',
             marginTop: height / 2 - 10,
           }}
@@ -356,7 +356,9 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
     >
       {/* Header row */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>≡ Profitability</Text>
+        <Text style={{ color: theme.text, fontSize: 16, fontWeight: fontWeight.bold }}>
+          ≡ Profitability
+        </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {priceHistory.length >= 4 && (
             <Svg width={36} height={20}>
@@ -379,7 +381,9 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
               />
             </Svg>
           )}
-          <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: '600' }}>BTC</Text>
+          <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: fontWeight.semibold }}>
+            BTC
+          </Text>
           <Text style={{ color: theme.text, fontSize: 14, fontWeight: '800' }}>
             ${btcPrice.toLocaleString()}
           </Text>
@@ -388,7 +392,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
               style={{
                 color: priceTrend >= 0 ? theme.success : theme.danger,
                 fontSize: 11,
-                fontWeight: '700',
+                fontWeight: fontWeight.bold,
               }}
             >
               {priceTrend >= 0 ? '▲' : '▼'}{' '}
@@ -408,10 +412,10 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           paddingVertical: 6,
         }}
       >
-        <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: '600' }}>
+        <Text style={{ color: theme.textDim, fontSize: 11, fontWeight: fontWeight.semibold }}>
           Network Hashrate
         </Text>
-        <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+        <Text style={{ color: theme.primary, fontSize: 12, fontWeight: fontWeight.bold }}>
           {formatHashrateValue(netHash)}
         </Text>
       </View>
@@ -428,12 +432,12 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           }}
         >
           <Text
-            style={{ color: theme.text, fontSize: 13, fontWeight: '600', flex: 1 }}
+            style={{ color: theme.text, fontSize: 13, fontWeight: fontWeight.semibold, flex: 1 }}
             numberOfLines={1}
           >
             {m.name || m.id}
           </Text>
-          <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+          <Text style={{ color: theme.primary, fontSize: 12, fontWeight: fontWeight.bold }}>
             {formatBTC(m.btcPerDay)}/day
           </Text>
           {btcPrice > 0 && (
@@ -458,21 +462,27 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Week</Text>
-          <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: fontWeight.semibold }}>
+            Week
+          </Text>
+          <Text style={{ color: theme.text, fontSize: 13, fontWeight: fontWeight.bold }}>
             {formatBTC(totalBtcDay * 7)}
           </Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>Month</Text>
-          <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+          <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: fontWeight.semibold }}>
+            Month
+          </Text>
+          <Text style={{ color: theme.text, fontSize: 13, fontWeight: fontWeight.bold }}>
             {formatBTC(totalBtcDay * 30)}
           </Text>
         </View>
         {btcPrice > 0 && (
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: '600' }}>USD/day</Text>
-            <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+            <Text style={{ color: theme.textDim, fontSize: 10, fontWeight: fontWeight.semibold }}>
+              USD/day
+            </Text>
+            <Text style={{ color: theme.text, fontSize: 13, fontWeight: fontWeight.bold }}>
               ~${usdPerDay.toFixed(2)}
             </Text>
           </View>
@@ -499,7 +509,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
                   ? theme.success
                   : theme.danger,
               fontSize: 13,
-              fontWeight: '700',
+              fontWeight: fontWeight.bold,
             }}
           >
             $
@@ -528,7 +538,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
@@ -539,7 +549,7 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
   },
   valueRow: {
     flexDirection: 'row',
@@ -547,16 +557,16 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   value: {
-    fontWeight: '800',
+    fontWeight: fontWeight.extrabold,
     letterSpacing: -0.3,
   },
   unit: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
   },
   label: {
     fontSize: 9,
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
     marginTop: 1,
   },
   chartContainer: {

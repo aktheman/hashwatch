@@ -205,15 +205,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 13,
+    fontSize: fontSize.base,
   },
   value: {
-    fontSize: 13,
+    fontSize: fontSize.base,
     fontFamily: 'monospace',
     fontWeight: fontWeight.semibold,
   },
   hint: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     fontFamily: 'monospace',
     fontWeight: fontWeight.regular,
   },
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   releaseLinkText: {
-    fontSize: 13,
+    fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
   },
   flashBtn: {
@@ -236,11 +236,11 @@ const styles = StyleSheet.create({
   },
   flashBtnText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
   },
   flashingHint: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     textAlign: 'center',
     marginTop: spacing.xs,
   },

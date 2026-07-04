@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface PoolStats {
   id: string;
@@ -38,10 +39,10 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
     <View
       style={{
         backgroundColor: theme.surface,
-        borderRadius: 18,
+        borderRadius: radius.xl,
         borderWidth: 1,
         borderColor: theme.border,
-        padding: 14,
+        padding: spacing.sm,
         boxShadow: `0 1px 14px ${theme.glow}`,
       }}
     >
@@ -50,8 +51,8 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
           color: theme.textDim,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
-          fontSize: 11,
-          fontWeight: '700',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.bold,
         }}
       >
         Pool coverage
@@ -59,17 +60,17 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
 
       <View
         style={{
-          marginTop: 10,
-          height: 10,
-          borderRadius: 999,
+          marginTop: spacing.xs,
+          height: spacing.xs,
+          borderRadius: radius.full,
           backgroundColor: theme.border,
           overflow: 'hidden',
         }}
       >
         <View
           style={{
-            height: 10,
-            borderRadius: 999,
+            height: spacing.xs,
+            borderRadius: radius.full,
             backgroundColor: getColor(),
             width: `${coverage}%`,
           }}
@@ -78,21 +79,27 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
 
       <View
         style={{
-          marginTop: 10,
+          marginTop: spacing.xs,
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700' }}>Top pool</Text>
-        <Text style={{ color: getColor(), fontSize: 20, fontWeight: '900' }}>{coverage}%</Text>
+        <Text style={{ color: theme.text, fontSize: fontSize.md, fontWeight: fontWeight.bold }}>
+          Top pool
+        </Text>
+        <Text
+          style={{ color: getColor(), fontSize: fontSize.h3, fontWeight: fontWeight.extrabold }}
+        >
+          {coverage}%
+        </Text>
       </View>
 
       <Text
         style={{
           color: theme.textDim,
-          fontSize: 11,
-          marginTop: 2,
+          fontSize: fontSize.sm,
+          marginTop: spacing.xxs,
         }}
       >
         {pools?.[0]?.name || 'No pool data'}

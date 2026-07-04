@@ -1,12 +1,21 @@
-import { useAlertHistoryStore } from '../src/store/alertHistory';
-
 const mockSetSetting = jest.fn().mockResolvedValue(undefined);
 const mockGetSetting = jest.fn();
+const mockFetchAlertHistory = jest.fn();
+const mockSyncAlertsToBackend = jest.fn();
 
 jest.mock('../src/db/database', () => ({
   setSetting: (k: string, v: string) => mockSetSetting(k, v),
   getSetting: (k: string) => mockGetSetting(k),
 }));
+
+jest.mock('../src/api/client', () => ({
+  pushStats: jest.fn(),
+  fetchStats: jest.fn(),
+  fetchAlertHistory: () => mockFetchAlertHistory(),
+  syncAlertsToBackend: (events: unknown[]) => mockSyncAlertsToBackend(events),
+}));
+
+import { useAlertHistoryStore } from '../src/store/alertHistory';
 
 beforeEach(() => {
   useAlertHistoryStore.setState({ events: [] });
@@ -210,5 +219,170 @@ describe('clearAll', () => {
 
     expect(useAlertHistoryStore.getState().events).toEqual([]);
     expect(mockSetSetting).toHaveBeenCalledWith('hashwatch_alert_history', '[]');
+  });
+});
+
+describe('syncFromBackend', () => {
+  it('merges remote events with local events', async () => {
+    useAlertHistoryStore.setState({
+      events: [
+        {
+          id: 'local1',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'offline',
+          title: 'Local offline',
+          timestamp: 100,
+          read: true,
+        },
+      ],
+    });
+
+    mockFetchAlertHistory.mockResolvedValue([
+      {
+        minerid: 'm2',
+        eventtype: 'online',
+        title: 'M2 online',
+        timestamp: 200,
+        read: false,
+      },
+    ]);
+
+    await useAlertHistoryStore.getState().syncFromBackend();
+
+    const events = useAlertHistoryStore.getState().events;
+    expect(events).toHaveLength(2);
+    expect(events[0].minerId).toBe('m2');
+    expect(events[1].minerId).toBe('m1');
+    expect(mockSetSetting).toHaveBeenCalled();
+  });
+
+  it('does not add duplicate remote events', async () => {
+    useAlertHistoryStore.setState({
+      events: [
+        {
+          id: 'existing',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'offline',
+          title: 'Off',
+          timestamp: 100,
+          read: false,
+        },
+      ],
+    });
+
+    mockFetchAlertHistory.mockResolvedValue([
+      {
+        minerid: 'm1',
+        eventtype: 'offline',
+        title: 'Off',
+        timestamp: 100,
+        read: false,
+      },
+    ]);
+
+    await useAlertHistoryStore.getState().syncFromBackend();
+
+    expect(useAlertHistoryStore.getState().events).toHaveLength(1);
+  });
+
+  it('sets syncing flag during fetch', async () => {
+    let resolvePromise!: (v: unknown) => void;
+    mockFetchAlertHistory.mockReturnValue(
+      new Promise((r) => {
+        resolvePromise = r;
+      }),
+    );
+
+    const promise = useAlertHistoryStore.getState().syncFromBackend();
+    expect(useAlertHistoryStore.getState().syncing).toBe(true);
+    resolvePromise([]);
+    await promise;
+    expect(useAlertHistoryStore.getState().syncing).toBe(false);
+  });
+
+  it('handles fetch error gracefully', async () => {
+    mockFetchAlertHistory.mockRejectedValue(new Error('network error'));
+
+    await useAlertHistoryStore.getState().syncFromBackend();
+
+    expect(useAlertHistoryStore.getState().syncing).toBe(false);
+    expect(useAlertHistoryStore.getState().events).toEqual([]);
+  });
+});
+
+describe('syncToBackend', () => {
+  it('sends unread events to backend', async () => {
+    useAlertHistoryStore.setState({
+      events: [
+        {
+          id: 'a1',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'offline',
+          title: 'Off',
+          timestamp: 100,
+          read: false,
+        },
+        {
+          id: 'a2',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'online',
+          title: 'On',
+          timestamp: 200,
+          read: true,
+        },
+      ],
+    });
+
+    await useAlertHistoryStore.getState().syncToBackend();
+
+    expect(mockSyncAlertsToBackend).toHaveBeenCalledTimes(1);
+    const sent = mockSyncAlertsToBackend.mock.calls[0][0];
+    expect(sent).toHaveLength(1);
+    expect(sent[0].minerId).toBe('m1');
+    expect(sent[0].eventType).toBe('offline');
+  });
+
+  it('does nothing when no unread events', async () => {
+    useAlertHistoryStore.setState({
+      events: [
+        {
+          id: 'a1',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'offline',
+          title: 'Off',
+          timestamp: 100,
+          read: true,
+        },
+      ],
+    });
+
+    await useAlertHistoryStore.getState().syncToBackend();
+
+    expect(mockSyncAlertsToBackend).not.toHaveBeenCalled();
+  });
+
+  it('handles backend error gracefully', async () => {
+    useAlertHistoryStore.setState({
+      events: [
+        {
+          id: 'a1',
+          minerId: 'm1',
+          minerName: 'M1',
+          type: 'offline',
+          title: 'Off',
+          timestamp: 100,
+          read: false,
+        },
+      ],
+    });
+
+    mockSyncAlertsToBackend.mockRejectedValue(new Error('server error'));
+
+    await expect(useAlertHistoryStore.getState().syncToBackend()).resolves.toBeUndefined();
   });
 });

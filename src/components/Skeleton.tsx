@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Platform, ViewStyle, DimensionValue } from 'react-native';
 import { useTheme } from '../theme';
+import { radius } from '../utils/design';
 
 interface SkeletonProps {
   width?: DimensionValue;
@@ -9,7 +10,7 @@ interface SkeletonProps {
   style?: ViewStyle;
 }
 
-export function Skeleton({ width, height = 16, borderRadius = 8, style }: SkeletonProps) {
+export function Skeleton({ width, height = 16, borderRadius = radius.sm, style }: SkeletonProps) {
   const theme = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
 

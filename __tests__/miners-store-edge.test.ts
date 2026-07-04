@@ -174,6 +174,37 @@ describe('scanNetwork error handling', () => {
     expect(state.error).toContain('Scan timeout');
   });
 
+  it('probes for missing apiPath on fetch failure and retries', async () => {
+    const origOnLine = Object.getOwnPropertyDescriptor(navigator, 'onLine');
+    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+
+    mockProbe.mockResolvedValue({ infoPath: '/api/info', statusPath: '/api/system' });
+
+    let storeRef: {
+      getState: () => { refreshMiner: (id: string) => Promise<void>; miners: unknown[] };
+    };
+    jest.isolateModules(() => {
+      const { useMinerStore } = require('../src/store/miners');
+      useMinerStore.setState({
+        miners: [{ id: 'm1', ip: '192.168.1.1', port: 80, apiPath: undefined, isOnline: true }],
+      });
+      storeRef = useMinerStore;
+    });
+
+    await storeRef.getState().refreshMiner('m1');
+
+    expect(mockProbe).toHaveBeenCalledWith('192.168.1.1', 80);
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ apiPath: '/api/info', statusPath: '/api/system' }),
+    );
+
+    if (origOnLine) {
+      Object.defineProperty(navigator, 'onLine', origOnLine);
+    } else {
+      delete (navigator as Record<string, unknown>).onLine;
+    }
+  });
+
   it('retries refreshMiner when offline', async () => {
     const origOnLine = Object.getOwnPropertyDescriptor(navigator, 'onLine');
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });

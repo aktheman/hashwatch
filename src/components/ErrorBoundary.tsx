@@ -2,7 +2,7 @@ import { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { theme } from '../theme';
-import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
+import { spacing, fontSize, fontWeight, radius } from '../utils/design';
 
 interface Props extends WithTranslation {
   children: ReactNode;
