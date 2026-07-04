@@ -3,6 +3,13 @@ require('@testing-library/jest-native/extend-expect');
 // Required for React 19 concurrent features (Suspense, lazy) in test environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
+// Suppress cosmetic expo-modules-core warning about missing native module in Jest
+const origWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes("ExpoModulesCoreJSLogger")) return;
+  origWarn(...args);
+};
+
 jest.mock('react-i18next', () => {
   const mockT = (key, opts) => {
     if (opts) {
