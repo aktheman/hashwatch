@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { toHashesPerSecond } from '../utils/hashrate';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface EfficiencyTrendProps {
   snapshots: MinerSnapshot[];
@@ -79,7 +80,7 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
         bezier
         withInnerLines
         withOuterLines={false}
-        style={{ borderRadius: 12 }}
+        style={{ borderRadius: radius.md }}
       />
       {avg > 0 && (
         <Text style={[styles.avg, { color: theme.textDim }]}>
@@ -92,24 +93,24 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: radius.lg,
+    padding: spacing.sm,
     borderWidth: 1,
   },
   avg: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
     textAlign: 'center',
-    marginTop: 6,
+    marginTop: spacing.xxs,
   },
   emptyIcon: {
-    fontSize: 28,
+    fontSize: fontSize.hero,
     textAlign: 'center',
-    paddingTop: 12,
+    paddingTop: spacing.sm,
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: fontSize.base,
     textAlign: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.sm,
   },
 });

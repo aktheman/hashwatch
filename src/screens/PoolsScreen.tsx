@@ -254,10 +254,41 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
           paddingVertical: 2,
         },
         changeBadgeText: {
-          color: theme.warning,
+          backgroundColor: theme.warning + '30',
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 2,
+        },
+        comparisonTable: {
+          marginHorizontal: 16,
+          marginBottom: 12,
+          backgroundColor: theme.surface,
+          borderRadius: 16,
+          padding: 12,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        comparisonRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingVertical: 6,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.border,
+        },
+        comparisonHeader: {
+          flex: 1,
+          color: theme.textDim,
           fontSize: 10,
           fontWeight: '700',
           textTransform: 'uppercase',
+          letterSpacing: 0.5,
+        },
+        comparisonCell: {
+          flex: 1,
+          color: theme.text,
+          fontSize: 13,
+          fontWeight: '600',
         },
       }),
     [theme],
@@ -290,6 +321,23 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
     );
   }
 
+  const poolComparison = useMemo(() => {
+    if (poolGroups.length < 2) return null;
+    const bestHash = Math.max(...poolGroups.map((g) => g.totalHashrate));
+    return poolGroups.map((g) => {
+      const totalShares = g.totalSharesAccepted + g.totalSharesRejected;
+      const acceptRate =
+        totalShares > 0 ? ((g.totalSharesAccepted / totalShares) * 100).toFixed(1) : '\u2014';
+      const btcDay = estimateBTCPerDay(g.totalHashrate);
+      return {
+        ...g,
+        acceptRate,
+        btcDay,
+        pctOfBest: ((g.totalHashrate / bestHash) * 100).toFixed(0),
+      };
+    });
+  }, [poolGroups]);
+
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
@@ -300,6 +348,35 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
           </Text>
         </View>
       </View>
+      {poolComparison && (
+        <View style={styles.comparisonTable}>
+          <View style={styles.comparisonRow}>
+            <Text style={[styles.comparisonHeader, { flex: 2 }]}>{t('comparison.pool')}</Text>
+            <Text style={styles.comparisonHeader}>{t('pools.miners')}</Text>
+            <Text style={styles.comparisonHeader}>{t('pools.hashrate')}</Text>
+            <Text style={styles.comparisonHeader}>{t('pools.acceptRate')}</Text>
+            <Text style={styles.comparisonHeader}>{t('pools.estDaily')}</Text>
+          </View>
+          {poolComparison.map((g) => (
+            <View key={`${g.pool}:${g.poolPort}`} style={styles.comparisonRow}>
+              <Text
+                style={[styles.comparisonCell, { flex: 2, fontWeight: '700' }]}
+                numberOfLines={1}
+              >
+                {g.pool}
+              </Text>
+              <Text style={styles.comparisonCell}>{g.miners.length}</Text>
+              <Text style={[styles.comparisonCell, { color: theme.primary }]}>
+                {formatRate(g.totalHashrate)}
+              </Text>
+              <Text style={styles.comparisonCell}>{g.acceptRate}%</Text>
+              <Text style={[styles.comparisonCell, { color: theme.success }]}>
+                {g.btcDay > 0 ? formatBTC(g.btcDay) : '\u2014'}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
       <FlatList
         data={poolGroups}
         keyExtractor={keyExtractor}

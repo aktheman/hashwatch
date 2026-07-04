@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
-import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { getSetting, setSetting } from '../db/database';
 
 export type SectionKey =

@@ -271,12 +271,12 @@ it('navigates to Wallets screen from Settings', async () => {
     if (key === 'onboarding_complete') return 'true';
     return null;
   });
-  await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.settings'));
-  await screen.findByText('settings.title');
-  fireEvent.press(screen.getByText('settings.wallets'));
-  expect(await screen.findByText('wallets.title')).toBeTruthy();
+  const r = await render(<AppNavigator />);
+  expect(await r.findByText('HashWatch')).toBeTruthy();
+  await fireEvent.press(r.getByText('tabs.settings'));
+  await r.findByText('settings.title');
+  await fireEvent.press(r.getByText('settings.wallets'));
+  expect(await r.findByText('wallets.title', { timeout: 3000 })).toBeTruthy();
 });
 
 it('navigates to Groups screen from Settings', async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense } from 'react';
 import {
   View,
   Text,
@@ -38,8 +38,11 @@ import { checkMinerAlerts } from '../services/notifications';
 import { BitAxeClient } from '../api/bitaxe';
 import { LATEST_FIRMWARE, getFirmwareBinaryUrl } from '../utils/version';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
-import { WorldMap } from '../components/WorldMap';
 import { TimeAgo } from '../components/TimeAgo';
+
+const LazyWorldMap = lazy(() =>
+  import('../components/WorldMap').then((m) => ({ default: m.WorldMap })),
+);
 import * as DB from '../db/database';
 import {
   DashboardCustomizer,
@@ -78,6 +81,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [groupFilter, setGroupFilter] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'offline'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -160,6 +164,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         if (groupFilter && groupFilter !== 'Ungrouped' && m.group !== groupFilter) return false;
         if (locationFilter && m.location !== locationFilter) return false;
         if (tagFilter && !(m.tags || []).includes(tagFilter)) return false;
+        if (statusFilter === 'online' && !m.isOnline) return false;
+        if (statusFilter === 'offline' && m.isOnline) return false;
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           const nameMatch = (m.name || '').toLowerCase().includes(q);
@@ -168,7 +174,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         }
         return true;
       }),
-    [miners, walletFilter, groupFilter, locationFilter, tagFilter, searchQuery],
+    [miners, walletFilter, groupFilter, locationFilter, tagFilter, statusFilter, searchQuery],
   );
 
   const pollingIntervalRef = useRef(30000);
@@ -432,7 +438,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
+    | { type: 'header'; group: string; miners: Miner[] }
+    | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -611,7 +618,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
+      | { type: 'header'; group: string; miners: Miner[] }
+      | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1113,7 +1121,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View
           style={{ paddingHorizontal: spacing.md, gap: 10, marginTop: 4, alignItems: 'center' }}
         >
-          <WorldMap />
+          <Suspense fallback={null}>
+            <LazyWorldMap />
+          </Suspense>
         </View>
       )}
 
@@ -1377,11 +1387,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 styles.walletChip,
                 {
                   backgroundColor:
-                    !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                    !walletFilter &&
+                    !groupFilter &&
+                    !locationFilter &&
+                    !tagFilter &&
+                    statusFilter === 'all'
                       ? theme.primary
                       : theme.surfaceLight,
                   borderColor:
-                    !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                    !walletFilter &&
+                    !groupFilter &&
+                    !locationFilter &&
+                    !tagFilter &&
+                    statusFilter === 'all'
                       ? theme.primary
                       : theme.border,
                 },
@@ -1391,6 +1409,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 setGroupFilter(null);
                 setLocationFilter(null);
                 setTagFilter(null);
+                setStatusFilter('all');
               }}
             >
               <Text
@@ -1398,13 +1417,59 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   styles.walletChipText,
                   {
                     color:
-                      !walletFilter && !groupFilter && !locationFilter && !tagFilter
+                      !walletFilter &&
+                      !groupFilter &&
+                      !locationFilter &&
+                      !tagFilter &&
+                      statusFilter === 'all'
                         ? '#FFF'
                         : theme.text,
                   },
                 ]}
               >
                 {t('common.all')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Filter: Online"
+              style={[
+                styles.walletChip,
+                {
+                  backgroundColor: statusFilter === 'online' ? theme.primary : theme.surfaceLight,
+                  borderColor: statusFilter === 'online' ? theme.primary : theme.border,
+                },
+              ]}
+              onPress={() => setStatusFilter(statusFilter === 'online' ? 'all' : 'online')}
+            >
+              <Text
+                style={[
+                  styles.walletChipText,
+                  { color: statusFilter === 'online' ? '#FFF' : theme.text },
+                ]}
+              >
+                {'\u25CF'} {t('common.online')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Filter: Offline"
+              style={[
+                styles.walletChip,
+                {
+                  backgroundColor: statusFilter === 'offline' ? theme.accent : theme.surfaceLight,
+                  borderColor: statusFilter === 'offline' ? theme.accent : theme.border,
+                },
+              ]}
+              onPress={() => setStatusFilter(statusFilter === 'offline' ? 'all' : 'offline')}
+            >
+              <Text
+                style={[
+                  styles.walletChipText,
+                  { color: statusFilter === 'offline' ? '#FFF' : theme.text },
+                ]}
+              >
+                {'\u25CB'} {t('common.offline')}
               </Text>
             </Pressable>
             {wallets.map((w) => (

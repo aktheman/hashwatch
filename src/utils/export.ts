@@ -1,9 +1,6 @@
 import { Platform, Share } from 'react-native';
 import * as DB from '../db/database';
 import { Miner, MinerSnapshot, Wallet } from '../types';
-import { toHashesPerSecond } from './hashrate';
-
-type SnapshotKey = keyof MinerSnapshot;
 
 function escapeCSV(val: string | number | null | undefined): string {
   if (val == null) return '';
@@ -94,7 +91,6 @@ function minersToCSV(miners: Miner[], powerCost: number): string {
     const unit = m.status?.hashRateUnit ?? 'GH/s';
     const power = m.status?.power ?? 0;
     const eff = computeEfficiency(power, hr, unit);
-    const hps = toHashesPerSecond(hr, unit);
     const costPerDay = power > 0 ? (power / 1000) * powerCost * 24 : 0;
     return [
       escapeCSV(m.name),

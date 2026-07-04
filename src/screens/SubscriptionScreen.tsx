@@ -83,7 +83,7 @@ export function SubscriptionScreen() {
         priceRow: {
           flexDirection: 'row',
           alignItems: 'baseline',
-          gap: 2,
+          gap: spacing.xxs,
         },
         planPrice: {
           color: theme.text,

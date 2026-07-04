@@ -125,6 +125,9 @@ describe('onNetworkReconnect', () => {
 
     // Last registered callback overrides previous
   });
+
+  // offline→online transition test not included: fake timer + async pollNetwork
+  // sequencing unreliable in Jest with RNTL v14 (see AGENTS.md "Hard-to-test")
 });
 
 // unref branch (lines 35-37) cannot be tested in Jest:
