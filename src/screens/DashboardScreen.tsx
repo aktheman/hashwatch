@@ -815,8 +815,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           position: 'absolute',
           right: spacing.md,
           bottom: spacing.lg,
-          width: 60,
-          height: 60,
+          width: spacing.xs,
+          height: spacing.xs,
           borderRadius: radius.xxl,
           backgroundColor: theme.primary,
           justifyContent: 'center',
@@ -1091,15 +1091,15 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 6,
+            marginTop: spacing.xs,
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
             <View
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
+                width: spacing.xs,
+                height: spacing.xs,
+                borderRadius: radius.xs,
                 backgroundColor: theme.success,
                 opacity: 0.8,
               }}
@@ -1135,7 +1135,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View
           style={{
             paddingHorizontal: spacing.md,
-            gap: 10,
+            gap: spacing.sm,
             marginTop: spacing.xxs,
             alignItems: 'center',
           }}
@@ -1153,44 +1153,51 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             justifyContent: 'center',
             gap: spacing.md,
             paddingHorizontal: spacing.md,
-            marginTop: 2,
+            marginTop: spacing.xxs,
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
+                width: spacing.xs,
+                height: spacing.xs,
+                borderRadius: radius.xs,
                 backgroundColor: theme.primaryLight,
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: 9 }}>online</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>online</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
+                width: spacing.xs,
+                height: spacing.xs,
+                borderRadius: radius.xs,
                 backgroundColor: theme.textMuted,
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: 9 }}>offline</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>offline</Text>
           </View>
           {miners.filter((m) => m.status?.pool).length > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.info }} />
-              <Text style={{ color: theme.textDim, fontSize: 9 }}>pool</Text>
+              <View
+                style={{
+                  width: spacing.xs,
+                  height: spacing.xs,
+                  borderRadius: radius.xs,
+                  backgroundColor: theme.info,
+                }}
+              />
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>pool</Text>
             </View>
           )}
         </View>
       )}
 
       {visibleSections.pools && miners.length > 0 && poolInfo.size > 0 && (
-        <View style={{ paddingHorizontal: spacing.md, marginTop: 6, gap: spacing.xxs }}>
+        <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}>
           {Array.from(poolInfo.entries()).map(([pool, info]) => {
             const isExpanded = expandedPool === pool;
             const totalShares = info.accepted + info.rejected;
@@ -1256,7 +1263,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                     style={{
                       backgroundColor: theme.surfaceLight,
                       borderRadius: 10,
-                      marginTop: 2,
+                      marginTop: spacing.xxs,
                       padding: spacing.sm,
                       borderWidth: 1,
                       borderColor: theme.border,
@@ -1318,7 +1325,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {visibleSections.metrics && (
-        <View style={{ paddingHorizontal: spacing.md, gap: 14, marginTop: spacing.xxs }}>
+        <View style={{ paddingHorizontal: spacing.md, gap: spacing.sm, marginTop: spacing.xxs }}>
           <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center' }}>
             {TIME_RANGE_OPTIONS.map((opt) => (
               <Pressable
@@ -1342,7 +1349,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               </Pressable>
             ))}
           </View>
-          <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <View style={{ flex: 1 }}>
               <MetricTile
                 title={String(t('dashboard.hashrate'))}
@@ -1369,7 +1376,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               />
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <View style={{ flex: 1 }}>
               <MetricTile
                 title={String(t('dashboard.power'))}
@@ -1394,7 +1401,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               />
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: 14 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <View style={{ flex: 1 }}>
               <MetricTile
                 title={String(t('dashboard.uptime'))}
