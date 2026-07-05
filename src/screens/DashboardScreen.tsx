@@ -1133,7 +1133,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {visibleSections.map && (
         <View
-          style={{ paddingHorizontal: spacing.md, gap: 10, marginTop: 4, alignItems: 'center' }}
+          style={{
+            paddingHorizontal: spacing.md,
+            gap: 10,
+            marginTop: spacing.xxs,
+            alignItems: 'center',
+          }}
         >
           <Suspense fallback={null}>
             <LazyWorldMap />
@@ -1146,12 +1151,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            gap: 16,
+            gap: spacing.md,
             paddingHorizontal: spacing.md,
             marginTop: 2,
           }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
               style={{
                 width: 6,
@@ -1163,7 +1168,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             />
             <Text style={{ color: theme.textDim, fontSize: 9 }}>online</Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
               style={{
                 width: 6,
@@ -1176,7 +1181,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={{ color: theme.textDim, fontSize: 9 }}>offline</Text>
           </View>
           {miners.filter((m) => m.status?.pool).length > 0 && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.info }} />
               <Text style={{ color: theme.textDim, fontSize: 9 }}>pool</Text>
             </View>
@@ -1185,7 +1190,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {visibleSections.pools && miners.length > 0 && poolInfo.size > 0 && (
-        <View style={{ paddingHorizontal: spacing.md, marginTop: 6, gap: 4 }}>
+        <View style={{ paddingHorizontal: spacing.md, marginTop: 6, gap: spacing.xxs }}>
           {Array.from(poolInfo.entries()).map(([pool, info]) => {
             const isExpanded = expandedPool === pool;
             const totalShares = info.accepted + info.rejected;
@@ -1313,7 +1318,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {visibleSections.metrics && (
-        <View style={{ paddingHorizontal: spacing.md, gap: 14, marginTop: 4 }}>
+        <View style={{ paddingHorizontal: spacing.md, gap: 14, marginTop: spacing.xxs }}>
           <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center' }}>
             {TIME_RANGE_OPTIONS.map((opt) => (
               <Pressable
