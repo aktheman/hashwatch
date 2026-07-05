@@ -76,6 +76,9 @@ export interface MinerSnapshot {
   sharesRejected: number;
   uptimeSeconds: number;
   frequency: number;
+  fanSpeed?: number;
+  fanRpm?: number;
+  coreVoltage?: number;
 }
 
 export type SubscriptionTier = 'free' | 'pro';
