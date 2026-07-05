@@ -255,7 +255,7 @@ export function WalletsScreen() {
           borderColor: theme.border,
         },
         colorRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
-        colorCircle: { width: 32, height: 32, borderRadius: 16, borderWidth: 2 },
+        colorCircle: { width: 32, height: 32, borderRadius: radius.lg, borderWidth: 2 },
         colorCircleSelected: { borderColor: buttonText },
         colorCircleUnselected: { borderColor: 'transparent' },
         modalActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
