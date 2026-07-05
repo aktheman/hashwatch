@@ -137,6 +137,25 @@ describe('startPolling interval tick', () => {
       stop();
     });
   });
+
+  it('calls refreshAll via background timer when paused', () => {
+    jest.isolateModules(() => {
+      const { useMinerStore } = require('../src/store/miners');
+      const refreshAll = jest.spyOn(useMinerStore.getState(), 'refreshAll');
+
+      const stop = useMinerStore.getState().startPolling(500000);
+      (useMinerStore.getState() as any).miners.length = 1;
+      refreshAll.mockClear();
+
+      mockAppStateListeners.forEach((fn) => fn('background'));
+      refreshAll.mockClear();
+
+      jest.advanceTimersByTime(120000);
+
+      expect(refreshAll).toHaveBeenCalled();
+      stop();
+    });
+  });
 });
 
 describe('onAuthLogin callback', () => {

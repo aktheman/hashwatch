@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Alert,
   StyleSheet,
   RefreshControl,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
@@ -44,6 +46,9 @@ export function GroupsScreen() {
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [draggedGroup, setDraggedGroup] = useState<string | null>(null);
+  const dragAnim = useRef(new Animated.Value(0)).current;
+  const [swapTarget, setSwapTarget] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -208,6 +213,68 @@ export function GroupsScreen() {
     [groups, t],
   );
 
+  const performSwap = useCallback(
+    (fromName: string, toName: string) => {
+      const names = groups.map(([g]) => g).filter((g) => g !== 'Ungrouped');
+      const fromIdx = names.indexOf(fromName);
+      const toIdx = names.indexOf(toName);
+      if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+      const newOrder = [...names];
+      [newOrder[fromIdx], newOrder[toIdx]] = [newOrder[toIdx], newOrder[fromIdx]];
+      setGroupOrder(newOrder);
+      DB.setSetting('groups_order', JSON.stringify(newOrder));
+      useToastStore.getState().showUndo({
+        id: `group-swap-${Date.now()}`,
+        message: t('groups.orderSaved') || '',
+        onUndo: () => {
+          const reverted = [...newOrder];
+          [reverted[fromIdx], reverted[toIdx]] = [reverted[toIdx], reverted[fromIdx]];
+          setGroupOrder(reverted);
+          DB.setSetting('groups_order', JSON.stringify(reverted));
+        },
+        onConfirm: () => {},
+      });
+      setDraggedGroup(null);
+      setSwapTarget(null);
+    },
+    [groups, t],
+  );
+
+  const startDrag = useCallback(
+    (name: string) => {
+      setDraggedGroup(name);
+      Animated.spring(dragAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+    },
+    [dragAnim],
+  );
+
+  const cancelDrag = useCallback(() => {
+    Animated.timing(dragAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      setDraggedGroup(null);
+      setSwapTarget(null);
+    });
+  }, [dragAnim]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !draggedGroup) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cancelDrag();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [draggedGroup, cancelDrag]);
+
+  const hoverSwap = useCallback((name: string) => {
+    setSwapTarget(name);
+  }, []);
+
   const renameGroup = useCallback(
     (oldName: string) => {
       if (typeof Alert.prompt === 'function') {
@@ -311,6 +378,26 @@ export function GroupsScreen() {
         },
         ungroupBtnText: { color: theme.danger, fontSize: 11, fontWeight: '600' },
         emptyText: { color: theme.textDim, fontSize: 14, textAlign: 'center', marginTop: 40 },
+        dragHandle: {
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginRight: 8,
+        },
+        dragHandleText: {
+          fontSize: 20,
+          color: theme.textMuted,
+          lineHeight: 22,
+        },
+        dropHint: {
+          color: theme.primary,
+          fontSize: 11,
+          fontWeight: '600',
+          textAlign: 'center',
+          marginTop: 4,
+        },
       }),
     [theme],
   );
@@ -355,10 +442,51 @@ export function GroupsScreen() {
         renderItem={({ item: [name, members] }) => {
           const stats = groupStats.get(name);
           const barRatio = stats && maxHash > 0 ? stats.totalHash / maxHash : 0;
+          const isDragged = draggedGroup === name;
+          const isDropTarget = draggedGroup && draggedGroup !== name;
+          const isHovered = swapTarget === name;
+          const scale = isDragged
+            ? dragAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.03] })
+            : 1;
+          const elevation = isDragged
+            ? dragAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })
+            : 0;
           return (
-            <View style={styles.groupCard}>
+            <Animated.View
+              style={[
+                styles.groupCard,
+                isDragged && { transform: [{ scale }], zIndex: 100, elevation },
+                isHovered && isDropTarget && { borderColor: theme.primary, borderWidth: 2 },
+                isDropTarget &&
+                  !isHovered && { borderColor: theme.primary + '40', borderWidth: 1.5 },
+              ]}
+            >
               <View style={styles.groupHeader}>
-                <View>
+                {name !== 'Ungrouped' && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={isDragged ? `Release ${name}` : `Drag ${name}`}
+                    onLongPress={() => !draggedGroup && startDrag(name)}
+                    onPress={() => {
+                      if (isDragged) {
+                        cancelDrag();
+                      } else if (isDropTarget) {
+                        performSwap(draggedGroup!, name);
+                      }
+                    }}
+                    delayLongPress={300}
+                    style={[
+                      styles.dragHandle,
+                      isDragged && { backgroundColor: theme.primary + '20' },
+                    ]}
+                    onPressIn={() => isDropTarget && hoverSwap(name)}
+                  >
+                    <Text style={[styles.dragHandleText, isDragged && { color: theme.primary }]}>
+                      {isDragged ? '✕' : '≡'}
+                    </Text>
+                  </Pressable>
+                )}
+                <View style={{ flex: 1 }}>
                   <Text style={styles.groupName}>
                     📁 {name === 'Ungrouped' ? t('groups.ungrouped') : name}
                   </Text>
@@ -400,7 +528,7 @@ export function GroupsScreen() {
                   </View>
                 </View>
               )}
-              {name !== 'Ungrouped' && (
+              {name !== 'Ungrouped' && !draggedGroup && (
                 <View style={styles.actions}>
                   <Pressable
                     accessibilityRole="button"
@@ -444,6 +572,9 @@ export function GroupsScreen() {
                   </Pressable>
                 </View>
               )}
+              {isDropTarget && (
+                <Text style={styles.dropHint}>{t('groups.tapToDrop', 'Tap to place here')}</Text>
+              )}
               {members.length > 0 && (
                 <View style={styles.minerList}>
                   {members.map((m) => (
@@ -465,7 +596,7 @@ export function GroupsScreen() {
                   ))}
                 </View>
               )}
-            </View>
+            </Animated.View>
           );
         }}
         ListEmptyComponent={<Text style={styles.emptyText}>{t('groups.noMiners')}</Text>}

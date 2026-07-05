@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useSubscriptionStore } from '../store/subscription';
-import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
+import { useDashboardMetrics, TimeRange } from '../hooks/useDashboardMetrics';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
@@ -34,10 +34,10 @@ import {
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
 import { spacing, radius, fontSize, fontWeight, buttonText, cardShadow } from '../utils/design';
 import { exportAllData } from '../utils/export';
-import { checkMinerAlerts } from '../services/notifications';
 import { BitAxeClient } from '../api/bitaxe';
 import { LATEST_FIRMWARE, getFirmwareBinaryUrl } from '../utils/version';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
+import { MinerDrillDownModal } from '../components/MinerDrillDownModal';
 import { TimeAgo } from '../components/TimeAgo';
 
 const LazyWorldMap = lazy(() =>
@@ -85,12 +85,25 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [groupPickerInput, setGroupPickerInput] = useState('');
   const [expandedPool, setExpandedPool] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [autoGroupBy, setAutoGroupBy] = useState<null | 'location' | 'tag'>(null);
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [drillDown, setDrillDown] = useState<{
+    metricType: 'hashrate' | 'power' | 'uptime' | 'temp';
+    title: string;
+  } | null>(null);
+  const TIME_RANGE_OPTIONS: { key: TimeRange; label: string }[] = [
+    { key: '1h', label: '1H' },
+    { key: '6h', label: '6H' },
+    { key: '24h', label: '24H' },
+    { key: '7d', label: '7D' },
+  ];
 
   useEffect(() => {
     import('../db/database').then((DB) =>
@@ -243,17 +256,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     };
   }, [selectionMode]);
 
-  const prevMiners = useRef(miners);
-  useEffect(() => {
-    const prev = prevMiners.current;
-    prevMiners.current = miners;
-    if (prev.length > 0 || miners.length > 0) {
-      checkMinerAlerts(prev, miners);
-    }
-  }, [miners]);
-
-  const { metrics, uptimeChartData, totalHashrate, totalPower, avgTemp } =
-    useDashboardMetrics(filteredMiners);
+  const { metrics, uptimeChartData, totalHashrate, totalPower, avgTemp } = useDashboardMetrics(
+    filteredMiners,
+    timeRange,
+  );
 
   const handleMinerPress = useCallback(
     (miner: Miner) => {
@@ -282,31 +288,18 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const handleBatchGroup = useCallback(() => {
     const selected = miners.filter((m) => selectedIds.has(m.id));
     if (selected.length === 0) return;
-    Alert.prompt(
-      t('dashboard.assignGroup'),
-      t('dashboard.assignGroupBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('dashboard.removeGroup'),
-          style: 'destructive',
-          onPress: () => {
-            selected.forEach((m) => setMinerGroup(m.id, undefined));
-          },
-        },
-        {
-          text: t('common.ok'),
-          onPress: (name?: string) => {
-            if (name?.trim()) {
-              selected.forEach((m) => setMinerGroup(m.id, name.trim()));
-            }
-          },
-        },
-      ],
-      'plain-text',
-      '',
-    );
-  }, [miners, selectedIds, setMinerGroup, t]);
+    setGroupPickerInput('');
+    setShowGroupPicker(true);
+  }, [miners, selectedIds, setShowGroupPicker]);
+
+  const handleBatchGroupAssign = useCallback(
+    (name: string | undefined) => {
+      const selected = miners.filter((m) => selectedIds.has(m.id));
+      selected.forEach((m) => setMinerGroup(m.id, name));
+      setShowGroupPicker(false);
+    },
+    [miners, selectedIds, setMinerGroup],
+  );
 
   const handleBatchWallet = useCallback(
     (walletId: string | undefined) => {
@@ -895,6 +888,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           fontWeight: fontWeight.bold,
           fontSize: fontSize.xs,
         },
+        timeRangeChip: {
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs + 2,
+          borderRadius: radius.lg,
+          borderWidth: 1,
+          borderColor: theme.border,
+          backgroundColor: theme.surfaceLight,
+        },
+        timeRangeChipText: {
+          color: theme.text,
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.semibold,
+        },
         modalOverlay: {
           flex: 1,
           backgroundColor: theme.bg + '99',
@@ -949,6 +955,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         walletChipText: {
           fontSize: fontSize.xs,
           fontWeight: fontWeight.semibold,
+        },
+        groupInput: {
+          backgroundColor: theme.surfaceLight,
+          color: theme.text,
+          fontSize: fontSize.md,
+          padding: spacing.sm,
+          borderRadius: radius.md,
+          borderWidth: 1,
+          borderColor: theme.border,
+          marginTop: spacing.xs,
         },
       }),
     [theme],
@@ -1277,6 +1293,29 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
 
       {visibleSections.metrics && (
         <View style={{ paddingHorizontal: spacing.md, gap: 14, marginTop: 4 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center' }}>
+            {TIME_RANGE_OPTIONS.map((opt) => (
+              <Pressable
+                key={opt.key}
+                accessibilityRole="button"
+                accessibilityLabel={`Time range: ${opt.label}`}
+                onPress={() => setTimeRange(opt.key)}
+                style={[
+                  styles.timeRangeChip,
+                  timeRange === opt.key && {
+                    backgroundColor: theme.primary,
+                    borderColor: theme.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.timeRangeChipText, timeRange === opt.key && { color: buttonText }]}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <View style={{ flexDirection: 'row', gap: 14 }}>
             <View style={{ flex: 1 }}>
               <MetricTile
@@ -1288,6 +1327,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 chart={metrics.recentHashrates.length > 0 ? 'sparkline' : undefined}
                 chartData={metrics.recentHashrates}
                 size="lg"
+                onPress={() =>
+                  setDrillDown({ metricType: 'hashrate', title: t('dashboard.hashrate') })
+                }
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -1312,6 +1354,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 chart={metrics.recentPower.length > 0 ? 'bars' : undefined}
                 chartData={metrics.recentPower}
                 size="lg"
+                onPress={() => setDrillDown({ metricType: 'power', title: t('dashboard.power') })}
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -1321,6 +1364,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 accent={avgTemp > 70 ? 'danger' : 'success'}
                 chart="gauge"
                 size="lg"
+                onPress={() => setDrillDown({ metricType: 'temp', title: t('dashboard.temp') })}
               />
             </View>
           </View>
@@ -1337,6 +1381,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
                 chartData={uptimeChartData}
                 size="lg"
+                onPress={() => setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })}
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -1946,6 +1991,60 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         </Pressable>
       </Modal>
 
+      <Modal
+        visible={showGroupPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowGroupPicker(false)}
+        testID="group-picker-modal"
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowGroupPicker(false)}
+          accessibilityLabel="Close group picker"
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <Text style={styles.modalTitle}>{t('dashboard.assignGroup')}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Remove group"
+              style={styles.modalOption}
+              onPress={() => handleBatchGroupAssign(undefined)}
+            >
+              <Text style={styles.modalOptionText}>{t('dashboard.removeGroup')}</Text>
+            </Pressable>
+            {groups
+              .filter((g) => g !== 'Ungrouped')
+              .map((g) => (
+                <Pressable
+                  accessibilityRole="button"
+                  key={g}
+                  accessibilityLabel={`Assign group: ${g}`}
+                  style={styles.modalOption}
+                  onPress={() => handleBatchGroupAssign(g)}
+                >
+                  <Text style={styles.modalOptionText}>{g}</Text>
+                </Pressable>
+              ))}
+            <TextInput
+              style={styles.groupInput}
+              placeholder={t('dashboard.createNewGroup', 'Create new group...')}
+              placeholderTextColor={theme.textMuted}
+              value={groupPickerInput}
+              onChangeText={setGroupPickerInput}
+              onSubmitEditing={(e) => {
+                const text = e?.nativeEvent?.text ?? groupPickerInput;
+                if (text.trim()) {
+                  handleBatchGroupAssign(text.trim());
+                }
+              }}
+              returnKeyType="done"
+              testID="group-picker-input"
+            />
+          </View>
+        </Pressable>
+      </Modal>
+
       <DashboardCustomizer
         visible={showCustomizer}
         onClose={() => setShowCustomizer(false)}
@@ -1955,6 +2054,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         onApplyPreset={handleApplyPreset}
         kioskMode={kioskMode}
         onToggleKiosk={handleToggleKiosk}
+      />
+
+      <MinerDrillDownModal
+        visible={drillDown !== null}
+        onClose={() => setDrillDown(null)}
+        miners={filteredMiners}
+        metricType={drillDown?.metricType ?? 'hashrate'}
+        title={drillDown?.title ?? ''}
       />
 
       {!kioskMode && (

@@ -561,19 +561,17 @@ describe('batch operations', () => {
       miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
       setMinerGroup: mockSetGroup,
     });
-    const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation(() => {});
-    await render(<DashboardScreen navigation={navigation} />);
-    await fireEvent.press(await screen.findByLabelText('Compare miners'));
-    await fireEvent.press((await screen.findAllByText('Miner1'))[1]);
-    await fireEvent.press((await screen.findAllByText('Miner2'))[1]);
-    await fireEvent.press(await screen.findByLabelText('Batch group'));
-    const promptArgs = promptSpy.mock.calls[0];
-    const okButton = promptArgs?.[2]?.find((b: any) => b.text === 'common.ok');
-    okButton?.onPress?.('Rack-A');
+    const r = await render(<DashboardScreen navigation={navigation} />);
+    await fireEvent.press(r.getByLabelText('Compare miners'));
+    await fireEvent.press((await r.findAllByText('Miner1'))[1]);
+    await fireEvent.press((await r.findAllByText('Miner2'))[1]);
+    await fireEvent.press(r.getByLabelText('Batch group'));
+    const input = r.getByTestId('group-picker-input');
+    await fireEvent.changeText(input, 'Rack-A');
+    await fireEvent(input, 'submitEditing', { nativeEvent: { text: 'Rack-A' } });
     await waitFor(() => {
       expect(mockSetGroup).toHaveBeenCalledTimes(2);
     });
-    promptSpy.mockRestore();
   });
 
   it('calls setMinerWallet when wallet is assigned via batch picker', async () => {
@@ -830,6 +828,26 @@ it('export button calls exportAllData', async () => {
   expect(exportAllData).toHaveBeenCalledTimes(1);
 });
 
+it('renders time range chips in metrics section', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  expect(r.getByLabelText('Time range: 1H')).toBeTruthy();
+  expect(r.getByLabelText('Time range: 6H')).toBeTruthy();
+  expect(r.getByLabelText('Time range: 24H')).toBeTruthy();
+  expect(r.getByLabelText('Time range: 7D')).toBeTruthy();
+});
+
+it('clicking time range chip changes active range', async () => {
+  useMinerStore.setState({
+    miners: [makeMiner()],
+  });
+  const r = await render(<DashboardScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Time range: 1H'));
+  expect(r.getByLabelText('Time range: 1H')).toBeTruthy();
+});
+
 it('theme button cycles mode', async () => {
   useMinerStore.setState({
     miners: [makeMiner()],
@@ -860,7 +878,6 @@ it('deselects miner on second tap in selection mode', async () => {
 
 it('batch Remove Group clears groups on selected miners', async () => {
   const mockSetGroup = jest.fn();
-  const promptSpy = jest.spyOn(Alert, 'prompt').mockImplementation((...args) => {});
   useMinerStore.setState({
     miners: [makeMiner({ id: 'm1', name: 'Miner1' }), makeMiner({ id: 'm2', name: 'Miner2' })],
     setMinerGroup: mockSetGroup,
@@ -870,14 +887,11 @@ it('batch Remove Group clears groups on selected miners', async () => {
   await fireEvent.press((await r.findAllByText('Miner1'))[1]);
   await fireEvent.press((await r.findAllByText('Miner2'))[1]);
   await fireEvent.press(r.getByLabelText('Batch group'));
-  const promptArgs = promptSpy.mock.calls[0];
-  const removeBtn = promptArgs?.[2]?.find((b: any) => b.text === 'dashboard.removeGroup');
-  removeBtn?.onPress?.();
+  await fireEvent.press(r.getByLabelText('Remove group'));
   await waitFor(() => {
     expect(mockSetGroup).toHaveBeenCalledWith('m1', undefined);
     expect(mockSetGroup).toHaveBeenCalledWith('m2', undefined);
   });
-  promptSpy.mockRestore();
 });
 
 describe('kiosk mode', () => {
