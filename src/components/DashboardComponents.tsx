@@ -303,7 +303,7 @@ function GaugeArc({
         <Text
           style={{
             color: '#FFFFFF',
-            fontSize: 14,
+            fontSize: fontSize.base,
             fontWeight: fontWeight.extrabold,
             textAlign: 'center',
             marginTop: height / 2 - 10,
@@ -365,7 +365,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         borderWidth: 1,
         borderColor: theme.border,
         padding: 16,
-        gap: 10,
+        gap: spacing.xl,
       }}
     >
       {/* Header row */}
@@ -373,7 +373,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         <Text style={{ color: theme.text, fontSize: fontSize.lg, fontWeight: fontWeight.bold }}>
           ≡ Profitability
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
           {priceHistory.length >= 4 && (
             <Svg width={36} height={20}>
               <Polyline
@@ -400,7 +400,9 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           >
             BTC
           </Text>
-          <Text style={{ color: theme.text, fontSize: 14, fontWeight: fontWeight.extrabold }}>
+          <Text
+            style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.extrabold }}
+          >
             ${btcPrice.toLocaleString()}
           </Text>
           {priceHistory.length >= 2 && (
@@ -423,9 +425,9 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           flexDirection: 'row',
           justifyContent: 'space-between',
           backgroundColor: theme.surfaceLight,
-          borderRadius: 10,
+          borderRadius: radius.md,
           paddingHorizontal: spacing.sm,
-          paddingVertical: 6,
+          paddingVertical: spacing.xs,
         }}
       >
         <Text
@@ -433,7 +435,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         >
           Network Hashrate
         </Text>
-        <Text style={{ color: theme.primary, fontSize: 12, fontWeight: fontWeight.bold }}>
+        <Text style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}>
           {formatHashrateValue(netHash)}
         </Text>
       </View>
@@ -460,7 +462,9 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           >
             {m.name || m.id}
           </Text>
-          <Text style={{ color: theme.primary, fontSize: 12, fontWeight: fontWeight.bold }}>
+          <Text
+            style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}
+          >
             {formatBTC(m.btcPerDay)}/day
           </Text>
           {btcPrice > 0 && (
@@ -478,10 +482,18 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           paddingTop: 6,
         }}
       >
-        <Text style={{ color: theme.text, fontSize: 14, fontWeight: fontWeight.extrabold }}>
+        <Text
+          style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.extrabold }}
+        >
           Total
         </Text>
-        <Text style={{ color: theme.success, fontSize: 14, fontWeight: fontWeight.extrabold }}>
+        <Text
+          style={{
+            color: theme.success,
+            fontSize: fontSize.base,
+            fontWeight: fontWeight.extrabold,
+          }}
+        >
           {formatBTC(totalBtcDay)}/day
         </Text>
       </View>
@@ -536,7 +548,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
             borderTopColor: theme.border,
           }}
         >
-          <Text style={{ color: theme.textDim, fontSize: 12 }}>Net/day (after power)</Text>
+          <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Net/day (after power)</Text>
           <Text
             style={{
               color:
@@ -563,7 +575,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 14,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.xxs,
     overflow: 'hidden',
@@ -580,9 +592,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   trendBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: spacing.xxs,
+    paddingVertical: spacing.xxs,
+    borderRadius: radius.xxs,
   },
   trendText: {
     fontSize: fontSize.xs,
@@ -598,13 +610,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   unit: {
-    fontSize: 12,
+    fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
   },
   label: {
-    fontSize: 9,
+    fontSize: fontSize.xs,
     fontWeight: fontWeight.semibold,
-    marginTop: 1,
+    marginTop: spacing.xxs,
   },
   chartContainer: {
     marginTop: spacing.xxs,
