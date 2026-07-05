@@ -15,6 +15,7 @@ interface NotificationHistoryState {
   history: PushNotificationEntry[];
   addEntry: (entry: Omit<PushNotificationEntry, 'id' | 'sentAt'>) => void;
   loadHistory: () => Promise<void>;
+  clearHistory: () => Promise<void>;
 }
 
 const STORAGE_KEY = 'hashwatch_notification_history';
@@ -49,5 +50,10 @@ export const useNotificationHistoryStore = create<NotificationHistoryState>((set
       DB.setSetting(STORAGE_KEY, JSON.stringify(history)).catch(() => {});
       return { history };
     });
+  },
+
+  clearHistory: async () => {
+    await DB.setSetting(STORAGE_KEY, JSON.stringify([]));
+    set({ history: [] });
   },
 }));

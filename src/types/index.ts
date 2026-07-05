@@ -93,6 +93,7 @@ export type RootStackParamList = {
   ImportData: undefined;
   MinerComparison: { minerIds: string[] };
   AlertHistory: undefined;
+  NotificationHistory: undefined;
 };
 
 export type TabParamList = {

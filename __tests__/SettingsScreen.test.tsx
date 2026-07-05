@@ -61,6 +61,7 @@ jest.mock('../src/services/websocket', () => ({
 
 jest.mock('../src/services/pushRegistration', () => ({
   registerPushToken: jest.fn(),
+  unregisterPushToken: jest.fn(),
 }));
 
 jest.mock('../src/api/bitaxe', () => ({
@@ -494,6 +495,12 @@ it('navigates to AlertHistory', async () => {
   const r = await render(<SettingsScreen navigation={navigation} />);
   await fireEvent.press(r.getByText('settings.alertHistory'));
   expect(navigation.navigate).toHaveBeenCalledWith('AlertHistory');
+});
+
+it('navigates to NotificationHistory', async () => {
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('settings.notificationHistory'));
+  expect(navigation.navigate).toHaveBeenCalledWith('NotificationHistory');
 });
 
 it('calls scanNetwork on Scan Network press', async () => {
