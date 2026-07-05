@@ -13,6 +13,7 @@ import { useMinerStore } from '../store/miners';
 import { useSubscriptionStore } from '../store/subscription';
 import { scanNetwork, DiscoveredMiner } from '../discovery/localNetwork';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
 
@@ -111,23 +112,23 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         },
         card: {
           backgroundColor: theme.surface,
-          borderRadius: 16,
+          borderRadius: radius.lg,
           padding: 16,
           borderWidth: 1,
           borderColor: theme.border,
         },
         sectionTitle: {
           color: theme.text,
-          fontSize: 15,
-          fontWeight: '700',
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.bold,
           marginBottom: 12,
         },
         input: {
           backgroundColor: theme.surfaceLight,
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 14,
           color: theme.text,
-          fontSize: 15,
+          fontSize: fontSize.md,
           fontFamily: 'monospace',
           marginBottom: 10,
           borderWidth: 1,
@@ -135,19 +136,19 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         },
         primaryBtn: {
           backgroundColor: theme.primary,
-          borderRadius: 12,
+          borderRadius: radius.md,
           padding: 14,
           alignItems: 'center',
-          marginTop: 4,
+          marginTop: spacing.xxs,
         },
         primaryBtnText: {
           color: '#FFF',
-          fontWeight: '700',
-          fontSize: 15,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.md,
         },
         secondaryBtn: {
           backgroundColor: theme.surfaceLight,
-          borderRadius: 12,
+          borderRadius: radius.md,
           padding: 14,
           alignItems: 'center',
           borderWidth: 1,
@@ -155,8 +156,8 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         },
         secondaryBtnText: {
           color: theme.text,
-          fontWeight: '600',
-          fontSize: 15,
+          fontWeight: fontWeight.semibold,
+          fontSize: fontSize.md,
         },
         btnDisabled: {
           opacity: 0.5,
@@ -174,18 +175,18 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         dividerText: {
           color: theme.textMuted,
           marginHorizontal: 12,
-          fontSize: 12,
-          fontWeight: '600',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
           letterSpacing: 1,
         },
         foundSection: {
-          marginTop: 8,
+          marginTop: spacing.xs,
         },
         foundTitle: {
           color: theme.success,
-          fontSize: 13,
-          fontWeight: '700',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.bold,
           marginBottom: 10,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
@@ -196,7 +197,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
           alignItems: 'center',
           backgroundColor: theme.surface,
           padding: 14,
-          borderRadius: 12,
+          borderRadius: radius.md,
           marginBottom: 6,
           borderWidth: 1,
           borderColor: theme.border,
@@ -204,41 +205,41 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         foundLeft: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 10,
+          gap: spacing.sm,
         },
         foundIcon: {
-          fontSize: 14,
+          fontSize: fontSize.base,
           color: theme.primary,
         },
         foundIP: {
           color: theme.text,
           fontFamily: 'monospace',
-          fontSize: 15,
-          fontWeight: '500',
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.regular,
         },
         foundAddBadge: {
           backgroundColor: theme.primary + '26',
-          paddingHorizontal: 12,
-          paddingVertical: 5,
-          borderRadius: 8,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+          borderRadius: radius.sm,
         },
         foundAdd: {
           color: theme.primaryLight,
-          fontWeight: '700',
-          fontSize: 13,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.base,
         },
         errorBox: {
           backgroundColor: theme.danger + '1A',
-          borderRadius: 12,
+          borderRadius: radius.md,
           padding: 12,
-          marginTop: 16,
+          marginTop: spacing.md,
           borderWidth: 1,
           borderColor: theme.danger + '33',
         },
         errorText: {
           color: theme.danger,
-          fontSize: 13,
-          fontWeight: '500',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.regular,
         },
       }),
     [theme],
@@ -307,7 +308,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
                 }}
               />
             </View>
-            <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: 4 }}>
+            <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: spacing.xxs }}>
               {t('addMiner.scanProgress', {
                 scanned: scanProgress.scanned,
                 total: scanProgress.total,
@@ -368,7 +369,12 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>⚠ {error}</Text>
           {Platform.OS === 'web' && (
-            <Text style={[styles.errorText, { marginTop: 8, fontSize: 12, lineHeight: 16 }]}>
+            <Text
+              style={[
+                styles.errorText,
+                { marginTop: spacing.xs, fontSize: fontSize.sm, lineHeight: 16 },
+              ]}
+            >
               Web requires a local proxy to reach miners on your network. Go to Settings → add your
               proxy URL (e.g. http://localhost:4567) and run{' '}
               <Text style={{ fontFamily: 'monospace', color: theme.primaryLight }}>
