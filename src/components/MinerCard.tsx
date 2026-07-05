@@ -122,7 +122,7 @@ export const MinerCard = memo(
           },
           statLabel: {
             color: theme.textDim,
-            fontSize: 9,
+            fontSize: fontSize.xs,
             fontWeight: fontWeight.bold,
             textTransform: 'uppercase',
             letterSpacing: 0.8,
@@ -301,11 +301,21 @@ export const MinerCard = memo(
                   paddingVertical: 1,
                 }}
               >
-                <Text style={{ color: theme.primary, fontSize: 9, fontWeight: '600' }}>{tag}</Text>
+                <Text
+                  style={{
+                    color: theme.primary,
+                    fontSize: fontSize.xs,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  {tag}
+                </Text>
               </View>
             ))}
             {miner.tags.length > 3 && (
-              <Text style={{ color: theme.textMuted, fontSize: 9 }}>+{miner.tags.length - 3}</Text>
+              <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>
+                +{miner.tags.length - 3}
+              </Text>
             )}
           </View>
         )}
