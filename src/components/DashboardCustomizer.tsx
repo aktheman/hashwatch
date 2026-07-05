@@ -189,12 +189,12 @@ export function DashboardCustomizer({
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                paddingVertical: 10,
+                paddingVertical: spacing.md,
                 borderBottomWidth: 1,
                 borderBottomColor: theme.border,
               }}
             >
-              <Text style={{ color: theme.text, fontSize: 14 }}>
+              <Text style={{ color: theme.text, fontSize: fontSize.base }}>
                 📺 {t('dashboardCustomizer.kioskMode')}
               </Text>
               <Switch
@@ -205,22 +205,24 @@ export function DashboardCustomizer({
               />
             </View>
 
-            <View style={{ marginTop: 16, gap: 8 }}>
-              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700' }}>
+            <View style={{ marginTop: spacing.md, gap: spacing.xs }}>
+              <Text
+                style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
+              >
                 {t('dashboardCustomizer.presets')}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 6 }}>
+              <View style={{ flexDirection: 'row', gap: spacing.xs }}>
                 <TextInput
                   style={{
                     flex: 1,
                     borderWidth: 1,
                     borderColor: theme.border,
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
+                    borderRadius: radius.sm,
+                    paddingHorizontal: spacing.md,
+                    paddingVertical: spacing.xs,
                     color: theme.text,
                     backgroundColor: theme.surfaceLight,
-                    fontSize: 14,
+                    fontSize: fontSize.base,
                   }}
                   placeholder={String(t('dashboardCustomizer.presetPlaceholder'))}
                   placeholderTextColor={theme.textMuted}
@@ -231,13 +233,15 @@ export function DashboardCustomizer({
                   accessibilityRole="button"
                   style={{
                     backgroundColor: theme.primary,
-                    paddingHorizontal: 14,
-                    borderRadius: 8,
+                    paddingHorizontal: spacing.lg,
+                    borderRadius: radius.sm,
                     justifyContent: 'center',
                   }}
                   onPress={handleSavePreset}
                 >
-                  <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 13 }}>
+                  <Text
+                    style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.base }}
+                  >
                     {t('dashboardCustomizer.save')}
                   </Text>
                 </Pressable>
@@ -246,22 +250,24 @@ export function DashboardCustomizer({
                 accessibilityRole="button"
                 style={{
                   backgroundColor: theme.surfaceLight,
-                  paddingVertical: 10,
-                  borderRadius: 8,
+                  paddingVertical: spacing.md,
+                  borderRadius: radius.sm,
                   alignItems: 'center',
                   borderWidth: 1,
                   borderColor: theme.border,
                 }}
                 onPress={() => setShowPresets((p) => !p)}
               >
-                <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>
+                <Text style={{ color: theme.text, fontWeight: '600', fontSize: fontSize.base }}>
                   {showPresets
                     ? t('dashboardCustomizer.hidePresets')
                     : t('dashboardCustomizer.loadPreset', { count: presets.length })}
                 </Text>
               </Pressable>
               {showPresets && presets.length === 0 && (
-                <Text style={{ color: theme.textMuted, fontSize: 12, textAlign: 'center' }}>
+                <Text
+                  style={{ color: theme.textMuted, fontSize: fontSize.sm, textAlign: 'center' }}
+                >
                   {t('dashboardCustomizer.noPresets')}
                 </Text>
               )}
@@ -272,7 +278,7 @@ export function DashboardCustomizer({
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
-                      gap: 6,
+                      gap: spacing.xs,
                       paddingVertical: 6,
                     }}
                   >
@@ -281,15 +287,17 @@ export function DashboardCustomizer({
                       style={{
                         flex: 1,
                         backgroundColor: theme.surfaceLight,
-                        paddingVertical: 8,
-                        paddingHorizontal: 12,
-                        borderRadius: 8,
+                        paddingVertical: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: radius.sm,
                         borderWidth: 1,
                         borderColor: theme.border,
                       }}
                       onPress={() => handleLoadPreset(p)}
                     >
-                      <Text style={{ color: theme.text, fontWeight: '600', fontSize: 13 }}>
+                      <Text
+                        style={{ color: theme.text, fontWeight: '600', fontSize: fontSize.base }}
+                      >
                         {p.name}
                       </Text>
                     </Pressable>
@@ -299,13 +307,19 @@ export function DashboardCustomizer({
                       style={{
                         width: 32,
                         height: 32,
-                        borderRadius: 8,
+                        borderRadius: radius.sm,
                         backgroundColor: theme.danger + '1A',
                         justifyContent: 'center',
                         alignItems: 'center',
                       }}
                     >
-                      <Text style={{ color: theme.danger, fontSize: 14, fontWeight: '700' }}>
+                      <Text
+                        style={{
+                          color: theme.danger,
+                          fontSize: fontSize.base,
+                          fontWeight: fontWeight.bold,
+                        }}
+                      >
                         ✕
                       </Text>
                     </Pressable>
@@ -315,8 +329,8 @@ export function DashboardCustomizer({
                 accessibilityRole="button"
                 style={{
                   backgroundColor: theme.danger + '1A',
-                  paddingVertical: 10,
-                  borderRadius: 8,
+                  paddingVertical: spacing.md,
+                  borderRadius: radius.sm,
                   alignItems: 'center',
                   borderWidth: 1,
                   borderColor: theme.danger + '40',
@@ -337,7 +351,13 @@ export function DashboardCustomizer({
                   );
                 }}
               >
-                <Text style={{ color: theme.danger, fontWeight: '700', fontSize: 13 }}>
+                <Text
+                  style={{
+                    color: theme.danger,
+                    fontWeight: fontWeight.bold,
+                    fontSize: fontSize.base,
+                  }}
+                >
                   {t('dashboardCustomizer.resetToDefaults')}
                 </Text>
               </Pressable>
