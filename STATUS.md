@@ -11,12 +11,13 @@
 - **Bundle analysis tooling** — added `source-map-explorer` dev dep, `build:web:analyze` script with `--dump-sourcemap`
 - **expo-modules-core mock** — comprehensive mock file at `src/__mocks__/expo-modules-core.ts` covering EventEmitter, NativeModule, SharedObject, SharedRef, CodedError, UnavailabilityError, requireNativeModule, requireOptionalNativeModule, Platform, uuid, PermissionStatus — available for selective test use
 - **E2E tests** — 3 new files (dashboard-metrics, groups, miner-detail) with 11 tests covering time range chips, drill-down modal, group display, alert rules
+- **Charts: Power, Voltage, Fan Speed** — 3 new trend chart components on MinerDetailScreen (amber power, cyan voltage, green fan RPM). Added `fanSpeed`, `fanRpm`, `coreVoltage` to `MinerSnapshot` type and `buildSnapshot()` for forward data collection. 18 new tests (6 each).
 - **Vercel redeploy** — https://hashwatch2.vercel.app live with latest changes
 - **Local web server** — http://localhost:3000
 
 ### Test Results
 
-- **Frontend**: 1141 tests passing, 79 suites (was 1100/79)
+- **Frontend**: 1159 tests passing, 82 suites (was 1141/79)
 - **Backend**: 163 tests passing, 17 suites (was 129/14)
 - **TypeScript**: clean
 - **ESLint**: 0 errors, 0 warnings
