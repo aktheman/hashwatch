@@ -9,6 +9,7 @@ import {
   Share,
   Alert,
   RefreshControl,
+  Switch,
 } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { useMinerStore } from '../store/miners';
@@ -1174,6 +1175,101 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <PoolChangeHistory minerId={miner.id} />
         </View>
 
+        {alertRules && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🔔</Text>{' '}
+              {t('minerDetail.alertRules', 'Alert Rules')}
+            </Text>
+            <View style={[styles.poolCard, { gap: spacing.sm }]}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontSize: fontSize.md,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  {t('minerDetail.alertRulesEnabled', 'Enabled')}
+                </Text>
+                <Switch
+                  value={alertRules.enabled}
+                  onValueChange={(v) => {
+                    const next = { ...alertRules, enabled: v };
+                    setAlertRulesState(next);
+                    setAlertRules(minerId, next);
+                  }}
+                  trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
+                  thumbColor={alertRules.enabled ? theme.primary : theme.textMuted}
+                  accessibilityLabel="Toggle alert rules"
+                />
+              </View>
+              {alertRules.enabled && (
+                <>
+                  <AlertRuleSlider
+                    label={t('minerDetail.tempThreshold', 'Temp Threshold')}
+                    value={alertRules.tempThreshold}
+                    min={50}
+                    max={100}
+                    unit="°C"
+                    theme={theme}
+                    onChange={(v) => {
+                      const next = { ...alertRules, tempThreshold: v };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                  />
+                  <AlertRuleSlider
+                    label={t('minerDetail.hashrateDrop', 'Hashrate Drop %')}
+                    value={alertRules.hashrateDropPercent}
+                    min={10}
+                    max={90}
+                    unit="%"
+                    theme={theme}
+                    onChange={(v) => {
+                      const next = { ...alertRules, hashrateDropPercent: v };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                  />
+                  <AlertRuleSlider
+                    label={t('minerDetail.offlineReminder', 'Offline Reminder (min)')}
+                    value={alertRules.offlineReminderMinutes}
+                    min={1}
+                    max={60}
+                    unit="min"
+                    theme={theme}
+                    onChange={(v) => {
+                      const next = { ...alertRules, offlineReminderMinutes: v };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                  />
+                  <AlertRuleSlider
+                    label={t('minerDetail.uptimeThreshold', 'Uptime Alert (hours)')}
+                    value={alertRules.uptimeThresholdHours}
+                    min={1}
+                    max={168}
+                    unit="h"
+                    theme={theme}
+                    onChange={(v) => {
+                      const next = { ...alertRules, uptimeThresholdHours: v };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                  />
+                </>
+              )}
+            </View>
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             <Text style={styles.sectionIcon}>📈</Text> {t('minerDetail.hashrateHistory')}
@@ -1308,5 +1404,86 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </View>
       </View>
     </ScrollView>
+  );
+}
+
+function AlertRuleSlider({
+  label,
+  value,
+  min,
+  max,
+  unit,
+  theme,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  theme: ReturnType<typeof import('../theme').useTheme>;
+  onChange: (v: number) => void;
+}) {
+  const step = unit === 'min' || unit === 'h' ? 1 : 5;
+  return (
+    <View style={{ paddingVertical: 6 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+        <Text style={{ color: theme.text, fontSize: 13 }}>{label}</Text>
+        <Text style={{ color: theme.primary, fontSize: 13, fontWeight: '700' }}>
+          {value}
+          {unit}
+        </Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={{ color: theme.textMuted, fontSize: 11 }}>{min}</Text>
+        <View
+          style={{
+            flex: 1,
+            height: 6,
+            backgroundColor: theme.surfaceLight,
+            borderRadius: 3,
+            overflow: 'hidden',
+          }}
+        >
+          <View
+            style={{
+              width: `${((value - min) / (max - min)) * 100}%`,
+              height: 6,
+              backgroundColor: theme.primary,
+              borderRadius: 3,
+            }}
+          />
+        </View>
+        <Text style={{ color: theme.textMuted, fontSize: 11 }}>{max}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Decrease ${label}`}
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 2,
+            backgroundColor: theme.surfaceLight,
+            borderRadius: 4,
+          }}
+          onPress={() => onChange(Math.max(min, value - step))}
+        >
+          <Text style={{ color: theme.text, fontSize: 14 }}>−</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Increase ${label}`}
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 2,
+            backgroundColor: theme.surfaceLight,
+            borderRadius: 4,
+          }}
+          onPress={() => onChange(Math.min(max, value + step))}
+        >
+          <Text style={{ color: theme.text, fontSize: 14 }}>+</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }

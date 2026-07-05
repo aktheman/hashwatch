@@ -95,6 +95,39 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
   }
 });
 
+proxyRouter.post('/flash', async (req: AuthRequest, res) => {
+  try {
+    const { url, method = 'POST', body } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: 'url is required' });
+    }
+    if (!isAllowedProxyUrl(url)) {
+      return res
+        .status(403)
+        .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+    }
+    const response = await axios({
+      url,
+      method: method.toUpperCase(),
+      data: body,
+      timeout: 120000,
+      validateStatus: () => true,
+    });
+    res.json({ success: response.status < 400, data: response.data });
+  } catch (e: unknown) {
+    captureException(e as unknown, { route: 'proxy.flash' });
+    if (e && typeof e === 'object' && 'code' in e) {
+      const code = (e as { code?: string }).code;
+      if (code === 'ECONNREFUSED' || code === 'EHOSTUNREACH') {
+        return res
+          .status(502)
+          .json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
+      }
+    }
+    res.status(502).json({ error: 'flash_failed', message: 'Could not flash firmware' });
+  }
+});
+
 proxyRouter.post('/restart', async (req: AuthRequest, res) => {
   try {
     const { url } = req.body;

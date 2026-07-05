@@ -56,6 +56,7 @@
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.4",
     "serve": "^14.2.6",
+    "source-map-explorer": "^2.5.3",
     "test-renderer": "^1.2.0",
     "typescript": "~6.0.3"
   },
@@ -65,6 +66,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web && cp public/service-worker.js dist/ 2>/dev/null; echo '{\"name\":\"HashWatch\",\"short_name\":\"HashWatch\",\"description\":\"Real-time BitAxe miner monitoring\",\"start_url\":\"/\",\"display\":\"standalone\",\"background_color\":\"#0A0A1A\",\"theme_color\":\"#0A0A1A\",\"icons\":[{\"src\":\"/favicon.ico\",\"sizes\":\"64x64\",\"type\":\"image/x-icon\"}]}' > dist/manifest.json 2>/dev/null; true",
+    "build:web:analyze": "expo export --platform web --dump-sourcemap && npx source-map-explorer dist/_expo/static/js/web/index-*.js && npx source-map-explorer dist/_expo/static/js/web/*.js --no-root",
     "electron": "NODE_ENV=development electron electron/main.js",
     "electron:build": "npm run build:web && electron-builder",
     "postinstall": "electron-builder install-app-deps",

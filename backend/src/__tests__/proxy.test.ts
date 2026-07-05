@@ -212,6 +212,51 @@ describe('POST /api/proxy', () => {
   });
 });
 
+describe('POST /api/proxy/flash', () => {
+  it('flashes firmware to a miner', async () => {
+    mockAxios.mockResolvedValueOnce({ status: 200, data: { success: true } });
+
+    const res = await request(app)
+      .post('/api/proxy/flash')
+      .send({
+        url: 'http://192.168.1.100/api/system/ota',
+        method: 'POST',
+        body: JSON.stringify({ url: 'http://firmware.example.com/bitaxe.bin' }),
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: { success: true } });
+  });
+
+  it('returns 400 when no url provided', async () => {
+    const res = await request(app).post('/api/proxy/flash').send({ method: 'POST' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('url is required');
+  });
+
+  it('returns 403 for public URLs', async () => {
+    const res = await request(app)
+      .post('/api/proxy/flash')
+      .send({ url: 'http://example.com/api/ota' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('forbidden');
+  });
+
+  it('returns 502 when miner is unreachable', async () => {
+    const err = new Error('Connection refused') as ProxyError;
+    err.code = 'ECONNREFUSED';
+    mockAxios.mockRejectedValueOnce(err);
+
+    const res = await request(app)
+      .post('/api/proxy/flash')
+      .send({ url: 'http://192.168.1.100/api/system/ota' });
+
+    expect(res.status).toBe(502);
+    expect(res.body.error).toBe('unreachable');
+  });
+});
+
 describe('POST /api/proxy/restart', () => {
   it('restarts a miner', async () => {
     mockAxios.mockResolvedValueOnce({ status: 200, data: {} });

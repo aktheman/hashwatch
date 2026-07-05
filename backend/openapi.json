@@ -787,6 +787,35 @@
         }
       }
     },
+    "/proxy/flash": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Flash firmware to a miner (OTA update)",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": { "type": "string", "description": "Miner OTA endpoint URL" },
+                  "method": { "type": "string", "default": "POST" },
+                  "body": { "type": "string", "description": "JSON body with firmware URL" }
+                },
+                "required": ["url"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Firmware flash initiated" },
+          "400": { "description": "Missing url" },
+          "403": { "description": "Forbidden URL" },
+          "502": { "description": "Miner unreachable or flash failed" }
+        }
+      }
+    },
     "/notification-prefs/{minerId}": {
       "get": {
         "tags": ["Notification Preferences"],
@@ -1214,7 +1243,7 @@
         }
       }
     },
-    "/alert-rules/{minerId}": {
+    "/miner-alert-rules/{minerId}": {
       "get": {
         "tags": ["Alert Rules"],
         "summary": "Get alert rules for a miner",
