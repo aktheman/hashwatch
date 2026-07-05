@@ -52,6 +52,11 @@ const MinerComparisonScreen = lazy(() =>
 const AlertHistoryScreen = lazy(() =>
   import('../screens/AlertHistoryScreen').then((m) => ({ default: m.AlertHistoryScreen })),
 );
+const NotificationHistoryScreen = lazy(() =>
+  import('../screens/NotificationHistoryScreen').then((m) => ({
+    default: m.NotificationHistoryScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -86,6 +91,7 @@ const WrappedGroups = withScreenBoundary(GroupsScreen);
 const WrappedImportData = withScreenBoundary(ImportDataScreen);
 const WrappedMinerComparison = withScreenBoundary(MinerComparisonScreen);
 const WrappedAlertHistory = withScreenBoundary(AlertHistoryScreen);
+const WrappedNotificationHistory = withScreenBoundary(NotificationHistoryScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -239,6 +245,11 @@ export function AppNavigator() {
           name="AlertHistory"
           component={WrappedAlertHistory}
           options={{ title: t('alertHistory.title', 'Alert History') }}
+        />
+        <Stack.Screen
+          name="NotificationHistory"
+          component={WrappedNotificationHistory}
+          options={{ title: t('notificationHistory.title', 'Notification History') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

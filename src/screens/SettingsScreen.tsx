@@ -30,6 +30,7 @@ import { NavigationProp } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useNetworkStatus } from '../services/networkStatus';
 import { useNotificationHistoryStore } from '../store/notificationHistory';
+import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import i18n from '../i18n';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 
@@ -879,6 +880,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             onValueChange={(val) => {
               setNotificationsEnabled(val);
               setSetting('notifications_enabled', String(val));
+              if (val) {
+                registerPushToken(token);
+              } else {
+                unregisterPushToken(token);
+              }
             }}
             trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
             thumbColor={notificationsEnabled ? theme.primary : theme.textMuted}
@@ -891,6 +897,18 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           onPress={() => navigation.navigate('AlertHistory')}
         >
           <Text style={styles.rowLabel}>{t('settings.alertHistory')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          style={[styles.row, { marginTop: 4 }]}
+          onPress={() => navigation.navigate('NotificationHistory')}
+        >
+          <Text style={styles.rowLabel}>
+            {t('settings.notificationHistory', 'Notification History')}
+          </Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
