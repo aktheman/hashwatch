@@ -14,6 +14,7 @@ import {
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner } from '../types';
 import { useTranslation } from 'react-i18next';
@@ -300,37 +301,37 @@ export function GroupsScreen() {
         title: {
           color: theme.text,
           fontSize: 24,
-          fontWeight: '800',
+          fontWeight: fontWeight.extrabold,
           marginBottom: 16,
-          marginTop: 8,
+          marginTop: spacing.xs,
           letterSpacing: -0.5,
         },
         inputRow: {
           flexDirection: 'row',
-          gap: 8,
+          gap: spacing.xxs,
           marginBottom: 20,
         },
         input: {
           flex: 1,
           backgroundColor: theme.surfaceLight,
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 12,
           color: theme.text,
-          fontSize: 15,
+          fontSize: fontSize.md,
           borderWidth: 1,
           borderColor: theme.border,
         },
         addBtn: {
           backgroundColor: theme.primary,
-          borderRadius: 10,
-          paddingHorizontal: 20,
+          borderRadius: radius.md,
+          paddingHorizontal: spacing.lg,
           justifyContent: 'center',
           alignItems: 'center',
         },
-        addBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+        addBtnText: { color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.md },
         groupCard: {
           backgroundColor: theme.surface,
-          borderRadius: 12,
+          borderRadius: radius.md,
           padding: 14,
           marginBottom: 8,
           borderWidth: 1,
@@ -343,60 +344,69 @@ export function GroupsScreen() {
         },
         groupName: {
           color: theme.text,
-          fontSize: 16,
-          fontWeight: '700',
+          fontSize: fontSize.lg,
+          fontWeight: fontWeight.bold,
         },
         groupCount: {
           color: theme.textDim,
-          fontSize: 13,
-          marginTop: 2,
+          fontSize: fontSize.base,
+          marginTop: spacing.xxs,
         },
-        actions: { flexDirection: 'row', gap: 8 },
+        actions: { flexDirection: 'row', gap: spacing.xxs },
         actionBtn: {
-          paddingHorizontal: 10,
-          paddingVertical: 4,
-          borderRadius: 8,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
           borderWidth: 1,
         },
-        actionBtnText: { fontSize: 12, fontWeight: '600' },
-        minerList: { marginTop: 8, gap: 4 },
+        actionBtnText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
+        minerList: { marginTop: spacing.xs, gap: spacing.xxs },
         minerRow: {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingVertical: 4,
-          paddingHorizontal: 8,
+          paddingVertical: spacing.xxs,
+          paddingHorizontal: spacing.xs,
           backgroundColor: theme.surfaceLight,
-          borderRadius: 8,
+          borderRadius: radius.sm,
         },
-        minerName: { color: theme.text, fontSize: 13, fontWeight: '500' },
+        minerName: { color: theme.text, fontSize: fontSize.base, fontWeight: '500' },
         ungroupBtn: {
-          paddingHorizontal: 8,
-          paddingVertical: 2,
-          borderRadius: 6,
+          paddingHorizontal: spacing.xs,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.xxs,
           backgroundColor: theme.danger + '20',
         },
-        ungroupBtnText: { color: theme.danger, fontSize: 11, fontWeight: '600' },
-        emptyText: { color: theme.textDim, fontSize: 14, textAlign: 'center', marginTop: 40 },
+        ungroupBtnText: {
+          color: theme.danger,
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
+        },
+        emptyText: {
+          color: theme.textDim,
+          fontSize: fontSize.base,
+          textAlign: 'center',
+          marginTop: spacing.xs,
+        },
         dragHandle: {
           width: 32,
           height: 32,
-          borderRadius: 8,
+          borderRadius: radius.sm,
           justifyContent: 'center',
           alignItems: 'center',
           marginRight: 8,
         },
         dragHandleText: {
-          fontSize: 20,
+          fontSize: fontSize.h3,
           color: theme.textMuted,
           lineHeight: 22,
         },
         dropHint: {
           color: theme.primary,
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
           textAlign: 'center',
-          marginTop: 4,
+          marginTop: spacing.xs,
         },
       }),
     [theme],
@@ -496,12 +506,18 @@ export function GroupsScreen() {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   {stats && stats.totalHash > 0 && (
-                    <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '700' }}>
+                    <Text
+                      style={{
+                        color: theme.primary,
+                        fontSize: fontSize.sm,
+                        fontWeight: fontWeight.bold,
+                      }}
+                    >
                       {formatHashrateValue(stats.totalHash)}
                     </Text>
                   )}
                   {stats && stats.avgTemp > 0 && (
-                    <Text style={{ color: theme.textDim, fontSize: 11 }}>
+                    <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
                       {stats.avgTemp.toFixed(0)}°C avg
                     </Text>
                   )}
@@ -512,7 +528,7 @@ export function GroupsScreen() {
                   <View
                     style={{
                       height: 4,
-                      borderRadius: 2,
+                      borderRadius: radius.xxs,
                       backgroundColor: theme.border,
                       overflow: 'hidden',
                     }}
@@ -521,7 +537,7 @@ export function GroupsScreen() {
                       style={{
                         width: `${Math.max(barRatio * 100, 1)}%`,
                         height: '100%',
-                        borderRadius: 2,
+                        borderRadius: radius.xxs,
                         backgroundColor: theme.primary,
                       }}
                     />
