@@ -268,7 +268,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           borderColor: theme.border,
         },
         poolRow: {
-          paddingVertical: 4,
+          paddingVertical: spacing.xxs,
         },
         poolDivider: {
           height: 1,
@@ -277,21 +277,21 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         },
         poolLabel: {
           color: theme.textDim,
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
           marginBottom: 2,
         },
         poolValue: {
           color: theme.text,
-          fontSize: 14,
+          fontSize: fontSize.base,
           fontFamily: 'monospace',
         },
         deleteBtn: {
           backgroundColor: theme.danger + '1A',
           padding: 14,
-          borderRadius: 12,
+          borderRadius: radius.md,
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.danger + '4D',
@@ -579,7 +579,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               style={{ flexDirection: 'row', alignItems: 'center' }}
             >
               <Text style={styles.ip}>{miner.ip}</Text>
-              <Text style={{ fontSize: 12, color: theme.primary, marginLeft: 6 }}>✏️</Text>
+              <Text style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: 6 }}>✏️</Text>
             </Pressable>
           )}
           {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
@@ -593,7 +593,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             />
           )}
           {showEmojiPicker && (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: spacing.xs,
+                marginTop: spacing.xs,
+              }}
+            >
               {[
                 '⬡',
                 '⚡',
@@ -621,7 +628,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                   style={{
                     width: 36,
                     height: 36,
-                    borderRadius: 10,
+                    borderRadius: radius.md,
                     backgroundColor:
                       miner.icon === emoji ? theme.primary + '30' : theme.surfaceLight,
                     justifyContent: 'center',
@@ -644,7 +651,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         {alertRules && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>⚙️ Alert Thresholds</Text>
-            <View style={{ gap: 10 }}>
+            <View style={{ gap: spacing.sm }}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -652,8 +659,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: theme.textDim, fontSize: 13 }}>Temp Alert (°C)</Text>
-                <View style={{ flexDirection: 'row', gap: 4 }}>
+                <Text style={{ color: theme.textDim, fontSize: fontSize.base }}>
+                  Temp Alert (°C)
+                </Text>
+                <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
                   {[60, 65, 70, 75, 80].map((t) => (
                     <Pressable
                       key={t}
@@ -692,8 +701,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ color: theme.textDim, fontSize: 13 }}>Hashrate Drop (%)</Text>
-                <View style={{ flexDirection: 'row', gap: 4 }}>
+                <Text style={{ color: theme.textDim, fontSize: fontSize.base }}>
+                  Hashrate Drop (%)
+                </Text>
+                <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
                   {[30, 40, 50, 60, 70].map((p) => (
                     <Pressable
                       key={p}
@@ -812,7 +823,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         <View style={[styles.section, styles.groupTagRow]}>
           <Text style={styles.groupTagIcon}>📍</Text>
           <Pressable style={{ flex: 1 }} onPress={() => setShowLocationPicker(!showLocationPicker)}>
-            <Text style={{ color: theme.text, fontSize: 14 }}>
+            <Text style={{ color: theme.text, fontSize: fontSize.base }}>
               {miner.location || 'Set location...'}
             </Text>
           </Pressable>
@@ -847,7 +858,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🏷️ Tags</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+          <View
+            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: 8 }}
+          >
             {(miner.tags || []).map((tag) => (
               <Pressable
                 key={tag}
@@ -918,7 +931,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     alignItems: 'flex-start',
                   }}
                 >
-                  <Text style={{ flex: 1, color: theme.text, fontSize: 13 }}>{note.text}</Text>
+                  <Text style={{ flex: 1, color: theme.text, fontSize: fontSize.base }}>
+                    {note.text}
+                  </Text>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Delete note"
@@ -1346,7 +1361,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.sectionIcon}>🖼</Text> Snapshot
           </Text>
           <MinerSnapshotCard miner={miner} />
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+          <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 12 }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Share Stats"
@@ -1467,20 +1482,22 @@ function AlertRuleSlider({
   return (
     <View style={{ paddingVertical: 6 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-        <Text style={{ color: theme.text, fontSize: 13 }}>{label}</Text>
-        <Text style={{ color: theme.primary, fontSize: 13, fontWeight: '700' }}>
+        <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
+        <Text
+          style={{ color: theme.primary, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
+        >
           {value}
           {unit}
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={{ color: theme.textMuted, fontSize: 11 }}>{min}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>{min}</Text>
         <View
           style={{
             flex: 1,
             height: 6,
             backgroundColor: theme.surfaceLight,
-            borderRadius: 3,
+            borderRadius: radius.xxs,
             overflow: 'hidden',
           }}
         >
@@ -1489,38 +1506,38 @@ function AlertRuleSlider({
               width: `${((value - min) / (max - min)) * 100}%`,
               height: 6,
               backgroundColor: theme.primary,
-              borderRadius: 3,
+              borderRadius: radius.xxs,
             }}
           />
         </View>
-        <Text style={{ color: theme.textMuted, fontSize: 11 }}>{max}</Text>
+        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>{max}</Text>
       </View>
-      <View style={{ flexDirection: 'row', gap: 4, marginTop: 4 }}>
+      <View style={{ flexDirection: 'row', gap: spacing.xxs, marginTop: spacing.xxs }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Decrease ${label}`}
           style={{
-            paddingHorizontal: 10,
-            paddingVertical: 2,
+            paddingHorizontal: spacing.sm,
+            paddingVertical: spacing.xxs,
             backgroundColor: theme.surfaceLight,
-            borderRadius: 4,
+            borderRadius: radius.xxs,
           }}
           onPress={() => onChange(Math.max(min, value - step))}
         >
-          <Text style={{ color: theme.text, fontSize: 14 }}>−</Text>
+          <Text style={{ color: theme.text, fontSize: fontSize.base }}>−</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Increase ${label}`}
           style={{
-            paddingHorizontal: 10,
-            paddingVertical: 2,
+            paddingHorizontal: spacing.sm,
+            paddingVertical: spacing.xxs,
             backgroundColor: theme.surfaceLight,
-            borderRadius: 4,
+            borderRadius: radius.xxs,
           }}
           onPress={() => onChange(Math.min(max, value + step))}
         >
-          <Text style={{ color: theme.text, fontSize: 14 }}>+</Text>
+          <Text style={{ color: theme.text, fontSize: fontSize.base }}>+</Text>
         </Pressable>
       </View>
     </View>
