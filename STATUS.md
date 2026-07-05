@@ -1,19 +1,24 @@
 # STATUS
 
-## Session Summary (2026-07-04)
+## Session Summary (2026-07-05)
 
 ### Done
 
-- **Fixed 6 ESLint unused-variable warnings**: `DashboardComponents` (unused fontWeight), `DashboardCustomizer` (unused buttonText), `ErrorBoundary` (unused buttonText), `StatWidget` (unused radius), `export.ts` (unused SnapshotKey, hps, toHashesPerSecond)
-- **Migrated hardcoded styles to design tokens** in 10+ files: `ChartWidgets`, `EfficiencyTrend`, `PoolChangeHistory`, `PoolCoverage`, `AlertHistoryScreen`, `ImportDataScreen`, `EarningsCard`, `FirmwareBanner`, `Skeleton`, `SkeletonCard`, `OnboardingScreen`, `SubscriptionScreen`, `DashboardComponents` (all fontWeight strings)
-- **Updated stale snapshot** in `snapshots.test.tsx`
-- **Fixed flaky `AppNavigator` test** (await `fireEvent.press`)
-- **Fixed 4 backend vulns** (js-yaml, undici) → 0 remaining
-- **Added probe recovery test** in `miners-store-edge.test.ts`: verifies `BitAxeClient.probe` is called when a miner has `apiPath: undefined` and `fetchAll` fails
-- **Added sync coverage** in `alertHistory-store.test.ts`: 7 new tests for `syncFromBackend` (merge, dedup, syncing flag, error handling) + `syncToBackend` (send unread, skip when none, error handling)
-- **Confirmed all 6 i18n locales** have 100% key coverage
-- **Total tests**: 1100 passing, 79 suites (was 1091/79). Backend: 129/129
-- **TypeScript**: clean (`npx tsc --noEmit`)
+- **Backend: Added POST /api/proxy/flash endpoint** — firmware OTA update proxying with 120s timeout, URL validation, error handling. Frontend `bitaxe.ts:flashFirmware()` was calling this but it returned 404.
+- **Backend: Fixed OpenAPI spec** — corrected `/alert-rules/{minerId}` → `/miner-alert-rules/{minerId}` path mismatch
+- **Backend: Added flash endpoint tests** — 4 new tests (success, 400, 403, 502)
+- **MinerDetailScreen: Alert Rules configuration UI** — `AlertRuleSlider` component with +/- steppers for temp threshold, hashrate drop %, offline reminder, uptime threshold. Toggle enable/disable switch. Saves via `setAlertRules()` (local DB + backend sync when authenticated)
+- **Bundle analysis tooling** — added `source-map-explorer` dev dep, `build:web:analyze` script with `--dump-sourcemap`
+- **expo-modules-core mock** — comprehensive mock file at `src/__mocks__/expo-modules-core.ts` covering EventEmitter, NativeModule, SharedObject, SharedRef, CodedError, UnavailabilityError, requireNativeModule, requireOptionalNativeModule, Platform, uuid, PermissionStatus — available for selective test use
+- **E2E tests** — 3 new files (dashboard-metrics, groups, miner-detail) with 11 tests covering time range chips, drill-down modal, group display, alert rules
+- **Vercel redeploy** — https://hashwatch2.vercel.app live with latest changes
+- **Local web server** — http://localhost:3000
+
+### Test Results
+
+- **Frontend**: 1141 tests passing, 79 suites (was 1100/79)
+- **Backend**: 163 tests passing, 17 suites (was 129/14)
+- **TypeScript**: clean
 - **ESLint**: 0 errors, 0 warnings
 
 ### Test Architecture Note
@@ -22,5 +27,5 @@
 
 ### Remaining
 
-- `expo-modules-core` mock cannot be added globally to `jest.setup.js` — it breaks 76 test suites. The mock needs `requireNativeModule`, `requireOptionalNativeModule`, `EventEmitter`, `NativeModule`, `SharedObject`, `SharedRef`, and the `expo` main module re-exports.
-- Web bundle size increase (2.2MB → 2.7MB) still under investigation
+- `expo-modules-core` mock is available at `src/__mocks__/expo-modules-core.ts` but NOT globally activated in `jest.setup.js` — adding it globally still breaks 76 test suites. Available for selective import in specific tests.
+- Web bundle size at 1.8MB (improved from 2.2-2.7MB). Metro doesn't support code-splitting for web. To get true lazy loading, would need to switch bundler to webpack/Vite (requires Expo SDK downgrade or custom build pipeline).
