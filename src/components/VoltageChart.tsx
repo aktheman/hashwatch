@@ -19,7 +19,7 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
     () =>
       StyleSheet.create({
         container: {
-          marginVertical: 8,
+          marginVertical: spacing.xs,
         },
         title: {
           color: theme.text,
@@ -45,7 +45,7 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
           borderColor: theme.border,
           padding: spacing.lg,
           alignItems: 'center',
-          marginVertical: 8,
+          marginVertical: spacing.xs,
           gap: spacing.xs,
         },
         emptyIcon: {

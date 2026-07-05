@@ -134,7 +134,7 @@ export const MinerCard = memo(
           },
           footer: {
             flexDirection: 'row',
-            gap: 16,
+            gap: spacing.md,
             marginTop: 10,
             paddingTop: 10,
             borderTopWidth: 1,

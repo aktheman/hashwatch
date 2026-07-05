@@ -19,7 +19,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
     () =>
       StyleSheet.create({
         container: {
-          marginVertical: 8,
+          marginVertical: spacing.xs,
         },
         title: {
           color: theme.text,
@@ -45,7 +45,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
           borderColor: theme.border,
           padding: spacing.lg,
           alignItems: 'center',
-          marginVertical: 8,
+          marginVertical: spacing.xs,
           gap: spacing.xs,
         },
         emptyIcon: {
