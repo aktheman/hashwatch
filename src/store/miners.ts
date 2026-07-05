@@ -34,6 +34,9 @@ function buildSnapshot(minerId: string, status: MinerStatus): MinerSnapshot {
     sharesRejected: status.sharesRejected,
     uptimeSeconds: status.uptimeSeconds,
     frequency: status.frequency,
+    fanSpeed: status.fanSpeed,
+    fanRpm: status.fanRpm,
+    coreVoltage: status.coreVoltage,
   };
 }
 

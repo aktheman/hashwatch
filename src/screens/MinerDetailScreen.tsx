@@ -21,6 +21,9 @@ import { BitAxeClient } from '../api/bitaxe';
 import { HashrateChart } from '../components/HashrateChart';
 import { TemperatureChart } from '../components/TemperatureChart';
 import { EfficiencyTrend } from '../components/EfficiencyTrend';
+import { PowerChart } from '../components/PowerChart';
+import { VoltageChart } from '../components/VoltageChart';
+import { FanChart } from '../components/FanChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
 import { fetchMinerNotes, addMinerNote, deleteMinerNote } from '../api/client';
@@ -1298,6 +1301,42 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Text>
             <SubscriptionGate feature="30-day charts">
               <TemperatureChart snapshots={snapshots} />
+            </SubscriptionGate>
+          </View>
+        )}
+
+        {snapshots.length > 1 && (
+          <View style={[styles.section, { paddingTop: 0 }]}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>⚡</Text>{' '}
+              {t('minerDetail.powerHistory', 'Power History')}
+            </Text>
+            <SubscriptionGate feature="30-day charts">
+              <PowerChart snapshots={snapshots} />
+            </SubscriptionGate>
+          </View>
+        )}
+
+        {snapshots.length > 1 && (
+          <View style={[styles.section, { paddingTop: 0 }]}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🔋</Text>{' '}
+              {t('minerDetail.voltageHistory', 'Voltage History')}
+            </Text>
+            <SubscriptionGate feature="30-day charts">
+              <VoltageChart snapshots={snapshots} />
+            </SubscriptionGate>
+          </View>
+        )}
+
+        {snapshots.length > 1 && (
+          <View style={[styles.section, { paddingTop: 0 }]}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🌀</Text>{' '}
+              {t('minerDetail.fanHistory', 'Fan Speed History')}
+            </Text>
+            <SubscriptionGate feature="30-day charts">
+              <FanChart snapshots={snapshots} />
             </SubscriptionGate>
           </View>
         )}
