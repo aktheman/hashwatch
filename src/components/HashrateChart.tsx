@@ -20,7 +20,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
     () =>
       StyleSheet.create({
         container: {
-          marginVertical: 8,
+          marginVertical: spacing.xs,
         },
         title: {
           color: theme.text,
@@ -55,7 +55,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
           borderColor: theme.border,
           padding: spacing.lg,
           alignItems: 'center',
-          marginVertical: 8,
+          marginVertical: spacing.xs,
           gap: spacing.xs,
         },
         emptyIcon: {
