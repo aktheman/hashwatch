@@ -431,8 +431,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    | { type: 'header'; group: string; miners: Miner[] }
-    | { type: 'miner'; miner: Miner };
+    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -611,8 +610,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      | { type: 'header'; group: string; miners: Miner[] }
-      | { type: 'miner'; miner: Miner }
+      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1202,9 +1200,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     backgroundColor: theme.surface,
-                    borderRadius: 10,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
+                    borderRadius: radius.md,
+                    paddingHorizontal: spacing.sm,
+                    paddingVertical: spacing.xs,
                     borderWidth: 1,
                     borderColor: theme.border,
                   }}
@@ -1214,7 +1212,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   <View style={{ flex: 1 }}>
                     <Text
-                      style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}
+                      style={{
+                        color: theme.text,
+                        fontSize: fontSize.base,
+                        fontWeight: fontWeight.bold,
+                      }}
                       numberOfLines={1}
                     >
                       {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
@@ -1225,14 +1227,22 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end', marginRight: 4 }}>
-                    <Text style={{ color: theme.success, fontSize: 12, fontWeight: '700' }}>
+                    <Text
+                      style={{
+                        color: theme.success,
+                        fontSize: fontSize.base,
+                        fontWeight: fontWeight.bold,
+                      }}
+                    >
                       +{info.accepted}
                     </Text>
                     {info.rejected > 0 && (
-                      <Text style={{ color: theme.danger, fontSize: 11 }}>-{info.rejected}</Text>
+                      <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
+                        -{info.rejected}
+                      </Text>
                     )}
                   </View>
-                  <Text style={{ color: theme.textMuted, fontSize: 10, marginLeft: 6 }}>
+                  <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginLeft: 6 }}>
                     {isExpanded ? '▲' : '▼'}
                   </Text>
                 </Pressable>
@@ -1242,7 +1252,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                       backgroundColor: theme.surfaceLight,
                       borderRadius: 10,
                       marginTop: 2,
-                      padding: 10,
+                      padding: spacing.sm,
                       borderWidth: 1,
                       borderColor: theme.border,
                     }}
@@ -1254,19 +1264,30 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                           flexDirection: 'row',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          paddingVertical: 4,
+                          paddingVertical: spacing.xxs,
                         }}
                       >
                         <Text
-                          style={{ color: theme.text, fontSize: 12, fontWeight: '600', flex: 1 }}
+                          style={{
+                            color: theme.text,
+                            fontSize: fontSize.base,
+                            fontWeight: fontWeight.semibold,
+                            flex: 1,
+                          }}
                           numberOfLines={1}
                         >
                           {pm.name}
                         </Text>
-                        <Text style={{ color: theme.success, fontSize: 11, marginHorizontal: 8 }}>
+                        <Text
+                          style={{
+                            color: theme.success,
+                            fontSize: fontSize.xs,
+                            marginHorizontal: 8,
+                          }}
+                        >
                           +{pm.status?.sharesAccepted ?? 0}
                         </Text>
-                        <Text style={{ color: theme.danger, fontSize: 11 }}>
+                        <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
                           -{pm.status?.sharesRejected ?? 0}
                         </Text>
                       </View>
@@ -1280,9 +1301,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text
               style={{
                 color: theme.textMuted,
-                fontSize: 10,
+                fontSize: fontSize.xs,
                 textAlign: 'center',
-                paddingVertical: 2,
+                paddingVertical: spacing.xxs,
               }}
             >
               +{poolInfo.size - 2} more pool{poolInfo.size - 2 > 1 ? 's' : ''}
