@@ -48,7 +48,7 @@ function NotificationHistorySection() {
     sectionTitle: {
       color: theme.textDim,
       fontSize: 11,
-      fontWeight: '700',
+      fontWeight: fontWeight.bold,
       textTransform: 'uppercase',
       letterSpacing: 0.8,
       marginBottom: 8,
@@ -260,7 +260,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         rowRight: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: spacing.xxs,
         },
         badge: {
           paddingHorizontal: 10,
@@ -268,8 +268,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           borderRadius: 8,
         },
         badgeText: {
-          fontSize: 12,
-          fontWeight: '700',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.bold,
         },
         chevron: {
           color: theme.textMuted,
@@ -279,7 +279,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         actionText: {
           color: theme.primary,
           fontSize: 15,
-          fontWeight: '600',
+          fontWeight: fontWeight.semibold,
         },
         authBox: {
           backgroundColor: theme.surfaceLight,
@@ -292,7 +292,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         authInput: {
           backgroundColor: theme.surface,
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 12,
           color: theme.text,
           fontSize: 15,
@@ -305,7 +305,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         authBtn: {
           backgroundColor: theme.primary,
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 12,
           alignItems: 'center',
         },
@@ -322,7 +322,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         logoutBtn: {
           backgroundColor: theme.danger + '1A',
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 12,
           alignItems: 'center',
           borderWidth: 1,
@@ -330,7 +330,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         logoutBtnText: {
           color: theme.danger,
-          fontWeight: '700',
+          fontWeight: fontWeight.bold,
         },
         themeBtn: {
           paddingHorizontal: 10,
@@ -339,33 +339,33 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           borderWidth: 1,
         },
         themeBtnText: {
-          fontSize: 12,
-          fontWeight: '600',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
         },
         sectionSub: {
           color: theme.textDim,
-          fontSize: 12,
+          fontSize: fontSize.sm,
           lineHeight: 18,
         },
         input: {
           backgroundColor: theme.surfaceLight,
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 12,
           color: theme.text,
-          fontSize: 14,
+          fontSize: fontSize.base,
           fontFamily: 'monospace',
           borderWidth: 1,
           borderColor: theme.border,
         },
         proxyBtn: {
-          borderRadius: 10,
+          borderRadius: radius.md,
           padding: 10,
           alignItems: 'center',
-          marginTop: 8,
+          marginTop: spacing.xs,
         },
         proxyBtnText: {
           color: '#FFF',
-          fontWeight: '700',
+          fontWeight: fontWeight.bold,
           fontSize: 13,
         },
       }),
@@ -480,11 +480,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   Alert.alert(t('settings.restoreTitle'), t('settings.restoreBody'));
                 }}
               >
-                <Text style={{ color: theme.primary, fontWeight: '600', fontSize: 13 }}>
+                <Text
+                  style={{ color: theme.primary, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                >
                   {t('settings.restorePurchases')}
                 </Text>
               </Pressable>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Force pro status"
@@ -500,7 +502,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     Alert.alert(t('settings.debugProTitle'), t('settings.debugProBody'));
                   }}
                 >
-                  <Text style={{ color: theme.success, fontWeight: '600', fontSize: 13 }}>
+                  <Text
+                    style={{ color: theme.success, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                  >
                     {t('settings.forcePro')}
                   </Text>
                 </Pressable>
@@ -519,7 +523,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     Alert.alert(t('settings.debugProTitle'), t('settings.debugFreeBody'));
                   }}
                 >
-                  <Text style={{ color: theme.danger, fontWeight: '600', fontSize: 13 }}>
+                  <Text
+                    style={{ color: theme.danger, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                  >
                     {t('settings.forceFree')}
                   </Text>
                 </Pressable>
@@ -572,7 +578,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Sync Now"
-                  style={[styles.authBtn, { marginTop: 8 }]}
+                  style={[styles.authBtn, { marginTop: spacing.xs }]}
                   onPress={syncNow}
                   disabled={syncing}
                 >
@@ -711,11 +717,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             ))}
           </View>
         </View>
-        <View style={{ ...styles.row, marginTop: 8 }}>
+        <View style={{ ...styles.row, marginTop: spacing.xs }}>
           <Text style={styles.rowLabel}>{t('settings.language')}</Text>
         </View>
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xxs }}>
             {['en', 'es', 'zh', 'ja', 'de', 'fr'].map((lang) => (
               <Pressable
                 key={lang}
@@ -724,7 +730,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 style={{
                   paddingHorizontal: 14,
                   paddingVertical: 8,
-                  borderRadius: 10,
+                  borderRadius: radius.md,
                   backgroundColor: language === lang ? theme.primary : theme.surfaceLight,
                   borderWidth: 1,
                   borderColor: language === lang ? theme.primary : theme.border,
@@ -739,7 +745,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   style={{
                     color: language === lang ? '#FFF' : theme.text,
                     fontSize: 13,
-                    fontWeight: '600',
+                    fontWeight: fontWeight.semibold,
                   }}
                 >
                   {
@@ -757,18 +763,18 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             ))}
           </View>
         </View>
-        <View style={{ ...styles.row, marginTop: 12 }}>
+        <View style={{ ...styles.row, marginTop: spacing.md }}>
           <Text style={styles.rowLabel}>{t('settings.darkModeSchedule')}</Text>
         </View>
         <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xxs }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Disable dark mode schedule"
               style={{
                 paddingHorizontal: 14,
                 paddingVertical: 8,
-                borderRadius: 10,
+                borderRadius: radius.md,
                 backgroundColor: autoDarkHour === null ? theme.primary : theme.surfaceLight,
                 borderWidth: 1,
                 borderColor: autoDarkHour === null ? theme.primary : theme.border,
@@ -783,7 +789,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 style={{
                   color: autoDarkHour === null ? '#FFF' : theme.text,
                   fontSize: 13,
-                  fontWeight: '600',
+                  fontWeight: fontWeight.semibold,
                 }}
               >
                 {t('settings.off')}
@@ -797,7 +803,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 style={{
                   paddingHorizontal: 14,
                   paddingVertical: 8,
-                  borderRadius: 10,
+                  borderRadius: radius.md,
                   backgroundColor: autoDarkHour === hour ? theme.primary : theme.surfaceLight,
                   borderWidth: 1,
                   borderColor: autoDarkHour === hour ? theme.primary : theme.border,
@@ -813,7 +819,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   style={{
                     color: autoDarkHour === hour ? '#FFF' : theme.text,
                     fontSize: 13,
-                    fontWeight: '600',
+                    fontWeight: fontWeight.semibold,
                   }}
                 >
                   {hour}:00
@@ -868,13 +874,15 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: theme.surface,
-            borderRadius: 14,
+            borderRadius: radius.lg,
             padding: 14,
             borderWidth: 1,
             borderColor: theme.border,
           }}
         >
-          <Text style={{ color: theme.text, fontSize: 14 }}>{t('settings.pushAlerts')}</Text>
+          <Text style={{ color: theme.text, fontSize: fontSize.base }}>
+            {t('settings.pushAlerts')}
+          </Text>
           <Switch
             value={notificationsEnabled}
             onValueChange={(val) => {
@@ -893,7 +901,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </View>
         <Pressable
           accessibilityRole="button"
-          style={[styles.row, { marginTop: 8 }]}
+          style={[styles.row, { marginTop: spacing.xs }]}
           onPress={() => navigation.navigate('AlertHistory')}
         >
           <Text style={styles.rowLabel}>{t('settings.alertHistory')}</Text>
@@ -1042,16 +1050,18 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           </Text>
         </Pressable>
         {showCsvImport && (
-          <View style={{ marginTop: 12, gap: 8 }}>
-            <Text style={{ color: theme.textDim, fontSize: 12 }}>{t('settings.csvHelp')}</Text>
+          <View style={{ marginTop: spacing.md, gap: spacing.xxs }}>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+              {t('settings.csvHelp')}
+            </Text>
             <TextInput
               style={{
                 backgroundColor: theme.surface,
-                borderRadius: 10,
+                borderRadius: radius.md,
                 padding: 12,
                 color: theme.text,
                 fontFamily: 'monospace',
-                fontSize: 12,
+                fontSize: fontSize.sm,
                 minHeight: 100,
                 borderWidth: 1,
                 borderColor: theme.border,
@@ -1062,14 +1072,14 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               placeholder={t('settings.csvPlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Import CSV data"
                 style={{
                   flex: 1,
                   backgroundColor: theme.primary,
-                  borderRadius: 10,
+                  borderRadius: radius.md,
                   padding: 12,
                   alignItems: 'center',
                 }}
@@ -1087,7 +1097,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setCsvInput('');
                 }}
               >
-                <Text style={{ color: '#FFF', fontWeight: '700', fontSize: 14 }}>
+                <Text
+                  style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.base }}
+                >
                   {t('settings.import')}
                 </Text>
               </Pressable>
@@ -1096,7 +1108,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 accessibilityLabel="Cancel CSV import"
                 style={{
                   backgroundColor: theme.surfaceLight,
-                  borderRadius: 10,
+                  borderRadius: radius.md,
                   padding: 12,
                   alignItems: 'center',
                   borderWidth: 1,
@@ -1107,7 +1119,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   setCsvInput('');
                 }}
               >
-                <Text style={{ color: theme.text, fontWeight: '600', fontSize: 14 }}>
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontWeight: fontWeight.semibold,
+                    fontSize: fontSize.base,
+                  }}
+                >
                   {t('settings.cancel')}
                 </Text>
               </Pressable>
