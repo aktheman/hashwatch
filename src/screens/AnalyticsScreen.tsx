@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'r
 import { useTranslation } from 'react-i18next';
 import { useMinerStore } from '../store/miners';
 import { useTheme } from '../theme';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Skeleton } from '../components/Skeleton';
 import { MetricTile } from '../components/DashboardComponents';
 import { MinerSnapshot } from '../types';
@@ -468,69 +469,83 @@ export function AnalyticsScreen() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingHorizontal: 20,
+          paddingHorizontal: spacing.lg,
           paddingTop: 16,
           paddingBottom: 8,
         },
-        headerTitle: { color: theme.text, fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
-        headerSub: { color: theme.textDim, fontSize: 12, marginTop: 2 },
+        headerTitle: {
+          color: theme.text,
+          fontSize: fontSize.h1,
+          fontWeight: fontWeight.extrabold,
+          letterSpacing: -0.5,
+        },
+        headerSub: { color: theme.textDim, fontSize: fontSize.sm, marginTop: spacing.xxs },
         scroll: { paddingBottom: 40 },
         summaryRow: {
           flexDirection: 'row',
-          paddingHorizontal: 16,
-          gap: 8,
+          paddingHorizontal: spacing.md,
+          gap: spacing.xxs,
           marginBottom: 8,
-          marginTop: 4,
+          marginTop: spacing.xxs,
         },
         summaryCard: {
           flex: 1,
           backgroundColor: theme.surface,
-          borderRadius: 16,
+          borderRadius: radius.lg,
           padding: 14,
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.border,
           boxShadow: `0 2px 12px ${theme.glow}`,
         },
-        summaryIcon: { fontSize: 16, marginBottom: 4 },
-        summaryValue: { fontSize: 22, fontWeight: '800', color: theme.text },
+        summaryIcon: { fontSize: fontSize.lg, marginBottom: 4 },
+        summaryValue: {
+          fontSize: fontSize.h2,
+          fontWeight: fontWeight.extrabold,
+          color: theme.text,
+        },
         summaryLabel: {
-          fontSize: 10,
+          fontSize: fontSize.xs,
           color: theme.textDim,
-          fontWeight: '600',
+          fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
-          marginTop: 2,
+          marginTop: spacing.xxs,
         },
         chartCard: {
           backgroundColor: theme.surface,
           marginHorizontal: 16,
           marginBottom: 16,
-          borderRadius: 16,
+          borderRadius: radius.lg,
           padding: 16,
           borderWidth: 1,
           borderColor: theme.border,
         },
-        chartTitle: { color: theme.text, fontSize: 16, fontWeight: '700', marginBottom: 12 },
+        chartTitle: {
+          color: theme.text,
+          fontSize: fontSize.lg,
+          fontWeight: fontWeight.bold,
+          marginBottom: spacing.md,
+        },
         rangeRow: {
           flexDirection: 'row',
-          gap: 6,
-          marginBottom: 12,
+          gap: spacing.xs,
+          marginBottom: spacing.md,
         },
         rangeBtn: {
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          borderRadius: 8,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+          borderRadius: radius.sm,
           borderWidth: 1,
         },
-        rangeBtnText: { fontSize: 12, fontWeight: '600' },
+        rangeBtnText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold },
         center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
-        loadingText: { color: theme.textDim, marginTop: 12, fontSize: 14 },
+        loadingText: { color: theme.textDim, marginTop: spacing.md, fontSize: 14 },
         emptyText: { color: theme.textDim, fontSize: 14, textAlign: 'center', lineHeight: 20 },
         filterBtn: {
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          borderRadius: 8,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+          borderRadius: radius.sm,
           borderWidth: 1,
           borderColor: theme.border,
         },
@@ -538,18 +553,22 @@ export function AnalyticsScreen() {
           backgroundColor: theme.primary,
           borderColor: theme.primary,
         },
-        filterBtnText: { fontSize: 12, fontWeight: '600', color: theme.text },
+        filterBtnText: {
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
+          color: theme.text,
+        },
         filterBtnTextActive: { color: '#FFF' },
         chipRow: {
           flexDirection: 'row',
           flexWrap: 'wrap',
-          gap: 6,
-          marginBottom: 12,
+          gap: spacing.xs,
+          marginBottom: spacing.md,
         },
         chip: {
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          borderRadius: 16,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+          borderRadius: radius.lg,
           borderWidth: 1,
           borderColor: theme.border,
           backgroundColor: 'transparent',
@@ -558,22 +577,22 @@ export function AnalyticsScreen() {
           backgroundColor: theme.primary,
           borderColor: theme.primary,
         },
-        chipText: { fontSize: 12, color: theme.text, fontWeight: '500' },
+        chipText: { fontSize: fontSize.sm, color: theme.text, fontWeight: fontWeight.regular },
         chipTextSelected: { color: '#FFF' },
         legendRow: {
           flexDirection: 'row',
           flexWrap: 'wrap',
           gap: 12,
-          marginTop: 12,
+          marginTop: spacing.md,
           justifyContent: 'center',
         },
         legendItem: {
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 4,
+          gap: spacing.xxs,
         },
-        legendDot: { width: 8, height: 8, borderRadius: 4 },
-        legendText: { fontSize: 11, color: theme.textDim },
+        legendDot: { width: 8, height: 8, borderRadius: radius.xxs },
+        legendText: { fontSize: fontSize.xs, color: theme.textDim },
       }),
     [theme],
   );
@@ -785,7 +804,7 @@ export function AnalyticsScreen() {
                 height={200}
                 chartConfig={chartConfig}
                 bezier
-                style={{ borderRadius: 8 }}
+                style={{ borderRadius: radius.sm }}
                 withInnerLines={false}
                 withOuterLines={false}
                 fromZero
@@ -815,7 +834,7 @@ export function AnalyticsScreen() {
                 height={200}
                 chartConfig={chartConfig}
                 bezier
-                style={{ borderRadius: 8 }}
+                style={{ borderRadius: radius.sm }}
                 withInnerLines={false}
                 withOuterLines={false}
                 fromZero
@@ -847,7 +866,7 @@ export function AnalyticsScreen() {
                 height={200}
                 chartConfig={chartConfig}
                 bezier
-                style={{ borderRadius: 8 }}
+                style={{ borderRadius: radius.sm }}
                 withInnerLines={false}
                 withOuterLines={false}
                 fromZero
@@ -879,19 +898,19 @@ export function AnalyticsScreen() {
                 height={200}
                 chartConfig={chartConfig}
                 bezier
-                style={{ borderRadius: 8 }}
+                style={{ borderRadius: radius.sm }}
                 withInnerLines={false}
                 withOuterLines={false}
                 fromZero
               />
               {powerCost <= 0 && (
-                <Text style={[styles.emptyText, { paddingVertical: 8 }]}>
+                <Text style={[styles.emptyText, { paddingVertical: spacing.xs }]}>
                   {String(t('analytics.setPowerCost')) || 'Set power cost in Settings'}
                 </Text>
               )}
             </>
           ) : (
-            <Text style={[styles.emptyText, { paddingVertical: 40 }]}>
+            <Text style={[styles.emptyText, { paddingVertical: spacing.xxs }]}>
               {t('analytics.notEnoughData')}
             </Text>
           )}
