@@ -294,12 +294,24 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     interval = setInterval(tick, intervalMs);
 
     const sub = AppState.addEventListener('change', (state) => {
-      paused = state !== 'active';
-      if (!paused) get().refreshAll();
+      if (state === 'active') {
+        paused = false;
+        get().refreshAll();
+      } else {
+        paused = true;
+      }
     });
+
+    const bgTimer = setInterval(() => {
+      if (paused && get().miners.length > 0) {
+        get().refreshAll();
+      }
+    }, 120000);
+    if (typeof bgTimer === 'object' && 'unref' in bgTimer) bgTimer.unref();
 
     return () => {
       if (interval) clearInterval(interval);
+      clearInterval(bgTimer);
       sub.remove();
     };
   },

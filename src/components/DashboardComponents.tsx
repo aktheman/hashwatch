@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Svg, { Polyline, Polygon, Circle, Defs, Stop, LinearGradient } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
@@ -23,6 +23,7 @@ interface MetricTileProps {
   chart?: 'sparkline' | 'bars' | 'donut' | 'gauge';
   chartData?: number[];
   size?: 'sm' | 'md' | 'lg';
+  onPress?: () => void;
 }
 
 export const MetricTile = React.memo(function MetricTile({
@@ -35,6 +36,7 @@ export const MetricTile = React.memo(function MetricTile({
   chart,
   chartData = [],
   size = 'md',
+  onPress,
 }: MetricTileProps) {
   const theme = useTheme();
   const accentColor = useMemo(() => {
@@ -64,7 +66,7 @@ export const MetricTile = React.memo(function MetricTile({
     lg: fontSize.hero,
   }[size];
 
-  return (
+  const TileContent = (
     <View
       style={[
         styles.container,
@@ -133,6 +135,18 @@ export const MetricTile = React.memo(function MetricTile({
 
       <View style={[styles.accentBar, { backgroundColor: accentColor }]} />
     </View>
+  );
+
+  return onPress ? (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`View ${title} details`}
+    >
+      {TileContent}
+    </Pressable>
+  ) : (
+    TileContent
   );
 });
 

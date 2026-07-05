@@ -4,6 +4,15 @@ import { toHashesPerSecond } from '../utils/hashrate';
 import * as DB from '../db/database';
 import { Miner } from '../types';
 
+export type TimeRange = '1h' | '6h' | '24h' | '7d';
+
+const RANGE_LIMITS: Record<TimeRange, { snapCount: number; nowWindow: number }> = {
+  '1h': { snapCount: 50, nowWindow: 3600 },
+  '6h': { snapCount: 100, nowWindow: 21600 },
+  '24h': { snapCount: 200, nowWindow: 86400 },
+  '7d': { snapCount: 500, nowWindow: 604800 },
+};
+
 interface Metrics {
   hashrateHistory: number[];
   powerHistory: number[];
@@ -18,7 +27,17 @@ interface Metrics {
   recentUptimes: number[];
 }
 
-export function useDashboardMetrics(filteredMiners: Miner[]) {
+function bucketData<T>(data: T[], count: number): T[] {
+  if (data.length <= count) return data;
+  const step = Math.ceil(data.length / count);
+  const result: T[] = [];
+  for (let i = 0; i < data.length; i += step) {
+    result.push(data[i]);
+  }
+  return result.slice(-count);
+}
+
+export function useDashboardMetrics(filteredMiners: Miner[], timeRange: TimeRange = '7d') {
   const miners = useMinerStore((s) => s.miners);
 
   const [metrics, setMetrics] = useState<Metrics>({
@@ -39,16 +58,23 @@ export function useDashboardMetrics(filteredMiners: Miner[]) {
     if (miners.length === 0) return;
     let cancelled = false;
     (async () => {
-      const snapshots = (await Promise.all(miners.map((m) => DB.getSnapshots(m.id, 100))))
+      const limits = RANGE_LIMITS[timeRange];
+      const snapshots = (
+        await Promise.all(miners.map((m) => DB.getSnapshots(m.id, limits.snapCount)))
+      )
         .flat()
+        .filter((s) => s.timestamp > Date.now() / 1000 - limits.nowWindow)
         .sort((a, b) => a.timestamp - b.timestamp);
 
       if (cancelled) return;
 
-      const recent = snapshots.slice(-20);
-      const hashrateHistory = recent.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit));
-      const powerHistory = recent.map((s) => s.power);
-      const uptimeHistory = recent.map((s) => s.uptimeSeconds);
+      const displayCount = timeRange === '7d' ? 30 : 20;
+      let hashrateHistory = snapshots.map((s) => toHashesPerSecond(s.hashRate, s.hashRateUnit));
+      let powerHistory = snapshots.map((s) => s.power);
+      let uptimeHistory = snapshots.map((s) => s.uptimeSeconds);
+      hashrateHistory = bucketData(hashrateHistory, displayCount);
+      powerHistory = bucketData(powerHistory, displayCount);
+      uptimeHistory = bucketData(uptimeHistory, displayCount);
 
       const totalHr = filteredMiners.reduce(
         (sum, m) => sum + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
@@ -84,9 +110,9 @@ export function useDashboardMetrics(filteredMiners: Miner[]) {
         workerTrend: snapshots.length > 0 ? `+${filteredMiners.length}` : '',
         uptimeAvg: avgUptime,
         efficiencyPct,
-        recentHashrates: hashrateHistory.slice(-7),
-        recentPower: powerHistory.slice(-7),
-        recentUptimes: uptimeHistory.slice(-7),
+        recentHashrates: hashrateHistory.slice(-Math.min(7, hashrateHistory.length)),
+        recentPower: powerHistory.slice(-Math.min(7, powerHistory.length)),
+        recentUptimes: uptimeHistory.slice(-Math.min(7, uptimeHistory.length)),
       });
     })();
     return () => {

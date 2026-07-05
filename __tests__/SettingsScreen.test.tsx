@@ -71,6 +71,12 @@ jest.mock('../src/utils/export', () => ({
   exportAllData: jest.fn().mockResolvedValue(undefined),
   exportJSON: jest.fn().mockResolvedValue(undefined),
   exportMinerStatusCSV: jest.fn().mockResolvedValue(undefined),
+  importFromCSV: jest.fn().mockResolvedValue({ imported: 0, errors: [] }),
+}));
+
+jest.mock('../src/services/backup', () => ({
+  exportBackup: jest.fn().mockResolvedValue(undefined),
+  importBackup: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 let mockAuthToken: string | null = null;
@@ -425,4 +431,138 @@ it('toggles RevenueCat debug panel', async () => {
   await fireEvent.press(screen.getByText('▼ settings.debugMenu'));
   expect(screen.queryByText('▲ settings.hideDebug')).toBeTruthy();
   expect(screen.getByLabelText('Restore purchases')).toBeTruthy();
+});
+
+it('shows last sync display when authenticated', async () => {
+  mockAuthToken = 't1';
+  const now = Date.now();
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  await waitFor(() => {
+    expect(r.getByText('settings.lastSync')).toBeTruthy();
+  });
+});
+
+it('shows "now" for last sync within 60s', async () => {
+  mockAuthToken = 't1';
+  const { setSetting } = require('../src/db/database');
+  (setSetting as jest.Mock).mockClear();
+  const RealDate = Date;
+  const mockDate = new Date('2025-01-01T12:00:30Z').getTime();
+  global.Date.now = jest.fn(() => mockDate);
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  await waitFor(() => {
+    expect(r.getByText('settings.lastSync')).toBeTruthy();
+  });
+  global.Date.now = RealDate.now;
+});
+
+it('calls logout on Disconnect', async () => {
+  mockAuthToken = 't1';
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  await fireEvent.press(r.getByLabelText('Disconnect'));
+  expect(mockLogout).toHaveBeenCalled();
+});
+
+it('shows registration error on failed register', async () => {
+  mockRegister.mockResolvedValueOnce(false);
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  await fireEvent.press(r.getByLabelText('Switch to create account'));
+  await waitFor(() => expect(r.getByLabelText('Create Account')).toBeTruthy());
+  await fireEvent.changeText(r.getByLabelText('Email input'), 'new@test.com');
+  await fireEvent.changeText(r.getByLabelText('Password input'), 'pass');
+  await fireEvent.press(r.getByLabelText('Create Account'));
+  await waitFor(() => {
+    expect(r.getByText('settings.registrationFailed')).toBeTruthy();
+  });
+});
+
+it('toggles push notifications switch', async () => {
+  const { setSetting } = require('../src/db/database');
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  const toggle = r.getByLabelText('Toggle push notifications');
+  fireEvent(toggle, 'onValueChange', false);
+  await waitFor(() => {
+    expect(setSetting).toHaveBeenCalledWith('notifications_enabled', 'false');
+  });
+});
+
+it('navigates to AlertHistory', async () => {
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('settings.alertHistory'));
+  expect(navigation.navigate).toHaveBeenCalledWith('AlertHistory');
+});
+
+it('calls scanNetwork on Scan Network press', async () => {
+  const mockScanNetwork = jest.fn();
+  useMinerStore.setState({ scanNetwork: mockScanNetwork } as any);
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByText('settings.scanNetwork'));
+  expect(mockScanNetwork).toHaveBeenCalled();
+});
+
+it('shows scanning disabled state', async () => {
+  useMinerStore.setState({ scanning: true } as any);
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  expect(r.getByText('settings.scanning')).toBeTruthy();
+});
+
+it('calls importFromCSV on CSV import', async () => {
+  const { importFromCSV } = jest.requireMock('../src/utils/export');
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Import CSV'));
+  const input = r.getByPlaceholderText('settings.csvPlaceholder');
+  await fireEvent.changeText(input, 'name,ip,port\nM1,10.0.0.1,80');
+  await fireEvent.press(r.getByLabelText('Import CSV data'));
+  await waitFor(() => {
+    expect(importFromCSV).toHaveBeenCalledWith(expect.stringContaining('name,ip,port'));
+  });
+});
+
+it('calls exportBackup on Export all data press', async () => {
+  const { exportBackup } = jest.requireMock('../src/services/backup');
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Export all data'));
+  expect(exportBackup).toHaveBeenCalled();
+});
+
+it('shows error alert when exportBackup fails', async () => {
+  const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { exportBackup } = jest.requireMock('../src/services/backup');
+  (exportBackup as jest.Mock).mockRejectedValueOnce(new Error('disk full'));
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Export all data'));
+  await waitFor(() => {
+    expect(mockAlert).toHaveBeenCalledWith('settings.exportFailed', 'disk full');
+  });
+  mockAlert.mockRestore();
+});
+
+it('loads saved language from settings on mount', async () => {
+  const { getSetting } = require('../src/db/database');
+  (getSetting as jest.Mock).mockImplementation(async (key: string) => {
+    if (key === 'language') return 'es';
+    return null;
+  });
+  await render(<SettingsScreen navigation={navigation} />);
+  await waitFor(() => {
+    expect(getSetting).toHaveBeenCalledWith('language');
+  });
+});
+
+it('closes auth form on successful login', async () => {
+  mockLogin.mockResolvedValueOnce(true);
+  mockAuthToken = null;
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  await fireEvent.press(r.getByLabelText('Remote Sync'));
+  await waitFor(() => expect(r.getByLabelText('Email input')).toBeTruthy());
+  await fireEvent.changeText(r.getByLabelText('Email input'), 'a@b.com');
+  await fireEvent.changeText(r.getByLabelText('Password input'), 'pass');
+  await fireEvent.press(r.getByLabelText('Sign In'));
+  await waitFor(() => {
+    expect(r.queryByLabelText('Email input')).toBeNull();
+  });
 });

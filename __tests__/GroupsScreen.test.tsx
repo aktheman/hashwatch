@@ -5,15 +5,13 @@ import { GroupsScreen } from '../src/screens/GroupsScreen';
 
 let mockMiners: any[];
 const mockSetMinerGroup = jest.fn();
-let mockEmptyGroups: string[] = [];
+
+const mockGetSettingImpl = jest.fn();
+const mockSetSettingImpl = jest.fn();
 
 jest.mock('../src/db/database', () => ({
-  getSetting: jest.fn(async (key: string) => {
-    if (key === 'empty_groups')
-      return mockEmptyGroups.length > 0 ? JSON.stringify(mockEmptyGroups) : null;
-    return null;
-  }),
-  setSetting: jest.fn(async () => {}),
+  getSetting: jest.fn((key: string) => mockGetSettingImpl(key)),
+  setSetting: jest.fn((...args: any[]) => mockSetSettingImpl(...args)),
 }));
 
 jest.mock('../src/store/miners', () => ({
@@ -59,13 +57,19 @@ jest.mock('../src/theme', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockEmptyGroups = [];
   mockMiners = [
     { id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80, isOnline: true, group: 'Garage' },
     { id: 'm2', name: 'Miner B', ip: '10.0.0.2', port: 80, isOnline: false, group: 'Garage' },
     { id: 'm3', name: 'Miner C', ip: '10.0.0.3', port: 80, isOnline: true, group: 'Basement' },
     { id: 'm4', name: 'Miner D', ip: '10.0.0.4', port: 80, isOnline: true },
   ];
+  mockGetSettingImpl.mockReset();
+  mockSetSettingImpl.mockReset();
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'empty_groups') return null;
+    if (key === 'groups_order') return null;
+    return null;
+  });
 });
 
 it('renders groups header', async () => {
@@ -101,8 +105,6 @@ it('shows empty state when no miners', async () => {
 });
 
 it('can create a new group via text input', async () => {
-  const { getSetting, setSetting } = require('../src/db/database');
-
   await render(<GroupsScreen />);
   await act(async () => {
     fireEvent.changeText(screen.getByLabelText('New group name'), 'NewGroup');
@@ -111,13 +113,11 @@ it('can create a new group via text input', async () => {
     fireEvent.press(screen.getByText('common.add'));
   });
 
-  expect(setSetting).toHaveBeenCalledWith('empty_groups', JSON.stringify(['NewGroup']));
-  expect(getSetting).toHaveBeenCalledWith('empty_groups');
+  expect(mockSetSettingImpl).toHaveBeenCalledWith('empty_groups', JSON.stringify(['NewGroup']));
+  expect(mockGetSettingImpl).toHaveBeenCalledWith('empty_groups');
 });
 
 it('creates group via onSubmitEditing', async () => {
-  const { setSetting } = require('../src/db/database');
-
   await render(<GroupsScreen />);
   await act(async () => {
     fireEvent.changeText(screen.getByLabelText('New group name'), 'TestGroup');
@@ -128,7 +128,7 @@ it('creates group via onSubmitEditing', async () => {
     fireEvent(input, 'submitEditing', { nativeEvent: { text: 'TestGroup' } });
   });
 
-  expect(setSetting).toHaveBeenCalledWith('empty_groups', JSON.stringify(['TestGroup']));
+  expect(mockSetSettingImpl).toHaveBeenCalledWith('empty_groups', JSON.stringify(['TestGroup']));
 });
 
 it('does nothing for empty group name', async () => {
@@ -163,7 +163,10 @@ it('shows alert for duplicate with existing miner group', async () => {
 
 it('shows alert for duplicate with empty group', async () => {
   const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  mockEmptyGroups = ['ExistingEmpty'];
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'empty_groups') return JSON.stringify(['ExistingEmpty']);
+    return null;
+  });
 
   await render(<GroupsScreen />);
   await act(async () => {
@@ -278,4 +281,168 @@ it('renders mine count with singular for single miner group', async () => {
   ];
   await render(<GroupsScreen />);
   expect(screen.getByText('groups.minerCount')).toBeTruthy();
+});
+
+it('loads and applies groups_order from settings', async () => {
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'groups_order') return JSON.stringify(['Basement', 'Garage']);
+    if (key === 'empty_groups') return null;
+    return null;
+  });
+  await render(<GroupsScreen />);
+  const flatList = screen.getAllByText(/Garage|Basement|groups.ungrouped/);
+  expect(flatList.length).toBeGreaterThanOrEqual(3);
+});
+
+it('handles invalid groups_order JSON gracefully', async () => {
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'groups_order') return 'not-json';
+    if (key === 'empty_groups') return null;
+    return null;
+  });
+  await render(<GroupsScreen />);
+  expect(screen.getByText(/Garage/)).toBeTruthy();
+});
+
+it('removes an empty-only group', async () => {
+  const alertSpy = jest
+    .spyOn(Alert, 'alert')
+    .mockImplementation(
+      (_title: string, _msg: string, buttons?: { text?: string; onPress?: () => void }[]) => {
+        const removeBtn = buttons?.find((b) => b.text === 'groups.remove');
+        if (removeBtn?.onPress) removeBtn.onPress();
+      },
+    );
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'empty_groups') return JSON.stringify(['MyEmptyGroup']);
+    return null;
+  });
+
+  await render(<GroupsScreen />);
+  await waitFor(() => expect(screen.getByLabelText('Remove group MyEmptyGroup')).toBeTruthy(), {
+    timeout: 3000,
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Remove group MyEmptyGroup'));
+  });
+
+  await waitFor(() => {
+    expect(mockSetSettingImpl).toHaveBeenCalledWith('empty_groups', JSON.stringify([]));
+  });
+  alertSpy.mockRestore();
+});
+
+it('moves group down via ▼ button', async () => {
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'groups_order') return JSON.stringify(['Garage', 'Basement']);
+    if (key === 'empty_groups') return null;
+    return null;
+  });
+  await render(<GroupsScreen />);
+  await waitFor(() => expect(screen.getByLabelText('Move group Garage down')).toBeTruthy(), {
+    timeout: 3000,
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Move group Garage down'));
+  });
+  await waitFor(() => {
+    expect(mockSetSettingImpl).toHaveBeenCalledWith('groups_order', expect.any(String));
+  });
+});
+
+it('moves group up via ▲ button', async () => {
+  mockGetSettingImpl.mockImplementation(async (key: string) => {
+    if (key === 'groups_order') return JSON.stringify(['Basement', 'Garage']);
+    if (key === 'empty_groups') return null;
+    return null;
+  });
+  await render(<GroupsScreen />);
+  await waitFor(() => expect(screen.getByLabelText('Move group Garage up')).toBeTruthy(), {
+    timeout: 3000,
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Move group Garage up'));
+  });
+  await waitFor(() => {
+    expect(mockSetSettingImpl).toHaveBeenCalledWith('groups_order', expect.any(String));
+  });
+});
+
+it('rename group via Alert.prompt renames miners', async () => {
+  const originalPrompt = Alert.prompt;
+  const promptSpy = jest.fn((_title: string, _msg: string, callback: (name: string) => void) => {
+    callback('WorkRoom');
+  });
+  (Alert as any).prompt = promptSpy;
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Rename group Garage'));
+  });
+  expect(promptSpy).toHaveBeenCalled();
+  expect(mockSetMinerGroup).toHaveBeenCalledWith('m1', 'WorkRoom');
+  expect(mockSetMinerGroup).toHaveBeenCalledWith('m2', 'WorkRoom');
+  (Alert as any).prompt = originalPrompt;
+});
+
+it('rename group does nothing for same name', async () => {
+  const originalPrompt = Alert.prompt;
+  const promptSpy = jest.fn((_title: string, _msg: string, callback: (name: string) => void) => {
+    callback('Garage');
+  });
+  (Alert as any).prompt = promptSpy;
+  mockSetMinerGroup.mockClear();
+
+  await render(<GroupsScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByLabelText('Rename group Garage'));
+  });
+  expect(mockSetMinerGroup).not.toHaveBeenCalled();
+  (Alert as any).prompt = originalPrompt;
+});
+
+describe('drag-to-reorder', () => {
+  it('long-press drag handle enters drag mode, tap target swaps', async () => {
+    mockGetSettingImpl.mockImplementation(async (key: string) => {
+      if (key === 'groups_order') return JSON.stringify(['Garage', 'Basement']);
+      if (key === 'empty_groups') return null;
+      return null;
+    });
+    await render(<GroupsScreen />);
+    await waitFor(() => expect(screen.getByLabelText('Drag Garage')).toBeTruthy(), {
+      timeout: 3000,
+    });
+
+    fireEvent(screen.getByLabelText('Drag Garage'), 'onLongPress');
+    await waitFor(() => {
+      expect(screen.getByLabelText('Release Garage')).toBeTruthy();
+    });
+
+    await fireEvent.press(screen.getByLabelText('Drag Basement'));
+    await waitFor(() => {
+      expect(mockSetSettingImpl).toHaveBeenCalledWith('groups_order', expect.any(String));
+    });
+  });
+
+  it('tapping dragged group cancels drag mode', async () => {
+    mockGetSettingImpl.mockImplementation(async (key: string) => {
+      if (key === 'groups_order') return JSON.stringify(['Garage', 'Basement']);
+      if (key === 'empty_groups') return null;
+      return null;
+    });
+    await render(<GroupsScreen />);
+    await waitFor(() => expect(screen.getByLabelText('Drag Garage')).toBeTruthy(), {
+      timeout: 3000,
+    });
+
+    fireEvent(screen.getByLabelText('Drag Garage'), 'onLongPress');
+    await waitFor(() => {
+      expect(screen.getByLabelText('Release Garage')).toBeTruthy();
+    });
+
+    await fireEvent.press(screen.getByLabelText('Release Garage'));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Drag Garage')).toBeTruthy();
+    });
+  });
 });

@@ -471,3 +471,242 @@ it('shows notes input and add button', async () => {
   const addButton = r.getByLabelText('Add note');
   expect(addButton).toBeTruthy();
 });
+
+it('renders FirmwareBanner when version is present', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, version: '2.3.0' },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText(/2\.3\.0/)).toBeTruthy();
+});
+
+it('renders SSID stat widget', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, ssid: 'HomeWiFi' },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('HomeWiFi')).toBeTruthy();
+});
+
+it('renders Power Mode stat widget (Standard)', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, powerMode: 0 },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('Standard')).toBeTruthy();
+});
+
+it('renders Power Mode stat widget (ECO)', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, powerMode: 1 },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('ECO')).toBeTruthy();
+});
+
+it('renders Power Mode stat widget (P2)', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, powerMode: 2 },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('P2')).toBeTruthy();
+});
+
+it('renders WiFi Signal stat widget with strong signal (green)', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        info: { ...onlineMiner.info, wifiSignal: 80 },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('80%')).toBeTruthy();
+});
+
+it('shows TemperatureChart when snapshots exist', async () => {
+  useMinerStore.setState({
+    getSnapshots: jest.fn().mockResolvedValue([
+      { hashRate: 100, hashRateUnit: 'GH/s', timestamp: Date.now() - 60000 },
+      { hashRate: 200, hashRateUnit: 'GH/s', timestamp: Date.now() },
+    ] as any),
+  } as any);
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await waitFor(() => {
+    expect(screen.getByText(/temperatureHistory/)).toBeTruthy();
+  });
+});
+
+it('shows restart failed alert when client.restart returns false', async () => {
+  const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { BitAxeClient } = require('../src/api/bitaxe');
+  BitAxeClient.mockImplementation(() => ({
+    restart: jest.fn().mockResolvedValue(false),
+  }));
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await fireEvent.press(screen.getByLabelText('Restart Miner'));
+  await waitFor(() => {
+    expect(mockAlert).toHaveBeenCalledWith(
+      'minerDetail.restartFailed',
+      'minerDetail.restartFailedBody',
+    );
+  });
+  mockAlert.mockRestore();
+});
+
+it('shows unknown wallet when walletId does not match any wallet', async () => {
+  const { loadWallets } = jest.requireMock('../src/db/database');
+  (loadWallets as jest.Mock).mockResolvedValue([]);
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        walletId: 'nonexistent',
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('minerDetail.unknownWallet')).toBeTruthy();
+});
+
+it('does not save IP when empty', async () => {
+  const mockSetMinerIp = jest.fn();
+  useMinerStore.setState({ setMinerIp: mockSetMinerIp } as any);
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  const pencil = r.getByText('✏️');
+  await fireEvent.press(pencil);
+  const input = await r.findByDisplayValue('192.168.1.100');
+  await fireEvent.changeText(input, '');
+  const saveBtn = r.getByLabelText('Save IP');
+  await fireEvent.press(saveBtn);
+  expect(mockSetMinerIp).not.toHaveBeenCalled();
+});
+
+it('shows fan speed only when RPM is 0', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        status: {
+          ...onlineMiner.status,
+          fanRpm: 0,
+          fanSpeed: 80,
+        },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('80%')).toBeTruthy();
+});
+
+it('shows pool URL without port when poolPort is falsy', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        status: {
+          ...onlineMiner.status,
+          poolPort: undefined as any,
+        },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  const poolUrlEls = screen.getAllByText(/stratum\.solomining\.io/);
+  expect(poolUrlEls.length).toBeGreaterThanOrEqual(1);
+});
+
+it('shows N/A for pool response time when <= 0', async () => {
+  useMinerStore.setState({
+    miners: [
+      {
+        ...onlineMiner,
+        status: {
+          ...onlineMiner.status,
+          poolResponseTime: 0,
+        },
+      },
+    ],
+  });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  expect(screen.getByText('common.na')).toBeTruthy();
+});
+
+it('displays notes when auth token is set and fetchMinerNotes returns data', async () => {
+  const { fetchMinerNotes } = jest.requireMock('../src/api/client');
+  (fetchMinerNotes as jest.Mock).mockResolvedValue([
+    { id: 1, text: 'First note', createdat: '2025-01-01' },
+    { id: 2, text: 'Second note', createdat: '2025-01-02' },
+  ]);
+  const { useAuthStore } = require('../src/store/auth');
+  useAuthStore.setState({ token: 'mock-token' });
+  await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await waitFor(() => {
+    expect(screen.getByText('First note')).toBeTruthy();
+    expect(screen.getByText('Second note')).toBeTruthy();
+  });
+});
+
+it('adds a note with auth token via API', async () => {
+  const { addMinerNote } = jest.requireMock('../src/api/client');
+  (addMinerNote as jest.Mock).mockResolvedValue({
+    id: 3,
+    minerid: 'm1',
+    text: 'API note',
+    createdat: new Date().toISOString(),
+  });
+  const { useAuthStore } = require('../src/store/auth');
+  useAuthStore.setState({ token: 'mock-token' });
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await waitFor(() => {
+    expect(r.getByLabelText('New note input')).toBeTruthy();
+  });
+  await fireEvent.changeText(r.getByLabelText('New note input'), 'API note');
+  await fireEvent.press(r.getByLabelText('Add note'));
+  await waitFor(() => {
+    expect(addMinerNote).toHaveBeenCalledWith('m1', 'API note');
+  });
+});
+
+it('deletes a note successfully', async () => {
+  const { fetchMinerNotes, deleteMinerNote } = jest.requireMock('../src/api/client');
+  (fetchMinerNotes as jest.Mock).mockResolvedValue([
+    { id: 1, text: 'Delete me', createdat: '2025-01-01' },
+  ]);
+  const { useAuthStore } = require('../src/store/auth');
+  useAuthStore.setState({ token: 'mock-token' });
+  const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
+  await waitFor(() => {
+    expect(r.getByText('Delete me')).toBeTruthy();
+  });
+  await fireEvent.press(r.getByLabelText('Delete note'));
+  await waitFor(() => {
+    expect(deleteMinerNote).toHaveBeenCalledWith('m1', 1);
+  });
+});
