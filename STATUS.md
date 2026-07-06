@@ -1,26 +1,17 @@
 # STATUS
 
-## Session Summary (2026-07-05)
+## Session Summary (2026-07-06)
 
 ### Done
 
-- **Backend: Added POST /api/proxy/flash endpoint** — firmware OTA update proxying with 120s timeout, URL validation, error handling. Frontend `bitaxe.ts:flashFirmware()` was calling this but it returned 404.
-- **Backend: Fixed OpenAPI spec** — corrected `/alert-rules/{minerId}` → `/miner-alert-rules/{minerId}` path mismatch
-- **Backend: Added flash endpoint tests** — 4 new tests (success, 400, 403, 502)
-- **MinerDetailScreen: Alert Rules configuration UI** — `AlertRuleSlider` component with +/- steppers for temp threshold, hashrate drop %, offline reminder, uptime threshold. Toggle enable/disable switch. Saves via `setAlertRules()` (local DB + backend sync when authenticated)
-- **Bundle analysis tooling** — added `source-map-explorer` dev dep, `build:web:analyze` script with `--dump-sourcemap`
-- **expo-modules-core mock** — comprehensive mock file at `src/__mocks__/expo-modules-core.ts` covering EventEmitter, NativeModule, SharedObject, SharedRef, CodedError, UnavailabilityError, requireNativeModule, requireOptionalNativeModule, Platform, uuid, PermissionStatus — available for selective test use
-- **E2E tests** — 3 new files (dashboard-metrics, groups, miner-detail) with 11 tests covering time range chips, drill-down modal, group display, alert rules
-- **Charts: Power, Voltage, Fan Speed** — 3 new trend chart components on MinerDetailScreen (amber power, cyan voltage, green fan RPM). Added `fanSpeed`, `fanRpm`, `coreVoltage` to `MinerSnapshot` type and `buildSnapshot()` for forward data collection. 18 new tests (6 each).
-- **NotificationHistoryScreen** — full-screen FlatList with group-by-date, status badges (✅/❌), refresh, clear-all with confirmation. Registered in AppNavigator/RootStackParamList. Nav link added to Settings.
-- **Push toggle fix** — Settings push notifications switch now calls `registerPushToken`/`unregisterPushToken` with backend (previously only saved local DB setting).
-- **Vercel redeploy** — https://hashwatch2.vercel.app live with latest changes
-- **Local web server** — http://localhost:3000
+- **NotificationPrefs sync fix** — When authenticated, toggle saves to **backend first, then local DB**. If backend fails, local is untouched (no inconsistent state). On load, backend prefs are synced to local DB so `checkMinerAlerts()` sees correct values. Backend fetch failure falls back to local prefs instead of rendering empty UI.
+- **Removed duplicate alert thresholds** — Old inline preset buttons (temp/hashrate 75°C, hashrate drop 60%) removed from MinerDetailScreen. The AlertRuleSlider section (toggle + 4 sliders) is now the sole alert rules UI. Tests updated to verify slider adjustment instead.
+- **Duplicate pushRegistration mock fix** — SettingsScreen.test.tsx had two `jest.mock` calls for the same path; updated both to export `registerPushToken` + `unregisterPushToken`.
 
 ### Test Results
 
-- **Frontend**: 1164 tests passing, 83 suites (was 1141/79)
-- **Backend**: 163 tests passing, 17 suites (was 129/14)
+- **Frontend**: 1164 tests passing, 83 suites
+- **Backend**: 163 tests passing, 17 suites
 - **TypeScript**: clean
 - **ESLint**: 0 errors, 0 warnings
 

@@ -80,6 +80,7 @@ const mockShowUndo = jest.fn(({ onConfirm }: any) => {
 jest.mock('../src/services/notifications', () => ({
   getAlertRules: () =>
     Promise.resolve({
+      enabled: true,
       tempThreshold: 70,
       hashrateDropPercent: 50,
       offlineReminderMinutes: 5,
@@ -382,24 +383,24 @@ it('edits miner IP inline and saves', async () => {
   expect(mockSetMinerIp).toHaveBeenCalledWith('m1', '10.0.0.50');
 });
 
-it('sets temp threshold via alert chip', async () => {
+it('adjusts temp threshold via alert slider', async () => {
   const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  await fireEvent.press(screen.getByLabelText('Set temp alert to 75°C'));
+  await fireEvent.press(screen.getByLabelText('Increase minerDetail.tempThreshold'));
 
   expect(mockAlertRules).toHaveBeenCalledWith('m1', expect.objectContaining({ tempThreshold: 75 }));
 });
 
-it('sets hashrate drop alert via chip', async () => {
+it('adjusts hashrate drop via alert slider', async () => {
   const { setAlertRules: mockAlertRules } = jest.requireMock('../src/services/notifications');
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
-  await fireEvent.press(screen.getByLabelText('Set hashrate drop alert to 60%'));
+  await fireEvent.press(screen.getByLabelText('Increase minerDetail.hashrateDrop'));
 
   expect(mockAlertRules).toHaveBeenCalledWith(
     'm1',
-    expect.objectContaining({ hashrateDropPercent: 60 }),
+    expect.objectContaining({ hashrateDropPercent: 55 }),
   );
 });
 

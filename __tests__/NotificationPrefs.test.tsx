@@ -121,7 +121,7 @@ it('loads prefs from remote when authed', async () => {
   });
 });
 
-it('toggles remote pref when authed', async () => {
+it('toggles remote pref when authed and syncs to local', async () => {
   mockToken = 'abc';
   mockGetNotificationPrefs.mockResolvedValue({});
   await render(<NotificationPrefs minerId="m1" />);
@@ -136,6 +136,10 @@ it('toggles remote pref when authed', async () => {
   await waitFor(() => {
     expect(mockSetNotificationPref).toHaveBeenCalledWith('m1', 'offline', false);
   });
+  expect(mockSetSetting).toHaveBeenCalledWith(
+    'notify_m1',
+    expect.stringContaining('"offline":false'),
+  );
 });
 
 it('reverts remote toggle on failure', async () => {
@@ -146,6 +150,7 @@ it('reverts remote toggle on failure', async () => {
   await waitFor(() => {
     expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
   });
+  mockSetSetting.mockClear();
   fireEvent(
     screen.getByLabelText('notificationPrefs.offline notification'),
     'onValueChange',
@@ -154,15 +159,18 @@ it('reverts remote toggle on failure', async () => {
   await waitFor(() => {
     expect(mockSetNotificationPref).toHaveBeenCalled();
   });
+  expect(mockSetSetting).not.toHaveBeenCalled();
   expect(screen.getByLabelText('notificationPrefs.offline notification').props.value).toBe(true);
 });
 
-it('handles remote fetch error gracefully', async () => {
+it('falls back to local prefs on remote fetch error', async () => {
   mockToken = 'abc';
   mockGetNotificationPrefs.mockRejectedValueOnce(new Error('fail'));
   await render(<NotificationPrefs minerId="m1" />);
   await waitFor(() => {
     expect(mockGetNotificationPrefs).toHaveBeenCalledWith('m1');
   });
-  expect(screen.queryByText('notificationPrefs.title')).toBeNull();
+  await waitFor(() => {
+    expect(screen.getByText('notificationPrefs.title')).toBeTruthy();
+  });
 });

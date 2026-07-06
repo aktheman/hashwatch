@@ -44,10 +44,16 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
         .then((p) => {
           if (cancelled) return;
           setPrefs(p);
+          for (const [key, val] of Object.entries(p)) {
+            setLocalPref(minerId, key, val).catch(() => {});
+          }
         })
         .catch(() => {
           if (cancelled) return;
-          console.warn('getNotificationPrefs failed');
+          getLocalPrefs(minerId).then((p) => {
+            if (cancelled) return;
+            setPrefs(p);
+          });
         });
     } else {
       getLocalPrefs(minerId).then((p) => {
@@ -64,12 +70,14 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
 
   const toggle = async (alertType: string, enabled: boolean) => {
     setPrefs((p) => (p ? { ...p, [alertType]: enabled } : p));
-    const persist = token
-      ? () => setNotificationPref(minerId, alertType, enabled)
-      : () => setLocalPref(minerId, alertType, enabled);
-    await persist().catch(() => {
+    try {
+      if (token) {
+        await setNotificationPref(minerId, alertType, enabled);
+      }
+      await setLocalPref(minerId, alertType, enabled);
+    } catch {
       setPrefs((p) => (p ? { ...p, [alertType]: !enabled } : p));
-    });
+    }
   };
 
   return (
