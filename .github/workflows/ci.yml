@@ -108,7 +108,7 @@ jobs:
 
   deploy-web:
     name: Deploy Web
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && !cancelled()
     needs: [backend, frontend, web-build]
     runs-on: ubuntu-latest
     steps:
@@ -158,8 +158,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
@@ -174,8 +172,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
