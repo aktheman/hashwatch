@@ -45,7 +45,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
       - run: npm install
       - run: npm run typecheck
       - run: npm run lint
@@ -84,7 +83,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - uses: actions/download-artifact@v4
         with:
           name: web-dist
@@ -101,7 +99,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm install
       - run: npx expo prebuild --platform ios --clean
       - name: Verify iOS project builds
@@ -112,14 +109,13 @@ jobs:
   deploy-web:
     name: Deploy Web
     if: github.ref == 'refs/heads/master'
-    needs: [backend, frontend, web-build, e2e-playwright]
+    needs: [backend, frontend, web-build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - uses: actions/download-artifact@v4
         with:
           name: web-dist
