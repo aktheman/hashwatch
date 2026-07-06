@@ -171,7 +171,7 @@ export const WorldMap = React.memo(function WorldMap() {
             borderColor: selected.color,
             borderRadius: radius.sm,
             paddingHorizontal: spacing.sm,
-            paddingVertical: 5,
+            paddingVertical: spacing.xxs,
             minWidth: 100,
             alignItems: 'center',
           }}
@@ -188,7 +188,7 @@ export const WorldMap = React.memo(function WorldMap() {
             </Text>
           )}
           {miners[selected.minerIndex].status && (
-            <Text style={{ color: theme.textMuted, fontSize: 10 }}>
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>
               {miners[selected.minerIndex].status!.hashRate}{' '}
               {miners[selected.minerIndex].status!.hashRateUnit}
             </Text>

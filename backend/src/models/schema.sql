@@ -98,6 +98,19 @@ CREATE TABLE IF NOT EXISTS miner_notes (
 
 CREATE INDEX IF NOT EXISTS idx_miner_notes_miner ON miner_notes(minerId, createdAt DESC);
 
+CREATE TABLE IF NOT EXISTS notification_history (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL,
+  body TEXT NOT NULL DEFAULT '',
+  data JSONB NOT NULL DEFAULT '{}',
+  sentAt BIGINT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'sent'
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_history_user ON notification_history(userId, sentAt DESC);
+
 CREATE TABLE IF NOT EXISTS miner_alert_rules (
   userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,

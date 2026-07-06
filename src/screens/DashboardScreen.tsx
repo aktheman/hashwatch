@@ -48,6 +48,7 @@ import {
   DashboardCustomizer,
   SectionKey,
   DEFAULT_VISIBLE,
+  SECTION_LABELS,
 } from '../components/DashboardCustomizer';
 
 interface DashboardScreenProps {
@@ -123,6 +124,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [visibleSections, setVisibleSections] = useState<Record<SectionKey, boolean>>({
     ...DEFAULT_VISIBLE,
   });
+  const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(
+    Object.keys(SECTION_LABELS) as SectionKey[],
+  );
   const [powerCost, setPowerCost] = useState(0);
 
   const groups = useMemo(() => {
@@ -431,7 +435,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
+    | { type: 'header'; group: string; miners: Miner[] }
+    | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -610,7 +615,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
+      | { type: 'header'; group: string; miners: Miner[] }
+      | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1294,7 +1300,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                           style={{
                             color: theme.success,
                             fontSize: fontSize.xs,
-                            marginHorizontal: 8,
+                            marginHorizontal: spacing.xs,
                           }}
                         >
                           +{pm.status?.sharesAccepted ?? 0}
@@ -2085,6 +2091,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         onToggle={handleToggleSection}
         onReset={handleResetSections}
         onApplyPreset={handleApplyPreset}
+        onReorder={(ordered) => {
+          setSectionOrder(ordered);
+          setSetting('dashboard_section_order', JSON.stringify(ordered)).catch(() => {});
+        }}
         kioskMode={kioskMode}
         onToggleKiosk={handleToggleKiosk}
       />

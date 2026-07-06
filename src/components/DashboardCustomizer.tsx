@@ -69,8 +69,18 @@ interface DashboardCustomizerProps {
   onToggle: (key: SectionKey) => void;
   onReset: () => void;
   onApplyPreset: (sections: Record<SectionKey, boolean>) => void;
+  onReorder: (orderedKeys: SectionKey[]) => void;
   kioskMode: boolean;
   onToggleKiosk: (val: boolean) => void;
+}
+
+const ALL_SECTIONS = Object.keys(SECTION_LABELS) as SectionKey[];
+
+function moveItem<T>(arr: T[], from: number, to: number): T[] {
+  const result = [...arr];
+  const [item] = result.splice(from, 1);
+  result.splice(to, 0, item);
+  return result;
 }
 
 export function DashboardCustomizer({
@@ -80,6 +90,7 @@ export function DashboardCustomizer({
   onToggle,
   onReset,
   onApplyPreset,
+  onReorder,
   kioskMode,
   onToggleKiosk,
 }: DashboardCustomizerProps) {
@@ -88,12 +99,14 @@ export function DashboardCustomizer({
   const [presets, setPresets] = useState<DashboardPreset[]>([]);
   const [presetName, setPresetName] = useState('');
   const [showPresets, setShowPresets] = useState(false);
+  const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(ALL_SECTIONS);
 
   useEffect(() => {
     if (visible) {
       loadPresets().then(setPresets);
       setShowPresets(false);
       setPresetName('');
+      setSectionOrder(ALL_SECTIONS);
     }
   }, [visible]);
 
@@ -161,29 +174,64 @@ export function DashboardCustomizer({
             </Pressable>
           </View>
           <ScrollView>
-            {Object.entries(SECTION_LABELS).map(([key, label]) => (
-              <View
-                key={key}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingVertical: spacing.sm,
-                  borderBottomWidth: 1,
-                  borderBottomColor: theme.border,
-                }}
-              >
-                <Text style={{ color: theme.text, fontSize: fontSize.base }}>
-                  {t(`dashboardCustomizer.section.${key}` as const, label)}
-                </Text>
-                <Switch
-                  value={visibleSections[key as SectionKey]}
-                  onValueChange={() => onToggle(key as SectionKey)}
-                  trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
-                  thumbColor={visibleSections[key as SectionKey] ? theme.primary : theme.textMuted}
-                />
-              </View>
-            ))}
+            {sectionOrder.map((key, idx) => {
+              const label = SECTION_LABELS[key];
+              const canMoveUp = idx > 0;
+              const canMoveDown = idx < sectionOrder.length - 1;
+              return (
+                <View
+                  key={key}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingVertical: spacing.sm,
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.border,
+                  }}
+                >
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 }}
+                  >
+                    <Text style={{ color: theme.text, fontSize: fontSize.base, flex: 1 }}>
+                      {t(`dashboardCustomizer.section.${key}` as const, label)}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Move ${label} up`}
+                      disabled={!canMoveUp}
+                      onPress={() => {
+                        const next = moveItem(sectionOrder, idx, idx - 1);
+                        setSectionOrder(next);
+                        onReorder(next);
+                      }}
+                      style={{ opacity: canMoveUp ? 1 : 0.2, padding: spacing.xxs }}
+                    >
+                      <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>▲</Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Move ${label} down`}
+                      disabled={!canMoveDown}
+                      onPress={() => {
+                        const next = moveItem(sectionOrder, idx, idx + 1);
+                        setSectionOrder(next);
+                        onReorder(next);
+                      }}
+                      style={{ opacity: canMoveDown ? 1 : 0.2, padding: spacing.xxs }}
+                    >
+                      <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>▼</Text>
+                    </Pressable>
+                  </View>
+                  <Switch
+                    value={visibleSections[key]}
+                    onValueChange={() => onToggle(key)}
+                    trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+                    thumbColor={visibleSections[key] ? theme.primary : theme.textMuted}
+                  />
+                </View>
+              );
+            })}
             <View
               style={{
                 flexDirection: 'row',
@@ -279,7 +327,7 @@ export function DashboardCustomizer({
                       flexDirection: 'row',
                       alignItems: 'center',
                       gap: spacing.xs,
-                      paddingVertical: 6,
+                      paddingVertical: spacing.xs,
                     }}
                   >
                     <Pressable

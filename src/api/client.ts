@@ -302,6 +302,48 @@ export async function fetchMinerAlertRules(minerId: string): Promise<MinerAlertR
   return res.data;
 }
 
+export interface NotificationHistoryItem {
+  id: number;
+  token: string;
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+  sentat: number;
+  status: string;
+}
+
+export async function fetchNotificationHistory(
+  limit?: number,
+  offset?: number,
+): Promise<NotificationHistoryItem[]> {
+  const res = await client.get<NotificationHistoryItem[]>('/api/notification-history', {
+    params: { limit, offset },
+  });
+  return res.data;
+}
+
+export async function syncNotificationHistory(
+  entries: {
+    title: string;
+    body?: string;
+    token?: string;
+    data?: Record<string, unknown>;
+    sentAt: number;
+    status?: string;
+  }[],
+): Promise<{ ok: boolean; inserted: number }> {
+  const res = await client.post<{ ok: boolean; inserted: number }>(
+    '/api/notification-history/sync',
+    { entries },
+  );
+  return res.data;
+}
+
+export async function clearNotificationHistory(): Promise<OkResponse> {
+  const res = await client.delete<OkResponse>('/api/notification-history');
+  return res.data;
+}
+
 export async function putMinerAlertRules(
   minerId: string,
   rules: MinerAlertRule,
