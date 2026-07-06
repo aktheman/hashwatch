@@ -43,36 +43,36 @@ function NotificationHistorySection() {
   const recent = history.slice(0, 50);
   const styles = StyleSheet.create({
     section: {
-      marginBottom: 24,
+      marginBottom: spacing.xl,
     },
     sectionTitle: {
       color: theme.textDim,
-      fontSize: 11,
+      fontSize: fontSize.xs,
       fontWeight: fontWeight.bold,
       textTransform: 'uppercase',
       letterSpacing: 0.8,
-      marginBottom: 8,
-      marginLeft: 4,
+      marginBottom: spacing.xs,
+      marginLeft: spacing.xxs,
     },
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: theme.surface,
-      padding: 14,
-      borderRadius: 12,
+      padding: spacing.md,
+      borderRadius: radius.md,
       marginBottom: 2,
       borderWidth: 1,
       borderColor: theme.border,
     },
     rowLabel: {
       color: theme.text,
-      fontSize: 15,
-      fontWeight: '500',
+      fontSize: fontSize.md,
+      fontWeight: fontWeight.regular,
     },
     rowValue: {
       color: theme.textDim,
-      fontSize: 15,
+      fontSize: fontSize.md,
     },
   });
   return (
@@ -263,9 +263,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           gap: spacing.xxs,
         },
         badge: {
-          paddingHorizontal: 10,
-          paddingVertical: 3,
-          borderRadius: 8,
+          paddingHorizontal: spacing.xs,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
         },
         badgeText: {
           fontSize: fontSize.sm,
@@ -273,40 +273,40 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         chevron: {
           color: theme.textMuted,
-          fontSize: 20,
+          fontSize: fontSize.h3,
           fontWeight: '300',
         },
         actionText: {
           color: theme.primary,
-          fontSize: 15,
+          fontSize: fontSize.md,
           fontWeight: fontWeight.semibold,
         },
         authBox: {
           backgroundColor: theme.surfaceLight,
-          borderRadius: 12,
-          padding: 14,
+          borderRadius: radius.md,
+          padding: spacing.md,
           marginTop: 2,
-          gap: 10,
+          gap: spacing.xs,
           borderWidth: 1,
           borderColor: theme.border,
         },
         authInput: {
           backgroundColor: theme.surface,
           borderRadius: radius.md,
-          padding: 12,
+          padding: spacing.sm,
           color: theme.text,
-          fontSize: 15,
+          fontSize: fontSize.md,
           borderWidth: 1,
           borderColor: theme.border,
         },
         authError: {
           color: theme.danger,
-          fontSize: 13,
+          fontSize: fontSize.base,
         },
         authBtn: {
           backgroundColor: theme.primary,
           borderRadius: radius.md,
-          padding: 12,
+          padding: spacing.sm,
           alignItems: 'center',
         },
         authBtnText: {
@@ -316,14 +316,14 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         authToggle: {
           color: theme.primary,
-          fontSize: 13,
+          fontSize: fontSize.base,
           textAlign: 'center',
-          fontWeight: '500',
+          fontWeight: fontWeight.regular,
         },
         logoutBtn: {
           backgroundColor: theme.danger + '1A',
           borderRadius: radius.md,
-          padding: 12,
+          padding: spacing.sm,
           alignItems: 'center',
           borderWidth: 1,
           borderColor: theme.danger + '4D',
@@ -333,9 +333,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           fontWeight: fontWeight.bold,
         },
         themeBtn: {
-          paddingHorizontal: 10,
-          paddingVertical: 6,
-          borderRadius: 8,
+          paddingHorizontal: spacing.xs,
+          paddingVertical: spacing.xs,
+          borderRadius: radius.sm,
           borderWidth: 1,
         },
         themeBtnText: {
@@ -350,7 +350,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         input: {
           backgroundColor: theme.surfaceLight,
           borderRadius: radius.md,
-          padding: 12,
+          padding: spacing.sm,
           color: theme.text,
           fontSize: fontSize.base,
           fontFamily: 'monospace',
@@ -359,14 +359,14 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         },
         proxyBtn: {
           borderRadius: radius.md,
-          padding: 10,
+          padding: spacing.xs,
           alignItems: 'center',
           marginTop: spacing.xs,
         },
         proxyBtnText: {
           color: '#FFF',
           fontWeight: fontWeight.bold,
-          fontSize: 13,
+          fontSize: fontSize.base,
         },
       }),
     [theme],
@@ -481,7 +481,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 }}
               >
                 <Text
-                  style={{ color: theme.primary, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                  style={{
+                    color: theme.primary,
+                    fontWeight: fontWeight.semibold,
+                    fontSize: fontSize.base,
+                  }}
                 >
                   {t('settings.restorePurchases')}
                 </Text>
@@ -503,7 +507,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                 >
                   <Text
-                    style={{ color: theme.success, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                    style={{
+                      color: theme.success,
+                      fontWeight: fontWeight.semibold,
+                      fontSize: fontSize.base,
+                    }}
                   >
                     {t('settings.forcePro')}
                   </Text>
@@ -524,22 +532,42 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }}
                 >
                   <Text
-                    style={{ color: theme.danger, fontWeight: fontWeight.semibold, fontSize: 13 }}
+                    style={{
+                      color: theme.danger,
+                      fontWeight: fontWeight.semibold,
+                      fontSize: fontSize.base,
+                    }}
                   >
                     {t('settings.forceFree')}
                   </Text>
                 </Pressable>
               </View>
               {customerInfo && (
-                <View style={{ backgroundColor: '#000' + '40', borderRadius: 8, padding: 8 }}>
-                  <Text style={{ color: theme.textDim, fontSize: 10, fontFamily: 'monospace' }}>
+                <View
+                  style={{
+                    backgroundColor: '#000' + '40',
+                    borderRadius: radius.sm,
+                    padding: spacing.xs,
+                  }}
+                >
+                  <Text
+                    style={{ color: theme.textDim, fontSize: fontSize.xs, fontFamily: 'monospace' }}
+                  >
                     {customerInfo}
                   </Text>
                 </View>
               )}
               {entitlements && (
-                <View style={{ backgroundColor: '#000' + '40', borderRadius: 8, padding: 8 }}>
-                  <Text style={{ color: theme.textDim, fontSize: 10, fontFamily: 'monospace' }}>
+                <View
+                  style={{
+                    backgroundColor: '#000' + '40',
+                    borderRadius: radius.sm,
+                    padding: spacing.xs,
+                  }}
+                >
+                  <Text
+                    style={{ color: theme.textDim, fontSize: fontSize.xs, fontFamily: 'monospace' }}
+                  >
                     {entitlements}
                   </Text>
                 </View>
@@ -587,7 +615,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   </Text>
                 </Pressable>
                 {lastSyncTimestamp && (
-                  <Text style={[styles.sectionSub, { textAlign: 'center', marginTop: 6 }]}>
+                  <Text style={[styles.sectionSub, { textAlign: 'center', marginTop: spacing.xs }]}>
                     {t('settings.lastSync', {
                       time: formatLastSync(lastSyncTimestamp),
                     })}
@@ -728,8 +756,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 accessibilityRole="button"
                 accessibilityLabel={`Switch language to ${lang}`}
                 style={{
-                  paddingHorizontal: 14,
-                  paddingVertical: 8,
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.xs,
                   borderRadius: radius.md,
                   backgroundColor: language === lang ? theme.primary : theme.surfaceLight,
                   borderWidth: 1,
@@ -744,7 +772,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Text
                   style={{
                     color: language === lang ? '#FFF' : theme.text,
-                    fontSize: 13,
+                    fontSize: fontSize.base,
                     fontWeight: fontWeight.semibold,
                   }}
                 >
@@ -772,8 +800,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               accessibilityRole="button"
               accessibilityLabel="Disable dark mode schedule"
               style={{
-                paddingHorizontal: 14,
-                paddingVertical: 8,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.xs,
                 borderRadius: radius.md,
                 backgroundColor: autoDarkHour === null ? theme.primary : theme.surfaceLight,
                 borderWidth: 1,
@@ -788,7 +816,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               <Text
                 style={{
                   color: autoDarkHour === null ? '#FFF' : theme.text,
-                  fontSize: 13,
+                  fontSize: fontSize.base,
                   fontWeight: fontWeight.semibold,
                 }}
               >
@@ -801,8 +829,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 accessibilityRole="button"
                 accessibilityLabel={`Schedule dark mode at ${hour}:00`}
                 style={{
-                  paddingHorizontal: 14,
-                  paddingVertical: 8,
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.xs,
                   borderRadius: radius.md,
                   backgroundColor: autoDarkHour === hour ? theme.primary : theme.surfaceLight,
                   borderWidth: 1,
@@ -818,7 +846,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Text
                   style={{
                     color: autoDarkHour === hour ? '#FFF' : theme.text,
-                    fontSize: 13,
+                    fontSize: fontSize.base,
                     fontWeight: fontWeight.semibold,
                   }}
                 >
@@ -875,7 +903,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             alignItems: 'center',
             backgroundColor: theme.surface,
             borderRadius: radius.lg,
-            padding: 14,
+            padding: spacing.md,
             borderWidth: 1,
             borderColor: theme.border,
           }}
@@ -911,7 +939,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          style={[styles.row, { marginTop: 4 }]}
+          style={[styles.row, { marginTop: spacing.xxs }]}
           onPress={() => navigation.navigate('NotificationHistory')}
         >
           <Text style={styles.rowLabel}>

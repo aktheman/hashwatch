@@ -14,6 +14,8 @@ jest.mock('../src/theme', () => ({
     textMuted: '#666',
     primary: '#6C63FF',
     danger: '#EF4444',
+    success: '#22C55E',
+    warning: '#F59E0B',
   }),
 }));
 
@@ -70,6 +72,38 @@ it('renders notification entries grouped by date', async () => {
   expect(tree.getByText('Yesterday')).toBeTruthy();
 });
 
+it('renders multiple items in the same date group', async () => {
+  const now = Date.now();
+  useNotificationHistoryStore.setState({
+    history: [
+      {
+        id: 'n1',
+        token: 'tok1',
+        title: 'Alert One',
+        body: 'First',
+        data: {},
+        sentAt: now,
+        status: 'sent',
+      },
+      {
+        id: 'n2',
+        token: 'tok1',
+        title: 'Alert Two',
+        body: 'Second',
+        data: {},
+        sentAt: now + 1000,
+        status: 'sent',
+      },
+    ],
+  });
+
+  const tree = await render(
+    <NotificationHistoryScreen navigation={{ navigate: mockNavigate } as any} />,
+  );
+  expect(tree.getByText('Alert One')).toBeTruthy();
+  expect(tree.getByText('Alert Two')).toBeTruthy();
+});
+
 it('shows clear all button and triggers confirmation', async () => {
   useNotificationHistoryStore.setState({
     history: [
@@ -90,7 +124,7 @@ it('shows clear all button and triggers confirmation', async () => {
   );
   const clearBtn = tree.getByText('notificationHistory.clearAction');
   expect(clearBtn).toBeTruthy();
-  fireEvent.press(clearBtn);
+  await fireEvent.press(clearBtn);
   expect(Alert.alert).toHaveBeenCalled();
 });
 
@@ -123,4 +157,25 @@ it('renders status badge for sent and failed', async () => {
   );
   expect(tree.getByText('Sent Alert')).toBeTruthy();
   expect(tree.getByText('Failed Alert')).toBeTruthy();
+});
+
+it('does not render body when body is empty', async () => {
+  useNotificationHistoryStore.setState({
+    history: [
+      {
+        id: 'n1',
+        token: 'tok1',
+        title: 'No Body',
+        body: '',
+        data: {},
+        sentAt: Date.now(),
+        status: 'sent',
+      },
+    ],
+  });
+
+  const tree = await render(
+    <NotificationHistoryScreen navigation={{ navigate: mockNavigate } as any} />,
+  );
+  expect(tree.getByText('No Body')).toBeTruthy();
 });

@@ -33,7 +33,7 @@ export const MinerCard = memo(
             borderRadius: radius.xl,
             padding: spacing.md,
             marginHorizontal: spacing.md,
-            marginVertical: 6,
+            marginVertical: spacing.xs,
             borderWidth: 1,
             borderColor: theme.border,
             ...(Platform.OS !== 'android'
@@ -118,7 +118,7 @@ export const MinerCard = memo(
             width: 1,
             height: 32,
             backgroundColor: theme.border,
-            marginHorizontal: 10,
+            marginHorizontal: spacing.xs,
           },
           statLabel: {
             color: theme.textDim,
@@ -296,8 +296,8 @@ export const MinerCard = memo(
                 key={tag}
                 style={{
                   backgroundColor: theme.primary + '25',
-                  borderRadius: 4,
-                  paddingHorizontal: 6,
+                  borderRadius: radius.xxs,
+                  paddingHorizontal: spacing.xs,
                   paddingVertical: 1,
                 }}
               >

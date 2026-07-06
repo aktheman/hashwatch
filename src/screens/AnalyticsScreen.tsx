@@ -514,8 +514,8 @@ export function AnalyticsScreen() {
         },
         chartCard: {
           backgroundColor: theme.surface,
-          marginHorizontal: 16,
-          marginBottom: 16,
+          marginHorizontal: spacing.md,
+          marginBottom: spacing.md,
           borderRadius: radius.lg,
           padding: 16,
           borderWidth: 1,

@@ -165,7 +165,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         divider: {
           flexDirection: 'row',
           alignItems: 'center',
-          marginVertical: 20,
+          marginVertical: spacing.lg,
         },
         dividerLine: {
           flex: 1,
@@ -174,7 +174,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
         },
         dividerText: {
           color: theme.textMuted,
-          marginHorizontal: 12,
+          marginHorizontal: spacing.sm,
           fontSize: fontSize.sm,
           fontWeight: fontWeight.semibold,
           textTransform: 'uppercase',
@@ -308,7 +308,7 @@ export function AddMinerScreen({ navigation }: AddMinerScreenProps) {
                 }}
               />
             </View>
-            <Text style={{ color: theme.textMuted, fontSize: 11, marginTop: spacing.xxs }}>
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.sm, marginTop: spacing.xxs }}>
               {t('addMiner.scanProgress', {
                 scanned: scanProgress.scanned,
                 total: scanProgress.total,

@@ -2352,7 +2352,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
         "flexDirection": "row",
         "justifyContent": "space-between",
         "paddingBottom": 8,
-        "paddingHorizontal": 20,
+        "paddingHorizontal": 24,
         "paddingTop": 16,
       }
     }
@@ -2374,8 +2374,8 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
         style={
           {
             "color": "#8B8FA3",
-            "fontSize": 12,
-            "marginTop": 2,
+            "fontSize": 11,
+            "marginTop": 4,
           }
         }
       >
@@ -2420,7 +2420,7 @@ exports[`PoolsScreen empty state matches snapshot 1`] = `
       style={
         {
           "color": "#8B8FA3",
-          "fontSize": 14,
+          "fontSize": 15,
           "textAlign": "center",
         }
       }
@@ -2596,8 +2596,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "style": [
                           {
                             "borderRadius": 8,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 3,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -2916,8 +2916,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -2981,8 +2981,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#6C63FF",
@@ -3046,8 +3046,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3111,8 +3111,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3176,8 +3176,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3241,8 +3241,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3306,8 +3306,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3371,8 +3371,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3436,8 +3436,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3501,8 +3501,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           {
                             "borderRadius": 8,
                             "borderWidth": 1,
-                            "paddingHorizontal": 10,
-                            "paddingVertical": 6,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 8,
                           },
                           {
                             "backgroundColor": "#1A1A3E",
@@ -3622,7 +3622,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#6C63FF",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -3677,7 +3677,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -3732,7 +3732,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -3787,7 +3787,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -3842,7 +3842,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -3897,7 +3897,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4007,7 +4007,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#6C63FF",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4063,7 +4063,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4119,7 +4119,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4175,7 +4175,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4231,7 +4231,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4287,7 +4287,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4343,7 +4343,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                           "borderColor": "#1E1E42",
                           "borderRadius": 12,
                           "borderWidth": 1,
-                          "paddingHorizontal": 14,
+                          "paddingHorizontal": 16,
                           "paddingVertical": 8,
                         },
                       },
@@ -4551,7 +4551,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "borderWidth": 1,
                   "flexDirection": "row",
                   "justifyContent": "space-between",
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4747,7 +4747,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "props": {
                 "style": {
                   "color": "#8B8FA3",
-                  "fontSize": 11,
+                  "fontSize": 10,
                   "fontWeight": "700",
                   "letterSpacing": 0.8,
                   "marginBottom": 8,
@@ -4800,7 +4800,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4848,7 +4848,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",
@@ -4891,7 +4891,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "flexDirection": "row",
                   "justifyContent": "space-between",
                   "marginBottom": 2,
-                  "padding": 14,
+                  "padding": 16,
                 },
               },
               "type": "View",

@@ -12,6 +12,7 @@ import {
 } from '../utils/formatters';
 import { Miner, RootStackParamList } from '../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface StatRow {
   label: string;
@@ -155,17 +156,17 @@ export function MinerComparisonScreen({
           backgroundColor: theme.bg,
         },
         scroll: {
-          padding: 12,
+          padding: spacing.sm,
         },
         header: {
           color: theme.text,
-          fontSize: 20,
-          fontWeight: '800',
-          marginBottom: 16,
-          marginLeft: 4,
+          fontSize: fontSize.h3,
+          fontWeight: fontWeight.extrabold,
+          marginBottom: spacing.md,
+          marginLeft: spacing.xxs,
         },
         table: {
-          borderRadius: 16,
+          borderRadius: radius.lg,
           overflow: 'hidden',
           borderWidth: 1,
           borderColor: theme.border,
@@ -181,7 +182,7 @@ export function MinerComparisonScreen({
         },
         label: {
           width: 100,
-          padding: 10,
+          padding: spacing.xs,
           backgroundColor: theme.surfaceLight,
           justifyContent: 'center',
           borderRightWidth: 1,
@@ -189,20 +190,20 @@ export function MinerComparisonScreen({
         },
         labelText: {
           color: theme.textDim,
-          fontSize: 11,
-          fontWeight: '700',
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.bold,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
         },
         cell: {
           flex: 1,
-          padding: 10,
+          padding: spacing.xs,
           alignItems: 'center',
           justifyContent: 'center',
         },
         cellValue: {
-          fontSize: 14,
-          fontWeight: '600',
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.semibold,
           textAlign: 'center',
         },
         cellBetter: {
@@ -216,35 +217,35 @@ export function MinerComparisonScreen({
         },
         minerHeader: {
           flex: 1,
-          padding: 10,
+          padding: spacing.xs,
           alignItems: 'center',
         },
         minerName: {
           color: theme.text,
-          fontSize: 13,
-          fontWeight: '700',
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.bold,
           textAlign: 'center',
         },
         minerIp: {
           color: theme.textMuted,
-          fontSize: 10,
+          fontSize: fontSize.xs,
           fontFamily: 'monospace',
-          marginTop: 2,
+          marginTop: spacing.xxs,
         },
         minerStatus: {
-          fontSize: 10,
-          fontWeight: '600',
-          marginTop: 2,
+          fontSize: fontSize.xs,
+          fontWeight: fontWeight.semibold,
+          marginTop: spacing.xxs,
         },
         empty: {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 32,
+          padding: spacing.xxl,
         },
         emptyText: {
           color: theme.textDim,
-          fontSize: 14,
+          fontSize: fontSize.md,
         },
       }),
     [theme],

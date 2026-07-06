@@ -262,8 +262,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         },
         poolCard: {
           backgroundColor: theme.surface,
-          borderRadius: 14,
-          padding: 14,
+          borderRadius: radius.md,
+          padding: spacing.md,
           borderWidth: 1,
           borderColor: theme.border,
         },
@@ -273,7 +273,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         poolDivider: {
           height: 1,
           backgroundColor: theme.border,
-          marginVertical: 6,
+          marginVertical: spacing.xs,
         },
         poolLabel: {
           color: theme.textDim,
@@ -566,7 +566,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                   setEditingIP(false);
                 }}
               >
-                <Text style={{ fontSize: 16, color: theme.success, marginLeft: 8 }}>✓</Text>
+                <Text
+                  style={{ fontSize: fontSize.lg, color: theme.success, marginLeft: spacing.xs }}
+                >
+                  ✓
+                </Text>
               </Pressable>
             </View>
           ) : (
@@ -642,7 +646,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     setShowEmojiPicker(false);
                   }}
                 >
-                  <Text style={{ fontSize: 18 }}>{emoji}</Text>
+                  <Text style={{ fontSize: fontSize.xl }}>{emoji}</Text>
                 </Pressable>
               ))}
             </View>
@@ -738,7 +742,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           </Pressable>
         </View>
         {showLocationPicker && (
-          <View style={[styles.section, styles.walletPicker, { marginHorizontal: 16 }]}>
+          <View style={[styles.section, styles.walletPicker, { marginHorizontal: spacing.md }]}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Clear location"
@@ -856,7 +860,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                       }
                     }}
                   >
-                    <Text style={{ color: theme.danger, fontSize: 16, marginLeft: 8 }}>✕</Text>
+                    <Text
+                      style={{ color: theme.danger, fontSize: fontSize.lg, marginLeft: spacing.xs }}
+                    >
+                      ✕
+                    </Text>
                   </Pressable>
                 </View>
               ))}
@@ -1389,8 +1397,10 @@ function AlertRuleSlider({
 }) {
   const step = unit === 'min' || unit === 'h' ? 1 : 5;
   return (
-    <View style={{ paddingVertical: 6 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+    <View style={{ paddingVertical: spacing.xs }}>
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xxs }}
+      >
         <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
         <Text
           style={{ color: theme.primary, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
