@@ -11,7 +11,7 @@ import {
   RefreshControl,
   Switch,
 } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
+
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { MinerSnapshot, Wallet, NavigationProp, MinerNoteItem } from '../types';
@@ -465,6 +465,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const statsRef = useRef<View>(null);
   const handleShareAsImage = async () => {
     try {
+      const { captureRef } = await import('react-native-view-shot');
       const uri = await captureRef(statsRef, { format: 'png', quality: 0.8 });
       await Share.share({ url: uri, message: `⬡ ${miner.name}` }).catch((e) =>
         console.warn('Share image failed:', e),
@@ -647,7 +648,6 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </View>
           )}
         </View>
-
 
         <NotificationPrefs minerId={miner.id} />
 
