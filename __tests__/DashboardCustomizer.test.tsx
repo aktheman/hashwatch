@@ -279,4 +279,63 @@ describe('DashboardCustomizer', () => {
       expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
     });
   });
+
+  it('moves section down with ▼ button', async () => {
+    const onReorder = jest.fn();
+    const r = await render(<DashboardCustomizer {...defaultProps} onReorder={onReorder} />);
+    await waitFor(() => {
+      expect(r.getByText('dashboardCustomizer.section.earnings')).toBeTruthy();
+    });
+    const downButtons = r.getAllByText('▼');
+    expect(downButtons.length).toBeGreaterThanOrEqual(8);
+    await fireEvent.press(downButtons[0]);
+    expect(onReorder).toHaveBeenCalled();
+    const ordered = onReorder.mock.calls[0][0] as string[];
+    expect(ordered[0]).toBe('ticker');
+    expect(ordered[1]).toBe('earnings');
+  });
+
+  it('moves section up with ▲ button', async () => {
+    const onReorder = jest.fn();
+    const r = await render(<DashboardCustomizer {...defaultProps} onReorder={onReorder} />);
+    await waitFor(() => {
+      expect(r.getByText('dashboardCustomizer.section.earnings')).toBeTruthy();
+    });
+    const downButtons = r.getAllByText('▼');
+    await fireEvent.press(downButtons[0]);
+    const upButtons = r.getAllByText('▲');
+    await fireEvent.press(upButtons[1]);
+    expect(onReorder).toHaveBeenCalledTimes(2);
+    const ordered = onReorder.mock.calls[1][0] as string[];
+    expect(ordered[0]).toBe('earnings');
+    expect(ordered[1]).toBe('ticker');
+  });
+
+  it('handles alert cancel on reset press', async () => {
+    const onReset = jest.fn();
+    const r = await render(<DashboardCustomizer {...defaultProps} onReset={onReset} />);
+    await waitFor(() => {
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
+    });
+    fireEvent.press(r.getByText('dashboardCustomizer.resetToDefaults'));
+    const cancelAction = (
+      mockAlert.mock.calls[0][2] as Array<{ text: string; onPress?: () => void }>
+    ).find((a) => a.text === 'common.cancel');
+    if (cancelAction?.onPress) cancelAction.onPress();
+    expect(onReset).not.toHaveBeenCalled();
+  });
+
+  it('handles alert confirm on reset press', async () => {
+    const onReset = jest.fn();
+    const r = await render(<DashboardCustomizer {...defaultProps} onReset={onReset} />);
+    await waitFor(() => {
+      expect(r.getByText('dashboardCustomizer.loadPreset')).toBeTruthy();
+    });
+    fireEvent.press(r.getByText('dashboardCustomizer.resetToDefaults'));
+    const resetAction = (
+      mockAlert.mock.calls[0][2] as Array<{ text: string; style?: string; onPress?: () => void }>
+    ).find((a) => a.text === 'dashboardCustomizer.reset');
+    if (resetAction?.onPress) resetAction.onPress();
+    expect(onReset).toHaveBeenCalled();
+  });
 });
