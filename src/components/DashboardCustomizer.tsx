@@ -1,5 +1,17 @@
-import { useState, useEffect } from 'react';
-import { View, Text, Pressable, Modal, Switch, TextInput, Alert, ScrollView } from 'react-native';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  Modal,
+  Switch,
+  TextInput,
+  Alert,
+  ScrollView,
+  Animated,
+  PanResponder,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
@@ -100,6 +112,67 @@ export function DashboardCustomizer({
   const [presetName, setPresetName] = useState('');
   const [showPresets, setShowPresets] = useState(false);
   const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(ALL_SECTIONS);
+  const sectionOrderRef = useRef(sectionOrder);
+  sectionOrderRef.current = sectionOrder;
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const dragIdxRef = useRef(dragIdx);
+  dragIdxRef.current = dragIdx;
+  const [scrollEnabled, setScrollEnabled] = useState(true);
+  const dragY = useRef(new Animated.Value(0)).current;
+  const dragAnimating = useRef(false);
+  const itemHeights = useRef<number[]>([]);
+  const ITEM_HEIGHT = 52;
+
+  const sectionListRef = useRef<ScrollView>(null);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: () => dragAnimating.current,
+      onPanResponderMove: (_, gs) => {
+        if (!dragAnimating.current || dragIdxRef.current === null) return;
+        const newY = gs.dy;
+        dragY.setValue(newY);
+        const itemH = itemHeights.current[dragIdxRef.current] || ITEM_HEIGHT;
+        const offset = Math.round(newY / itemH);
+        if (offset !== 0) {
+          const currentOrder = sectionOrderRef.current;
+          const currentIdx = dragIdxRef.current;
+          const targetIdx = Math.max(0, Math.min(currentOrder.length - 1, currentIdx + offset));
+          if (targetIdx !== currentIdx) {
+            const newOrder = moveItem(currentOrder, currentIdx, targetIdx);
+            setSectionOrder(newOrder);
+            sectionOrderRef.current = newOrder;
+            onReorder(newOrder);
+            setDragIdx(targetIdx);
+            dragIdxRef.current = targetIdx;
+            itemHeights.current[targetIdx] = itemH;
+            dragY.setValue(0);
+          }
+        }
+      },
+      onPanResponderRelease: () => {
+        if (!dragAnimating.current) return;
+        dragAnimating.current = false;
+        setDragIdx(null);
+        setScrollEnabled(true);
+        Animated.spring(dragY, { toValue: 0, useNativeDriver: true }).start();
+      },
+      onPanResponderTerminate: () => {
+        dragAnimating.current = false;
+        setDragIdx(null);
+        setScrollEnabled(true);
+        dragY.setValue(0);
+      },
+    }),
+  ).current;
+
+  const startDrag = (idx: number) => {
+    if (dragIdx !== null) return;
+    setDragIdx(idx);
+    dragAnimating.current = true;
+    setScrollEnabled(false);
+  };
 
   useEffect(() => {
     if (visible) {
@@ -107,6 +180,9 @@ export function DashboardCustomizer({
       setShowPresets(false);
       setPresetName('');
       setSectionOrder(ALL_SECTIONS);
+      dragAnimating.current = false;
+      setDragIdx(null);
+      dragY.setValue(0);
     }
   }, [visible]);
 
@@ -173,26 +249,51 @@ export function DashboardCustomizer({
               </Text>
             </Pressable>
           </View>
-          <ScrollView>
+          <ScrollView
+            ref={sectionListRef}
+            scrollEnabled={scrollEnabled}
+            {...panResponder.panHandlers}
+          >
             {sectionOrder.map((key, idx) => {
               const label = SECTION_LABELS[key];
               const canMoveUp = idx > 0;
               const canMoveDown = idx < sectionOrder.length - 1;
+              const isDragging = dragIdx === idx;
               return (
-                <View
+                <Animated.View
                   key={key}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingVertical: spacing.sm,
-                    borderBottomWidth: 1,
-                    borderBottomColor: theme.border,
+                  style={[
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingVertical: spacing.sm,
+                      borderBottomWidth: 1,
+                      borderBottomColor: theme.border,
+                      zIndex: isDragging ? 10 : 1,
+                      elevation: isDragging ? 10 : 1,
+                      opacity: dragIdx !== null && !isDragging ? 0.5 : 1,
+                    },
+                    isDragging && { transform: [{ translateY: dragY }] },
+                  ]}
+                  onLayout={(e) => {
+                    itemHeights.current[idx] = e.nativeEvent.layout.height;
                   }}
                 >
                   <View
                     style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 }}
                   >
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Drag ${label} to reorder`}
+                      onLongPress={() => startDrag(idx)}
+                      onPressIn={() => {
+                        itemHeights.current[idx] = ITEM_HEIGHT;
+                      }}
+                      style={{ padding: spacing.xxs, cursor: 'grab' } as any}
+                    >
+                      <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>≡</Text>
+                    </Pressable>
                     <Text style={{ color: theme.text, fontSize: fontSize.base, flex: 1 }}>
                       {t(`dashboardCustomizer.section.${key}` as const, label)}
                     </Text>
@@ -229,7 +330,7 @@ export function DashboardCustomizer({
                     trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
                     thumbColor={visibleSections[key] ? theme.primary : theme.textMuted}
                   />
-                </View>
+                </Animated.View>
               );
             })}
             <View

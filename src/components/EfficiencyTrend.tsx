@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { LineChart } from 'react-native-chart-kit';
+import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { toHashesPerSecond } from '../utils/hashrate';
@@ -59,7 +59,7 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
       accessibilityLabel={t('efficiencyTrend.average', { avg: avg.toFixed(1) })}
       style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
     >
-      <LineChart
+      <LazyLineChart
         data={{
           labels,
           datasets: [{ data: values, color: () => theme.primary, strokeWidth: 2 }],
