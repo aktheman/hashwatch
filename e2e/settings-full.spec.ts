@@ -17,7 +17,7 @@ test.describe('Settings Full', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await expect(page.getByText(/plan/i).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Plan').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('shows power cost input', async ({ page }) => {
