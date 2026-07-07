@@ -1,0 +1,32 @@
+import { test, expect } from '@playwright/test';
+import { seedLocalStorage } from './helpers';
+
+test.describe('Miner Comparison', () => {
+  test('enters selection mode and compares two miners', async ({ page }) => {
+    await seedLocalStorage(page);
+    await page.getByRole('button', { name: /compare miners/i }).click({ timeout: 15000 });
+    await page.getByText('Miner Alpha').first().click();
+    await page.getByText('Miner Beta').first().click();
+    await page.getByRole('button', { name: /compare/i, exact: true }).click({ timeout: 15000 });
+    await expect(page.getByText('Miner Alpha')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Miner Beta')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/hashrate/i)).toBeVisible({ timeout: 15000 });
+  });
+
+  test('Compare button is disabled with single miner selected', async ({ page }) => {
+    await seedLocalStorage(page);
+    await page.getByRole('button', { name: /compare miners/i }).click({ timeout: 15000 });
+    await page.getByText('Miner Alpha').first().click();
+    const compareBtn = page.getByRole('button', { name: /compare/i, exact: true });
+    await expect(compareBtn).toBeDisabled({ timeout: 5000 });
+  });
+
+  test('cancel selection exits selection mode', async ({ page }) => {
+    await seedLocalStorage(page);
+    await page.getByRole('button', { name: /compare miners/i }).click({ timeout: 15000 });
+    await page.getByRole('button', { name: /cancel selection/i }).click({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /compare miners/i })).toBeVisible({
+      timeout: 5000,
+    });
+  });
+});

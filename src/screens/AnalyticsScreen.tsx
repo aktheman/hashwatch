@@ -17,7 +17,7 @@ import {
   fetchNetworkHashrate,
 } from '../utils/hashrate';
 import * as DB from '../db/database';
-import { LineChart } from 'react-native-chart-kit';
+import { LazyLineChart } from '../components/LazyLineChart';
 import { useWindowDimensions } from 'react-native';
 
 interface ChartDataWithLegend {
@@ -798,7 +798,7 @@ export function AnalyticsScreen() {
             </View>
           ) : chartView === 'hashrate' && chartData ? (
             <>
-              <LineChart
+              <LazyLineChart
                 data={chartData}
                 width={screenWidth - 64}
                 height={200}
@@ -828,7 +828,7 @@ export function AnalyticsScreen() {
             </>
           ) : chartView === 'uptime' && uptimeChartData ? (
             <>
-              <LineChart
+              <LazyLineChart
                 data={uptimeChartData}
                 width={screenWidth - 64}
                 height={200}
@@ -860,7 +860,7 @@ export function AnalyticsScreen() {
             </>
           ) : chartView === 'efficiency' && efficiencyChartData ? (
             <>
-              <LineChart
+              <LazyLineChart
                 data={efficiencyChartData}
                 width={screenWidth - 64}
                 height={200}
@@ -892,7 +892,7 @@ export function AnalyticsScreen() {
             </>
           ) : chartView === 'profit' && profitChartData ? (
             <>
-              <LineChart
+              <LazyLineChart
                 data={profitChartData}
                 width={screenWidth - 64}
                 height={200}

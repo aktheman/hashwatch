@@ -15,6 +15,11 @@ jest.mock('../middleware/auth', () => {
   };
 });
 
+const mockListPoolStats = jest.fn();
+jest.mock('../services/minerState', () => ({
+  listPoolStats: mockListPoolStats,
+}));
+
 import { minersRouter } from '../routes/miners';
 
 const app = express();
@@ -225,6 +230,68 @@ describe('POST /api/miners/:minerId/notes', () => {
     mockQuery.mockRejectedValueOnce(new Error('DB down'));
 
     const res = await request(app).post('/api/miners/m1/notes').send({ text: 'x' });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
+});
+
+describe('GET /api/miners/pools', () => {
+  it('returns pool stats', async () => {
+    const fakePoolStats = [
+      { pool: 'pool1', minerCount: 2, totalHashrate: 150.5, miners: ['m1', 'm2'] },
+      { pool: 'pool2', minerCount: 1, totalHashrate: 75.0, miners: ['m3'] },
+    ];
+    mockListPoolStats.mockReturnValueOnce(fakePoolStats);
+
+    const res = await request(app).get('/api/miners/pools');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      { id: '0', pool: 'pool1', minerCount: 2, totalHashrate: 150.5, miners: ['m1', 'm2'] },
+      { id: '1', pool: 'pool2', minerCount: 1, totalHashrate: 75.0, miners: ['m3'] },
+    ]);
+  });
+
+  it('returns 500 on unexpected error', async () => {
+    mockListPoolStats.mockImplementationOnce(() => {
+      throw new Error('something broke');
+    });
+
+    const res = await request(app).get('/api/miners/pools');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('internal server error');
+  });
+});
+
+describe('DELETE /api/miners/:minerId/notes/:noteId', () => {
+  it('deletes a note', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'note-1' }] });
+
+    const res = await request(app).delete('/api/miners/m1/notes/note-1');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ deleted: true });
+    expect(mockQuery).toHaveBeenCalledWith(
+      'DELETE FROM miner_notes WHERE id = $1 AND minerId = $2 AND userId = $3 RETURNING id',
+      ['note-1', 'm1', 'test-user-id'],
+    );
+  });
+
+  it('returns 404 when note not found', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).delete('/api/miners/m1/notes/nonexistent');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('note not found');
+  });
+
+  it('returns 500 on unexpected error', async () => {
+    mockQuery.mockRejectedValueOnce(new Error('DB down'));
+
+    const res = await request(app).delete('/api/miners/m1/notes/note-1');
 
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('internal server error');

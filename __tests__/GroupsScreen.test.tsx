@@ -73,8 +73,8 @@ beforeEach(() => {
 });
 
 it('renders groups header', async () => {
-  await render(<GroupsScreen />);
-  expect(screen.getByText('groups.title')).toBeTruthy();
+  const r = await render(<GroupsScreen />);
+  expect(r.getByText('groups.title')).toBeTruthy();
 });
 
 it('shows all groups with miner counts', async () => {

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LineChart } from 'react-native-chart-kit';
+import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
@@ -104,7 +104,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
     <View style={styles.container} accessibilityLabel={t('fanChart.title', 'Fan Speed History')}>
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartWrapper}>
-        <LineChart
+        <LazyLineChart
           data={{
             labels: filteredLabels,
             datasets: [{ data: rpmValues, color: lineColor }],

@@ -145,8 +145,8 @@ beforeEach(() => {
 });
 
 it('renders settings title', async () => {
-  await render(<SettingsScreen navigation={navigation} />);
-  expect(await screen.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();
+  const r = await render(<SettingsScreen navigation={navigation} />);
+  expect(await r.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();
 }, 20000);
 
 it('shows plan as Free by default', async () => {
