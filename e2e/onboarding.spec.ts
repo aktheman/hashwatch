@@ -18,8 +18,10 @@ test.describe('Onboarding', () => {
   test('can navigate slides and reach get started', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await expect(page.getByText('Monitor Your BitAxe').first()).toBeVisible({ timeout: 15000 });
     for (let i = 0; i < 3; i++) {
       await page.getByText('Next').first().click({ force: true });
+      await page.waitForTimeout(300);
     }
     await expect(page.getByText('Get Started').first()).toBeVisible({ timeout: 10000 });
     await page.getByText('Get Started').first().click({ force: true });

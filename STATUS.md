@@ -1,25 +1,25 @@
 # STATUS
 
-## Session Summary (2026-07-07 — Round 8)
+## Session Summary (2026-07-08 — Round 9)
 
 ### Done
 
-- **PanResponder/ScrollView conflict fix**: Added `scrollEnabled` state to DashboardCustomizer — scroll disabled during drag, re-enabled on release/terminate. Fixed stale closure bug in PanResponder callbacks using `sectionOrderRef`/`dragIdxRef` refs (the `useRef(PanResponder.create(...))` closure captured initial values only, causing incorrect reorder after first swap).
+- **Interval `.unref()` fixes**: Added proper `.unref()` guards to remaining intervals in `TimeAgo.tsx`, `DashboardScreen.tsx` (autoScanInterval), and `miners.ts` (startPolling interval). Uses `typeof === 'object' && 'unref' in id` pattern to avoid ESLint `no-explicit-any` warnings while correctly handling Node.js Timeout objects.
 
-- **DashboardScreen cleanup**: Removed unused `sectionOrder` state (set but never read). Removed unused `SECTION_LABELS` import. Fixed `DB.setSetting` prefix missing in `onReorder` callback.
+- **E2E test hardening**: Updated 17 E2E test files to use `seedLocalStorage` over `skipOnboarding`, added `last_seen_version: '1.1.0'` to seeded settings, replaced i18n key selectors with English text, switched from `first()` to `last()` for duplicate text matching, replaced fragile `locator('text=...')` with `getByRole`/`getByLabel` selectors.
 
-- **E2E test coverage**: Added `e2e/settings-full.spec.ts` with 10 tests for Settings screen: theme section, plan status, power cost, import/export, Groups navigation, Wallets navigation, Import Data screen, subscription, notification history, alert history.
-
-- **All prior work from Round 7 also included**: PanResponder drag-to-reorder, expo-modules-core mock fix, LazyLineChart lazy loading, backend notification-history endpoints + tests, modified GroupsScreen/SettingsScreen tests (screen singleton fix).
+- **AppNavigator animation fix**: Added `animation: 'none'` to Stack navigator options to prevent native stack animation issues.
 
 ### Test Results
 
-- **Frontend**: 1166 tests passing, 83 suites
-- **Backend**: 178 tests passing, 19 suites
+- **Frontend**: 1170 tests passing, 83 suites (no regressions)
 - **TypeScript**: clean (0 errors)
 - **ESLint**: 0 errors, 0 warnings
+- **E2E web build**: 57 passed, 10 failed (API backend not running, dashboard-load port mismatch, onboarding pre-existing)
 
 ### Remaining
 
-- TimeAgo.tsx still causes a Jest worker warning (pre-existing, `.unref()` needed on interval)
-- E2E web build verification needed (requires `npx expo export --platform web && npx playwright test`)
+- Jest worker process exit warning persists (pre-existing, interval IDs are numbers in RN/Jest env so `.unref()` is never called)
+- E2E: dashboard-load tests target port 8081 (expo dev) not 4173 (static build)
+- E2E: onboarding "Get Started" text not found on last slide
+- Backend tests: need `cd backend && npx jest --no-coverage`
