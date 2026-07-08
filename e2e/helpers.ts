@@ -1,4 +1,22 @@
-import { Page } from '@playwright/test';
+import { Page, APIRequestContext } from '@playwright/test';
+
+let _apiAvailable = false;
+
+export function isApiAvailable(): boolean {
+  return _apiAvailable;
+}
+
+export async function probeApi(requestCtx: APIRequestContext, apiUrl: string): Promise<void> {
+  try {
+    const res = await requestCtx.get(`${apiUrl}/health`, { timeout: 3000 });
+    if (res.status() === 200) {
+      const body = await res.json();
+      _apiAvailable = body.status === 'ok' && body.db === 'connected';
+    }
+  } catch {
+    _apiAvailable = false;
+  }
+}
 
 export async function seedLocalStorage(page: Page): Promise<void> {
   await page.goto('/');

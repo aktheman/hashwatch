@@ -1,6 +1,6 @@
 const {
   app, BrowserWindow, Menu, Tray, nativeImage,
-  ipcMain, dialog, Notification,
+  ipcMain, dialog, Notification, autoUpdater,
 } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -226,16 +226,42 @@ if (!gotTheLock) {
 
     ipcMain.handle('app:getVersion', () => app.getVersion());
 
+    function setupAutoUpdater() {
+      const repo = 'aktheman/hashwatch';
+      const feedURL = `https://github.com/${repo}/releases/latest/download`;
+      autoUpdater.setFeedURL({ url: feedURL });
+
+      autoUpdater.on('update-available', (info) => {
+        if (mainWindow) {
+          mainWindow.webContents.send('update:available', {
+            version: info.version,
+            url: `https://github.com/${repo}/releases/tag/v${info.version}`,
+          });
+        }
+      });
+
+      autoUpdater.on('update-downloaded', () => {
+        if (mainWindow) {
+          mainWindow.webContents.send('update:downloaded');
+        }
+      });
+
+      autoUpdater.on('error', (_err) => {
+        // silent — updates are non-critical
+      });
+    }
+
     ipcMain.on('app:checkForUpdate', () => {
-      // Triggered from renderer; in production this would invoke auto-updater.
-      // For now, simulate the event so preload listener fires.
-      if (mainWindow) {
-        mainWindow.webContents.send('update:available', {
-          version: app.getVersion(),
-          url: 'https://github.com/user/hashwatch/releases',
-        });
-      }
+      autoUpdater.checkForUpdates().catch(() => {
+        // silent
+      });
     });
+
+    ipcMain.on('app:installUpdate', () => {
+      autoUpdater.quitAndInstall(false, true);
+    });
+
+    setupAutoUpdater();
   });
 
   app.on('window-all-closed', () => {
