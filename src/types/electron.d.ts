@@ -11,7 +11,9 @@ interface ElectronAPI {
   sendNotification: (title: string, body: string) => void;
   getAppVersion: () => Promise<string>;
   checkForUpdate: () => void;
+  installUpdate: () => void;
   onCheckForUpdate: (callback: (info: { version: string; url: string }) => void) => () => void;
+  onUpdateDownloaded: (callback: () => void) => () => void;
   onNavigate: (callback: (route: string) => void) => () => void;
 }
 
