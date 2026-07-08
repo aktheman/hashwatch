@@ -213,6 +213,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         scanNetwork();
       }
     }, 300000);
+    if (
+      typeof autoScanInterval === 'object' &&
+      autoScanInterval !== null &&
+      'unref' in autoScanInterval
+    ) {
+      (autoScanInterval as { unref: () => void }).unref();
+    }
     const unsubReconnect = (async () => {
       try {
         const { onNetworkReconnect } = await import('../services/networkStatus');

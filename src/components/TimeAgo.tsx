@@ -11,7 +11,9 @@ export function TimeAgo({ timestamp, style }: TimeAgoProps) {
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
-    if (typeof id === 'object' && 'unref' in id) id.unref();
+    if (typeof id === 'object' && id !== null && 'unref' in id) {
+      (id as { unref: () => void }).unref();
+    }
     return () => clearInterval(id);
   }, []);
 

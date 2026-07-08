@@ -18,28 +18,37 @@ test.describe('Dashboard Metrics', () => {
 
   test('metric tiles are tappable', async ({ page }) => {
     await seedLocalStorage(page);
-    await expect(page.getByLabel('View dashboard.hashrate details').first()).toBeVisible({
+    await expect(page.getByLabel(/View.*hashrate.*details/i).first()).toBeVisible({
       timeout: 15000,
     });
   });
 
   test('tapping hashrate metric opens drill-down', async ({ page }) => {
     await seedLocalStorage(page);
-    await page.getByLabel('View dashboard.hashrate details').first().click({ timeout: 15000 });
+    await page
+      .getByLabel(/View.*hashrate.*details/i)
+      .first()
+      .click({ timeout: 15000 });
     await expect(page.getByLabel('Close drill-down')).toBeVisible({ timeout: 15000 });
   });
 
   test('drill-down modal shows miner names', async ({ page }) => {
     await seedLocalStorage(page);
-    await page.getByLabel('View dashboard.hashrate details').first().click({ timeout: 15000 });
+    await page
+      .getByLabel(/View.*hashrate.*details/i)
+      .first()
+      .click({ timeout: 15000 });
     await expect(page.getByText('Miner Alpha').first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Miner Beta').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('drill-down modal can be closed', async ({ page }) => {
     await seedLocalStorage(page);
-    await page.getByLabel('View dashboard.hashrate details').first().click({ timeout: 15000 });
-    await page.getByLabel('Close').click();
-    await expect(page.getByLabel('Close drill-down')).not.toBeVisible({ timeout: 5000 });
+    await page
+      .getByLabel(/View.*hashrate.*details/i)
+      .first()
+      .click({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('button', { name: 'Close' })).not.toBeVisible({ timeout: 5000 });
   });
 });

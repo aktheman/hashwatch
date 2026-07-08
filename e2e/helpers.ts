@@ -56,6 +56,7 @@ export async function seedLocalStorage(page: Page): Promise<void> {
         auto_scan: 'false',
         power_cost: '0.12',
         onboarding_complete: 'true',
+        last_seen_version: '1.1.0',
       }),
     );
     localStorage.setItem(
@@ -81,7 +82,10 @@ export async function clearLocalStorage(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
   await page.evaluate(() => {
     localStorage.clear();
-    localStorage.setItem('hashwatch_settings', JSON.stringify({ onboarding_complete: 'true' }));
+    localStorage.setItem(
+      'hashwatch_settings',
+      JSON.stringify({ onboarding_complete: 'true', last_seen_version: '1.1.0' }),
+    );
   });
   await page.reload();
   await page.waitForLoadState('networkidle');
@@ -91,7 +95,10 @@ export async function skipOnboarding(page: Page): Promise<void> {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
   await page.evaluate(() => {
-    localStorage.setItem('hashwatch_settings', JSON.stringify({ onboarding_complete: 'true' }));
+    localStorage.setItem(
+      'hashwatch_settings',
+      JSON.stringify({ onboarding_complete: 'true', last_seen_version: '1.1.0' }),
+    );
   });
   await page.reload();
   await page.waitForLoadState('networkidle');

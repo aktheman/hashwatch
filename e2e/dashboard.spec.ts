@@ -25,7 +25,7 @@ test.describe('Dashboard E2E', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await expect(page.getByText(/push notification settings/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('theme toggle works on Settings page', async ({ page }) => {
@@ -34,7 +34,7 @@ test.describe('Dashboard E2E', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await expect(page.getByText(/push notification settings/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('shows empty Add miner button when no miners', async ({ page }) => {

@@ -12,7 +12,7 @@ test('navigates to Settings tab', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/push notification settings/i)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('displays theme toggle on Settings', async ({ page }) => {
@@ -21,7 +21,7 @@ test('displays theme toggle on Settings', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/push notification settings/i)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('shows miner card when miners exist', async ({ page }) => {

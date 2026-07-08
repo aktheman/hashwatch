@@ -295,6 +295,9 @@ export const useMinerStore = create<MinersState>((set, get) => ({
 
     get().refreshAll();
     interval = setInterval(tick, intervalMs);
+    if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
+      (interval as { unref: () => void }).unref();
+    }
 
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {

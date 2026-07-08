@@ -1,13 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedLocalStorage } from './helpers';
 
 test('analytics page loads and shows summary', async ({ page }) => {
-  await page.goto('/analytics');
-  await expect(page.locator('text=Hashrate History').first()).toBeVisible({ timeout: 10000 });
+  await seedLocalStorage(page);
+  await page.getByRole('tab', { name: /analytics/i }).click({ timeout: 10000 });
+  await expect(page.getByText(/hashrate.?history/i).first()).toBeVisible({ timeout: 10000 });
 });
 
 test('chart range selector switches tabs', async ({ page }) => {
-  await page.goto('/analytics');
-  await page.locator('button:has-text("7d")').first().click();
+  await seedLocalStorage(page);
+  await page.getByRole('tab', { name: /analytics/i }).click({ timeout: 10000 });
+  await page.getByRole('button', { name: /7 days/i }).click({ timeout: 5000 });
   await page.waitForTimeout(500);
-  await expect(page.locator('button:has-text("7d")').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /7 days/i }).first()).toBeVisible();
 });
