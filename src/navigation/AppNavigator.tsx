@@ -203,6 +203,7 @@ export function AppNavigator() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700', fontSize: 17 },
           contentStyle: { backgroundColor: theme.bg },
+          animation: 'none',
         }}
       >
         <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />

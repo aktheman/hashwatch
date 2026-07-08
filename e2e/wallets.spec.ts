@@ -8,8 +8,8 @@ test.describe('Wallets Screen', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await page.getByText('Wallets').first().click({ force: true });
-    await expect(page.getByText('Wallets').first()).toBeVisible({ timeout: 10000 });
+    await page.getByText('Wallets').last().click({ force: true });
+    await expect(page.getByText('Wallets').last()).toBeVisible({ timeout: 10000 });
   });
 
   test('shows seeded wallet', async ({ page }) => {
@@ -18,8 +18,8 @@ test.describe('Wallets Screen', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await page.getByText('Wallets').first().click({ force: true });
-    await expect(page.getByText('Main Wallet').first()).toBeVisible({ timeout: 10000 });
+    await page.getByText('Wallets').last().click({ force: true });
+    await expect(page.getByText('Main Wallet').last()).toBeVisible({ timeout: 10000 });
   });
 
   test('shows empty state when no wallets', async ({ page }) => {
@@ -28,7 +28,7 @@ test.describe('Wallets Screen', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await page.getByText('Wallets').first().click({ force: true });
+    await page.getByText('Wallets').last().click({ force: true });
     await expect(page.getByText('No Wallets').first()).toBeVisible({ timeout: 10000 });
   });
 });

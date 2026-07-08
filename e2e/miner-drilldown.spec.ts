@@ -8,7 +8,7 @@ test.describe('Miner Drill Down', () => {
       .getByRole('button', { name: /time range/i })
       .first()
       .waitFor({ timeout: 15000 });
-    const tiles = page.getByText('dashboard.hashrate');
+    const tiles = page.getByText(/Hashrate|dashboard\.hashrate/);
     await tiles.first().click({ timeout: 15000 });
     await expect(page.getByRole('button', { name: /close/i })).toBeVisible({ timeout: 10000 });
   });
@@ -19,7 +19,7 @@ test.describe('Miner Drill Down', () => {
       .getByRole('button', { name: /time range/i })
       .first()
       .waitFor({ timeout: 15000 });
-    const tiles = page.getByText('dashboard.hashrate');
+    const tiles = page.getByText(/Hashrate|dashboard\.hashrate/);
     await tiles.first().click({ timeout: 15000 });
     await page.getByRole('button', { name: /close/i }).click({ timeout: 5000 });
     await expect(page.getByRole('button', { name: /close/i })).not.toBeVisible({ timeout: 5000 });

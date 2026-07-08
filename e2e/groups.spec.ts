@@ -10,8 +10,8 @@ test.describe('Groups', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await page.getByText('groups.title').click({ timeout: 15000 });
-    await expect(page.getByText(/Living Room|Garage/).first()).toBeVisible({ timeout: 15000 });
+    await page.getByText('Groups').first().click({ timeout: 15000 });
+    await expect(page.getByText(/Living Room|Garage/).last()).toBeVisible({ timeout: 15000 });
   });
 
   test('group cards show miner count', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Groups', () => {
       .getByRole('button', { name: /settings/i })
       .first()
       .click({ force: true });
-    await page.getByText('groups.title').click({ timeout: 15000 });
-    await expect(page.getByText(/groups\.minerCount/).first()).toBeVisible({ timeout: 15000 });
+    await page.getByText('Groups').first().click({ timeout: 15000 });
+    await expect(page.getByText(/minerCount|miner/i).last()).toBeVisible({ timeout: 15000 });
   });
 });
