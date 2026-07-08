@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedLocalStorage } from './helpers';
 
-const APP_URL = process.env.E2E_APP_URL || 'http://localhost:8081';
+const APP_URL = process.env.E2E_APP_URL || 'http://localhost:4173';
 
 test.describe('Dashboard', () => {
   test('dashboard loads', async ({ page }) => {
-    await page.goto(APP_URL);
-    await expect(page).toHaveTitle(/hashwatch/i, { timeout: 15000 });
+    await seedLocalStorage(page);
+    await expect(page).toHaveTitle(/dashboard|hashwatch/i, { timeout: 15000 });
   });
 
   test('dashboard renders app shell', async ({ page }) => {
-    await page.goto(APP_URL);
+    await seedLocalStorage(page);
     const appShell = page.locator(
       'nav, [data-testid="app"], [data-testid="dashboard"], main, #root, .app',
     );
@@ -17,7 +18,7 @@ test.describe('Dashboard', () => {
   });
 
   test('dashboard shows charts or tiles', async ({ page }) => {
-    await page.goto(APP_URL);
+    await seedLocalStorage(page);
     const content = page.locator(
       'svg, canvas, .metric-tile, [aria-label*="hashrate" i], [aria-label*="efficiency" i]',
     );

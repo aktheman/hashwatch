@@ -30,12 +30,16 @@ export function OnboardingScreen({ onComplete }: Props) {
     { icon: '⭐', title: t('onboarding.slide4Title'), subtitle: t('onboarding.slide4Body') },
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const currentIndexRef = useRef(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
   const handleNext = async () => {
-    if (currentIndex < slides.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+    if (currentIndexRef.current < slides.length - 1) {
+      const nextIndex = currentIndexRef.current + 1;
+      currentIndexRef.current = nextIndex;
+      setCurrentIndex(nextIndex);
+      flatListRef.current?.scrollToIndex({ index: nextIndex });
     } else {
       await setSetting('onboarding_complete', 'true');
       onComplete();
@@ -53,7 +57,10 @@ export function OnboardingScreen({ onComplete }: Props) {
 
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / width);
-    setCurrentIndex(idx);
+    if (idx !== currentIndexRef.current) {
+      currentIndexRef.current = idx;
+      setCurrentIndex(idx);
+    }
   };
 
   const isLast = currentIndex === slides.length - 1;
