@@ -22,7 +22,13 @@ import {
   clearThemeSchedule,
 } from '../theme';
 import { getSetting, setSetting } from '../db/database';
-import { exportAllData, exportJSON, exportMinerStatusCSV, importFromCSV } from '../utils/export';
+import {
+  exportAllData,
+  exportJSON,
+  exportMinerStatusCSV,
+  importFromCSV,
+  previewCSV,
+} from '../utils/export';
 import { exportBackup, importBackup } from '../services/backup';
 import { setProxyUrl, getProxyUrl } from '../constants';
 import { putSetting as putRemoteSetting } from '../api/client';
@@ -138,6 +144,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const powerCostDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [csvInput, setCsvInput] = useState('');
+  const [csvPreview, setCsvPreview] = useState<{ name: string; ip: string; port: number }[] | null>(
+    null,
+  );
   const [showCsvImport, setShowCsvImport] = useState(false);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<string | null>(null);
@@ -1087,82 +1096,156 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
               {t('settings.csvHelp')}
             </Text>
-            <TextInput
-              style={{
-                backgroundColor: theme.surface,
-                borderRadius: radius.md,
-                padding: 12,
-                color: theme.text,
-                fontFamily: 'monospace',
-                fontSize: fontSize.sm,
-                minHeight: 100,
-                borderWidth: 1,
-                borderColor: theme.border,
-              }}
-              value={csvInput}
-              onChangeText={setCsvInput}
-              multiline
-              placeholder={t('settings.csvPlaceholder')}
-              placeholderTextColor={theme.textMuted}
-            />
-            <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Import CSV data"
-                style={{
-                  flex: 1,
-                  backgroundColor: theme.primary,
-                  borderRadius: radius.md,
-                  padding: 12,
-                  alignItems: 'center',
-                }}
-                onPress={async () => {
-                  const result = await importFromCSV(csvInput);
-                  Alert.alert(
-                    t('settings.importComplete'),
-                    `${t('settings.import')}: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
-                    [{ text: 'OK' }],
-                  );
-                  if (result.errors.length > 0) {
-                    console.warn('CSV import errors:', result.errors);
-                  }
-                  setShowCsvImport(false);
-                  setCsvInput('');
-                }}
-              >
-                <Text
-                  style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.base }}
-                >
-                  {t('settings.import')}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cancel CSV import"
-                style={{
-                  backgroundColor: theme.surfaceLight,
-                  borderRadius: radius.md,
-                  padding: 12,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: theme.border,
-                }}
-                onPress={() => {
-                  setShowCsvImport(false);
-                  setCsvInput('');
-                }}
-              >
-                <Text
+            {csvPreview ? (
+              <>
+                <View
                   style={{
-                    color: theme.text,
-                    fontWeight: fontWeight.semibold,
-                    fontSize: fontSize.base,
+                    backgroundColor: theme.surface,
+                    borderRadius: radius.md,
+                    padding: spacing.sm,
+                    borderWidth: 1,
+                    borderColor: theme.border,
                   }}
                 >
-                  {t('settings.cancel')}
-                </Text>
-              </Pressable>
-            </View>
+                  <Text style={{ color: theme.text, fontWeight: fontWeight.bold, marginBottom: 4 }}>
+                    Preview ({csvPreview.length} miners)
+                  </Text>
+                  {csvPreview.slice(0, 5).map((m, i) => (
+                    <Text key={i} style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+                      {m.name} @ {m.ip}:{m.port}
+                    </Text>
+                  ))}
+                  {csvPreview.length > 5 && (
+                    <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: 2 }}>
+                      ...and {csvPreview.length - 5} more
+                    </Text>
+                  )}
+                </View>
+                <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Confirm CSV import"
+                    style={{
+                      flex: 1,
+                      backgroundColor: theme.primary,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      alignItems: 'center',
+                    }}
+                    onPress={async () => {
+                      const result = await importFromCSV(csvInput);
+                      Alert.alert(
+                        t('settings.importComplete'),
+                        `${t('settings.import')}: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
+                        [{ text: 'OK' }],
+                      );
+                      if (result.errors.length > 0) {
+                        console.warn('CSV import errors:', result.errors);
+                      }
+                      setShowCsvImport(false);
+                      setCsvInput('');
+                      setCsvPreview(null);
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontWeight: fontWeight.bold,
+                        fontSize: fontSize.base,
+                      }}
+                    >
+                      {t('settings.confirmImport')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    style={{
+                      backgroundColor: theme.surfaceLight,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      alignItems: 'center',
+                    }}
+                    onPress={() => setCsvPreview(null)}
+                  >
+                    <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
+                      {t('settings.edit')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <>
+                <TextInput
+                  style={{
+                    backgroundColor: theme.surface,
+                    borderRadius: radius.md,
+                    padding: 12,
+                    color: theme.text,
+                    fontFamily: 'monospace',
+                    fontSize: fontSize.sm,
+                    minHeight: 100,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                  value={csvInput}
+                  onChangeText={setCsvInput}
+                  multiline
+                  placeholder={t('settings.csvPlaceholder')}
+                  placeholderTextColor={theme.textMuted}
+                />
+                <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Preview CSV data"
+                    style={{
+                      flex: 1,
+                      backgroundColor: theme.primary,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      alignItems: 'center',
+                    }}
+                    onPress={() => {
+                      const preview = previewCSV(csvInput);
+                      if (preview.errors.length > 0) {
+                        Alert.alert('CSV Errors', preview.errors.join('\n'));
+                      }
+                      if (preview.valid.length > 0) {
+                        setCsvPreview(preview.valid);
+                      } else {
+                        Alert.alert(
+                          'No valid rows',
+                          'Check that your CSV has "name" and "ip" columns.',
+                        );
+                      }
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontWeight: fontWeight.bold,
+                        fontSize: fontSize.base,
+                      }}
+                    >
+                      {t('settings.preview')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    style={{
+                      backgroundColor: theme.surfaceLight,
+                      borderRadius: radius.md,
+                      padding: 12,
+                      alignItems: 'center',
+                    }}
+                    onPress={() => setShowCsvImport(false)}
+                  >
+                    <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
+                      {t('settings.cancel')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </View>
         )}
       </View>

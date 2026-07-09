@@ -348,6 +348,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const setMinerLocation = useMinerStore((s) => s.setMinerLocation);
   const setMinerTags = useMinerStore((s) => s.setMinerTags);
   const setMinerNotes = useMinerStore((s) => s.setMinerNotes);
+  const setMinerMaintenance = useMinerStore((s) => s.setMinerMaintenance);
   const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -1482,6 +1483,35 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.actionBtnIcon}>🔄</Text>
             <Text style={[styles.actionBtnText, { color: theme.warning }]}>
               {t('minerDetail.restartMiner')}
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              miner.maintenanceMode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'
+            }
+            style={[
+              styles.actionBtn,
+              {
+                backgroundColor: miner.maintenanceMode
+                  ? theme.success + '15'
+                  : theme.warning + '15',
+                borderColor: miner.maintenanceMode ? theme.success + '30' : theme.warning + '30',
+                marginBottom: 12,
+              },
+            ]}
+            onPress={() => setMinerMaintenance(miner.id, !miner.maintenanceMode)}
+          >
+            <Text style={styles.actionBtnIcon}>{miner.maintenanceMode ? '✅' : '🔧'}</Text>
+            <Text
+              style={[
+                styles.actionBtnText,
+                { color: miner.maintenanceMode ? theme.success : theme.warning },
+              ]}
+            >
+              {miner.maintenanceMode
+                ? t('minerDetail.maintenanceOn')
+                : t('minerDetail.maintenanceOff')}
             </Text>
           </Pressable>
           <Text style={[styles.sectionTitle, { color: theme.danger }]}>

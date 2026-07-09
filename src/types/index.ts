@@ -60,6 +60,7 @@ export interface Miner {
   lastSeen?: number;
   addedAt?: number;
   isOnline: boolean;
+  maintenanceMode?: boolean;
   notes?: string;
 }
 

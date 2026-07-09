@@ -1,9 +1,19 @@
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet, RefreshControl, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useNotificationHistoryStore, PushNotificationEntry } from '../store/notificationHistory';
+import { useAuthStore } from '../store/auth';
 import { NavigationProp } from '../types';
 
 const STATUS_ICONS: Record<string, string> = {
@@ -54,19 +64,31 @@ export function NotificationHistoryScreen({
   const theme = useTheme();
   const { t } = useTranslation();
   const history = useNotificationHistoryStore((s) => s.history);
+  const syncing = useNotificationHistoryStore((s) => s.syncing);
   const loadHistory = useNotificationHistoryStore((s) => s.loadHistory);
   const clearHistory = useNotificationHistoryStore((s) => s.clearHistory);
+  const syncFromBackend = useNotificationHistoryStore((s) => s.syncFromBackend);
+  const syncToBackend = useNotificationHistoryStore((s) => s.syncToBackend);
+  const isAuthed = !!useAuthStore.getState().token;
 
   useEffect(() => {
     loadHistory();
-  }, [loadHistory]);
+    if (isAuthed) {
+      syncFromBackend();
+      syncToBackend();
+    }
+  }, [loadHistory, isAuthed, syncFromBackend, syncToBackend]);
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadHistory();
+    if (isAuthed) {
+      await syncFromBackend();
+      await syncToBackend();
+    }
     setRefreshing(false);
-  }, [loadHistory]);
+  }, [loadHistory, isAuthed, syncFromBackend, syncToBackend]);
 
   const sections = useMemo(() => groupByDate(history), [history]);
 
@@ -103,6 +125,20 @@ export function NotificationHistoryScreen({
           color: theme.text,
           fontSize: fontSize.base,
           fontWeight: fontWeight.bold,
+        },
+        syncBtn: {
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
+          backgroundColor: theme.surface,
+          borderWidth: 1,
+          borderColor: theme.border,
+          marginRight: spacing.sm,
+        },
+        syncBtnText: {
+          color: theme.primary,
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
         },
         clearBtn: {
           paddingHorizontal: spacing.sm,
@@ -190,6 +226,20 @@ export function NotificationHistoryScreen({
           <Text style={styles.headerTitle}>
             {t('notificationHistory.title', 'Notification History')}
           </Text>
+          {isAuthed && (
+            <Pressable
+              accessibilityRole="button"
+              style={styles.syncBtn}
+              onPress={syncFromBackend}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <ActivityIndicator size="small" color={theme.primary} />
+              ) : (
+                <Text style={styles.syncBtnText}>{t('common.sync', 'Sync')}</Text>
+              )}
+            </Pressable>
+          )}
         </View>
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>🔔</Text>
@@ -207,16 +257,32 @@ export function NotificationHistoryScreen({
         <Text style={styles.headerTitle}>
           {t('notificationHistory.title', 'Notification History')}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('notificationHistory.clearAction', 'Clear history')}
-          style={styles.clearBtn}
-          onPress={handleClear}
-        >
-          <Text style={styles.clearBtnText}>
-            {t('notificationHistory.clearAction', 'Clear All')}
-          </Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {isAuthed && (
+            <Pressable
+              accessibilityRole="button"
+              style={styles.syncBtn}
+              onPress={syncFromBackend}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <ActivityIndicator size="small" color={theme.primary} />
+              ) : (
+                <Text style={styles.syncBtnText}>{t('common.sync', 'Sync')}</Text>
+              )}
+            </Pressable>
+          )}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('notificationHistory.clearAction', 'Clear history')}
+            style={styles.clearBtn}
+            onPress={handleClear}
+          >
+            <Text style={styles.clearBtnText}>
+              {t('notificationHistory.clearAction', 'Clear All')}
+            </Text>
+          </Pressable>
+        </View>
       </View>
       <FlatList
         data={sections}

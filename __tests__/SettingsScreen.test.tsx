@@ -73,6 +73,10 @@ jest.mock('../src/utils/export', () => ({
   exportJSON: jest.fn().mockResolvedValue(undefined),
   exportMinerStatusCSV: jest.fn().mockResolvedValue(undefined),
   importFromCSV: jest.fn().mockResolvedValue({ imported: 0, errors: [] }),
+  previewCSV: jest.fn().mockReturnValue({
+    valid: [{ name: 'M1', ip: '10.0.0.1', port: 80 }],
+    errors: [],
+  }),
 }));
 
 jest.mock('../src/services/backup', () => ({
@@ -524,7 +528,8 @@ it('calls importFromCSV on CSV import', async () => {
   await fireEvent.press(r.getByLabelText('Import CSV'));
   const input = r.getByPlaceholderText('settings.csvPlaceholder');
   await fireEvent.changeText(input, 'name,ip,port\nM1,10.0.0.1,80');
-  await fireEvent.press(r.getByLabelText('Import CSV data'));
+  await fireEvent.press(r.getByLabelText('Preview CSV data'));
+  await fireEvent.press(r.getByLabelText('Confirm CSV import'));
   await waitFor(() => {
     expect(importFromCSV).toHaveBeenCalledWith(expect.stringContaining('name,ip,port'));
   });
