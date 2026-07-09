@@ -150,6 +150,31 @@ minersRouter.post('/:minerId/notes', async (req: AuthRequest, res) => {
   }
 });
 
+const noteSchemaUpdate = z.object({
+  text: z.string().min(1).max(500),
+});
+
+minersRouter.put('/:minerId/notes/:noteId', async (req: AuthRequest, res) => {
+  try {
+    const { minerId, noteId } = req.params;
+    const data = noteSchemaUpdate.parse(req.body);
+    const result = await query(
+      `UPDATE miner_notes SET text = $1 WHERE id = $2 AND minerId = $3 AND userId = $4 RETURNING *`,
+      [data.text, noteId, minerId, getUserId(req)],
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'note not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (e: unknown) {
+    if (e instanceof z.ZodError) {
+      return res.status(400).json({ error: e.errors });
+    }
+    captureException(e);
+    res.status(500).json({ error: 'internal server error' });
+  }
+});
+
 minersRouter.delete('/:minerId/notes/:noteId', async (req: AuthRequest, res) => {
   try {
     const { minerId, noteId } = req.params;

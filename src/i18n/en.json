@@ -14,7 +14,10 @@
     "ok": "OK",
     "clear": "Clear",
     "online": "Online",
-    "offline": "Offline"
+    "offline": "Offline",
+    "close": "Close",
+    "success": "Success",
+    "error": "Error"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -64,7 +67,8 @@
     "location": "Location",
     "assignWallet": "Assign Wallet",
     "noWallet": "No Wallet",
-    "assignLocation": "Assign Location"
+    "assignLocation": "Assign Location",
+    "noData": "No data"
   },
   "dashboardCustomizer": {
     "title": "Customize Dashboard",
@@ -273,7 +277,10 @@
     "wifiNetwork": "WiFi",
     "wifiSignal": "Signal",
     "powerMode": "Mode",
-    "recentPoolChanges": "Recent Pool Changes"
+    "recentPoolChanges": "Recent Pool Changes",
+    "port": "Port",
+    "poolUpdated": "Pool updated",
+    "poolUpdateFailed": "Failed to update pool"
   },
   "addMiner": {
     "addByIp": "Add by IP",

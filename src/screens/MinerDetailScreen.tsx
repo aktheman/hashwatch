@@ -26,7 +26,7 @@ import { VoltageChart } from '../components/VoltageChart';
 import { FanChart } from '../components/FanChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
-import { fetchMinerNotes, addMinerNote, deleteMinerNote } from '../api/client';
+import { fetchMinerNotes, addMinerNote, deleteMinerNote, recordPoolChange } from '../api/client';
 import { useAuthStore } from '../store/auth';
 import { NotificationPrefs } from '../components/NotificationPrefs';
 import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
@@ -301,6 +301,14 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           fontWeight: fontWeight.bold,
           fontSize: fontSize.md,
         },
+        flashBtn: {
+          borderRadius: radius.md,
+          paddingVertical: spacing.sm,
+          paddingHorizontal: spacing.md,
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 40,
+        },
         confirmBox: {
           backgroundColor: theme.surface,
           borderRadius: radius.lg,
@@ -348,6 +356,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [editingIP, setEditingIP] = useState(false);
   const [editIPValue, setEditIPValue] = useState('');
+  const [editingPool, setEditingPool] = useState(false);
+  const [editPoolUrl, setEditPoolUrl] = useState('');
+  const [editPoolPort, setEditPoolPort] = useState('');
+  const [editPoolUser, setEditPoolUser] = useState('');
   const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [notes, setNotes] = useState<MinerNoteItem[]>([]);
@@ -1086,26 +1098,152 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.sectionIcon}>🌊</Text> {t('minerDetail.pool')}
           </Text>
           <View style={styles.poolCard}>
-            <View style={styles.poolRow}>
-              <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
-              <Text style={styles.poolValue}>
-                {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || t('common.na')}
-              </Text>
-            </View>
-            <View style={styles.poolDivider} />
-            <View style={styles.poolRow}>
-              <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
-              <Text style={styles.poolValue} selectable>
-                {s.poolUser || t('common.na')}
-              </Text>
-            </View>
-            <View style={styles.poolDivider} />
-            <View style={styles.poolRow}>
-              <Text style={styles.poolLabel}>{t('minerDetail.responseTime')}</Text>
-              <Text style={styles.poolValue}>
-                {s.poolResponseTime > 0 ? `${s.poolResponseTime.toFixed(0)} ms` : t('common.na')}
-              </Text>
-            </View>
+            {editingPool ? (
+              <View style={{ gap: spacing.sm }}>
+                <View>
+                  <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
+                  <TextInput
+                    style={[
+                      styles.poolValue,
+                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                    ]}
+                    value={editPoolUrl}
+                    onChangeText={setEditPoolUrl}
+                    placeholder="pool.example.com"
+                    placeholderTextColor={theme.textMuted}
+                    autoFocus
+                  />
+                </View>
+                <View>
+                  <Text style={styles.poolLabel}>{t('minerDetail.port', 'Port')}</Text>
+                  <TextInput
+                    style={[
+                      styles.poolValue,
+                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                    ]}
+                    value={editPoolPort}
+                    onChangeText={setEditPoolPort}
+                    placeholder="3333"
+                    placeholderTextColor={theme.textMuted}
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View>
+                  <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
+                  <TextInput
+                    style={[
+                      styles.poolValue,
+                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                    ]}
+                    value={editPoolUser}
+                    onChangeText={setEditPoolUser}
+                    placeholder="username.worker"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </View>
+                <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
+                  <Pressable
+                    style={[styles.flashBtn, { flex: 1, backgroundColor: theme.success }]}
+                    onPress={async () => {
+                      if (!editPoolUrl.trim()) return;
+                      const port = parseInt(editPoolPort, 10) || 3333;
+                      const user = editPoolUser.trim();
+                      const client = new BitAxeClient(
+                        miner.ip,
+                        miner.port,
+                        miner.apiPath ?? undefined,
+                        miner.statusPath ?? undefined,
+                      );
+                      const ok = await client.setPool(editPoolUrl.trim(), port, user);
+                      if (ok) {
+                        const prevPool = s.pool ? `${s.pool}:${s.poolPort || 3333}` : '';
+                        const newPool = `${editPoolUrl.trim()}:${port}`;
+                        try {
+                          await recordPoolChange(miner.id, prevPool, newPool, Date.now());
+                        } catch {}
+                        await refreshMiner(miner.id);
+                        Alert.alert(
+                          t('common.success', 'Success'),
+                          t('minerDetail.poolUpdated', 'Pool updated'),
+                        );
+                      } else {
+                        Alert.alert(
+                          t('common.error', 'Error'),
+                          t('minerDetail.poolUpdateFailed', 'Failed to update pool'),
+                        );
+                      }
+                      setEditingPool(false);
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: fontWeight.bold }}>
+                      {t('common.save')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.flashBtn, { flex: 1, backgroundColor: theme.surfaceLight }]}
+                    onPress={() => setEditingPool(false)}
+                  >
+                    <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
+                      {t('common.cancel')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <>
+                <View style={styles.poolRow}>
+                  <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flex: 1,
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <Text style={styles.poolValue}>
+                      {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || t('common.na')}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Change pool"
+                      onPress={() => {
+                        setEditPoolUrl(s.pool || '');
+                        setEditPoolPort(String(s.poolPort || 3333));
+                        setEditPoolUser(s.poolUser || '');
+                        setEditingPool(true);
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: fontSize.sm,
+                          color: theme.primary,
+                          marginLeft: spacing.sm,
+                        }}
+                      >
+                        {t('common.edit')}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+                <View style={styles.poolDivider} />
+                <View style={styles.poolRow}>
+                  <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
+                  <Text style={styles.poolValue} selectable>
+                    {s.poolUser || t('common.na')}
+                  </Text>
+                </View>
+                <View style={styles.poolDivider} />
+                <View style={styles.poolRow}>
+                  <Text style={styles.poolLabel}>{t('minerDetail.responseTime')}</Text>
+                  <Text style={styles.poolValue}>
+                    {s.poolResponseTime > 0
+                      ? `${s.poolResponseTime.toFixed(0)} ms`
+                      : t('common.na')}
+                  </Text>
+                </View>
+              </>
+            )}
           </View>
           <PoolChangeHistory minerId={miner.id} />
         </View>

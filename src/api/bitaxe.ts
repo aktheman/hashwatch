@@ -223,6 +223,34 @@ export class BitAxeClient {
     }
   }
 
+  async setPool(poolUrl: string, port: number, user: string): Promise<boolean> {
+    try {
+      const path = '/api/system/updatePool';
+      const body = { url: poolUrl, port, user };
+      if (isWeb) {
+        const headers: Record<string, string> = {};
+        const apiUrl = getExtra().apiUrl;
+        if (getProxyUrl() === apiUrl || getProxyUrl().startsWith(apiUrl)) {
+          const token = getAuthToken();
+          if (token) headers.Authorization = `Bearer ${token}`;
+        }
+        const { data } = await axios.post(
+          `${getProxyUrl()}/api/proxy/pool`,
+          {
+            minerUrl: `http://${formatIp(this.ip)}:${this.port}${path}`,
+            body,
+          },
+          { timeout: 10000, headers, validateStatus: () => true },
+        );
+        return data?.success === true;
+      }
+      await this.client.post(path, body, { timeout: 10000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async flashFirmware(url: string): Promise<boolean> {
     try {
       const path = '/api/system/ota';

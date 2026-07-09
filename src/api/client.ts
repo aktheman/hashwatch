@@ -281,6 +281,15 @@ export async function addMinerNote(minerId: string, text: string): Promise<Miner
   return res.data;
 }
 
+export async function updateMinerNote(
+  minerId: string,
+  noteId: number,
+  text: string,
+): Promise<MinerNoteItem> {
+  const res = await client.put<MinerNoteItem>(`/api/miners/${minerId}/notes/${noteId}`, { text });
+  return res.data;
+}
+
 export async function deleteMinerNote(
   minerId: string,
   noteId: number,

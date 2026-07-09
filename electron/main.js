@@ -1,7 +1,8 @@
 const {
   app, BrowserWindow, Menu, Tray, nativeImage,
-  ipcMain, dialog, Notification, autoUpdater,
+  ipcMain, dialog, Notification,
 } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
@@ -227,6 +228,8 @@ if (!gotTheLock) {
     ipcMain.handle('app:getVersion', () => app.getVersion());
 
     function setupAutoUpdater() {
+      if (isDev) return;
+
       const repo = 'aktheman/hashwatch';
       const feedURL = `https://github.com/${repo}/releases/latest/download`;
       autoUpdater.setFeedURL({ url: feedURL });
@@ -247,14 +250,17 @@ if (!gotTheLock) {
       });
 
       autoUpdater.on('error', (_err) => {
-        // silent — updates are non-critical
+        // updates are non-critical; log would go to electron main process
+      });
+
+      autoUpdater.checkForUpdates().catch(() => {
+        // silent
       });
     }
 
     ipcMain.on('app:checkForUpdate', () => {
-      autoUpdater.checkForUpdates().catch(() => {
-        // silent
-      });
+      if (isDev) return;
+      autoUpdater.checkForUpdates().catch(() => {});
     });
 
     ipcMain.on('app:installUpdate', () => {

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { ScreenErrorBoundary } from '../components/ScreenErrorBoundary';
 import { UndoToast } from '../components/UndoToast';
+import { UpdateBanner } from '../components/UpdateBanner';
 import { useTheme } from '../theme';
 import { useAlertHistoryStore } from '../store/alertHistory';
 import type { RootStackParamList, TabParamList } from '../types';
@@ -196,6 +197,7 @@ export function AppNavigator() {
   return (
     <NavigationContainer ref={navigationRef}>
       <OfflineBanner />
+      <UpdateBanner />
       <UndoToast />
       <Stack.Navigator
         screenOptions={{

@@ -14,7 +14,10 @@
     "ok": "确定",
     "clear": "清除",
     "online": "在线",
-    "offline": "离线"
+    "offline": "离线",
+    "close": "关闭",
+    "success": "成功",
+    "error": "错误"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -64,7 +67,8 @@
     "location": "位置",
     "assignWallet": "分配钱包",
     "noWallet": "无钱包",
-    "assignLocation": "分配位置"
+    "assignLocation": "分配位置",
+    "noData": "无数据"
   },
   "dashboardCustomizer": {
     "title": "自定义仪表盘",
@@ -270,7 +274,10 @@
     "wifiNetwork": "WiFi",
     "wifiSignal": "信号",
     "powerMode": "模式",
-    "recentPoolChanges": "最近的矿池变更"
+    "recentPoolChanges": "最近的矿池变更",
+    "port": "端口",
+    "poolUpdated": "矿池已更新",
+    "poolUpdateFailed": "更新矿池失败"
   },
   "addMiner": {
     "addByIp": "通过 IP 添加",
