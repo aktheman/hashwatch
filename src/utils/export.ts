@@ -245,6 +245,42 @@ export async function importFromJSON(jsonStr: string): Promise<{
   };
 }
 
+export function previewCSV(csvText: string): {
+  valid: { name: string; ip: string; port: number }[];
+  errors: string[];
+} {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2)
+    return { valid: [], errors: ['CSV must have a header row and at least one data row'] };
+
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const nameIdx = headers.indexOf('name');
+  const ipIdx = headers.indexOf('ip');
+  const portIdx = headers.indexOf('port');
+
+  if (nameIdx === -1 || ipIdx === -1) {
+    return { valid: [], errors: ['CSV must have "name" and "ip" columns'] };
+  }
+
+  const valid: { name: string; ip: string; port: number }[] = [];
+  const errors: string[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map((c) => c.trim());
+    const name = cols[nameIdx];
+    const ip = cols[ipIdx];
+    const port = portIdx >= 0 ? parseInt(cols[portIdx]) || 80 : 80;
+
+    if (!name || !ip) {
+      errors.push(`Row ${i}: missing name or IP`);
+    } else {
+      valid.push({ name, ip, port });
+    }
+  }
+
+  return { valid, errors };
+}
+
 export async function importFromCSV(
   csvText: string,
 ): Promise<{ imported: number; errors: string[] }> {

@@ -64,6 +64,7 @@ interface MinersState {
   setMinerName: (minerId: string, name: string) => Promise<void>;
   cloneMiner: (minerId: string) => Promise<void>;
   setMinerIcon: (minerId: string, icon: string | undefined) => Promise<void>;
+  setMinerMaintenance: (minerId: string, enabled: boolean) => Promise<void>;
   setMinerLocation: (minerId: string, location: string | undefined) => Promise<void>;
   setMinerTags: (minerId: string, tags: string[]) => Promise<void>;
   setMinerNotes: (minerId: string, notes: string) => Promise<void>;
@@ -174,6 +175,7 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   refreshMiner: async (id: string) => {
     const miner = get().miners.find((m) => m.id === id);
     if (!miner) return;
+    if (miner.maintenanceMode) return;
 
     const attempt = async (retryMs = 0): Promise<void> => {
       if (retryMs > 0) await new Promise((resolve) => setTimeout(resolve, retryMs));
@@ -410,6 +412,16 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
     const updated = { ...miner, icon: icon || undefined };
+    await DB.saveMiner(updated);
+    set((s) => ({
+      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+    }));
+  },
+
+  setMinerMaintenance: async (minerId: string, enabled: boolean) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const updated = { ...miner, maintenanceMode: enabled };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
