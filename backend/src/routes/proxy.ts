@@ -128,6 +128,31 @@ proxyRouter.post('/flash', async (req: AuthRequest, res) => {
   }
 });
 
+proxyRouter.post('/pool', async (req: AuthRequest, res) => {
+  try {
+    const { minerUrl, body } = req.body;
+    if (!minerUrl) {
+      return res.status(400).json({ error: 'minerUrl is required' });
+    }
+    if (!isAllowedProxyUrl(minerUrl)) {
+      return res
+        .status(403)
+        .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+    }
+    const response = await axios({
+      url: minerUrl,
+      method: 'POST',
+      data: body,
+      timeout: 10000,
+      validateStatus: () => true,
+    });
+    res.json({ success: response.status < 400, data: response.data });
+  } catch (e: unknown) {
+    captureException(e as unknown, { route: 'proxy.pool' });
+    res.status(502).json({ error: 'pool_change_failed', message: 'Could not update pool' });
+  }
+});
+
 proxyRouter.post('/restart', async (req: AuthRequest, res) => {
   try {
     const { url } = req.body;

@@ -106,6 +106,7 @@ jest.mock('../src/store/auth', () => ({
     };
     return selector ? selector(state) : state;
   },
+  queueSetting: jest.fn(),
 }));
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';

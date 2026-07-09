@@ -14,7 +14,10 @@
     "ok": "De acuerdo",
     "clear": "Limpiar",
     "online": "En línea",
-    "offline": "Fuera de línea"
+    "offline": "Fuera de línea",
+    "close": "Cerrar",
+    "success": "Éxito",
+    "error": "Error"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -64,7 +67,8 @@
     "btcMonth": "BTC/Mes",
     "usdEquivalent": "Equiv. USD",
     "perMiner": "Por Minero",
-    "total": "Total"
+    "total": "Total",
+    "noData": "Sin datos"
   },
   "dashboardCustomizer": {
     "title": "Personalizar Panel",
@@ -270,7 +274,10 @@
     "wifiNetwork": "WiFi",
     "wifiSignal": "Señal",
     "powerMode": "Modo",
-    "recentPoolChanges": "Cambios de pool recientes"
+    "recentPoolChanges": "Cambios de pool recientes",
+    "port": "Puerto",
+    "poolUpdated": "Pool actualizado",
+    "poolUpdateFailed": "Error al actualizar pool"
   },
   "addMiner": {
     "addByIp": "Agregar por IP",

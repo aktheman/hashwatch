@@ -916,6 +916,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             onValueChange={(val) => {
               setNotificationsEnabled(val);
               setSetting('notifications_enabled', String(val));
+              const valStr = String(val);
+              putRemoteSetting('notifications_enabled', valStr).catch(() =>
+                console.warn('Failed to sync notifications_enabled'),
+              );
+              queueSetting('notifications_enabled', valStr);
               if (val) {
                 registerPushToken(token);
               } else {
