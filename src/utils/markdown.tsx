@@ -39,7 +39,18 @@ function parseMarkdown(text: string, baseStyle: TextStyle): React.ReactNode[] {
         );
       } else if (match[5]) {
         parts.push(
-          <Text key={`c-${key++}`} style={[baseStyle, { fontFamily: 'monospace', backgroundColor: '#333', paddingHorizontal: 4, borderRadius: 4 }]}>
+          <Text
+            key={`c-${key++}`}
+            style={[
+              baseStyle,
+              {
+                fontFamily: 'monospace',
+                backgroundColor: '#333',
+                paddingHorizontal: 4,
+                borderRadius: 4,
+              },
+            ]}
+          >
             {match[5]}
           </Text>,
         );

@@ -989,7 +989,16 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <Text style={styles.sectionTitle}>Webhooks</Text>
         <View style={styles.row}>
           <TextInput
-            style={{ flex: 1, color: theme.text, backgroundColor: theme.surfaceLight, borderRadius: 8, padding: 10, fontSize: fontSize.md, borderWidth: 1, borderColor: theme.border }}
+            style={{
+              flex: 1,
+              color: theme.text,
+              backgroundColor: theme.surfaceLight,
+              borderRadius: 8,
+              padding: 10,
+              fontSize: fontSize.md,
+              borderWidth: 1,
+              borderColor: theme.border,
+            }}
             value={webhookUrl}
             onChangeText={setWebhookUrl}
             placeholder="https://hooks.example.com/alert"
@@ -1001,14 +1010,28 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Save webhook URL"
-            style={{ backgroundColor: theme.primary, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, marginLeft: 8 }}
+            style={{
+              backgroundColor: theme.primary,
+              borderRadius: 8,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              marginLeft: 8,
+            }}
             onPress={saveWebhookUrl}
           >
             <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>{t('common.save')}</Text>
           </Pressable>
         </View>
-        <Text style={{ color: theme.textDim, fontSize: fontSize.xs, paddingHorizontal: spacing.sm, paddingTop: spacing.xxs }}>
-          Receive POST requests when miner alerts fire. The payload includes event, miner info, title, body, and timestamp.
+        <Text
+          style={{
+            color: theme.textDim,
+            fontSize: fontSize.xs,
+            paddingHorizontal: spacing.sm,
+            paddingTop: spacing.xxs,
+          }}
+        >
+          Receive POST requests when miner alerts fire. The payload includes event, miner info,
+          title, body, and timestamp.
         </Text>
       </View>
 
@@ -1047,7 +1070,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Auto-scan network"
           />
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('settings.refreshAll')} style={styles.row} onPress={() => loadMiners()}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.refreshAll')}
+          style={styles.row}
+          onPress={() => loadMiners()}
+        >
           <Text style={styles.rowLabel}>{t('settings.refreshAll')}</Text>
           <Text style={styles.actionText}>{t('settings.refresh')}</Text>
         </Pressable>
