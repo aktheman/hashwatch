@@ -16,7 +16,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Key Files
 
-- `__tests__/miners-store.test.ts`: 38 tests covering load/add/remove/refresh/sync/snapshots/wallet/group
+- `__tests__/miners-store.test.ts`: 50 tests covering load/add/remove/refresh/sync/snapshots/wallet/group + auto-assign rules (12 tests: load/save, regex match, name match, disabled, unknown miner, invalid regex fallback, applyAll, first-match-wins, no-rules)
 - `__tests__/miners-store-edge.test.ts`: 7 tests — AppState pause/resume, interval tick (paused/not-paused), onAuthLogin callback, scanNetwork error/success, offline retry
 - `__tests__/widget.test.tsx`: 3 tests (Android guard, native module call, missing module)
 - `__tests__/authToken.test.ts`: 6 tests (getter, setter, login callbacks)
@@ -37,7 +37,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/toast.test.ts`: 9 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss, safe dismissUndo when null, same-id timer clear)
 - `__tests__/UndoToast.test.tsx`: 4 tests (null state, renders message+undo, tap calls onUndo, accessibility label)
 - `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
-- `__tests__/AppNavigator.test.tsx`: 12 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback, navigation)
+- `__tests__/AppNavigator.test.tsx`: 14 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback, navigation, notification tap)
 - `__tests__/constants.test.ts`: 10 tests (getExtra, getProxyUrl, setProxyUrl success/DB failure, initProxyUrl saved/null/error)
 - `__tests__/bitaxe.test.ts`: 18 tests (system info, miner status, fetchAll, restart, probe with fallback paths, non-primary paths, wifi fields)
 - `__tests__/bitaxe-web.test.ts`: 13 tests (web proxy for info/status/fetchAll/restart/probe, auth header injection, error handling)
@@ -51,29 +51,42 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/design.test.ts`: 23 tests (tokens, cardShadow, cardStyle, layout constants, inputStyle)
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, Android build, deploy, e2e, coverage threshold verification, `workflow_dispatch` trigger
 - `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
+- `backend/src/__tests__/webhook.test.ts`: 7 tests (sendWebhook success/failure, no URL, empty URL, invalid URL, deleteLogs)
+- `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
+- `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-07 — Round 8)
+## Latest Round (Session 2026-07-10 — Round 10)
 
-### Changes (Round 8 — Native Polish + E2E + Cleanup)
+### Changes (Round 10 — Auto-Assign Rules, Webhooks, Docker, i18n)
 
-- **DashboardCustomizer.tsx**: Fixed PanResponder/ScrollView conflict — added `scrollEnabled` state that disables scroll during drag (set in `startDrag`, reset in `onPanResponderRelease`/`onPanResponderTerminate`). Fixed stale closure bug in PanResponder callbacks by using `sectionOrderRef` and `dragIdxRef` refs that stay current across re-renders (the `useRef(PanResponder.create(...))` closure captured initial values, causing incorrect reorder after first swap).
-- **DashboardScreen.tsx**: Removed unused `sectionOrder` state (was set but never read in render; section order persisted to DB via `onReorder` callback, no local state needed). Removed unused `SECTION_LABELS` import. Fixed missing `DB.` prefix on `DB.setSetting` call.
-- **e2e/settings-full.spec.ts**: 10 new E2E tests covering Settings screen: theme section, plan status, power cost input, import/export, Groups navigation, Wallets navigation, Import Data screen, Subscription flow, notification history, alert history navigation.
+- **Auto-assign rules**: Regex-based rules to auto-assign miners to groups by IP/name/tag. GroupsScreen has rule editor modal, toggle/delete/edit/apply. miners store: load/save/apply rules with regex + substring fallback. First matching rule wins.
+- **Backend webhooks**: `sendWebhook()` POSTs to user-configured URL on miner alerts. `webhook_logs` table tracks delivery. GET/DELETE `/api/webhooks/logs` routes. All 6 push notification functions also send webhooks.
+- **Backend caching**: In-memory `cacheMiddleware(ttl)` for GET responses, `invalidateCache(prefix?)`. Cleanup interval with `.unref()`.
+- **Docker**: Multi-stage `backend/Dockerfile` (Node 22 Alpine, non-root user) + `docker-compose.yml` (Postgres 16 + backend).
+- **i18n**: 20+ new English strings. DashboardScreen hardcoded strings (`Sort:`, `Group:`, `📍 Loc`, `🏷️ Tag`, `online`, `offline`, etc.) replaced with `t()` keys.
+- **Markdown notes**: `MarkdownText` component for rich-text miner notes (bold, italic, code, links).
+- **Web push**: VAPID-based browser push notification subscription in `pushRegistration.ts`.
+- **Notifications on web**: `checkMinerAlerts` no longer short-circuits on web platform. Push gated by `Platform.OS !== 'web'`.
+- **ESLint fix**: Removed unused `lastIndex` in `markdown.tsx`.
+- **DashboardScreen test fix**: 2 lines using hardcoded `📍 Loc` → `dashboard.groupByLocation`.
 
 ### Test results
 
-- Frontend: 1166 passing, 83 suites
-- Backend: 178 passing, 19 suites
-- TypeScript: `npx tsc --noEmit` clean
-- ESLint: 0 errors, 0 warnings (frontend + backend)
+- Frontend: 1182 passing, 83 suites (12 new auto-assign + fixes)
+- Backend: 194 passing, 22 suites (16 new webhook/cache/webhook-route)
+- TypeScript: clean (0 errors) — frontend + backend
+- ESLint: 0 errors, 0 warnings — frontend + backend
 
 ## Current State
 
-- Native polish complete (PanResponder/ScrollView conflict fixed, stale closure fixed)
-- E2E tests expanded (10 new Settings tests)
-- Code cleanup (unused state/imports removed)
-- React pinned to exact 19.2.3 (RN 0.85.3 renderer incompatible with 19.2.7)
-- Tests: 1033 frontend (72 suites) + 126 backend (14 suites) = 1159 total
+- Auto-assign rules: fully implemented (UI + store + tests)
+- Webhooks: fully implemented (service + routes + schema + tests + SettingsScreen UI)
+- Docker: Dockerfile + docker-compose.yml ready
+- i18n: DashboardScreen fully i18n'd; GroupsScreen auto-assign rules not yet i18n'd
+- Markdown notes: MinerDetailScreen renders notes with MarkdownText
+- Web push: VAPID subscription support in pushRegistration.ts
+- Notifications: web platform sends alerts (not just native)
+- Tests: 1182 frontend (83 suites) + 194 backend (22 suites) = 1376 total
 - `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
 - `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
 - Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — currently 83.54/91.95/96.24/94.38 (all thresholds met)
