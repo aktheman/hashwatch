@@ -121,3 +121,15 @@ CREATE TABLE IF NOT EXISTS miner_alert_rules (
   enabled BOOLEAN NOT NULL DEFAULT true,
   PRIMARY KEY (userId, minerId)
 );
+
+CREATE TABLE IF NOT EXISTS webhook_logs (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  event TEXT NOT NULL DEFAULT '',
+  url TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'pending',
+  responseCode INTEGER NOT NULL DEFAULT 0,
+  sentAt BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)
+);
+
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_user ON webhook_logs(userId, sentAt DESC);

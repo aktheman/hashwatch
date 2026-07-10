@@ -143,6 +143,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [autoDarkHour, setAutoDarkHour] = useState<number | null>(null);
   const powerCostDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [webhookUrl, setWebhookUrl] = useState('');
   const [csvInput, setCsvInput] = useState('');
   const [csvPreview, setCsvPreview] = useState<{ name: string; ip: string; port: number }[] | null>(
     null,
@@ -163,6 +164,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
     setPowerCost(pc || '');
     const as = await getSetting('auto_scan');
     setAutoScan(as === 'true');
+    const wh = await getSetting('webhook_url');
+    setWebhookUrl(wh || '');
     setRefreshing(false);
   }, [loadMiners]);
 
@@ -195,6 +198,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       if (saved) i18n.changeLanguage(saved);
     });
     getSetting('auto_dark_hour').then((v) => setAutoDarkHour(v ? parseInt(v) : null));
+    getSetting('webhook_url').then((v) => setWebhookUrl(v || ''));
     useNotificationHistoryStore.getState().loadHistory();
   }, []);
 
@@ -217,6 +221,16 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       setAuthError(isRegister ? t('settings.registrationFailed') : t('settings.loginFailed'));
     }
   };
+
+  const saveWebhookUrl = useCallback(async () => {
+    await setSetting('webhook_url', webhookUrl);
+    const { useAuthStore } = await import('../store/auth');
+    const token = useAuthStore.getState().token;
+    if (token) {
+      putRemoteSetting('webhook_url', webhookUrl).catch(() => {});
+    }
+    Alert.alert(t('common.success'), 'Webhook URL saved');
+  }, [webhookUrl, t]);
 
   const styles = useMemo(
     () =>
@@ -966,6 +980,33 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       </View>
 
       <NotificationHistorySection />
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Webhooks</Text>
+        <View style={styles.row}>
+          <TextInput
+            style={{ flex: 1, color: theme.text, backgroundColor: theme.surfaceLight, borderRadius: 8, padding: 10, fontSize: fontSize.md, borderWidth: 1, borderColor: theme.border }}
+            value={webhookUrl}
+            onChangeText={setWebhookUrl}
+            placeholder="https://hooks.example.com/alert"
+            placeholderTextColor={theme.textMuted}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save webhook URL"
+            style={{ backgroundColor: theme.primary, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, marginLeft: 8 }}
+            onPress={saveWebhookUrl}
+          >
+            <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>{t('common.save')}</Text>
+          </Pressable>
+        </View>
+        <Text style={{ color: theme.textDim, fontSize: fontSize.xs, paddingHorizontal: spacing.sm, paddingTop: spacing.xxs }}>
+          Receive POST requests when miner alerts fire. The payload includes event, miner info, title, body, and timestamp.
+        </Text>
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.miners')}</Text>

@@ -23,6 +23,8 @@ import { notificationHistoryRouter } from './routes/notificationHistory';
 import { createWebSocketServer } from './ws';
 import { query } from './db';
 import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
+import { cacheMiddleware, invalidateCache } from './middleware/cache';
+import { webhooksRouter } from './routes/webhooks';
 
 const app = express();
 const server = createServer(app);
@@ -71,6 +73,9 @@ app.use('/api/pool-changes', poolChangesRouter);
 app.use('/api/alert-history', alertHistoryRouter);
 app.use('/api/miner-alert-rules', alertRulesRouter);
 app.use('/api/notification-history', notificationHistoryRouter);
+app.use('/api/webhooks', webhooksRouter);
+
+app.use('/api/', cacheMiddleware());
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;
@@ -115,6 +120,7 @@ validateEnv();
 
 initSentry();
 initSchema().then(() => {
+  invalidateCache();
   server.listen(PORT, () => {
     console.log(`HashWatch API running on :${PORT}`);
     startMinerPoller();
@@ -124,6 +130,7 @@ initSchema().then(() => {
 function gracefulShutdown(signal: string) {
   console.log(`Received ${signal}, shutting down gracefully...`);
   stopMinerPoller();
+  invalidateCache();
   server.close(() => {
     console.log('HTTP server closed');
     process.exit(0);

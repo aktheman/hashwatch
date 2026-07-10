@@ -44,6 +44,7 @@ import {
 } from '../utils/formatters';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
+import { MarkdownText } from '../utils/markdown';
 import { useTranslation } from 'react-i18next';
 
 interface MinerDetailScreenProps {
@@ -857,9 +858,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     alignItems: 'flex-start',
                   }}
                 >
-                  <Text style={{ flex: 1, color: theme.text, fontSize: fontSize.base }}>
-                    {note.text}
-                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <MarkdownText style={{ color: theme.text, fontSize: fontSize.base }}>
+                      {note.text}
+                    </MarkdownText>
+                  </View>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Delete note"

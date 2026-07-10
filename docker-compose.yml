@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hashwatch
+      POSTGRES_USER: hashwatch
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hashwatch}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hashwatch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      DATABASE_URL: postgres://hashwatch:${DB_PASSWORD:-hashwatch}@postgres:5432/hashwatch
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-random-secret}
+      PORT: 4000
+      NODE_ENV: production
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

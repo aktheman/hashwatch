@@ -7,6 +7,8 @@ const mockSaveSnapshot = jest.fn();
 const mockLoadMiners = jest.fn().mockResolvedValue([]);
 const mockGetSnapshots = jest.fn().mockResolvedValue([]);
 const mockCleanupOldSnapshots = jest.fn();
+const mockGetSetting = jest.fn().mockResolvedValue(null);
+const mockSetSetting = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('../src/db/database', () => ({
   loadMiners: () => mockLoadMiners(),
@@ -15,6 +17,8 @@ jest.mock('../src/db/database', () => ({
   saveSnapshot: (s: unknown) => mockSaveSnapshot(s),
   getSnapshots: (id: string, limit: number) => mockGetSnapshots(id, limit),
   cleanupOldSnapshots: () => mockCleanupOldSnapshots(),
+  getSetting: (key: string) => mockGetSetting(key),
+  setSetting: (key: string, value: string) => mockSetSetting(key, value),
 }));
 
 const mockFetchAll = jest.fn();
@@ -978,5 +982,147 @@ describe('syncWithBackend failure', () => {
 
     await expect(useMinerStore.getState().syncWithBackend()).resolves.toBeUndefined();
     mockAuthToken = null;
+  });
+});
+
+describe('auto-assign rules', () => {
+  beforeEach(() => {
+    mockGetSetting.mockReset();
+    mockSetSetting.mockReset();
+    mockSetSetting.mockResolvedValue(undefined);
+  });
+
+  it('loadAutoAssignRules returns empty when no setting', async () => {
+    mockGetSetting.mockResolvedValue(null);
+    const rules = await useMinerStore.getState().loadAutoAssignRules();
+    expect(rules).toEqual([]);
+  });
+
+  it('loadAutoAssignRules parses stored rules', async () => {
+    const stored = [{ id: 'r1', field: 'ip', pattern: '192\\.168', group: 'Office', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(stored));
+    const rules = await useMinerStore.getState().loadAutoAssignRules();
+    expect(rules).toEqual(stored);
+  });
+
+  it('loadAutoAssignRules returns empty on invalid JSON', async () => {
+    mockGetSetting.mockResolvedValue('not-json');
+    const rules = await useMinerStore.getState().loadAutoAssignRules();
+    expect(rules).toEqual([]);
+  });
+
+  it('saveAutoAssignRules persists to DB', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '10\\.0', group: 'Farm', enabled: true }];
+    await useMinerStore.getState().saveAutoAssignRules(rules);
+    expect(mockSetSetting).toHaveBeenCalledWith('auto_assign_rules', JSON.stringify(rules));
+  });
+
+  it('applyAutoAssignRules matches IP pattern and assigns group', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '10\\.0\\.0', group: 'Farm', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', group: 'Farm' }),
+    );
+  });
+
+  it('applyAutoAssignRules matches name pattern', async () => {
+    const rules = [{ id: 'r1', field: 'name' as const, pattern: 'Bitaxe', group: 'Mining', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Bitaxe-001', ip: '10.0.0.1', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', group: 'Mining' }),
+    );
+  });
+
+  it('applyAutoAssignRules skips disabled rules', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '10\\.0\\.0', group: 'Farm', enabled: false }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Miner A', ip: '10.0.0.1', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).not.toHaveBeenCalled();
+  });
+
+  it('applyAutoAssignRules does nothing for unknown miner', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '.*', group: 'All', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({ miners: [] });
+
+    await useMinerStore.getState().applyAutoAssignRules('nonexistent');
+
+    expect(mockSaveMiner).not.toHaveBeenCalled();
+  });
+
+  it('applyAutoAssignRules falls back to substring match for invalid regex', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '[invalid', group: 'Test', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Miner A', ip: '[invalid-ip', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'm1', group: 'Test' }),
+    );
+  });
+
+  it('applyAutoAssignRulesAll applies rules to all miners', async () => {
+    const rules = [{ id: 'r1', field: 'ip' as const, pattern: '10\\.0', group: 'Home', enabled: true }];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [
+        { id: 'm1', name: 'A', ip: '10.0.0.1', port: 80 } as never,
+        { id: 'm2', name: 'B', ip: '10.0.0.2', port: 80 } as never,
+        { id: 'm3', name: 'C', ip: '192.168.1.1', port: 80 } as never,
+      ],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRulesAll();
+
+    expect(mockSaveMiner).toHaveBeenCalledTimes(2);
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ id: 'm1', group: 'Home' }));
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ id: 'm2', group: 'Home' }));
+  });
+
+  it('applyAutoAssignRules uses first matching rule only', async () => {
+    const rules = [
+      { id: 'r1', field: 'ip' as const, pattern: '10\\.0', group: 'A', enabled: true },
+      { id: 'r2', field: 'ip' as const, pattern: '10\\.0\\.0\\.1', group: 'B', enabled: true },
+    ];
+    mockGetSetting.mockResolvedValue(JSON.stringify(rules));
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Miner', ip: '10.0.0.1', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).toHaveBeenCalledTimes(1);
+    expect(mockSaveMiner).toHaveBeenCalledWith(expect.objectContaining({ id: 'm1', group: 'A' }));
+  });
+
+  it('applyAutoAssignRules skips when no active rules', async () => {
+    mockGetSetting.mockResolvedValue(null);
+    useMinerStore.setState({
+      miners: [{ id: 'm1', name: 'Miner', ip: '10.0.0.1', port: 80 } as never],
+    });
+
+    await useMinerStore.getState().applyAutoAssignRules('m1');
+
+    expect(mockSaveMiner).not.toHaveBeenCalled();
   });
 });

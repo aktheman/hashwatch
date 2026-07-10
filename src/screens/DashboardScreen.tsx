@@ -448,11 +448,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const handleDelete = useCallback((minerId: string, minerName: string) => {
     useToastStore.getState().showUndo({
       id: `delete-${minerId}`,
-      message: `Dashboard: ${minerName} removed`,
+      message: t('dashboard.minerRemoved', { name: minerName }),
       onUndo: () => {},
       onConfirm: () => useMinerStore.getState().removeMiner(minerId),
     });
-  }, []);
+  }, [t]);
 
   const renderGroupedItem = useCallback(
     ({ item }: { item: GroupedItem }) => {
@@ -1002,9 +1002,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             alignItems: 'center',
           }}
           onPress={() => {
-            Alert.alert('Exit Kiosk', 'Tap "Exit" to leave kiosk mode.', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Exit', onPress: () => handleToggleKiosk(false) },
+            Alert.alert(t('dashboard.exitKioskTitle'), t('dashboard.exitKioskBody'), [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('dashboard.exitKioskExit'), onPress: () => handleToggleKiosk(false) },
             ]);
           }}
         >
@@ -1042,7 +1042,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <View style={{ alignItems: 'center' }}>
                 <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
                 <Text style={styles.headerSub}>
-                  <Text style={styles.liveDot}>●</Text> live monitor
+                  <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
                 </Text>
               </View>
               <View
@@ -1175,7 +1175,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>online</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('common.online')}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
@@ -1187,7 +1187,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>offline</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('common.offline')}</Text>
           </View>
           {miners.filter((m) => m.status?.pool).length > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
@@ -1199,7 +1199,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   backgroundColor: theme.info,
                 }}
               />
-              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>pool</Text>
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('dashboard.pool')}</Text>
             </View>
           )}
         </View>
@@ -1243,8 +1243,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                       {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
                     </Text>
                     <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-                      {info.miners} miner{info.miners > 1 ? 's' : ''} · {info.responseTime}ms ·{' '}
-                      {rejectRate}% rejected
+                      {t('dashboard.minersCount', { count: info.miners })} · {info.responseTime}ms ·{' '}
+                      {t('dashboard.rejectedRate', { rate: rejectRate })}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end', marginRight: 4 }}>
@@ -1327,7 +1327,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 paddingVertical: spacing.xxs,
               }}
             >
-              +{poolInfo.size - 2} more pool{poolInfo.size - 2 > 1 ? 's' : ''}
+              {t('dashboard.morePools', { count: poolInfo.size - 2 })}
             </Text>
           )}
         </View>
@@ -1430,7 +1430,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               <MetricTile
                 title={String(t('dashboard.workers'))}
                 value={String(filteredMiners.length)}
-                unit="active"
+                unit={t('dashboard.active')}
                 accent="info"
                 trend={metrics.workerTrend}
                 size="lg"
@@ -1671,7 +1671,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text
             style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
           >
-            Sort:
+            {t('dashboard.sortBy')}
           </Text>
           {(['name', 'hashrate', 'temp'] as const).map((s) => (
             <Pressable
@@ -1695,7 +1695,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   color: sortBy === s ? '#FFF' : theme.textMuted,
                 }}
               >
-                {s === 'name' ? 'Name' : s === 'hashrate' ? 'Hashrate' : 'Temp'}
+                {s === 'name' ? t('dashboard.sortByName') : s === 'hashrate' ? t('dashboard.sortByHashrate') : t('dashboard.sortByTemp')}
               </Text>
             </Pressable>
           ))}
@@ -1715,7 +1715,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text
             style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
           >
-            Group:
+            {t('dashboard.groupBy')}
           </Text>
           {([null, 'location', 'tag'] as const).map((g) => (
             <Pressable
@@ -1738,7 +1738,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   color: autoGroupBy === g ? '#FFF' : theme.textMuted,
                 }}
               >
-                {g === null ? 'Off' : g === 'location' ? '📍 Loc' : '🏷️ Tag'}
+                {g === null ? t('dashboard.groupOff') : g === 'location' ? t('dashboard.groupByLocation') : t('dashboard.groupByTag')}
               </Text>
             </Pressable>
           ))}
