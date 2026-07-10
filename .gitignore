@@ -41,7 +41,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-/package-lock.json
+
 .vercel
 
 # coverage
