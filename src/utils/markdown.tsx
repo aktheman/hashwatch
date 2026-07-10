@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, TextStyle, Linking } from 'react-native';
 
 function parseMarkdown(text: string, baseStyle: TextStyle): React.ReactNode[] {
@@ -74,5 +74,6 @@ interface MarkdownTextProps {
 }
 
 export function MarkdownText({ children, style }: MarkdownTextProps) {
-  return <Text>{parseMarkdown(children, style || {})}</Text>;
+  const nodes = useMemo(() => parseMarkdown(children, style || {}), [children, style]);
+  return <Text>{nodes}</Text>;
 }

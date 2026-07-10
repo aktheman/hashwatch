@@ -27,7 +27,7 @@ services:
       - "${PORT:-4000}:4000"
     environment:
       DATABASE_URL: postgres://hashwatch:${DB_PASSWORD:-hashwatch}@postgres:5432/hashwatch
-      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-random-secret}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env or environment}
       PORT: 4000
       NODE_ENV: production
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}

@@ -1721,6 +1721,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Pressable
               key={g ?? 'off'}
               accessibilityRole="button"
+              accessibilityLabel={g === null ? t('dashboard.groupOff') : g === 'location' ? t('dashboard.groupByLocation') : t('dashboard.groupByTag')}
               onPress={() => setAutoGroupBy(g)}
               style={{
                 paddingHorizontal: spacing.xs,

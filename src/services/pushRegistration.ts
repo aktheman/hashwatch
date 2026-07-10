@@ -67,11 +67,11 @@ async function registerWebPush(authToken: string | null) {
 
     let subscription = await registration.pushManager.getSubscription();
     if (subscription) {
-      subscription.unsubscribe();
+      await subscription.unsubscribe();
     }
 
-    const publicVapidKey = (window as unknown as Record<string, string>).VAPID_PUBLIC_KEY
-      || 'BEl62iUYgUivx0kvS7I1sE1q5n4WLaY6lY7lFJ6n4WLaY6lY7lFJ6n4WLaY6lY7lFJ6n4WLaY6lY7lFJ6n4WLA';
+    const publicVapidKey = (window as unknown as Record<string, string>).VAPID_PUBLIC_KEY;
+    if (!publicVapidKey) return;
 
     const keyBuffer = urlBase64ToUint8Array(publicVapidKey).buffer as ArrayBuffer;
     subscription = await registration.pushManager.subscribe({
