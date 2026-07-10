@@ -354,7 +354,7 @@ export function GroupsScreen() {
 
   const applyRules = useCallback(async () => {
     await useMinerStore.getState().applyAutoAssignRulesAll();
-    Alert.alert(t('groups.groupCreated'), t('groups.groupCreatedBody', { name: '' }));
+    Alert.alert(t('groups.rulesApplied'), t('groups.applyRules'));
   }, [t]);
 
   const styles = useMemo(
@@ -756,7 +756,7 @@ export function GroupsScreen() {
         style={styles.rulesToggle}
         onPress={() => setShowRules((s) => !s)}
       >
-        <Text style={styles.rulesToggleText}>Auto-Assign Rules</Text>
+        <Text style={styles.rulesToggleText}>{t('groups.autoAssignRules')}</Text>
         <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
           {showRules ? '▲' : '▼'}
         </Text>
@@ -765,7 +765,7 @@ export function GroupsScreen() {
         <View style={{ marginBottom: 16 }}>
           {rules.length === 0 && (
             <Text style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}>
-              No rules yet. Add rules to auto-assign miners to groups based on IP, name, or tags.
+              {t('groups.noRules')}
             </Text>
           )}
           {rules.map((rule) => (
@@ -784,18 +784,18 @@ export function GroupsScreen() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={rule.enabled ? 'Disable rule' : 'Enable rule'}
+                accessibilityLabel={rule.enabled ? t('groups.disableRule') : t('groups.enableRule')}
                 hitSlop={8}
                 onPress={() => toggleRule(rule.id)}
                 style={{ padding: 4 }}
               >
                 <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
-                  {rule.enabled ? t('settings.off', 'Off') : 'On'}
+                  {rule.enabled ? t('groups.off') : t('groups.on')}
                 </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Delete rule"
+                accessibilityLabel={t('groups.deleteRule')}
                 hitSlop={8}
                 onPress={() => deleteRule(rule.id)}
                 style={{ padding: 4, marginLeft: 4 }}
@@ -806,7 +806,7 @@ export function GroupsScreen() {
           ))}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Add auto-assign rule"
+            accessibilityLabel={t('groups.addRule')}
             style={styles.addRuleBtn}
             onPress={() => {
               setEditingRule(null);
@@ -816,16 +816,16 @@ export function GroupsScreen() {
               setShowRuleEditor(true);
             }}
           >
-            <Text style={styles.addRuleBtnText}>+ Add Rule</Text>
+            <Text style={styles.addRuleBtnText}>{t('groups.addRule')}</Text>
           </Pressable>
           {rules.length > 0 && (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Apply rules to all miners"
+              accessibilityLabel={t('groups.applyAll')}
               style={[styles.addRuleBtn, { borderWidth: 1, borderColor: theme.primary + '40', marginTop: 4 }]}
               onPress={applyRules}
             >
-              <Text style={styles.addRuleBtnText}>Apply Rules</Text>
+              <Text style={styles.addRuleBtnText}>{t('groups.applyRules')}</Text>
             </Pressable>
           )}
         </View>
@@ -833,8 +833,8 @@ export function GroupsScreen() {
       <Modal visible={showRuleEditor} transparent animationType="fade" onRequestClose={() => setShowRuleEditor(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{editingRule ? 'Edit Rule' : 'Add Rule'}</Text>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>Match field:</Text>
+            <Text style={styles.modalTitle}>{editingRule ? t('groups.editRule') : t('groups.newRule')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('groups.matchField')}</Text>
             <View style={styles.pickerRow}>
               {(['ip', 'name', 'tag'] as const).map((f) => (
                 <Pressable
@@ -844,7 +844,7 @@ export function GroupsScreen() {
                   onPress={() => setRuleField(f)}
                 >
                   <Text style={[styles.fieldChipText, { color: ruleField === f ? theme.primary : theme.textMuted }]}>
-                    {f === 'ip' ? 'IP' : f === 'name' ? 'Name' : 'Tag'}
+                    {f === 'ip' ? t('groups.fieldIP') : f === 'name' ? t('groups.fieldName') : t('groups.fieldTag')}
                   </Text>
                 </Pressable>
               ))}
@@ -853,7 +853,7 @@ export function GroupsScreen() {
               style={styles.ruleInput}
               value={rulePattern}
               onChangeText={setRulePattern}
-              placeholder="Pattern (regex, e.g. 192\.168\.1\.\d+)"
+              placeholder={t('groups.patternPlaceholder')}
               placeholderTextColor={theme.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -862,7 +862,7 @@ export function GroupsScreen() {
               style={styles.ruleInput}
               value={ruleGroup}
               onChangeText={setRuleGroup}
-              placeholder="Target group name"
+              placeholder={t('groups.targetGroupPlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
             <View style={styles.modalActions}>
