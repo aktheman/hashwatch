@@ -10,13 +10,14 @@ import {
   RefreshControl,
   Animated,
   Platform,
+  Modal,
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { SkeletonCard } from '../components/SkeletonCard';
-import { Miner } from '../types';
+import { Miner, AutoAssignRule } from '../types';
 import { useTranslation } from 'react-i18next';
 import * as DB from '../db/database';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
@@ -50,6 +51,13 @@ export function GroupsScreen() {
   const [draggedGroup, setDraggedGroup] = useState<string | null>(null);
   const dragAnim = useRef(new Animated.Value(0)).current;
   const [swapTarget, setSwapTarget] = useState<string | null>(null);
+  const [rules, setRules] = useState<AutoAssignRule[]>([]);
+  const [showRules, setShowRules] = useState(false);
+  const [editingRule, setEditingRule] = useState<AutoAssignRule | null>(null);
+  const [ruleField, setRuleField] = useState<AutoAssignRule['field']>('ip');
+  const [rulePattern, setRulePattern] = useState('');
+  const [ruleGroup, setRuleGroup] = useState('');
+  const [showRuleEditor, setShowRuleEditor] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -65,9 +73,11 @@ export function GroupsScreen() {
         }
         return [];
       }),
-    ]).then(([eg, go]) => {
+      useMinerStore.getState().loadAutoAssignRules(),
+    ]).then(([eg, go, rl]) => {
       setEmptyGroups(eg);
       setGroupOrder(go);
+      setRules(rl);
       setLoading(false);
     });
   }, []);
@@ -294,6 +304,59 @@ export function GroupsScreen() {
     [miners, setMinerGroup],
   );
 
+  const addRule = useCallback(() => {
+    if (!rulePattern.trim() || !ruleGroup.trim()) return;
+    const newRule: AutoAssignRule = {
+      id: `rule_${Date.now()}`,
+      field: ruleField,
+      pattern: rulePattern.trim(),
+      group: ruleGroup.trim(),
+      enabled: true,
+    };
+    const updated = editingRule
+      ? rules.map((r) => (r.id === editingRule.id ? { ...newRule, id: editingRule.id } : r))
+      : [...rules, newRule];
+    setRules(updated);
+    useMinerStore.getState().saveAutoAssignRules(updated);
+    setShowRuleEditor(false);
+    setEditingRule(null);
+    setRulePattern('');
+    setRuleGroup('');
+  }, [rules, ruleField, rulePattern, ruleGroup, editingRule]);
+
+  const toggleRule = useCallback(
+    (ruleId: string) => {
+      const updated = rules.map((r) =>
+        r.id === ruleId ? { ...r, enabled: !r.enabled } : r,
+      );
+      setRules(updated);
+      useMinerStore.getState().saveAutoAssignRules(updated);
+    },
+    [rules],
+  );
+
+  const deleteRule = useCallback(
+    (ruleId: string) => {
+      const updated = rules.filter((r) => r.id !== ruleId);
+      setRules(updated);
+      useMinerStore.getState().saveAutoAssignRules(updated);
+    },
+    [rules],
+  );
+
+  const editRule = useCallback((rule: AutoAssignRule) => {
+    setEditingRule(rule);
+    setRuleField(rule.field);
+    setRulePattern(rule.pattern);
+    setRuleGroup(rule.group);
+    setShowRuleEditor(true);
+  }, []);
+
+  const applyRules = useCallback(async () => {
+    await useMinerStore.getState().applyAutoAssignRulesAll();
+    Alert.alert(t('groups.groupCreated'), t('groups.groupCreatedBody', { name: '' }));
+  }, [t]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -408,6 +471,73 @@ export function GroupsScreen() {
           textAlign: 'center',
           marginTop: spacing.xs,
         },
+        rulesToggle: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingVertical: spacing.sm,
+          marginTop: spacing.md,
+          borderTopWidth: 1,
+          borderTopColor: theme.border,
+        },
+        rulesToggleText: {
+          color: theme.text,
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.bold,
+        },
+        ruleRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: spacing.xs,
+          paddingHorizontal: spacing.sm,
+          backgroundColor: theme.surfaceLight,
+          borderRadius: radius.sm,
+          marginBottom: spacing.xxs,
+        },
+        ruleInfo: { flex: 1, marginLeft: spacing.sm },
+        ruleField: { color: theme.primary, fontSize: fontSize.xs, fontWeight: fontWeight.bold },
+        rulePattern: { color: theme.text, fontSize: fontSize.base, fontFamily: 'monospace' },
+        ruleGroup: { color: theme.textMuted, fontSize: fontSize.xs },
+        addRuleBtn: {
+          backgroundColor: theme.primary + '20',
+          borderRadius: radius.sm,
+          paddingVertical: spacing.xs,
+          paddingHorizontal: spacing.md,
+          alignItems: 'center',
+          marginTop: spacing.xs,
+        },
+        addRuleBtnText: { color: theme.primary, fontWeight: fontWeight.bold, fontSize: fontSize.sm },
+        modalOverlay: {
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          justifyContent: 'center',
+          padding: 32,
+        },
+        modalCard: {
+          backgroundColor: theme.surface,
+          borderRadius: radius.lg,
+          padding: 20,
+          gap: 12,
+        },
+        modalTitle: { color: theme.text, fontSize: fontSize.lg, fontWeight: fontWeight.bold },
+        pickerRow: { flexDirection: 'row', gap: spacing.xs, marginVertical: spacing.xs },
+        fieldChip: {
+          paddingHorizontal: spacing.sm,
+          paddingVertical: spacing.xxs,
+          borderRadius: radius.sm,
+          borderWidth: 1,
+        },
+        fieldChipText: { fontSize: fontSize.xs, fontWeight: fontWeight.bold },
+        ruleInput: {
+          backgroundColor: theme.surfaceLight,
+          borderRadius: radius.md,
+          padding: 12,
+          color: theme.text,
+          fontSize: fontSize.md,
+          borderWidth: 1,
+          borderColor: theme.border,
+        },
+        modalActions: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'flex-end', marginTop: spacing.sm },
       }),
     [theme],
   );
@@ -620,6 +750,142 @@ export function GroupsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
         }
       />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Toggle auto-assign rules"
+        style={styles.rulesToggle}
+        onPress={() => setShowRules((s) => !s)}
+      >
+        <Text style={styles.rulesToggleText}>Auto-Assign Rules</Text>
+        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
+          {showRules ? '▲' : '▼'}
+        </Text>
+      </Pressable>
+      {showRules && (
+        <View style={{ marginBottom: 16 }}>
+          {rules.length === 0 && (
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}>
+              No rules yet. Add rules to auto-assign miners to groups based on IP, name, or tags.
+            </Text>
+          )}
+          {rules.map((rule) => (
+            <View key={rule.id} style={styles.ruleRow}>
+              <Text style={{ fontSize: fontSize.lg, color: rule.enabled ? theme.success : theme.textMuted }}>
+                {rule.enabled ? '✓' : '○'}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                style={styles.ruleInfo}
+                onPress={() => editRule(rule)}
+              >
+                <Text style={styles.ruleField}>{rule.field}</Text>
+                <Text style={styles.rulePattern}>/{rule.pattern}/</Text>
+                <Text style={styles.ruleGroup}>→ {rule.group}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={rule.enabled ? 'Disable rule' : 'Enable rule'}
+                hitSlop={8}
+                onPress={() => toggleRule(rule.id)}
+                style={{ padding: 4 }}
+              >
+                <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
+                  {rule.enabled ? t('settings.off', 'Off') : 'On'}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Delete rule"
+                hitSlop={8}
+                onPress={() => deleteRule(rule.id)}
+                style={{ padding: 4, marginLeft: 4 }}
+              >
+                <Text style={{ color: theme.danger, fontSize: fontSize.sm }}>✕</Text>
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add auto-assign rule"
+            style={styles.addRuleBtn}
+            onPress={() => {
+              setEditingRule(null);
+              setRuleField('ip');
+              setRulePattern('');
+              setRuleGroup('');
+              setShowRuleEditor(true);
+            }}
+          >
+            <Text style={styles.addRuleBtnText}>+ Add Rule</Text>
+          </Pressable>
+          {rules.length > 0 && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Apply rules to all miners"
+              style={[styles.addRuleBtn, { borderWidth: 1, borderColor: theme.primary + '40', marginTop: 4 }]}
+              onPress={applyRules}
+            >
+              <Text style={styles.addRuleBtnText}>Apply Rules</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+      <Modal visible={showRuleEditor} transparent animationType="fade" onRequestClose={() => setShowRuleEditor(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{editingRule ? 'Edit Rule' : 'Add Rule'}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>Match field:</Text>
+            <View style={styles.pickerRow}>
+              {(['ip', 'name', 'tag'] as const).map((f) => (
+                <Pressable
+                  key={f}
+                  accessibilityRole="button"
+                  style={[styles.fieldChip, { backgroundColor: ruleField === f ? theme.primary + '20' : theme.surfaceLight, borderColor: ruleField === f ? theme.primary : theme.border }]}
+                  onPress={() => setRuleField(f)}
+                >
+                  <Text style={[styles.fieldChipText, { color: ruleField === f ? theme.primary : theme.textMuted }]}>
+                    {f === 'ip' ? 'IP' : f === 'name' ? 'Name' : 'Tag'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <TextInput
+              style={styles.ruleInput}
+              value={rulePattern}
+              onChangeText={setRulePattern}
+              placeholder="Pattern (regex, e.g. 192\.168\.1\.\d+)"
+              placeholderTextColor={theme.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TextInput
+              style={styles.ruleInput}
+              value={ruleGroup}
+              onChangeText={setRuleGroup}
+              placeholder="Target group name"
+              placeholderTextColor={theme.textMuted}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, borderColor: theme.border }]}
+                onPress={() => setShowRuleEditor(false)}
+              >
+                <Text style={{ color: theme.textMuted }}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, backgroundColor: theme.primary, borderColor: theme.primary }]}
+                onPress={addRule}
+              >
+                <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
+                  {editingRule ? t('common.save') : t('common.add')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

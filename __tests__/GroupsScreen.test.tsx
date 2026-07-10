@@ -15,11 +15,20 @@ jest.mock('../src/db/database', () => ({
 }));
 
 jest.mock('../src/store/miners', () => ({
-  useMinerStore: (selector: any) =>
-    selector({
-      miners: mockMiners,
-      setMinerGroup: (id: string, group: string | undefined) => mockSetMinerGroup(id, group),
-    }),
+  useMinerStore: Object.assign(
+    (selector: any) =>
+      selector({
+        miners: mockMiners,
+        setMinerGroup: (id: string, group: string | undefined) => mockSetMinerGroup(id, group),
+      }),
+    {
+      getState: () => ({
+        loadAutoAssignRules: () => Promise.resolve([]),
+        saveAutoAssignRules: () => Promise.resolve(),
+        applyAutoAssignRulesAll: () => Promise.resolve(),
+      }),
+    },
+  ),
 }));
 
 const mockShowUndo = jest.fn(({ onConfirm }: any) => {

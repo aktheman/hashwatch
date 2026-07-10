@@ -638,7 +638,7 @@ it('shows sort chips and sorts by hashrate', async () => {
     ],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  expect(r.getByText('Sort:')).toBeTruthy();
+  expect(r.getByText('dashboard.sortBy')).toBeTruthy();
   await fireEvent.press(r.getByLabelText('Sort by hashrate'));
   expect(r.getAllByText(/MinerA|MinerB/).length).toBeGreaterThanOrEqual(2);
 });
@@ -671,7 +671,7 @@ it('groups miners by location', async () => {
     ],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  await fireEvent.press(r.getByText('📍 Loc'));
+  await fireEvent.press(r.getByText('dashboard.groupByLocation'));
   expect(r.getByText('Home')).toBeTruthy();
   expect(r.getByText('Office')).toBeTruthy();
 });
@@ -684,8 +684,8 @@ it('groups miners by tag', async () => {
     ],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  await fireEvent.press(r.getByText('📍 Loc'));
-  await fireEvent.press(r.getByText('🏷️ Tag'));
+  await fireEvent.press(r.getByText('dashboard.groupByLocation'));
+  await fireEvent.press(r.getByText('dashboard.groupByTag'));
   expect(r.getAllByText(/gpu/).length).toBeGreaterThanOrEqual(1);
   expect(r.getAllByText(/asic/).length).toBeGreaterThanOrEqual(1);
 });
@@ -702,7 +702,7 @@ it('restores saved section visibility from DB', async () => {
     miners: [makeMiner()],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  expect(r.queryByText('Sort:')).toBeNull();
+  expect(r.queryByText('dashboard.sortBy')).toBeNull();
 });
 
 it('filters miners by location chip', async () => {
@@ -782,7 +782,7 @@ it('collapse group header hides miners in that group', async () => {
     ],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  await fireEvent.press(r.getByText('📍 Loc'));
+  await fireEvent.press(r.getByText('dashboard.groupByLocation'));
   const header = r.getByLabelText('Home group, 2 miners');
   expect(r.queryByText('▶')).toBeNull();
   await fireEvent.press(header);
@@ -803,7 +803,7 @@ it('expand collapsed group shows miners again', async () => {
     ],
   });
   const r = await render(<DashboardScreen navigation={navigation} />);
-  await fireEvent.press(r.getByText('📍 Loc'));
+  await fireEvent.press(r.getByText('dashboard.groupByLocation'));
   await fireEvent.press(r.getByLabelText('Home group, 2 miners'));
   await waitFor(() => {
     expect(r.getByText('▶')).toBeTruthy();
@@ -925,7 +925,7 @@ describe('kiosk mode', () => {
     const r = await render(<DashboardScreen navigation={navigation} />);
     await fireEvent.press(r.getByLabelText('Exit kiosk mode'));
     const alertArgs = alertSpy.mock.calls[0];
-    const exitButton = alertArgs?.[2]?.find((b: any) => b.text === 'Exit');
+    const exitButton = alertArgs?.[2]?.find((b: any) => b.text === 'dashboard.exitKioskExit');
     exitButton?.onPress?.();
     const { setSetting } = jest.requireMock('../src/db/database');
     expect(setSetting).toHaveBeenCalledWith('kiosk_mode', 'false');

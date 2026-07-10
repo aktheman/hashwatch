@@ -128,7 +128,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         >
           ●
         </Text>
-         live monitor
+         
+        dashboard.subtitle
       </Text>
     </View>
     <View
@@ -2039,7 +2040,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
                 ]
               }
             >
-              active
+              dashboard.active
             </Text>
           </View>
           <View
@@ -4900,6 +4901,139 @@ exports[`SettingsScreen matches snapshot 1`] = `
           "props": {
             "style": {
               "marginBottom": 24,
+            },
+          },
+          "type": "View",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "Webhooks",
+              ],
+              "props": {
+                "style": {
+                  "color": "#8B8FA3",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 0.8,
+                  "marginBottom": 8,
+                  "marginLeft": 8,
+                  "textTransform": "uppercase",
+                },
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  onChangeText={[Function]}
+                  placeholder="https://hooks.example.com/alert"
+                  placeholderTextColor="#5C5F7A"
+                  style={
+                    {
+                      "backgroundColor": "#1A1A3E",
+                      "borderColor": "#1E1E42",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "color": "#FFFFFF",
+                      "flex": 1,
+                      "fontSize": 15,
+                      "padding": 10,
+                    }
+                  }
+                  value=""
+                />,
+                {
+                  "children": [
+                    {
+                      "children": [
+                        "common.save",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#FFF",
+                          "fontWeight": "700",
+                        },
+                      },
+                      "type": "Text",
+                    },
+                  ],
+                  "props": {
+                    "accessibilityLabel": "Save webhook URL",
+                    "accessibilityRole": "button",
+                    "accessibilityState": {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    },
+                    "accessibilityValue": {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    },
+                    "accessible": true,
+                    "collapsable": false,
+                    "focusable": true,
+                    "onBlur": [Function],
+                    "onClick": [Function],
+                    "onFocus": [Function],
+                    "onResponderGrant": [Function],
+                    "onResponderMove": [Function],
+                    "onResponderRelease": [Function],
+                    "onResponderTerminate": [Function],
+                    "onResponderTerminationRequest": [Function],
+                    "onStartShouldSetResponder": [Function],
+                    "style": {
+                      "backgroundColor": "#6C63FF",
+                      "borderRadius": 8,
+                      "marginLeft": 8,
+                      "paddingHorizontal": 16,
+                      "paddingVertical": 10,
+                    },
+                  },
+                  "type": "View",
+                },
+              ],
+              "props": {
+                "style": {
+                  "alignItems": "center",
+                  "backgroundColor": "#13132B",
+                  "borderColor": "#1E1E42",
+                  "borderRadius": 16,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 2,
+                  "padding": 16,
+                },
+              },
+              "type": "View",
+            },
+            {
+              "children": [
+                "Receive POST requests when miner alerts fire. The payload includes event, miner info, title, body, and timestamp.",
+              ],
+              "props": {
+                "style": {
+                  "color": "#8B8FA3",
+                  "fontSize": 10,
+                  "paddingHorizontal": 12,
+                  "paddingTop": 4,
+                },
+              },
+              "type": "Text",
+            },
+          ],
+          "props": {
+            "style": {
+              "marginBottom": 20,
             },
           },
           "type": "View",

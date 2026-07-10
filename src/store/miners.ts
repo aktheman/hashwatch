@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
 import pLimit from 'p-limit';
-import { Miner, MinerInfo, MinerSnapshot, MinerStatus } from '../types';
+import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
@@ -79,6 +79,10 @@ interface MinersState {
   clearError: () => void;
   clearMinerErrors: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
+  loadAutoAssignRules: () => Promise<AutoAssignRule[]>;
+  saveAutoAssignRules: (rules: AutoAssignRule[]) => Promise<void>;
+  applyAutoAssignRules: (minerId: string) => Promise<void>;
+  applyAutoAssignRulesAll: () => Promise<void>;
 }
 
 export const useMinerStore = create<MinersState>((set, get) => ({
@@ -529,6 +533,54 @@ export const useMinerStore = create<MinersState>((set, get) => ({
       }
     }
     return local.slice(-limit);
+  },
+
+  loadAutoAssignRules: async () => {
+    const raw = await DB.getSetting('auto_assign_rules');
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as AutoAssignRule[];
+    } catch {
+      return [];
+    }
+  },
+
+  saveAutoAssignRules: async (rules: AutoAssignRule[]) => {
+    await DB.setSetting('auto_assign_rules', JSON.stringify(rules));
+  },
+
+  applyAutoAssignRules: async (minerId: string) => {
+    const miner = get().miners.find((m) => m.id === minerId);
+    if (!miner) return;
+    const rules = await get().loadAutoAssignRules();
+    const activeRules = rules.filter((r) => r.enabled);
+    if (activeRules.length === 0) return;
+    for (const rule of activeRules) {
+      let value = '';
+      if (rule.field === 'ip') value = miner.ip;
+      else if (rule.field === 'name') value = miner.name;
+      else if (rule.field === 'tag') value = (miner.tags && miner.tags[0]) || '';
+      if (!value) continue;
+      try {
+        const regex = new RegExp(rule.pattern, 'i');
+        if (regex.test(value)) {
+          await get().setMinerGroup(minerId, rule.group);
+          return;
+        }
+      } catch {
+        if (value.includes(rule.pattern)) {
+          await get().setMinerGroup(minerId, rule.group);
+          return;
+        }
+      }
+    }
+  },
+
+  applyAutoAssignRulesAll: async () => {
+    const minersList = get().miners;
+    for (const m of minersList) {
+      await get().applyAutoAssignRules(m.id);
+    }
   },
 }));
 

@@ -145,3 +145,11 @@ export interface MinerNoteItem {
   text: string;
   createdat: string;
 }
+
+export interface AutoAssignRule {
+  id: string;
+  field: 'ip' | 'name' | 'tag';
+  pattern: string;
+  group: string;
+  enabled: boolean;
+}

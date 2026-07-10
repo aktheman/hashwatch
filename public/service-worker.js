@@ -24,7 +24,6 @@ self.addEventListener('fetch', (e) => {
   const { request } = e;
   const url = new URL(request.url);
 
-  // API requests: stale-while-revalidate
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       caches.open(API_CACHE).then(async (cache) => {
@@ -39,7 +38,6 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Static assets: cache-first
   if (url.origin === self.location.origin) {
     e.respondWith(
       caches.match(request).then((cached) => cached || fetch(request).then((res) => {
@@ -49,4 +47,44 @@ self.addEventListener('fetch', (e) => {
       })),
     );
   }
+});
+
+self.addEventListener('push', (e) => {
+  let data = { title: 'HashWatch', body: '', icon: '/favicon.ico', badge: '/favicon.ico' };
+  if (e.data) {
+    try {
+      data = { ...data, ...e.data.json() };
+    } catch {
+      data.body = e.data.text();
+    }
+  }
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon,
+      badge: data.badge,
+      tag: 'hashwatch-alert',
+      renotify: true,
+      silent: false,
+      data: data.data || {},
+      requireInteraction: true,
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const urlToOpen = new URL('/', self.location.origin).href;
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    }),
+  );
 });
