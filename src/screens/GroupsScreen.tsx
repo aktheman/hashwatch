@@ -326,9 +326,7 @@ export function GroupsScreen() {
 
   const toggleRule = useCallback(
     (ruleId: string) => {
-      const updated = rules.map((r) =>
-        r.id === ruleId ? { ...r, enabled: !r.enabled } : r,
-      );
+      const updated = rules.map((r) => (r.id === ruleId ? { ...r, enabled: !r.enabled } : r));
       setRules(updated);
       useMinerStore.getState().saveAutoAssignRules(updated);
     },
@@ -506,7 +504,11 @@ export function GroupsScreen() {
           alignItems: 'center',
           marginTop: spacing.xs,
         },
-        addRuleBtnText: { color: theme.primary, fontWeight: fontWeight.bold, fontSize: fontSize.sm },
+        addRuleBtnText: {
+          color: theme.primary,
+          fontWeight: fontWeight.bold,
+          fontSize: fontSize.sm,
+        },
         modalOverlay: {
           flex: 1,
           backgroundColor: 'rgba(0,0,0,0.6)',
@@ -537,7 +539,12 @@ export function GroupsScreen() {
           borderWidth: 1,
           borderColor: theme.border,
         },
-        modalActions: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'flex-end', marginTop: spacing.sm },
+        modalActions: {
+          flexDirection: 'row',
+          gap: spacing.sm,
+          justifyContent: 'flex-end',
+          marginTop: spacing.sm,
+        },
       }),
     [theme],
   );
@@ -764,13 +771,20 @@ export function GroupsScreen() {
       {showRules && (
         <View style={{ marginBottom: 16 }}>
           {rules.length === 0 && (
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}>
+            <Text
+              style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}
+            >
               {t('groups.noRules')}
             </Text>
           )}
           {rules.map((rule) => (
             <View key={rule.id} style={styles.ruleRow}>
-              <Text style={{ fontSize: fontSize.lg, color: rule.enabled ? theme.success : theme.textMuted }}>
+              <Text
+                style={{
+                  fontSize: fontSize.lg,
+                  color: rule.enabled ? theme.success : theme.textMuted,
+                }}
+              >
                 {rule.enabled ? '✓' : '○'}
               </Text>
               <Pressable
@@ -823,7 +837,10 @@ export function GroupsScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('groups.applyAll')}
-              style={[styles.addRuleBtn, { borderWidth: 1, borderColor: theme.primary + '40', marginTop: 4 }]}
+              style={[
+                styles.addRuleBtn,
+                { borderWidth: 1, borderColor: theme.primary + '40', marginTop: 4 },
+              ]}
               onPress={applyRules}
             >
               <Text style={styles.addRuleBtnText}>{t('groups.applyRules')}</Text>
@@ -831,22 +848,52 @@ export function GroupsScreen() {
           )}
         </View>
       )}
-      <Modal visible={showRuleEditor} transparent animationType="fade" onRequestClose={() => setShowRuleEditor(false)}>
+      <Modal
+        visible={showRuleEditor}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRuleEditor(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{editingRule ? t('groups.editRule') : t('groups.newRule')}</Text>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('groups.matchField')}</Text>
+            <Text style={styles.modalTitle}>
+              {editingRule ? t('groups.editRule') : t('groups.newRule')}
+            </Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('groups.matchField')}
+            </Text>
             <View style={styles.pickerRow}>
               {(['ip', 'name', 'tag'] as const).map((f) => (
                 <Pressable
                   key={f}
                   accessibilityRole="button"
-                  accessibilityLabel={f === 'ip' ? t('groups.fieldIP') : f === 'name' ? t('groups.fieldName') : t('groups.fieldTag')}
-                  style={[styles.fieldChip, { backgroundColor: ruleField === f ? theme.primary + '20' : theme.surfaceLight, borderColor: ruleField === f ? theme.primary : theme.border }]}
+                  accessibilityLabel={
+                    f === 'ip'
+                      ? t('groups.fieldIP')
+                      : f === 'name'
+                        ? t('groups.fieldName')
+                        : t('groups.fieldTag')
+                  }
+                  style={[
+                    styles.fieldChip,
+                    {
+                      backgroundColor: ruleField === f ? theme.primary + '20' : theme.surfaceLight,
+                      borderColor: ruleField === f ? theme.primary : theme.border,
+                    },
+                  ]}
                   onPress={() => setRuleField(f)}
                 >
-                  <Text style={[styles.fieldChipText, { color: ruleField === f ? theme.primary : theme.textMuted }]}>
-                    {f === 'ip' ? t('groups.fieldIP') : f === 'name' ? t('groups.fieldName') : t('groups.fieldTag')}
+                  <Text
+                    style={[
+                      styles.fieldChipText,
+                      { color: ruleField === f ? theme.primary : theme.textMuted },
+                    ]}
+                  >
+                    {f === 'ip'
+                      ? t('groups.fieldIP')
+                      : f === 'name'
+                        ? t('groups.fieldName')
+                        : t('groups.fieldTag')}
                   </Text>
                 </Pressable>
               ))}
@@ -871,7 +918,10 @@ export function GroupsScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('common.cancel')}
-                style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, borderColor: theme.border }]}
+                style={[
+                  styles.ruleInput,
+                  { flex: 0, paddingHorizontal: 16, borderColor: theme.border },
+                ]}
                 onPress={() => setShowRuleEditor(false)}
               >
                 <Text style={{ color: theme.textMuted }}>{t('common.cancel')}</Text>
@@ -879,7 +929,15 @@ export function GroupsScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={editingRule ? t('common.save') : t('common.add')}
-                style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, backgroundColor: theme.primary, borderColor: theme.primary }]}
+                style={[
+                  styles.ruleInput,
+                  {
+                    flex: 0,
+                    paddingHorizontal: 16,
+                    backgroundColor: theme.primary,
+                    borderColor: theme.primary,
+                  },
+                ]}
                 onPress={addRule}
               >
                 <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>

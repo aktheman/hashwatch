@@ -438,21 +438,23 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    | { type: 'header'; group: string; miners: Miner[] }
-    | { type: 'miner'; miner: Miner };
+    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
   }, []);
 
-  const handleDelete = useCallback((minerId: string, minerName: string) => {
-    useToastStore.getState().showUndo({
-      id: `delete-${minerId}`,
-      message: t('dashboard.minerRemoved', { name: minerName }),
-      onUndo: () => {},
-      onConfirm: () => useMinerStore.getState().removeMiner(minerId),
-    });
-  }, [t]);
+  const handleDelete = useCallback(
+    (minerId: string, minerName: string) => {
+      useToastStore.getState().showUndo({
+        id: `delete-${minerId}`,
+        message: t('dashboard.minerRemoved', { name: minerName }),
+        onUndo: () => {},
+        onConfirm: () => useMinerStore.getState().removeMiner(minerId),
+      });
+    },
+    [t],
+  );
 
   const renderGroupedItem = useCallback(
     ({ item }: { item: GroupedItem }) => {
@@ -618,8 +620,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      | { type: 'header'; group: string; miners: Miner[] }
-      | { type: 'miner'; miner: Miner }
+      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1175,7 +1176,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('common.online')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('common.online')}
+            </Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
             <View
@@ -1187,7 +1190,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 opacity: 0.85,
               }}
             />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('common.offline')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('common.offline')}
+            </Text>
           </View>
           {miners.filter((m) => m.status?.pool).length > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
@@ -1199,7 +1204,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   backgroundColor: theme.info,
                 }}
               />
-              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{t('dashboard.pool')}</Text>
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                {t('dashboard.pool')}
+              </Text>
             </View>
           )}
         </View>
@@ -1695,7 +1702,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   color: sortBy === s ? '#FFF' : theme.textMuted,
                 }}
               >
-                {s === 'name' ? t('dashboard.sortByName') : s === 'hashrate' ? t('dashboard.sortByHashrate') : t('dashboard.sortByTemp')}
+                {s === 'name'
+                  ? t('dashboard.sortByName')
+                  : s === 'hashrate'
+                    ? t('dashboard.sortByHashrate')
+                    : t('dashboard.sortByTemp')}
               </Text>
             </Pressable>
           ))}
@@ -1721,7 +1732,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Pressable
               key={g ?? 'off'}
               accessibilityRole="button"
-              accessibilityLabel={g === null ? t('dashboard.groupOff') : g === 'location' ? t('dashboard.groupByLocation') : t('dashboard.groupByTag')}
+              accessibilityLabel={
+                g === null
+                  ? t('dashboard.groupOff')
+                  : g === 'location'
+                    ? t('dashboard.groupByLocation')
+                    : t('dashboard.groupByTag')
+              }
               onPress={() => setAutoGroupBy(g)}
               style={{
                 paddingHorizontal: spacing.xs,
@@ -1739,7 +1756,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   color: autoGroupBy === g ? '#FFF' : theme.textMuted,
                 }}
               >
-                {g === null ? t('dashboard.groupOff') : g === 'location' ? t('dashboard.groupByLocation') : t('dashboard.groupByTag')}
+                {g === null
+                  ? t('dashboard.groupOff')
+                  : g === 'location'
+                    ? t('dashboard.groupByLocation')
+                    : t('dashboard.groupByTag')}
               </Text>
             </Pressable>
           ))}

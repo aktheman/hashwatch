@@ -69,7 +69,7 @@
     "build:web:analyze": "expo export --platform web --dump-sourcemap && node scripts/analyze-bundle.js",
     "electron": "NODE_ENV=development electron electron/main.js",
     "electron:build": "npm run build:web && electron-builder",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "command -v electron-builder >/dev/null 2>&1 && electron-builder install-app-deps || true",
     "deploy:web": "expo export --platform web && npx vercel --prod",
     "test": "jest",
     "test:e2e": "playwright test",
