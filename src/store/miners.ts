@@ -319,7 +319,9 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         get().refreshAll();
       }
     }, 120000);
-    if (typeof bgTimer === 'object' && 'unref' in bgTimer) bgTimer.unref();
+    if (typeof bgTimer === 'object' && bgTimer !== null && 'unref' in bgTimer) {
+      (bgTimer as { unref: () => void }).unref();
+    }
 
     return () => {
       if (interval) clearInterval(interval);

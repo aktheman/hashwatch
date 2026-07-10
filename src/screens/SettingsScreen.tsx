@@ -467,6 +467,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
 
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={showDebugPanel ? t('settings.hideDebug') : t('settings.debugMenu')}
           onPress={() => {
             setShowDebugPanel(!showDebugPanel);
             if (!showDebugPanel) loadDebugInfo();
@@ -957,6 +959,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </View>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('settings.alertHistory')}
           style={[styles.row, { marginTop: spacing.xs }]}
           onPress={() => navigation.navigate('AlertHistory')}
         >
@@ -967,6 +970,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('settings.notificationHistory')}
           style={[styles.row, { marginTop: spacing.xxs }]}
           onPress={() => navigation.navigate('NotificationHistory')}
         >
@@ -1043,12 +1047,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Auto-scan network"
           />
         </View>
-        <Pressable accessibilityRole="button" style={styles.row} onPress={() => loadMiners()}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('settings.refreshAll')} style={styles.row} onPress={() => loadMiners()}>
           <Text style={styles.rowLabel}>{t('settings.refreshAll')}</Text>
           <Text style={styles.actionText}>{t('settings.refresh')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={scanning ? t('settings.scanning') : t('settings.scanNetwork')}
           style={styles.row}
           onPress={scanNetwork}
           disabled={scanning}
@@ -1200,6 +1205,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
+                    accessibilityLabel={t('settings.edit')}
                     style={{
                       backgroundColor: theme.surfaceLight,
                       borderRadius: radius.md,
@@ -1272,6 +1278,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
+                    accessibilityLabel={t('settings.cancel')}
                     style={{
                       backgroundColor: theme.surfaceLight,
                       borderRadius: radius.md,

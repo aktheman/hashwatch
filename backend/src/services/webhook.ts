@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { URL } from 'url';
 import { query } from '../db';
 import { captureException } from './sentry';
 
@@ -9,6 +10,24 @@ interface WebhookPayload {
   title: string;
   body: string;
   timestamp: number;
+}
+
+function isPrivateHost(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr);
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0') return true;
+    if (host.startsWith('10.') || host.startsWith('192.168.') || host.startsWith('172.')) {
+      const second = parseInt(host.split('.')[1] || '0', 10);
+      if (host.startsWith('172.') && (second < 16 || second > 31)) return false;
+      return true;
+    }
+    if (host === '169.254.169.254') return true;
+    if (host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.lan')) return true;
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 export async function sendWebhook(
@@ -24,6 +43,7 @@ export async function sendWebhook(
     if (result.rows.length === 0) return;
     webhookUrl = (result.rows[0] as { value: string }).value;
     if (!webhookUrl || !webhookUrl.startsWith('http')) return;
+    if (isPrivateHost(webhookUrl)) return;
 
     const response = await axios.post(webhookUrl, payload, {
       timeout: 10_000,

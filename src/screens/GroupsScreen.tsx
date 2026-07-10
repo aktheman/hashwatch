@@ -775,6 +775,7 @@ export function GroupsScreen() {
               </Text>
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={t('groups.editRule')}
                 style={styles.ruleInfo}
                 onPress={() => editRule(rule)}
               >
@@ -840,6 +841,7 @@ export function GroupsScreen() {
                 <Pressable
                   key={f}
                   accessibilityRole="button"
+                  accessibilityLabel={f === 'ip' ? t('groups.fieldIP') : f === 'name' ? t('groups.fieldName') : t('groups.fieldTag')}
                   style={[styles.fieldChip, { backgroundColor: ruleField === f ? theme.primary + '20' : theme.surfaceLight, borderColor: ruleField === f ? theme.primary : theme.border }]}
                   onPress={() => setRuleField(f)}
                 >
@@ -868,6 +870,7 @@ export function GroupsScreen() {
             <View style={styles.modalActions}>
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={t('common.cancel')}
                 style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, borderColor: theme.border }]}
                 onPress={() => setShowRuleEditor(false)}
               >
@@ -875,6 +878,7 @@ export function GroupsScreen() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={editingRule ? t('common.save') : t('common.add')}
                 style={[styles.ruleInput, { flex: 0, paddingHorizontal: 16, backgroundColor: theme.primary, borderColor: theme.primary }]}
                 onPress={addRule}
               >

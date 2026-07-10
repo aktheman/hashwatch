@@ -7,6 +7,7 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 const DEFAULT_TTL = 30_000; // 30s
+const MAX_CACHE_SIZE = 1_000;
 const CLEANUP_INTERVAL = 60_000;
 
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -40,6 +41,10 @@ export function cacheMiddleware(ttl = DEFAULT_TTL) {
     }
     const originalJson = res.json.bind(res);
     res.json = (body: unknown) => {
+      if (cache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = cache.keys().next().value;
+        if (oldestKey) cache.delete(oldestKey);
+      }
       cache.set(key, { data: body, expiresAt: now + ttl });
       return originalJson(body);
     };
