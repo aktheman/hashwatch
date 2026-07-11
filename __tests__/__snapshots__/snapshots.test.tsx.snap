@@ -2690,6 +2690,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityLabel": "settings.debugMenu",
+                "accessibilityRole": "button",
                 "accessibilityState": {
                   "busy": undefined,
                   "checked": undefined,
@@ -4599,6 +4601,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityLabel": "settings.alertHistory",
                 "accessibilityRole": "button",
                 "accessibilityState": {
                   "busy": undefined,
@@ -4686,6 +4689,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityLabel": "settings.notificationHistory",
                 "accessibilityRole": "button",
                 "accessibilityState": {
                   "busy": undefined,
@@ -5225,6 +5229,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityLabel": "settings.refreshAll",
                 "accessibilityRole": "button",
                 "accessibilityState": {
                   "busy": undefined,
@@ -5295,6 +5300,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityLabel": "settings.scanNetwork",
                 "accessibilityRole": "button",
                 "accessibilityState": {
                   "busy": undefined,

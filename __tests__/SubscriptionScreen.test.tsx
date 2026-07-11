@@ -53,3 +53,8 @@ it('displays feature list', async () => {
   expect(screen.getByText(/Up to 4 miners/)).toBeTruthy();
   expect(screen.getAllByText(/30-day charts/).length).toBe(1);
 });
+
+it('displays pro feature list', async () => {
+  await render(<SubscriptionScreen />);
+  expect(screen.getByText(/Unlimited miners/)).toBeTruthy();
+});

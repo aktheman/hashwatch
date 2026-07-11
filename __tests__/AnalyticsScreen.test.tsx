@@ -150,7 +150,9 @@ it('shows Power (W) label in static summary cards', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await waitFor(() => expect(screen.getByText('analytics.power')).toBeTruthy());
+  await waitFor(() =>
+    expect(screen.getAllByText('analytics.power').length).toBeGreaterThanOrEqual(1),
+  );
 });
 
 it('shows Est. Daily BTC label in static summary cards', async () => {

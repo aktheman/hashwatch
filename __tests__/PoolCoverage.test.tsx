@@ -88,7 +88,7 @@ describe('PoolCoverage', () => {
         minersCount={10}
       />,
     );
-    expect(screen.getByText('No pool data')).toBeTruthy();
+    expect(screen.getByText('poolCoverage.noData')).toBeTruthy();
   });
 
   it('uses success color for coverage >= 75', async () => {
@@ -99,7 +99,7 @@ describe('PoolCoverage', () => {
       />,
     );
     expect(screen.getByText('80%')).toBeTruthy();
-    expect(screen.getByText('Top pool')).toBeTruthy();
+    expect(screen.getByText('poolCoverage.topPool')).toBeTruthy();
   });
 
   it('uses primary color for 40 <= coverage < 75', async () => {
@@ -124,6 +124,6 @@ describe('PoolCoverage', () => {
 
   it('renders header text', async () => {
     await render(<PoolCoverage pools={[]} minersCount={0} />);
-    expect(screen.getByText('Pool coverage')).toBeTruthy();
+    expect(screen.getByText('poolCoverage.title')).toBeTruthy();
   });
 });

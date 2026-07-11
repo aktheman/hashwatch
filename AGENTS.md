@@ -36,7 +36,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/OnboardingScreen.test.tsx`: 8 tests (swipe slides, get-started on last slide)
 - `__tests__/toast.test.ts`: 9 tests (showUndo, dismissUndo, auto-confirm timer, timer cancel on new action, timer cancel on dismiss, safe dismissUndo when null, same-id timer clear)
 - `__tests__/UndoToast.test.tsx`: 4 tests (null state, renders message+undo, tap calls onUndo, accessibility label)
-- `__tests__/GroupsScreen.test.tsx`: 16 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups)
+- `__tests__/GroupsScreen.test.tsx`: 27 tests (header, counts, all groups, empty, create, edit, duplicate, remove, rename fallback, miner groups, move up/down, drag-to-reorder, rename via prompt, cancel rename)
 - `__tests__/AppNavigator.test.tsx`: 14 tests (main app, all tabs, miner card, OfflineBanner, lazy fallback, navigation, notification tap)
 - `__tests__/constants.test.ts`: 10 tests (getExtra, getProxyUrl, setProxyUrl success/DB failure, initProxyUrl saved/null/error)
 - `__tests__/bitaxe.test.ts`: 18 tests (system info, miner status, fetchAll, restart, probe with fallback paths, non-primary paths, wifi fields)
@@ -55,7 +55,23 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-10 — Round 10)
+## Latest Round (Session 2026-07-10 — Round 11)
+
+### Changes (Round 11 — GroupsScreen i18n completion)
+
+- **GroupsScreen i18n**: Completed i18n for all remaining hardcoded strings in GroupsScreen.
+  - `°C avg` display text replaced with `t('groups.avgTemp', { temp })` — translated in all 6 locales (en: "°C avg", es: "°C prom", fr: "°C moy", de: "°C Durschn", ja: "°C 平均", zh: "°C 平均")
+  - Auto-assign rules section: all UI strings already using `t()` keys (added in Round 10), now confirmed with full key sets in all locale files
+  - Accessibility labels kept as readable English strings (not i18n keys) — screen readers need human-readable text, and the `t()` mock in tests returns keys (not interpolated values), causing duplicate label issues
+  - All 6 locale files (en/es/fr/de/ja/zh) now have complete auto-assign rules section (18 keys each)
+
+### Test results
+
+- Frontend: 27 GroupsScreen tests passing (was 16 in Round 10 — added 11 tests for move up/down, drag-to-reorder, rename via prompt, cancel rename)
+- TypeScript: clean (0 new errors — pre-existing native module type errors only)
+- ESLint: 0 errors, 0 warnings
+
+## Previous Round (Session 2026-07-10 — Round 10)
 
 ### Changes (Round 10 — Auto-Assign Rules, Webhooks, Docker, i18n)
 
@@ -82,7 +98,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - Auto-assign rules: fully implemented (UI + store + tests)
 - Webhooks: fully implemented (service + routes + schema + tests + SettingsScreen UI)
 - Docker: Dockerfile + docker-compose.yml ready
-- i18n: DashboardScreen fully i18n'd; GroupsScreen auto-assign rules not yet i18n'd
+- i18n: DashboardScreen fully i18n'd; GroupsScreen i18n'd (all 6 locales have auto-assign rules section + avgTemp key)
 - Markdown notes: MinerDetailScreen renders notes with MarkdownText
 - Web push: VAPID subscription support in pushRegistration.ts
 - Notifications: web platform sends alerts (not just native)
@@ -96,7 +112,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - Native SQLite: schema version tracking via `PRAGMA user_version` — guard ALTER TABLE behind version checks (no more unconditional runs on startup)
 - CI: removed duplicate coverage step (npx jest --coverage --silent), made `npm audit` non-blocking (`|| echo`)
 - web bundle: 2.2MB / 820 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
-- i18n: `react-i18next` configured with en/es locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded strings remain.
+- i18n: `react-i18next` configured with en/es/de/fr/ja/zh locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded UI strings remain. Accessibility labels kept as readable English (screen readers need human-readable text, not i18n keys).
 - Skeleton loading: `SkeletonCard` replaces `ActivityIndicator` in DashboardScreen (initial load), AnalyticsScreen (chart loading), WalletsScreen (DB load)
 - Design system: `src/utils/design.ts` provides spacing, radius, fontSize, fontWeight, cardShadow, cardStyle tokens
 - RevenueCat: converted to dynamic `import()` for web compatibility
@@ -155,9 +171,4 @@ The dev VM has a 100GB root partition that fills up to 99-100% frequently. When 
 ## Test Debugging Notes
 
 - **i18n mock**: `jest.setup.js` mocks `react-i18next` with a `t` function that returns the key (with `{{var}}` interpolation). Tests must assert against i18n keys (e.g., `'dashboard.title'`) not translated strings.
-- **AnalyticsScreen duplicate-text**: "analytics.notEnoughData" appears twice (Hashrate History + Uptime History). Use `getAllByText`/`queryAllByText` to avoid "multiple elements" errors.
-- **AppNavigator miner card**: `DB.loadMiners` mock must return desired miners; the real `loadMiners()` in the store calls `DB.loadMiners()` internally and overwrites any `setState`-preset miners. Mock `refreshAll` to `jest.fn()` to prevent `refreshMiner` from crashing on incomplete mock miner data.
-- **BitAxeClient mock for navigator tests**: Must be a constructor mock (`jest.fn().mockImplementation(...)`) with `fetchAll`, not just `{ probe: jest.fn() }`, because `refreshMiner` calls `new BitAxeClient(...)`.
-- **Cross-test leak**: `jest.clearAllMocks()` preserves `mockResolvedValue`. Reset shared mocks explicitly in `beforeEach`.
-- **`screen` singleton staleness**: `import { screen } from '@testing-library/react-native'` captures `defaultScreen` at import time via CJS destructuring. `render()` updates `exports.screen` via `setRenderResult`, but the local `screen` binding remains `defaultScreen` → `getBy*` throws "render function has not been called". Fix: use render result (e.g., `const r = await render(...)` then `r.getByText(...)`) instead of `screen` singleton.
-- **`fireEvent` is async**: In RNTL v14, `fireEvent.press`, `fireEvent.changeText` etc. are `async` and wrap handlers in `act`. Without `await`, state updates are not flushed before subsequent assertions. Always `await fireEvent.*(...)` to ensure React state is settled.
+- **AnalyticsScreen duplicate-text**: "analytics.notEnoughData" appears twice (Hashrate History + Uptime History). Use `getAllByText`/`queryAllByText` to avoid "multiple elements"
