@@ -88,7 +88,11 @@ export const EarningsForecast = React.memo(function EarningsForecast({
   const onlineMiners = miners.filter((m) => m.isOnline);
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+      accessible
+      accessibilityRole="summary"
+    >
       <Text style={[styles.title, { color: theme.textDim }]}>
         {t('analytics.earningsForecast', 'Earnings Forecast')}
       </Text>
@@ -122,31 +126,31 @@ export const EarningsForecast = React.memo(function EarningsForecast({
 
       <View style={styles.projections}>
         <ProjectionRow
-          label="1 Day"
+          label={t('forecast.oneDay', '1 Day')}
           btcAmount={forecast.projections['1d']}
           btcPrice={forecast.btcPrice}
           color={theme.success}
         />
         <ProjectionRow
-          label="7 Days"
+          label={t('forecast.sevenDays', '7 Days')}
           btcAmount={forecast.projections['7d']}
           btcPrice={forecast.btcPrice}
           color={theme.info}
         />
         <ProjectionRow
-          label="30 Days"
+          label={t('forecast.thirtyDays', '30 Days')}
           btcAmount={forecast.projections['30d']}
           btcPrice={forecast.btcPrice}
           color={theme.primary}
         />
         <ProjectionRow
-          label="90 Days"
+          label={t('forecast.ninetyDays', '90 Days')}
           btcAmount={forecast.projections['90d']}
           btcPrice={forecast.btcPrice}
           color={theme.warning}
         />
         <ProjectionRow
-          label="1 Year"
+          label={t('forecast.oneYear', '1 Year')}
           btcAmount={forecast.projections['1y']}
           btcPrice={forecast.btcPrice}
           color={theme.accent || theme.primary}

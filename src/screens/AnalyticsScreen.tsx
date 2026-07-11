@@ -651,12 +651,15 @@ export function AnalyticsScreen() {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Filter by miner"
+          accessibilityLabel={t('analyticsExtra.filter', 'Filter')}
+          accessibilityHint={
+            showMinerFilter ? 'Hides miner filter panel' : 'Shows miner filter panel'
+          }
           style={[styles.filterBtn, showMinerFilter && styles.filterBtnActive]}
           onPress={toggleMinerFilter}
         >
           <Text style={[styles.filterBtnText, showMinerFilter && styles.filterBtnTextActive]}>
-            Filter
+            {t('analyticsExtra.filter', 'Filter')}
           </Text>
         </Pressable>
       </View>
@@ -760,6 +763,10 @@ export function AnalyticsScreen() {
             {(['hashrate', 'uptime', 'efficiency', 'profit', 'cost'] as const).map((view) => (
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={t(
+                  `analytics.${view === 'hashrate' ? 'hashrateHistory' : view === 'uptime' ? 'uptimeHistory' : view === 'efficiency' ? 'efficiencyHistory' : view === 'profit' ? 'profitHistory' : 'costHistory'}`,
+                )}
+                accessibilityState={{ selected: chartView === view }}
                 key={view}
                 style={[
                   styles.rangeBtn,
@@ -790,8 +797,9 @@ export function AnalyticsScreen() {
             {ranges.map((r) => (
               <Pressable
                 accessibilityRole="button"
-                key={r}
                 accessibilityLabel={`Show ${r === '1h' ? '1 hour' : r === '24h' ? '24 hours' : r === '7d' ? '7 days' : '30 days'}`}
+                accessibilityState={{ selected: range === r }}
+                key={r}
                 style={[
                   styles.rangeBtn,
                   {
@@ -811,14 +819,15 @@ export function AnalyticsScreen() {
             <View style={styles.chipRow}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="All miners"
+                accessibilityLabel={t('analyticsExtra.allMiners', 'All miners')}
+                accessibilityState={{ selected: selectedMinerIds.size === 0 }}
                 style={[styles.chip, selectedMinerIds.size === 0 && styles.chipSelected]}
                 onPress={selectAllMiners}
               >
                 <Text
                   style={[styles.chipText, selectedMinerIds.size === 0 && styles.chipTextSelected]}
                 >
-                  All miners
+                  {t('analyticsExtra.allMiners', 'All miners')}
                 </Text>
               </Pressable>
               {miners.map((m) => {
@@ -828,6 +837,7 @@ export function AnalyticsScreen() {
                     accessibilityRole="button"
                     key={m.id}
                     accessibilityLabel={m.name || m.id}
+                    accessibilityState={{ selected: isSelected }}
                     style={[styles.chip, isSelected && styles.chipSelected]}
                     onPress={() => toggleMiner(m.id)}
                   >
