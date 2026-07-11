@@ -19,6 +19,7 @@ export interface MinerAlertRule {
   hashratedroppercent: number;
   offlinereminderminutes: number;
   uptimethresholdhours: number;
+  sharerejectionpercent: number;
 }
 
 const DEFAULT_RULE: MinerAlertRule = {
@@ -27,6 +28,7 @@ const DEFAULT_RULE: MinerAlertRule = {
   hashratedroppercent: 50,
   offlinereminderminutes: 5,
   uptimethresholdhours: 24,
+  sharerejectionpercent: 10,
 };
 
 alertRulesRouter.get('/:minerId', async (req: AuthRequest, res) => {
@@ -35,11 +37,18 @@ alertRulesRouter.get('/:minerId', async (req: AuthRequest, res) => {
     return res.status(404).json({ error: 'miner not found' });
   }
   const result = await query(
-    'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
+    'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
     [req.userId as string, minerId],
   );
   if (result.rows.length === 0) {
-    return res.json({ ...DEFAULT_RULE });
+    return res.json({
+      enabled: true,
+      tempThreshold: 70,
+      hashrateDropPercent: 50,
+      offlineReminderMinutes: 5,
+      uptimeThresholdHours: 24,
+      shareRejectionPercent: 10,
+    });
   }
   const row = result.rows[0] as MinerAlertRule;
   res.json({
@@ -48,6 +57,7 @@ alertRulesRouter.get('/:minerId', async (req: AuthRequest, res) => {
     hashrateDropPercent: row.hashratedroppercent,
     offlineReminderMinutes: row.offlinereminderminutes,
     uptimeThresholdHours: row.uptimethresholdhours,
+    shareRejectionPercent: row.sharerejectionpercent,
   });
 });
 
@@ -61,17 +71,19 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
     hashrateDropPercent,
     offlineReminderMinutes,
     uptimeThresholdHours,
+    shareRejectionPercent,
     enabled,
   } = req.body;
   await query(
-    `INSERT INTO miner_alert_rules (userId, minerId, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, enabled)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO miner_alert_rules (userId, minerId, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent, enabled)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (userId, minerId) DO UPDATE SET
        tempThreshold = $3,
        hashrateDropPercent = $4,
        offlineReminderMinutes = $5,
        uptimeThresholdHours = $6,
-       enabled = $7`,
+       shareRejectionPercent = $7,
+       enabled = $8`,
     [
       req.userId as string,
       minerId,
@@ -79,6 +91,7 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
       hashrateDropPercent ?? 50,
       offlineReminderMinutes ?? 5,
       uptimeThresholdHours ?? 24,
+      shareRejectionPercent ?? 10,
       enabled ?? true,
     ],
   );

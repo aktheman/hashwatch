@@ -177,3 +177,25 @@ export async function sendPoolChangeNotification(
     timestamp: Date.now(),
   });
 }
+
+export async function sendShareRejectionNotification(
+  userId: string,
+  minerName: string,
+  minerId: string,
+  rejectionRate: number,
+): Promise<void> {
+  await sendPushNotification(
+    userId,
+    'share_rejection',
+    'Share Rejection',
+    `${minerName} rejecting ${rejectionRate}% of shares`,
+  );
+  await sendWebhook(userId, {
+    event: 'share_rejection',
+    minerId,
+    minerName,
+    title: 'Share Rejection',
+    body: `${minerName} rejecting ${rejectionRate}% of shares`,
+    timestamp: Date.now(),
+  });
+}

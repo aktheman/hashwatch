@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS miner_alert_rules (
   hashrateDropPercent REAL NOT NULL DEFAULT 50,
   offlineReminderMinutes INTEGER NOT NULL DEFAULT 5,
   uptimeThresholdHours INTEGER NOT NULL DEFAULT 24,
+  shareRejectionPercent REAL NOT NULL DEFAULT 10,
   enabled BOOLEAN NOT NULL DEFAULT true,
   PRIMARY KEY (userId, minerId)
 );

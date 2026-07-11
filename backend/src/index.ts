@@ -24,6 +24,7 @@ import { createWebSocketServer } from './ws';
 import { query } from './db';
 import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
 import { cacheMiddleware, invalidateCache } from './middleware/cache';
+import { Request, Response, NextFunction } from 'express';
 import { webhooksRouter } from './routes/webhooks';
 
 const app = express();
@@ -61,6 +62,8 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth', authLimiter);
 
+app.use('/api/', cacheMiddleware());
+
 app.use('/api/auth', authRouter);
 app.use('/api/miners', minersRouter);
 app.use('/api/stats', statsRouter);
@@ -75,8 +78,6 @@ app.use('/api/miner-alert-rules', alertRulesRouter);
 app.use('/api/notification-history', notificationHistoryRouter);
 app.use('/api/webhooks', webhooksRouter);
 
-app.use('/api/', cacheMiddleware());
-
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;
   try {
@@ -87,6 +88,11 @@ app.get('/api/health', async (_req, res) => {
       .status(503)
       .json({ status: 'degraded', timestamp: Date.now(), db: 'disconnected', commitSha });
   }
+});
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Unhandled error:', err.message);
+  res.status(500).json({ error: 'internal server error' });
 });
 
 async function initSchema() {

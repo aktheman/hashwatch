@@ -12,6 +12,7 @@ const ALERT_TYPES = [
   'hashrate_drop',
   'pool_lost',
   'long_uptime',
+  'share_rejection',
 ] as const;
 
 async function verifyMinerOwnership(minerId: string, userId: string): Promise<boolean> {

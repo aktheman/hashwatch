@@ -35,6 +35,7 @@ describe('GET /api/notification-prefs/:minerId', () => {
       hashrate_drop: true,
       pool_lost: true,
       long_uptime: true,
+      share_rejection: true,
     });
   });
 
@@ -56,6 +57,7 @@ describe('GET /api/notification-prefs/:minerId', () => {
       hashrate_drop: true,
       pool_lost: true,
       long_uptime: true,
+      share_rejection: true,
     });
   });
 
