@@ -631,6 +631,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Sync Now"
+                  accessibilityHint={
+                    syncing ? 'Syncing in progress' : 'Syncs all settings with the server'
+                  }
+                  accessibilityState={{ disabled: syncing }}
                   style={[styles.authBtn, { marginTop: spacing.xs }]}
                   onPress={syncNow}
                   disabled={syncing}
@@ -1082,6 +1086,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={scanning ? t('settings.scanning') : t('settings.scanNetwork')}
+          accessibilityState={{ disabled: scanning }}
+          accessibilityHint="Scans local network for new miners"
           style={styles.row}
           onPress={scanNetwork}
           disabled={scanning}

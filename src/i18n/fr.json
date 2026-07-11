@@ -597,5 +597,29 @@
     "title": "Couverture du pool",
     "topPool": "Pool principal",
     "noData": "Aucune donnée de pool"
+  },
+  "forecast": {
+    "oneDay": "1 Jour",
+    "sevenDays": "7 Jours",
+    "thirtyDays": "30 Jours",
+    "ninetyDays": "90 Jours",
+    "oneYear": "1 An"
+  },
+  "minerHealth": {
+    "offline": "Hors ligne",
+    "critical": "Critique",
+    "warning": "Avertissement",
+    "healthy": "Sain"
+  },
+  "analyticsExtra": {
+    "filter": "Filtrer",
+    "allMiners": "Tous les mineurs"
+  },
+  "settingsExtra": {
+    "webhooks": "Webhooks",
+    "webhookDescription": "Recevez des requêtes POST lorsque les alertes de mineurs se déclenchent.",
+    "csvErrors": "Erreurs CSV",
+    "noValidRows": "Aucune ligne valide",
+    "checkCsvColumns": "Vérifiez que votre CSV contient les colonnes \"name\" et \"ip\"."
   }
 }

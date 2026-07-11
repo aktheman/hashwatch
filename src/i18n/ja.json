@@ -587,5 +587,29 @@
     "title": "プールカバレッジ",
     "topPool": "トッププール",
     "noData": "プールデータなし"
+  },
+  "forecast": {
+    "oneDay": "1日",
+    "sevenDays": "7日",
+    "thirtyDays": "30日",
+    "ninetyDays": "90日",
+    "oneYear": "1年"
+  },
+  "minerHealth": {
+    "offline": "オフライン",
+    "critical": "危険",
+    "warning": "警告",
+    "healthy": "正常"
+  },
+  "analyticsExtra": {
+    "filter": "フィルター",
+    "allMiners": "すべてのマイナー"
+  },
+  "settingsExtra": {
+    "webhooks": "Webhooks",
+    "webhookDescription": "マイナーアラートが発火した時にPOSTリクエストを受信します。",
+    "csvErrors": "CSVエラー",
+    "noValidRows": "有効な行がありません",
+    "checkCsvColumns": "CSVに「name」と「ip」の列があることを確認してください。"
   }
 }

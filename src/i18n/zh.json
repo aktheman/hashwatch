@@ -587,5 +587,29 @@
     "title": "矿池覆盖",
     "topPool": "主要矿池",
     "noData": "无矿池数据"
+  },
+  "forecast": {
+    "oneDay": "1天",
+    "sevenDays": "7天",
+    "thirtyDays": "30天",
+    "ninetyDays": "90天",
+    "oneYear": "1年"
+  },
+  "minerHealth": {
+    "offline": "离线",
+    "critical": "严重",
+    "warning": "警告",
+    "healthy": "正常"
+  },
+  "analyticsExtra": {
+    "filter": "筛选",
+    "allMiners": "所有矿机"
+  },
+  "settingsExtra": {
+    "webhooks": "Webhooks",
+    "webhookDescription": "当矿机警报触发时接收POST请求。",
+    "csvErrors": "CSV错误",
+    "noValidRows": "没有有效行",
+    "checkCsvColumns": "请检查您的CSV是否包含\"name\"和\"ip\"列。"
   }
 }

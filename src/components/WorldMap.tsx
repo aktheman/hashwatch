@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Path, Circle, G, Line } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useMinerStore } from '../store/miners';
@@ -95,6 +96,7 @@ interface DotInfo {
 }
 
 export const WorldMap = React.memo(function WorldMap() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
   const [selectedDot, setSelectedDot] = useState<number | null>(null);
@@ -171,7 +173,12 @@ export const WorldMap = React.memo(function WorldMap() {
   const selected = selectedDot !== null ? dots[selectedDot] : null;
 
   return (
-    <View style={{ position: 'relative' }}>
+    <View
+      style={{ position: 'relative' }}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={t('dashboard.title', 'HashWatch') + ' map'}
+    >
       {selected && miners[selected.minerIndex] && (
         <View
           style={{
@@ -216,12 +223,12 @@ export const WorldMap = React.memo(function WorldMap() {
             }}
           >
             {!miners[selected.minerIndex].isOnline
-              ? 'Offline'
+              ? t('minerHealth.offline', 'Offline')
               : miners[selected.minerIndex].status!.temperature > 80
-                ? 'Critical'
+                ? t('minerHealth.critical', 'Critical')
                 : miners[selected.minerIndex].status!.temperature > 65
-                  ? 'Warning'
-                  : 'Healthy'}
+                  ? t('minerHealth.warning', 'Warning')
+                  : t('minerHealth.healthy', 'Healthy')}
           </Text>
         </View>
       )}

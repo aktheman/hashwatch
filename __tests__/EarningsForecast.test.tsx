@@ -100,11 +100,11 @@ it('shows online/total miner count', () => {
 it('renders projection rows', () => {
   const miners = [makeMiner()];
   const r = render(<EarningsForecast miners={miners} />);
-  expect(r.getByText('1 Day')).toBeTruthy();
-  expect(r.getByText('7 Days')).toBeTruthy();
-  expect(r.getByText('30 Days')).toBeTruthy();
-  expect(r.getByText('90 Days')).toBeTruthy();
-  expect(r.getByText('1 Year')).toBeTruthy();
+  expect(r.getByText('forecast.oneDay')).toBeTruthy();
+  expect(r.getByText('forecast.sevenDays')).toBeTruthy();
+  expect(r.getByText('forecast.thirtyDays')).toBeTruthy();
+  expect(r.getByText('forecast.ninetyDays')).toBeTruthy();
+  expect(r.getByText('forecast.oneYear')).toBeTruthy();
 });
 
 it('shows net daily when powerCost provided', () => {
