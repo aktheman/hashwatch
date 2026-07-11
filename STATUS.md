@@ -1,6 +1,60 @@
 # STATUS
 
-## Session Summary (2026-07-10 — Round 10)
+## Session Summary (2026-07-11 — Round 12)
+
+### Done
+
+- **Earnings Forecasting**: New `EarningsForecast` component added to AnalyticsScreen.
+  - 1d/7d/30d/90d/1y BTC and USD projections based on total hashrate
+  - Summary row: hashrate, miner count (online/total), total power
+  - Net daily (after power cost) shown when power cost > 0
+  - BTC price footer displayed
+  - i18n keys in all 6 locales (en/es/fr/de/ja/zh)
+
+- **Miner Health Dashboard Map**: WorldMap enhanced with health-colored status indicators.
+  - Green dot = healthy (temp < 65, hashrate > 100)
+  - Yellow dot = warning (temp > 65 or hashrate < 100)
+  - Red dot = critical (temp > 80 or hashrate = 0)
+  - Tooltip shows hashrate, temperature, and health label (Healthy/Warning/Critical/Offline)
+
+- **Advanced Alerts**: share_rejection alert type + quiet hours fully implemented.
+  - `shareRejectionPercent` column added to `miner_alert_rules` table
+  - Backend routes, push notifications, webhook service, notification prefs all support `share_rejection`
+
+- **Performance**: React.memo on 5 chart components, RevenueCat singleton, lazy loaded OnboardingScreen + WhatsNewModal.
+  - Extracted `TILE_SIZE_STYLES`, `TILE_VALUE_SIZES`, `TAB_ICONS` outside component bodies
+  - Metro config updated with `minifierConfig` for better tree-shaking (2-pass compression)
+
+- **CI/CD Pipeline Fixes**: Consolidated duplicate jobs, graceful web deploy, conditional E2E.
+
+- **Tests**: New tests for EarningsForecast (8) and WorldMap (14).
+
+### Test Results
+
+- **Frontend**: TypeScript clean (0 errors), ESLint clean (0 warnings)
+- **Backend**: 194 tests passing (schema updated with `shareRejectionPercent`)
+- **EarningsForecast**: 8 tests passing (title, summary, projections, net daily, empty, BTC price, total power)
+- **WorldMap**: 14 tests passing (empty, online, offline, critical, warning, danger, multi-location, 10+ miners)
+
+---
+
+## Previous Session Summary (2026-07-10 — Round 11)
+
+- **GroupsScreen i18n completion**: All remaining hardcoded strings in GroupsScreen now i18n'd.
+  - `°C avg` display text → `t('groups.avgTemp', { temp })` with translations in all 6 locales
+  - Auto-assign rules section: all 18 keys added to es/fr/de/ja/zh locale files (were missing from Round 10)
+  - Accessibility labels kept as readable English (not i18n keys) — screen readers need human-readable text
+  - 11 new GroupsScreen tests (move up/down, drag-to-reorder, rename via prompt, cancel rename)
+
+### Test Results
+
+- **Frontend**: 27 GroupsScreen tests passing (was 16)
+- **TypeScript**: clean (0 new errors)
+- **ESLint**: 0 errors, 0 warnings
+
+---
+
+## Previous Session Summary (2026-07-10 — Round 10)
 
 ### Done
 
@@ -30,10 +84,10 @@
 
 - **i18n**: 20+ new English strings for DashboardScreen and other screens.
   - DashboardScreen: all hardcoded strings (`Sort:`, `Group:`, `Name`, `Hashrate`, `Temp`, `Off`, `📍 Loc`, `🏷️ Tag`, `online`, `offline`, `pool`, `active`, `Exit Kiosk`, `live monitor`) replaced with `t()` keys
-  - GroupsScreen: auto-assign rules UI uses English strings (not yet i18n'd)
+  - GroupsScreen: auto-assign rules UI uses `t()` keys (i18n completed in Round 11)
 
 - **Markdown notes**: `MarkdownText` component for rich-text rendering in miner notes.
-  - Supports: **bold**, *italic*, ***bold italic***, `code`, [links](url)
+  - Supports: **bold**, _italic_, **_bold italic_**, `code`, [links](url)
   - `MinerDetailScreen`: notes rendered with `MarkdownText` instead of plain `Text`
 
 - **Web push registration**: Browser push notification support via VAPID.
@@ -56,6 +110,5 @@
 ### Remaining
 
 - Disk space: VM at 100% disk utilization; commands time out intermittently. Can free ~1GB by removing `app-builder-bin`, `electron-builder`, etc. if not building desktop.
-- GroupsScreen auto-assign rules UI strings not yet i18n'd (hardcoded English).
 - E2E web build: not re-run this session due to disk space constraints.
 - CI: Deploy Web fails (missing Vercel secrets), E2E (Playwright) fails (no backend in CI), iOS Build Check fails (no Apple account). All pre-existing infrastructure issues.

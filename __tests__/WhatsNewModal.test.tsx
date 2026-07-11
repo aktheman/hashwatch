@@ -37,7 +37,7 @@ describe('WhatsNewModal', () => {
     await render(<WhatsNewModal />);
 
     await waitFor(() => {
-      expect(screen.getByText("What's New")).toBeTruthy();
+      expect(screen.getByText('whatsNew.title')).toBeTruthy();
     });
   });
 
@@ -47,7 +47,7 @@ describe('WhatsNewModal', () => {
     await render(<WhatsNewModal />);
 
     await waitFor(() => {
-      expect(screen.getByText("What's New")).toBeTruthy();
+      expect(screen.getByText('whatsNew.title')).toBeTruthy();
     });
   });
 
@@ -57,7 +57,7 @@ describe('WhatsNewModal', () => {
     await render(<WhatsNewModal />);
 
     await waitFor(() => {
-      expect(screen.queryByText("What's New")).toBeNull();
+      expect(screen.queryByText('whatsNew.title')).toBeNull();
     });
   });
 
@@ -87,7 +87,7 @@ describe('WhatsNewModal', () => {
     await render(<WhatsNewModal />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Version 1\.1\.0/)).toBeTruthy();
+      expect(screen.getByText(/whatsNew\.version/)).toBeTruthy();
     });
   });
 
@@ -108,7 +108,7 @@ describe('WhatsNewModal', () => {
     await render(<WhatsNewModal />);
 
     await waitFor(() => {
-      expect(screen.getByText('Got it!')).toBeTruthy();
+      expect(screen.getByText('whatsNew.gotIt')).toBeTruthy();
     });
   });
 });
