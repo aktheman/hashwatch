@@ -19,7 +19,10 @@ let notifiedHot = new Set<string>();
 let notifiedHashrateDrop = new Set<string>();
 let notifiedPoolLoss = new Set<string>();
 let notifiedLongUptime = new Set<string>();
+let notifiedShareRejection = new Set<string>();
 let prevHashrates = new Map<string, number>();
+let prevSharesAccepted = new Map<string, number>();
+let prevSharesRejected = new Map<string, number>();
 
 export interface AlertRule {
   enabled: boolean;
@@ -27,6 +30,7 @@ export interface AlertRule {
   hashrateDropPercent: number;
   offlineReminderMinutes: number;
   uptimeThresholdHours: number;
+  shareRejectionPercent: number;
 }
 
 const DEFAULT_RULES: AlertRule = {
@@ -35,6 +39,7 @@ const DEFAULT_RULES: AlertRule = {
   hashrateDropPercent: 50,
   offlineReminderMinutes: 5,
   uptimeThresholdHours: 24,
+  shareRejectionPercent: 10,
 };
 
 export async function getAlertRules(minerId: string): Promise<AlertRule> {
@@ -91,7 +96,10 @@ export function resetAlertState(): void {
   notifiedHashrateDrop = new Set();
   notifiedPoolLoss = new Set();
   notifiedLongUptime = new Set();
+  notifiedShareRejection = new Set();
   prevHashrates = new Map();
+  prevSharesAccepted = new Map();
+  prevSharesRejected = new Map();
 }
 
 export function cleanupAlertState(activeMinerIds: Set<string>): void {
@@ -110,8 +118,17 @@ export function cleanupAlertState(activeMinerIds: Set<string>): void {
   for (const key of notifiedLongUptime) {
     if (!activeMinerIds.has(key)) notifiedLongUptime.delete(key);
   }
+  for (const key of notifiedShareRejection) {
+    if (!activeMinerIds.has(key)) notifiedShareRejection.delete(key);
+  }
   for (const key of prevHashrates.keys()) {
     if (!activeMinerIds.has(key)) prevHashrates.delete(key);
+  }
+  for (const key of prevSharesAccepted.keys()) {
+    if (!activeMinerIds.has(key)) prevSharesAccepted.delete(key);
+  }
+  for (const key of prevSharesRejected.keys()) {
+    if (!activeMinerIds.has(key)) prevSharesRejected.delete(key);
   }
 }
 
@@ -120,6 +137,8 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
 
   const enabledSetting = await DB.getSetting('notifications_enabled');
   if (enabledSetting === 'false') return;
+
+  if (await isQuietHours()) return;
 
   const alertRuleCache = new Map<string, AlertRule>();
   const alertPrefCache = new Map<string, Record<string, boolean>>();
@@ -218,6 +237,30 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     if (uptime < uptimeThresholdSec && notifiedLongUptime.has(current.id)) {
       notifiedLongUptime.delete(current.id);
     }
+
+    const curAccepted = current.status?.sharesAccepted ?? 0;
+    const curRejected = current.status?.sharesRejected ?? 0;
+    const prevAccepted = prevSharesAccepted.get(current.id) ?? 0;
+    const prevRejected = prevSharesRejected.get(current.id) ?? 0;
+    const deltaAccepted = curAccepted - prevAccepted;
+    const deltaRejected = curRejected - prevRejected;
+    if (deltaAccepted + deltaRejected > 0) {
+      const rejectionRate = (deltaRejected / (deltaAccepted + deltaRejected)) * 100;
+      if (rejectionRate >= rules.shareRejectionPercent && !notifiedShareRejection.has(current.id)) {
+        notifiedShareRejection.add(current.id);
+        if (prefs.share_rejection !== false) {
+          await sendShareRejectionAlert(current, rejectionRate);
+        }
+      }
+      if (
+        rejectionRate < rules.shareRejectionPercent / 2 &&
+        notifiedShareRejection.has(current.id)
+      ) {
+        notifiedShareRejection.delete(current.id);
+      }
+    }
+    prevSharesAccepted.set(current.id, curAccepted);
+    prevSharesRejected.set(current.id, curRejected);
 
     prevHashrates.set(current.id, hr);
   }
@@ -326,4 +369,37 @@ async function sendLongUptimeAlert(miner: Miner, seconds: number) {
     type: 'long_uptime',
     title: `${miner.name} running ${hrs}h`,
   });
+}
+
+async function sendShareRejectionAlert(miner: Miner, rejectionRate: number) {
+  const pct = Math.round(rejectionRate);
+  await send('Share Rejection', `${miner.name} rejecting ${pct}% of shares`, {
+    minerId: miner.id,
+    type: 'share_rejection',
+  });
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: 'share_rejection',
+    title: `${miner.name} rejecting ${pct}% shares`,
+  });
+}
+
+async function isQuietHours(): Promise<boolean> {
+  const quietStart = await DB.getSetting('quiet_hours_start');
+  const quietEnd = await DB.getSetting('quiet_hours_end');
+  const quietEnabled = await DB.getSetting('quiet_hours_enabled');
+  if (quietEnabled === 'false' || !quietStart || !quietEnd) return false;
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const [startH, startM] = quietStart.split(':').map(Number);
+  const [endH, endM] = quietEnd.split(':').map(Number);
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+
+  if (startMinutes <= endMinutes) {
+    return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+  }
+  return currentMinutes >= startMinutes || currentMinutes < endMinutes;
 }

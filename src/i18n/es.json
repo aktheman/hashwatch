@@ -132,7 +132,9 @@
     "notEnoughData": "Datos insuficientes. Mantén los mineros encendidos.",
     "efficiencyHistory": "Historial de Eficiencia",
     "profitHistory": "Ganancias",
-    "setPowerCost": "Establecer costo eléctrico en Configuración"
+    "setPowerCost": "Establecer costo eléctrico en Configuración",
+    "earningsForecast": "Pronóstico de Ganancias",
+    "netDaily": "Neto/día (después de electricidad)"
   },
   "settings": {
     "title": "Configuración",
@@ -337,7 +339,27 @@
     "editInDetails": "Editar nombre de grupo en Detalles del Minero",
     "moveUp": "Mover arriba",
     "moveDown": "Mover abajo",
-    "orderSaved": "Orden de grupos guardado"
+    "orderSaved": "Orden de grupos guardado",
+    "autoAssignRules": "Reglas de Auto-Asignacion",
+    "noRules": "Sin reglas. Agrega reglas para auto-asignar mineros a grupos por IP, nombre o etiquetas.",
+    "addRule": "+ Agregar Regla",
+    "applyRules": "Aplicar Reglas",
+    "rulesApplied": "Reglas aplicadas",
+    "editRule": "Editar Regla",
+    "newRule": "Agregar Regla",
+    "matchField": "Campo de coincidencia:",
+    "fieldIP": "IP",
+    "fieldName": "Nombre",
+    "fieldTag": "Etiqueta",
+    "patternPlaceholder": "Patron (regex, ej. 192\\.168\\.1\\.\\d+)",
+    "targetGroupPlaceholder": "Nombre del grupo destino",
+    "disableRule": "Desactivar regla",
+    "enableRule": "Activar regla",
+    "deleteRule": "Eliminar regla",
+    "on": "On",
+    "off": "Off",
+    "applyAll": "Aplicar Reglas",
+    "avgTemp": "{{temp}}°C prom"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -507,7 +529,15 @@
     "hot": "Temperatura Alta",
     "hashrateDrop": "Caída de Hashrate",
     "poolLost": "Pool Perdido",
-    "longUptime": "Uptime Largo"
+    "longUptime": "Uptime Largo",
+    "shareRejection": "Rechazo de Shares",
+    "quietHours": "Horario Silencioso",
+    "quietHoursDesc": "Pausar notificaciones durante estas horas",
+    "quietHoursStart": "Hora de Inicio",
+    "quietHoursEnd": "Hora de Fin",
+    "globalDefaults": "Reglas de Alerta Predeterminadas",
+    "globalDefaultsDesc": "Aplicadas a todos los mineros sin reglas personalizadas",
+    "shareRejectionThreshold": "% de Rechazo de Shares"
   },
   "offlineBanner": {
     "offline": "Estás desconectado — mostrando datos en caché"
@@ -518,5 +548,54 @@
   "temperatureChart": {
     "notEnoughData": "Datos insuficientes para el gráfico de temperatura",
     "title": "Historial de temperatura"
+  },
+  "update": {
+    "downloaded": "Actualización descargada",
+    "downloadedBody": "HashWatch v{{version}} está listo para instalar. Reinicia la aplicación para aplicar.",
+    "restartInstall": "Reiniciar e instalar",
+    "later": "Más tarde",
+    "available": "Actualización disponible",
+    "availableBody": "HashWatch v{{version}} está disponible. Descargando en segundo plano...",
+    "dismiss": "Descartar"
+  },
+  "whatsNew": {
+    "title": "Novedades",
+    "version": "Versión {{version}}",
+    "gotIt": "¡Entendido!",
+    "changelog": [
+      "Polling rápido en tiempo real (5s primer plano / 30s segundo plano)",
+      "Personalización del diseño del panel (mostrar/ocultar secciones)",
+      "Gráficos superpuestos entre mineros en Analíticas",
+      "PWA mejorada con caché de API",
+      "Grupos de mineros 2.0 con secciones colapsables + estadísticas",
+      "Soporte multilingüe (中文, 日本語, Deutsch, Français)",
+      "Iconos de emoji personalizados para mineros",
+      "Clonación de mineros (duplicar)",
+      "Programación de modo oscuro (cambio automático por temporizador)",
+      "Importación/exportación CSV masiva",
+      "Mejoras de rendimiento",
+      "Configuración de notificaciones push",
+      "Accesibilidad por teclado (Escape para salir del modo selección)",
+      "Tarjeta de instantánea de minero compartible",
+      "Modal de novedades / registro de cambios"
+    ],
+    "changelogV1": [
+      "Lanzamiento inicial",
+      "Panel de mineros con mapa mundial",
+      "Monitoreo en tiempo real de hashrate/temperatura",
+      "Gráficos históricos en Analíticas",
+      "Gestión de billeteras",
+      "Grupos de mineros",
+      "Sistema de temas (5 temas)",
+      "Soporte PWA",
+      "Exportación CSV",
+      "Alertas de mineros (desconectado/caliente/caída de hashrate)",
+      "Estadísticas de pool"
+    ]
+  },
+  "poolCoverage": {
+    "title": "Cobertura de pool",
+    "topPool": "Pool principal",
+    "noData": "Sin datos de pool"
   }
 }

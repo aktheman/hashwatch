@@ -655,7 +655,7 @@ export function GroupsScreen() {
                   )}
                   {stats && stats.avgTemp > 0 && (
                     <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
-                      {stats.avgTemp.toFixed(0)}°C avg
+                      {t('groups.avgTemp', { temp: stats.avgTemp.toFixed(0) })}
                     </Text>
                   )}
                 </View>

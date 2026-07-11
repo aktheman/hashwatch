@@ -6,6 +6,7 @@ import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Skeleton } from '../components/Skeleton';
 import { MetricTile } from '../components/DashboardComponents';
+import { EarningsForecast } from '../components/EarningsForecast';
 import { MinerSnapshot } from '../types';
 import {
   toHashesPerSecond,
@@ -710,6 +711,8 @@ export function AnalyticsScreen() {
             accent="primary"
           />
         </View>
+
+        <EarningsForecast miners={miners} powerCost={powerCost} />
 
         {powerCost > 0 && (
           <View style={styles.chartCard}>

@@ -132,7 +132,9 @@
     "notEnoughData": "Noch nicht genügend Daten. Lasse die Miner laufen.",
     "efficiencyHistory": "Effizienzverlauf",
     "profitHistory": "Gewinn",
-    "setPowerCost": "Stromkosten in Einstellungen festlegen"
+    "setPowerCost": "Stromkosten in Einstellungen festlegen",
+    "earningsForecast": "Ertragsprognose",
+    "netDaily": "Netto/Tag (nach Strom)"
   },
   "settings": {
     "title": "Einstellungen",
@@ -337,7 +339,27 @@
     "editInDetails": "Gruppennamen in Minerdetails bearbeiten",
     "moveUp": "Nach oben",
     "moveDown": "Nach unten",
-    "orderSaved": "Gruppenreihenfolge gespeichert"
+    "orderSaved": "Gruppenreihenfolge gespeichert",
+    "autoAssignRules": "Auto-Zuweisungsregeln",
+    "noRules": "Noch keine Regeln. Fugen Sie Regeln hinzu, um Miner automatisch anhand von IP, Name oder Tags zuzuweisen.",
+    "addRule": "+ Regel hinzufugen",
+    "applyRules": "Regeln anwenden",
+    "rulesApplied": "Regeln angewendet",
+    "editRule": "Regel bearbeiten",
+    "newRule": "Regel hinzufugen",
+    "matchField": "Matchfeld:",
+    "fieldIP": "IP",
+    "fieldName": "Name",
+    "fieldTag": "Tag",
+    "patternPlaceholder": "Muster (Regex, z.B. 192\\.168\\.1\\.\\d+)",
+    "targetGroupPlaceholder": "Zielgruppenname",
+    "disableRule": "Regel deaktivieren",
+    "enableRule": "Regel aktivieren",
+    "deleteRule": "Regel loschen",
+    "on": "Ein",
+    "off": "Aus",
+    "applyAll": "Regeln anwenden",
+    "avgTemp": "{{temp}}°C Durschn"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -468,7 +490,15 @@
     "hot": "Hohe Temperatur",
     "hashrateDrop": "Hashrate-Abfall",
     "poolLost": "Pool verloren",
-    "longUptime": "Lange Betriebszeit"
+    "longUptime": "Lange Betriebszeit",
+    "shareRejection": "Share-Ablehnung",
+    "quietHours": "Ruhezeiten",
+    "quietHoursDesc": "Benachrichtigungen während dieser Stunden pausieren",
+    "quietHoursStart": "Startzeit",
+    "quietHoursEnd": "Endzeit",
+    "globalDefaults": "Standard-Alertregeln",
+    "globalDefaultsDesc": "Für alle Miner ohne benutzerdefinierte Regeln",
+    "shareRejectionThreshold": "Share-Ablehnung %"
   },
   "offlineBanner": {
     "offline": "Du bist offline — zeige zwischengespeicherte Daten"
@@ -518,5 +548,54 @@
   "temperatureChart": {
     "notEnoughData": "Nicht genügend Daten für das Temperaturdiagramm",
     "title": "Temperaturverlauf"
+  },
+  "update": {
+    "downloaded": "Update heruntergeladen",
+    "downloadedBody": "HashWatch v{{version}} ist bereit zur Installation. Starte die App neu, um zu aktualisieren.",
+    "restartInstall": "Neu starten & installieren",
+    "later": "Später",
+    "available": "Update verfügbar",
+    "availableBody": "HashWatch v{{version}} ist verfügbar. Wird im Hintergrund heruntergeladen...",
+    "dismiss": "Schließen"
+  },
+  "whatsNew": {
+    "title": "Neuigkeiten",
+    "version": "Version {{version}}",
+    "gotIt": "Verstanden!",
+    "changelog": [
+      "Echtzeit-Schnellabfrage (5s Vordergrund / 30s Hintergrund)",
+      "Dashboard-Layout-Anpassung (Abschnitte ein-/ausblenden)",
+      "Überlagerte Miner-Charts in Analysen",
+      "Verbesserte PWA mit API-Caching",
+      "Miner-Gruppen 2.0 mit einklappbaren Abschnitten + Gruppenstatistiken",
+      "Mehrsprachige Unterstützung (中文, 日本語, Deutsch, Français)",
+      "Benutzerdefinierte Miner-Emoji-Symbole",
+      "Miner-Klonen (duplizieren)",
+      "Dunkelmodus-Zeitplan (automatischer Wechsel)",
+      "Massen-CSV-Import/Export",
+      "Leistungsverbesserungen",
+      "Push-Benachrichtigungseinstellungen",
+      "Tastaturbedienung (Escape zum Beenden des Auswahlmodus)",
+      "Teilbare Miner-Schnappschusskarte",
+      "Was ist neu / Änderungsprotokoll-Modal"
+    ],
+    "changelogV1": [
+      "Erstveröffentlichung",
+      "Miner-Dashboard mit Weltkarte",
+      "Echtzeit-Hashrate/Temperatur-Überwachung",
+      "Historische Diagramme in Analysen",
+      "Wallet-Verwaltung",
+      "Miner-Gruppen",
+      "Design-System (5 Themes)",
+      "PWA-Unterstützung",
+      "CSV-Export",
+      "Miner-Warnungen (offline/heiß/Hashrate-Abfall)",
+      "Pool-Statistiken"
+    ]
+  },
+  "poolCoverage": {
+    "title": "Pool-Abdeckung",
+    "topPool": "Top-Pool",
+    "noData": "Keine Pool-Daten"
   }
 }

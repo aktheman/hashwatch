@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontWeight, fontSize } from '../utils/design';
 
 interface UpdateInfo {
@@ -10,6 +11,7 @@ interface UpdateInfo {
 
 export function UpdateBanner() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [downloaded, setDownloaded] = useState(false);
 
@@ -45,27 +47,31 @@ export function UpdateBanner() {
       <View style={styles.content}>
         {downloaded ? (
           <>
-            <Text style={styles.title}>Update downloaded</Text>
+            <Text style={styles.title}>{t('update.downloaded')}</Text>
             <Text style={styles.body}>
-              HashWatch v{updateInfo.version} is ready to install. Restart the app to apply.
+              {t('update.downloadedBody', { version: updateInfo.version })}
             </Text>
             <View style={styles.actions}>
               <Pressable style={[styles.btn, styles.btnPrimary]} onPress={handleInstall}>
-                <Text style={styles.btnPrimaryText}>Restart & Install</Text>
+                <Text style={styles.btnPrimaryText}>{t('update.restartInstall')}</Text>
               </Pressable>
               <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleDismiss}>
-                <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>Later</Text>
+                <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>
+                  {t('update.later')}
+                </Text>
               </Pressable>
             </View>
           </>
         ) : (
           <>
-            <Text style={styles.title}>Update Available</Text>
+            <Text style={styles.title}>{t('update.available')}</Text>
             <Text style={styles.body}>
-              HashWatch v{updateInfo.version} is available. Downloading in the background...
+              {t('update.availableBody', { version: updateInfo.version })}
             </Text>
             <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleDismiss}>
-              <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>Dismiss</Text>
+              <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>
+                {t('update.dismiss')}
+              </Text>
             </Pressable>
           </>
         )}
