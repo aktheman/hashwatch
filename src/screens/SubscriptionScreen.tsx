@@ -169,18 +169,13 @@ export function SubscriptionScreen() {
           <Text style={styles.planPrice}>{t('subscription.freePrice')}</Text>
         </View>
         <View style={styles.featureList}>
-          <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Up to 4 miners
-          </Text>
-          <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Live dashboard
-          </Text>
-          <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Basic stats
-          </Text>
-          <Text style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text> Push alerts
-          </Text>
+          {(t('subscription.freeFeatures', { returnObjects: true }) as string[]).map(
+            (f: string) => (
+              <Text key={f} style={styles.featureItem}>
+                <Text style={styles.featureCheck}>✓</Text> {f}
+              </Text>
+            ),
+          )}
         </View>
         {tier === 'free' && (
           <View style={styles.currentBadge}>
@@ -201,7 +196,7 @@ export function SubscriptionScreen() {
           </View>
         </View>
         <View style={styles.featureList}>
-          {['Unlimited miners', '30-day charts', 'Push notifications', 'Multi-wallet'].map((f) => (
+          {(t('subscription.proFeatures', { returnObjects: true }) as string[]).map((f: string) => (
             <Text key={f} style={styles.featureItem}>
               <Text style={styles.featureCheck}>✓</Text> {f}
             </Text>

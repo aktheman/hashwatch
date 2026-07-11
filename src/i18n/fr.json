@@ -132,7 +132,9 @@
     "notEnoughData": "Pas assez de données. Laissez les mineurs fonctionner.",
     "efficiencyHistory": "Historique d'efficacité",
     "profitHistory": "Profit",
-    "setPowerCost": "Définir le coût électrique dans les paramètres"
+    "setPowerCost": "Définir le coût électrique dans les paramètres",
+    "earningsForecast": "Prévisions des gains",
+    "netDaily": "Net/jour (après électricité)"
   },
   "settings": {
     "title": "Paramètres",
@@ -337,7 +339,27 @@
     "editInDetails": "Modifier le nom du groupe dans les détails du mineur",
     "moveUp": "Monter",
     "moveDown": "Descendre",
-    "orderSaved": "Ordre des groupes enregistré"
+    "orderSaved": "Ordre des groupes enregistré",
+    "autoAssignRules": "Règles d'auto-assignation",
+    "noRules": "Aucune règle. Ajoutez des règles pour auto-assigner les mineurs aux groupes par IP, nom ou étiquettes.",
+    "addRule": "+ Ajouter une règle",
+    "applyRules": "Appliquer les règles",
+    "rulesApplied": "Règles appliquées",
+    "editRule": "Modifier la règle",
+    "newRule": "Ajouter une règle",
+    "matchField": "Champ de correspondance :",
+    "fieldIP": "IP",
+    "fieldName": "Nom",
+    "fieldTag": "Étiquette",
+    "patternPlaceholder": "Modèle (regex, ex. 192\\.168\\.1\\.\\d+)",
+    "targetGroupPlaceholder": "Nom du groupe cible",
+    "disableRule": "Désactiver la règle",
+    "enableRule": "Activer la règle",
+    "deleteRule": "Supprimer la règle",
+    "on": "On",
+    "off": "Off",
+    "applyAll": "Appliquer les règles",
+    "avgTemp": "{{temp}}°C moy"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -468,7 +490,15 @@
     "hot": "Température élevée",
     "hashrateDrop": "Baisse du taux de hachage",
     "poolLost": "Pool perdu",
-    "longUptime": "Longue disponibilité"
+    "longUptime": "Longue disponibilité",
+    "shareRejection": "Rejet de parts",
+    "quietHours": "Heures silencieuses",
+    "quietHoursDesc": "Mettre en pause les notifications pendant ces heures",
+    "quietHoursStart": "Heure de début",
+    "quietHoursEnd": "Heure de fin",
+    "globalDefaults": "Règles d'alerte par défaut",
+    "globalDefaultsDesc": "Appliquées à tous les mineurs sans règles personnalisées",
+    "shareRejectionThreshold": "% de rejet de parts"
   },
   "offlineBanner": {
     "offline": "Vous êtes hors ligne — affichage des données en cache"
@@ -518,5 +548,54 @@
   "temperatureChart": {
     "notEnoughData": "Pas assez de données pour le graphique de température",
     "title": "Historique des températures"
+  },
+  "update": {
+    "downloaded": "Mise à jour téléchargée",
+    "downloadedBody": "HashWatch v{{version}} est prêt à installer. Redémarrez l'application pour appliquer.",
+    "restartInstall": "Redémarrer et installer",
+    "later": "Plus tard",
+    "available": "Mise à jour disponible",
+    "availableBody": "HashWatch v{{version}} est disponible. Téléchargement en arrière-plan...",
+    "dismiss": "Fermer"
+  },
+  "whatsNew": {
+    "title": "Nouveautés",
+    "version": "Version {{version}}",
+    "gotIt": "Compris !",
+    "changelog": [
+      "Interrogation rapide en temps réel (5s au premier plan / 30s en arrière-plan)",
+      "Personnalisation de la disposition du tableau de bord (afficher/masquer des sections)",
+      "Graphiques superposés entre mineurs dans Analyses",
+      "PWA améliorée avec mise en cache de l'API",
+      "Groupes de mineurs 2.0 avec sections réductibles + statistiques",
+      "Support multilingue (中文, 日本語, Deutsch, Français)",
+      "Icônes d'emoji personnalisées pour les mineurs",
+      "Clonage de mineurs (dupliquer)",
+      "Programmation du mode sombre (changement automatique)",
+      "Import/export CSV en masse",
+      "Améliorations de performance",
+      "Paramètres de notifications push",
+      "Accessibilité clavier (Échap pour quitter le mode sélection)",
+      "Carte d'instantané de mineur partageable",
+      "Modal des nouveautés / journal des modifications"
+    ],
+    "changelogV1": [
+      "Version initiale",
+      "Tableau de bord des mineurs avec carte du monde",
+      "Surveillance en temps réel du taux de hachage/température",
+      "Graphiques historiques dans Analyses",
+      "Gestion des portefeuilles",
+      "Groupes de mineurs",
+      "Système de thèmes (5 thèmes)",
+      "Support PWA",
+      "Export CSV",
+      "Alertes de mineurs (hors ligne/surchauffe/baisse de hashrate)",
+      "Statistiques du pool"
+    ]
+  },
+  "poolCoverage": {
+    "title": "Couverture du pool",
+    "topPool": "Pool principal",
+    "noData": "Aucune donnée de pool"
   }
 }

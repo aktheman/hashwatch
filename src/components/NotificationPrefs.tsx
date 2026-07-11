@@ -18,6 +18,7 @@ const ALERT_LABELS_MAP: Record<string, string> = {
   hashrate_drop: 'notificationPrefs.hashrateDrop',
   pool_lost: 'notificationPrefs.poolLost',
   long_uptime: 'notificationPrefs.longUptime',
+  share_rejection: 'notificationPrefs.shareRejection',
 };
 
 async function getLocalPrefs(minerId: string): Promise<Record<string, boolean>> {

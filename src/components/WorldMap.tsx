@@ -4,7 +4,20 @@ import Svg, { Path, Circle, G, Line } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useMinerStore } from '../store/miners';
+import { Miner } from '../types';
 import { NA, SA, EU, AF, AS, OC } from '../data/worldMap';
+
+function getHealthColor(
+  miner: Miner,
+  theme: { success: string; warning: string; danger: string; textMuted: string },
+): string {
+  if (!miner.isOnline) return theme.textMuted;
+  const temp = miner.status?.temperature ?? 0;
+  const hr = miner.status?.hashRate ?? 0;
+  if (temp > 80 || hr === 0) return theme.danger;
+  if (temp > 65 || (hr > 0 && hr < 100)) return theme.warning;
+  return theme.success;
+}
 
 const LOCATION_CLUSTERS: Record<string, { x: number; y: number }> = {
   Home: { x: 20, y: 18 },
@@ -191,8 +204,25 @@ export const WorldMap = React.memo(function WorldMap() {
             <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>
               {miners[selected.minerIndex].status!.hashRate}{' '}
               {miners[selected.minerIndex].status!.hashRateUnit}
+              {' · '}
+              {miners[selected.minerIndex].status!.temperature.toFixed(0)}°C
             </Text>
           )}
+          <Text
+            style={{
+              color: getHealthColor(miners[selected.minerIndex], theme),
+              fontSize: 9,
+              fontWeight: fontWeight.semibold,
+            }}
+          >
+            {!miners[selected.minerIndex].isOnline
+              ? 'Offline'
+              : miners[selected.minerIndex].status!.temperature > 80
+                ? 'Critical'
+                : miners[selected.minerIndex].status!.temperature > 65
+                  ? 'Warning'
+                  : 'Healthy'}
+          </Text>
         </View>
       )}
       <Svg width={500} height={280} viewBox="-17 -18 116 76" preserveAspectRatio="xMidYMid meet">
@@ -223,17 +253,21 @@ export const WorldMap = React.memo(function WorldMap() {
             opacity={0.4}
           />
         ))}
-        {dots.map((dot, i) => (
-          <Circle
-            key={i}
-            cx={dot.x}
-            cy={dot.y}
-            r={1.5 + (i % 3) * 0.4}
-            fill={miners[dot.minerIndex]?.isOnline ? dot.color : theme.textMuted}
-            opacity={0.85}
-            onPress={() => setSelectedDot(selectedDot === i ? null : i)}
-          />
-        ))}
+        {dots.map((dot, i) => {
+          const miner = miners[dot.minerIndex];
+          const healthColor = miner ? getHealthColor(miner, theme) : theme.textMuted;
+          return (
+            <Circle
+              key={i}
+              cx={dot.x}
+              cy={dot.y}
+              r={1.5 + (i % 3) * 0.4}
+              fill={healthColor}
+              opacity={0.85}
+              onPress={() => setSelectedDot(selectedDot === i ? null : i)}
+            />
+          );
+        })}
         {locationLabels.map((l, i) => (
           <G key={`label-${i}`}>
             <Circle cx={l.x} cy={l.y + 0.3} r={2.5} fill={l.color} opacity={0.2} />

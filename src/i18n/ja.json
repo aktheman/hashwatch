@@ -132,7 +132,9 @@
     "efficiencyHistory": "効率履歴",
     "profitHistory": "利益",
     "setPowerCost": "設定で電気代を設定",
-    "notEnoughData": "データが十分ではありません。マイナーを稼働させ続けてください。"
+    "notEnoughData": "データが十分ではありません。マイナーを稼働させ続けてください。",
+    "earningsForecast": "収益予測",
+    "netDaily": "1日あたりの純利益（電気代差引後）"
   },
   "settings": {
     "title": "設定",
@@ -337,7 +339,27 @@
     "editInDetails": "マイナー詳細でグループ名を編集",
     "moveUp": "上に移動",
     "moveDown": "下に移動",
-    "orderSaved": "グループの順序を保存しました"
+    "orderSaved": "グループの順序を保存しました",
+    "autoAssignRules": "自動割り当てルール",
+    "noRules": "ルールがありません。IP、名前、タグに基づいてマイナーをグループに自動割り当てるルールを追加してください。",
+    "addRule": "+ ルールを追加",
+    "applyRules": "ルールを適用",
+    "rulesApplied": "ルールを適用しました",
+    "editRule": "ルールを編集",
+    "newRule": "ルールを追加",
+    "matchField": "一致フィールド：",
+    "fieldIP": "IP",
+    "fieldName": "名前",
+    "fieldTag": "タグ",
+    "patternPlaceholder": "パターン（正規表現、例: 192\\.168\\.1\\.\\d+）",
+    "targetGroupPlaceholder": "対象グループ名",
+    "disableRule": "ルールを無効にする",
+    "enableRule": "ルールを有効にする",
+    "deleteRule": "ルールを削除",
+    "on": "オン",
+    "off": "オフ",
+    "applyAll": "ルールを適用",
+    "avgTemp": "{{temp}}°C 平均"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -458,7 +480,15 @@
     "hot": "高温",
     "hashrateDrop": "ハッシュレート低下",
     "poolLost": "プール喪失",
-    "longUptime": "長時間稼働"
+    "longUptime": "長時間稼働",
+    "shareRejection": "シェア拒否",
+    "quietHours": "サイレント時間",
+    "quietHoursDesc": "この時間帯は通知を一時停止します",
+    "quietHoursStart": "開始時間",
+    "quietHoursEnd": "終了時間",
+    "globalDefaults": "デフォルトアラートルール",
+    "globalDefaultsDesc": "カスタムルールのないすべてのマイナーに適用",
+    "shareRejectionThreshold": "シェア拒否率 %"
   },
   "offlineBanner": {
     "offline": "オフラインです — キャッシュデータを表示中"
@@ -508,5 +538,54 @@
     "failed": "失敗",
     "last50": "最新50件",
     "noNotifications": "通知はまだありません"
+  },
+  "update": {
+    "downloaded": "アップデートをダウンロードしました",
+    "downloadedBody": "HashWatch v{{version}} のインストール準備が完了しました。アプリを再起動してください。",
+    "restartInstall": "再起動してインストール",
+    "later": "後で",
+    "available": "アップデートがあります",
+    "availableBody": "HashWatch v{{version}} が利用可能です。バックグラウンドでダウンロード中...",
+    "dismiss": "閉じる"
+  },
+  "whatsNew": {
+    "title": "新機能",
+    "version": "バージョン {{version}}",
+    "gotIt": "了解！",
+    "changelog": [
+      "リアルタイム高速ポーリング（フォアグラウンド5秒/バックグラウンド30秒）",
+      "ダッシュボードレイアウトのカスタマイズ（セクションの表示/非表示）",
+      "分析画面のマイナー間オーバーレイチャート",
+      "API キャッシュ対応 PWA の強化",
+      "折りたたみセクション + グループ統計付きマイナーグループ 2.0",
+      "多言語対応（中文, 日本語, Deutsch, Français）",
+      "カスタムマイナーアイコン（絵文字）",
+      "マイナーのクローン（複製）",
+      "ダークモードスケジュール（タイマー自動切替）",
+      "一括 CSV インポート/エクスポート",
+      "パフォーマンスの改善",
+      "プッシュ通知設定",
+      "キーボードアクセシビリティ（Escape で選択モードを終了）",
+      "共有可能なマイナースナップショットカード",
+      "新機能モーダル / 変更履歴"
+    ],
+    "changelogV1": [
+      "初回リリース",
+      "ワールドマップ付きマイナーダッシュボード",
+      "リアルタイムハッシュレート/温度監視",
+      "分析画面の履歴チャート",
+      "ウォレット管理",
+      "マイナーグループ",
+      "テーマシステム（5テーマ）",
+      "PWA サポート",
+      "CSV エクスポート",
+      "マイナーアラート（オフライン/高温/ハッシュレート低下）",
+      "プール統計"
+    ]
+  },
+  "poolCoverage": {
+    "title": "プールカバレッジ",
+    "topPool": "トッププール",
+    "noData": "プールデータなし"
   }
 }

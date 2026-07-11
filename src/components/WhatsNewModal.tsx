@@ -1,50 +1,15 @@
 import { View, Text, Pressable, Modal, ScrollView, StyleSheet } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as DB from '../db/database';
 
 const APP_VERSION = '1.1.0';
 
 const CHANGELOG = [
-  {
-    version: '1.1.0',
-    date: '2026-06-24',
-    changes: [
-      'Real-time fast polling (5s foreground / 30s background)',
-      'Dashboard layout customization (show/hide sections)',
-      'Cross-miner overlay charts on Analytics',
-      'Enhanced PWA with API caching',
-      'Miner groups 2.0 with collapsible sections + group stats',
-      'Multi-language support (中文, 日本語, Deutsch, Français)',
-      'Custom miner emoji icons',
-      'Miner cloning (duplicate)',
-      'Dark mode schedule (timer-based auto-switch)',
-      'Bulk CSV import/export',
-      'Performance improvements',
-      'Push notification settings',
-      'Keyboard accessibility (Escape to exit selection mode)',
-      'Shareable miner snapshot card',
-      "What's New / changelog modal",
-    ],
-  },
-  {
-    version: '1.0.0',
-    date: '2026-06-01',
-    changes: [
-      'Initial release',
-      'Miner dashboard with world map',
-      'Real-time hashrate/temp monitoring',
-      'Historical charts on Analytics',
-      'Wallet management',
-      'Miner groups',
-      'Theme system (5 themes)',
-      'PWA support',
-      'CSV export',
-      'Miner alerts (offline/hot/hashrate drop)',
-      'Pool statistics',
-    ],
-  },
+  { version: '1.1.0', date: '2026-06-24', key: 'changelog' },
+  { version: '1.0.0', date: '2026-06-01', key: 'changelogV1' },
 ];
 
 const styles = StyleSheet.create({
@@ -96,6 +61,7 @@ const styles = StyleSheet.create({
 
 export function WhatsNewModal() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -122,65 +88,68 @@ export function WhatsNewModal() {
               { color: theme.text, fontSize: fontSize.h3, fontWeight: fontWeight.extrabold },
             ]}
           >
-            What's New
+            {t('whatsNew.title')}
           </Text>
           <Text style={[styles.version, { color: theme.textDim, fontSize: fontSize.sm }]}>
-            Version {APP_VERSION}
+            {t('whatsNew.version', { version: APP_VERSION })}
           </Text>
           <ScrollView showsVerticalScrollIndicator={false}>
-            {CHANGELOG.map((entry) => (
-              <View key={entry.version} style={styles.section}>
-                <View style={styles.headerRow}>
-                  <Text
-                    style={[
-                      styles.version,
-                      {
-                        color: theme.primary,
-                        fontSize: fontSize.base,
-                        fontWeight: fontWeight.bold,
-                        marginBottom: 0,
-                      },
-                    ]}
-                  >
-                    v{entry.version}
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme.textMuted,
-                      fontSize: fontSize.xs,
-                      marginLeft: spacing.xs,
-                    }}
-                  >
-                    {entry.date}
-                  </Text>
-                </View>
-                {entry.changes.map((change, i) => (
-                  <View key={i} style={styles.changeRow}>
+            {CHANGELOG.map((entry) => {
+              const changes = t(`whatsNew.${entry.key}`, { returnObjects: true }) as string[];
+              return (
+                <View key={entry.version} style={styles.section}>
+                  <View style={styles.headerRow}>
+                    <Text
+                      style={[
+                        styles.version,
+                        {
+                          color: theme.primary,
+                          fontSize: fontSize.base,
+                          fontWeight: fontWeight.bold,
+                          marginBottom: 0,
+                        },
+                      ]}
+                    >
+                      v{entry.version}
+                    </Text>
                     <Text
                       style={{
-                        color: theme.success,
+                        color: theme.textMuted,
                         fontSize: fontSize.xs,
-                        marginRight: spacing.xxs,
+                        marginLeft: spacing.xs,
                       }}
                     >
-                      ✓
-                    </Text>
-                    <Text
-                      style={[styles.changeText, { color: theme.textDim, fontSize: fontSize.xs }]}
-                    >
-                      {change}
+                      {entry.date}
                     </Text>
                   </View>
-                ))}
-              </View>
-            ))}
+                  {changes.map((change: string, i: number) => (
+                    <View key={i} style={styles.changeRow}>
+                      <Text
+                        style={{
+                          color: theme.success,
+                          fontSize: fontSize.xs,
+                          marginRight: spacing.xxs,
+                        }}
+                      >
+                        ✓
+                      </Text>
+                      <Text
+                        style={[styles.changeText, { color: theme.textDim, fontSize: fontSize.xs }]}
+                      >
+                        {change}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              );
+            })}
           </ScrollView>
           <Pressable
             style={[styles.closeButton, { backgroundColor: theme.primary }]}
             onPress={() => setVisible(false)}
           >
             <Text style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.md }}>
-              Got it!
+              {t('whatsNew.gotIt')}
             </Text>
           </Pressable>
         </View>

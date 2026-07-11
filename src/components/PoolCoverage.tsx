@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '../theme';
+import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 
 interface PoolStats {
@@ -18,6 +19,7 @@ interface PoolCoverageProps {
 
 export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const coverage = useMemo(() => {
     if (!pools.length) return 0;
@@ -55,7 +57,7 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
           fontWeight: fontWeight.bold,
         }}
       >
-        Pool coverage
+        {t('poolCoverage.title')}
       </Text>
 
       <View
@@ -86,7 +88,7 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
         }}
       >
         <Text style={{ color: theme.text, fontSize: fontSize.md, fontWeight: fontWeight.bold }}>
-          Top pool
+          {t('poolCoverage.topPool')}
         </Text>
         <Text
           style={{ color: getColor(), fontSize: fontSize.h3, fontWeight: fontWeight.extrabold }}
@@ -102,7 +104,7 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
           marginTop: spacing.xxs,
         }}
       >
-        {pools?.[0]?.name || 'No pool data'}
+        {pools?.[0]?.name || t('poolCoverage.noData')}
       </Text>
     </View>
   );

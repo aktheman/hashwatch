@@ -153,6 +153,8 @@
     "uptimeHistory": "Uptime History",
     "efficiencyHistory": "Efficiency History",
     "profitHistory": "Profit",
+    "earningsForecast": "Earnings Forecast",
+    "netDaily": "Net/day (after power)",
     "setPowerCost": "Set power cost in Settings",
     "notEnoughData": "Not enough data yet. Keep miners running."
   },
@@ -381,7 +383,8 @@
     "deleteRule": "Delete rule",
     "on": "On",
     "off": "Off",
-    "applyAll": "Apply Rules"
+    "applyAll": "Apply Rules",
+    "avgTemp": "{{temp}}°C avg"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -541,7 +544,15 @@
     "hot": "High Temperature",
     "hashrateDrop": "Hashrate Drop",
     "poolLost": "Pool Lost",
-    "longUptime": "Long Uptime"
+    "longUptime": "Long Uptime",
+    "shareRejection": "Share Rejection",
+    "quietHours": "Quiet Hours",
+    "quietHoursDesc": "Pause notifications during these hours",
+    "quietHoursStart": "Start Time",
+    "quietHoursEnd": "End Time",
+    "globalDefaults": "Default Alert Rules",
+    "globalDefaultsDesc": "Applied to all miners without custom rules",
+    "shareRejectionThreshold": "Share Rejection %"
   },
   "offlineBanner": {
     "offline": "You are offline \u2014 showing cached data"
@@ -552,5 +563,54 @@
   "temperatureChart": {
     "notEnoughData": "Not enough data for temperature chart",
     "title": "Temperature History"
+  },
+  "update": {
+    "downloaded": "Update downloaded",
+    "downloadedBody": "HashWatch v{{version}} is ready to install. Restart the app to apply.",
+    "restartInstall": "Restart & Install",
+    "later": "Later",
+    "available": "Update Available",
+    "availableBody": "HashWatch v{{version}} is available. Downloading in the background...",
+    "dismiss": "Dismiss"
+  },
+  "whatsNew": {
+    "title": "What's New",
+    "version": "Version {{version}}",
+    "gotIt": "Got it!",
+    "changelog": [
+      "Real-time fast polling (5s foreground / 30s background)",
+      "Dashboard layout customization (show/hide sections)",
+      "Cross-miner overlay charts on Analytics",
+      "Enhanced PWA with API caching",
+      "Miner groups 2.0 with collapsible sections + group stats",
+      "Multi-language support (中文, 日本語, Deutsch, Français)",
+      "Custom miner emoji icons",
+      "Miner cloning (duplicate)",
+      "Dark mode schedule (timer-based auto-switch)",
+      "Bulk CSV import/export",
+      "Performance improvements",
+      "Push notification settings",
+      "Keyboard accessibility (Escape to exit selection mode)",
+      "Shareable miner snapshot card",
+      "What's New / changelog modal"
+    ],
+    "changelogV1": [
+      "Initial release",
+      "Miner dashboard with world map",
+      "Real-time hashrate/temp monitoring",
+      "Historical charts on Analytics",
+      "Wallet management",
+      "Miner groups",
+      "Theme system (5 themes)",
+      "PWA support",
+      "CSV export",
+      "Miner alerts (offline/hot/hashrate drop)",
+      "Pool statistics"
+    ]
+  },
+  "poolCoverage": {
+    "title": "Pool coverage",
+    "topPool": "Top pool",
+    "noData": "No pool data"
   }
 }
