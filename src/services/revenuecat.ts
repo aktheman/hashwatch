@@ -9,8 +9,18 @@ const API_KEYS = {
   android: getExtra().revenuecatAndroidKey,
 };
 
+let PurchasesModule: typeof import('react-native-purchases') | null = null;
+
+async function getPurchases(): Promise<(typeof import('react-native-purchases'))['default']> {
+  if (!PurchasesModule) {
+    PurchasesModule = await import('react-native-purchases');
+  }
+  return PurchasesModule.default;
+}
+
 export async function configureRevenueCat(): Promise<void> {
-  const { default: Purchases, LOG_LEVEL } = await import('react-native-purchases');
+  const Purchases = await getPurchases();
+  const { LOG_LEVEL } = PurchasesModule!;
 
   if (__DEV__) {
     Purchases.setLogLevel(LOG_LEVEL.DEBUG);
@@ -32,7 +42,7 @@ export async function configureRevenueCat(): Promise<void> {
 
 export async function getOfferings(): Promise<PurchasesOfferings | null> {
   try {
-    const { default: Purchases } = await import('react-native-purchases');
+    const Purchases = await getPurchases();
     const offerings = await Purchases.getOfferings();
     return offerings;
   } catch {
@@ -49,7 +59,7 @@ export async function purchasePro(): Promise<{
     const pkg = offerings?.current?.availablePackages?.[0];
     if (!pkg) return null;
 
-    const { default: Purchases } = await import('react-native-purchases');
+    const Purchases = await getPurchases();
     const result = await Purchases.purchasePackage(pkg);
     return { customerInfo: result.customerInfo, productIdentifier: result.productIdentifier };
   } catch (e: unknown) {
@@ -60,7 +70,7 @@ export async function purchasePro(): Promise<{
 
 export async function restorePurchases(): Promise<CustomerInfo | null> {
   try {
-    const { default: Purchases } = await import('react-native-purchases');
+    const Purchases = await getPurchases();
     const customerInfo = await Purchases.restorePurchases();
     return customerInfo;
   } catch {
@@ -76,7 +86,7 @@ export function isPro(customerInfo: CustomerInfo | null): boolean {
 
 export async function checkProStatus(): Promise<boolean> {
   try {
-    const { default: Purchases } = await import('react-native-purchases');
+    const Purchases = await getPurchases();
     const customerInfo = await Purchases.getCustomerInfo();
     return isPro(customerInfo);
   } catch {
@@ -85,7 +95,7 @@ export async function checkProStatus(): Promise<boolean> {
 }
 
 export async function listenForProChanges(callback: (isPro: boolean) => void): Promise<() => void> {
-  const { default: Purchases } = await import('react-native-purchases');
+  const Purchases = await getPurchases();
   const listener = (customerInfo: CustomerInfo) => {
     callback(isPro(customerInfo));
   };

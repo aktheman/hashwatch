@@ -97,18 +97,19 @@ const WrappedNotificationHistory = withScreenBoundary(NotificationHistoryScreen)
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
+const TAB_ICONS: Record<string, string> = {
+  Dashboard: '⬡',
+  Pools: '🌊',
+  Analytics: '📊',
+  Settings: '⚙',
+};
+
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const theme = useTheme();
-  const icons: Record<string, string> = {
-    Dashboard: '⬡',
-    Pools: '🌊',
-    Analytics: '📊',
-    Settings: '⚙',
-  };
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       <Text style={{ fontSize: 22, color: focused ? theme.primary : theme.textMuted }}>
-        {icons[label] || '•'}
+        {TAB_ICONS[label] || '•'}
       </Text>
     </View>
   );

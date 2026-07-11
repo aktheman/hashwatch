@@ -14,7 +14,13 @@ interface SparklineProps {
   fill?: string;
 }
 
-export function Sparkline({ data, width = 120, height = 40, color, fill: _fill }: SparklineProps) {
+export const Sparkline = React.memo(function Sparkline({
+  data,
+  width = 120,
+  height = 40,
+  color,
+  fill: _fill,
+}: SparklineProps) {
   const theme = useTheme();
   const stroke = color || theme.info;
   const min = Math.min(...data);
@@ -40,7 +46,7 @@ export function Sparkline({ data, width = 120, height = 40, color, fill: _fill }
       </Svg>
     </View>
   );
-}
+});
 
 interface MiniBarChartProps {
   data: number[];
@@ -49,7 +55,12 @@ interface MiniBarChartProps {
   color?: string;
 }
 
-export function MiniBarChart({ data, width = 120, height = 40, color }: MiniBarChartProps) {
+export const MiniBarChart = React.memo(function MiniBarChart({
+  data,
+  width = 120,
+  height = 40,
+  color,
+}: MiniBarChartProps) {
   const theme = useTheme();
   const stroke = color || theme.primary;
   const barWidth = (width / data.length) * 0.6;
@@ -71,7 +82,7 @@ export function MiniBarChart({ data, width = 120, height = 40, color }: MiniBarC
       ))}
     </View>
   );
-}
+});
 
 interface DonutProps {
   value: number;
@@ -80,7 +91,12 @@ interface DonutProps {
   size?: number;
 }
 
-export function Donut({ value, max = 100, color, size = 100 }: DonutProps) {
+export const Donut = React.memo(function Donut({
+  value,
+  max = 100,
+  color,
+  size = 100,
+}: DonutProps) {
   const theme = useTheme();
   const strokeColor = color || theme.primary;
   const radius = (size - 12) / 2;
@@ -121,7 +137,7 @@ export function Donut({ value, max = 100, color, size = 100 }: DonutProps) {
       </View>
     </View>
   );
-}
+});
 
 interface GaugeProps {
   value: number;
@@ -131,7 +147,13 @@ interface GaugeProps {
   height?: number;
 }
 
-export function Gauge({ value, max = 100, color, width = 120, height = 70 }: GaugeProps) {
+export const Gauge = React.memo(function Gauge({
+  value,
+  max = 100,
+  color,
+  width = 120,
+  height = 70,
+}: GaugeProps) {
   const theme = useTheme();
   const strokeColor = color || theme.success;
   const radius = (width - 20) / 2;
@@ -168,7 +190,7 @@ export function Gauge({ value, max = 100, color, width = 120, height = 70 }: Gau
       </Svg>
     </View>
   );
-}
+});
 
 interface TimelineSegment {
   month: string;
@@ -182,7 +204,11 @@ interface TimelineProps {
   height?: number;
 }
 
-export function Timeline({ data, width = 140, height = 220 }: TimelineProps) {
+export const Timeline = React.memo(function Timeline({
+  data,
+  width = 140,
+  height = 220,
+}: TimelineProps) {
   const theme = useTheme();
   const dotSize = 28;
 
@@ -220,4 +246,4 @@ export function Timeline({ data, width = 140, height = 220 }: TimelineProps) {
       ))}
     </View>
   );
-}
+});

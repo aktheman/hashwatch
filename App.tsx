@@ -1,11 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import './src/i18n';
 import { AppNavigator } from './src/navigation/AppNavigator';
-import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
-import { WhatsNewModal } from './src/components/WhatsNewModal';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
@@ -19,6 +17,13 @@ import {
   setThemeMode,
 } from './src/theme';
 import { initProxyUrl } from './src/constants';
+
+const OnboardingScreen = lazy(() =>
+  import('./src/screens/OnboardingScreen').then((m) => ({ default: m.OnboardingScreen })),
+);
+const WhatsNewModal = lazy(() =>
+  import('./src/components/WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
+);
 
 export default function App() {
   const theme = useTheme();
@@ -87,7 +92,9 @@ export default function App() {
     return (
       <>
         <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
-        <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+        <Suspense fallback={null}>
+          <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+        </Suspense>
       </>
     );
   }
@@ -95,7 +102,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
-      <WhatsNewModal />
+      <Suspense fallback={null}>
+        <WhatsNewModal />
+      </Suspense>
       <AppNavigator />
     </ErrorBoundary>
   );

@@ -17,4 +17,15 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
+config.transformer = {
+  ...config.transformer,
+  minifierConfig: {
+    compress: {
+      drop_console: false,
+      passes: 2,
+      pure_funcs: [],
+    },
+  },
+};
+
 module.exports = config;
