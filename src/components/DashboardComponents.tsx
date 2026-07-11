@@ -13,6 +13,18 @@ import {
   getNetworkHashrate,
 } from '../utils/hashrate';
 
+const TILE_SIZE_STYLES: Record<'sm' | 'md' | 'lg', { padding: number; minHeight: number }> = {
+  sm: { padding: spacing.md, minHeight: 80 },
+  md: { padding: spacing.lg, minHeight: 110 },
+  lg: { padding: spacing.xl, minHeight: 140 },
+};
+
+const TILE_VALUE_SIZES = {
+  sm: fontSize.lg,
+  md: fontSize.h2,
+  lg: fontSize.hero,
+} as const;
+
 interface MetricTileProps {
   title: string;
   value: string;
@@ -54,23 +66,15 @@ export const MetricTile = React.memo(function MetricTile({
     }
   }, [theme, accent]);
 
-  const sizeStyles = {
-    sm: { padding: spacing.md, minHeight: 80 },
-    md: { padding: spacing.lg, minHeight: 110 },
-    lg: { padding: spacing.xl, minHeight: 140 },
-  };
+  const sizeStyles = TILE_SIZE_STYLES[size];
 
-  const valueSize = {
-    sm: fontSize.lg,
-    md: fontSize.h2,
-    lg: fontSize.hero,
-  }[size];
+  const valueSize = TILE_VALUE_SIZES[size];
 
   const TileContent = (
     <View
       style={[
         styles.container,
-        sizeStyles[size],
+        sizeStyles,
         {
           backgroundColor: theme.surface,
           borderColor: theme.border,
