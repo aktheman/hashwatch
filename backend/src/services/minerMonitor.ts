@@ -6,6 +6,7 @@ import {
   sendHashrateDropNotification,
   sendPoolChangeNotification,
   sendLongUptimeNotification,
+  sendShareRejectionNotification,
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
 
@@ -15,6 +16,8 @@ interface MinerState {
   hashRate: number;
   pool: string | null;
   uptimeSeconds?: number;
+  sharesAccepted?: number;
+  sharesRejected?: number;
 }
 
 interface AlertRuleRow {
@@ -23,6 +26,7 @@ interface AlertRuleRow {
   hashratedroppercent: number;
   offlinereminderminutes: number;
   uptimethresholdhours: number;
+  sharerejectionpercent: number;
 }
 
 const minerStates = new Map<string, MinerState>();
@@ -81,6 +85,7 @@ async function getAlertRules(minerId: string, userId: string): Promise<AlertRule
         hashratedroppercent: row.hashratedroppercent,
         offlinereminderminutes: row.offlinereminderminutes,
         uptimethresholdhours: row.uptimethresholdhours,
+        sharerejectionpercent: row.sharerejectionpercent,
       };
       alertRuleCache.set(cacheKey, rule);
       return rule;
@@ -94,6 +99,7 @@ async function getAlertRules(minerId: string, userId: string): Promise<AlertRule
     hashratedroppercent: 50,
     offlinereminderminutes: 5,
     uptimethresholdhours: 24,
+    sharerejectionpercent: 10,
   };
 }
 
@@ -114,12 +120,22 @@ export async function checkMinerStatus(
   hashRate: number = 0,
   pool: string | null = null,
   uptimeSeconds: number = 0,
+  sharesAccepted: number = 0,
+  sharesRejected: number = 0,
 ): Promise<void> {
   const key = `${userId}:${minerId}`;
   const prev = minerStates.get(key) as MinerState | undefined;
 
   if (!prev) {
-    minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
+    minerStates.set(key, {
+      isOnline,
+      temperature,
+      hashRate,
+      pool,
+      uptimeSeconds,
+      sharesAccepted,
+      sharesRejected,
+    });
     setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
     return;
   }
@@ -127,7 +143,15 @@ export async function checkMinerStatus(
   const rules = await getAlertRules(minerId, userId);
 
   if (!rules.enabled) {
-    minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
+    minerStates.set(key, {
+      isOnline,
+      temperature,
+      hashRate,
+      pool,
+      uptimeSeconds,
+      sharesAccepted,
+      sharesRejected,
+    });
     setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
     return;
   }
@@ -188,6 +212,27 @@ export async function checkMinerStatus(
     }
   }
 
-  minerStates.set(key, { isOnline, temperature, hashRate, pool, uptimeSeconds });
+  const deltaAccepted = sharesAccepted - (prev.sharesAccepted ?? 0);
+  const deltaRejected = sharesRejected - (prev.sharesRejected ?? 0);
+  if (deltaAccepted + deltaRejected > 0) {
+    const rejectionRate = (deltaRejected / (deltaAccepted + deltaRejected)) * 100;
+    if (
+      rejectionRate >= rules.sharerejectionpercent &&
+      canNotify(`${key}:share_rejection`) &&
+      prefs.share_rejection !== false
+    ) {
+      sendShareRejectionNotification(userId, minerName, minerId, Math.round(rejectionRate));
+    }
+  }
+
+  minerStates.set(key, {
+    isOnline,
+    temperature,
+    hashRate,
+    pool,
+    uptimeSeconds,
+    sharesAccepted,
+    sharesRejected,
+  });
   setPoolStatus(minerId, { miner: minerName, pool, hashrate: hashRate, lastSeen: Date.now() });
 }

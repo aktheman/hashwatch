@@ -30,10 +30,11 @@ describe('GET /api/alert-rules/:minerId', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
       enabled: true,
-      tempthreshold: 70,
-      hashratedroppercent: 50,
-      offlinereminderminutes: 5,
-      uptimethresholdhours: 24,
+      tempThreshold: 70,
+      hashrateDropPercent: 50,
+      offlineReminderMinutes: 5,
+      uptimeThresholdHours: 24,
+      shareRejectionPercent: 10,
     });
   });
 
@@ -46,6 +47,7 @@ describe('GET /api/alert-rules/:minerId', () => {
           hashratedroppercent: 60,
           offlinereminderminutes: 10,
           uptimethresholdhours: 48,
+          sharerejectionpercent: 15,
         },
       ],
     });
@@ -59,6 +61,7 @@ describe('GET /api/alert-rules/:minerId', () => {
       hashrateDropPercent: 60,
       offlineReminderMinutes: 10,
       uptimeThresholdHours: 48,
+      shareRejectionPercent: 15,
     });
   });
 
@@ -81,6 +84,7 @@ describe('PUT /api/alert-rules/:minerId', () => {
       hashrateDropPercent: 70,
       offlineReminderMinutes: 15,
       uptimeThresholdHours: 12,
+      shareRejectionPercent: 20,
       enabled: false,
     });
 
@@ -88,7 +92,7 @@ describe('PUT /api/alert-rules/:minerId', () => {
     expect(res.body).toEqual({ ok: true });
     expect(mockQuery).toHaveBeenLastCalledWith(
       expect.stringContaining('INSERT INTO miner_alert_rules'),
-      ['test-user-id', 'm1', 80, 70, 15, 12, false],
+      ['test-user-id', 'm1', 80, 70, 15, 12, 20, false],
     );
   });
 
@@ -101,7 +105,7 @@ describe('PUT /api/alert-rules/:minerId', () => {
     expect(res.body).toEqual({ ok: true });
     expect(mockQuery).toHaveBeenLastCalledWith(
       expect.stringContaining('INSERT INTO miner_alert_rules'),
-      ['test-user-id', 'm1', 70, 50, 5, 24, true],
+      ['test-user-id', 'm1', 70, 50, 5, 24, 10, true],
     );
   });
 

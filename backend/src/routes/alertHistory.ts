@@ -5,7 +5,15 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 export const alertHistoryRouter = Router();
 alertHistoryRouter.use(authMiddleware);
 
-const VALID_EVENTS = ['offline', 'online', 'hot', 'hashrate_drop', 'pool_lost', 'long_uptime'];
+const VALID_EVENTS = [
+  'offline',
+  'online',
+  'hot',
+  'hashrate_drop',
+  'pool_lost',
+  'long_uptime',
+  'share_rejection',
+];
 
 alertHistoryRouter.get('/', async (req: AuthRequest, res) => {
   const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
