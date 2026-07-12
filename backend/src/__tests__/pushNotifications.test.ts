@@ -8,6 +8,7 @@ import {
   sendMinerHotNotification,
   sendHashrateDropNotification,
   sendPoolChangeNotification,
+  sendRichNotification,
 } from '../services/pushNotifications';
 
 const mockSendPushNotificationsAsync = jest.fn().mockResolvedValue([{ status: 'ok' }]);
@@ -38,7 +39,7 @@ describe('sendPushNotification', () => {
     await sendPushNotification('user-1', 'test_type', 'Test Title', 'Test body');
 
     expect(mockQuery).toHaveBeenCalledWith(
-      'SELECT token, alert_types FROM push_tokens WHERE userId = $1',
+      'SELECT token, alert_types, token_type FROM push_tokens WHERE userId = $1',
       ['user-1'],
     );
     expect(mockChunkPushNotifications).toHaveBeenCalled();
@@ -138,8 +139,8 @@ describe('sendPushNotification alert_types filtering', () => {
 
     await sendPushNotification('user-1', 'offline', 'T', 'B');
 
-    expect(mockChunkPushNotifications).toHaveBeenCalledWith([]);
-    expect(mockSendPushNotificationsAsync).toHaveBeenCalledWith([]);
+    expect(mockChunkPushNotifications).not.toHaveBeenCalled();
+    expect(mockSendPushNotificationsAsync).not.toHaveBeenCalled();
   });
 });
 

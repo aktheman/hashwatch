@@ -88,6 +88,7 @@ async function registerWebPush(authToken: string | null) {
       },
       body: JSON.stringify({
         token: JSON.stringify(subscription),
+        tokenType: 'web',
         alertTypes: ['offline', 'online', 'hot', 'hashrate_drop', 'pool_lost', 'long_uptime'],
       }),
     });

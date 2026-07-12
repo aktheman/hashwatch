@@ -58,23 +58,36 @@ self.addEventListener('push', (e) => {
       data.body = e.data.text();
     }
   }
-  e.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon,
-      badge: data.badge,
-      tag: 'hashwatch-alert',
-      renotify: true,
-      silent: false,
-      data: data.data || {},
-      requireInteraction: true,
-    }),
-  );
+  const options = {
+    body: data.body,
+    icon: data.icon,
+    badge: data.badge,
+    tag: 'hashwatch-alert',
+    renotify: true,
+    silent: false,
+    data: data.data || {},
+    requireInteraction: true,
+  };
+  if (Array.isArray(data.actions) && data.actions.length > 0) {
+    options.actions = data.actions;
+  }
+  e.waitUntil(self.registration.showNotification(data.title, options));
 });
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  const urlToOpen = new URL('/', self.location.origin).href;
+  const action = e.action;
+  const data = e.notification.data || {};
+
+  if (action === 'dismiss') return;
+
+  let urlToOpen = new URL('/', self.location.origin).href;
+  if (action === 'view_miner' && data.url) {
+    urlToOpen = new URL(data.url, self.location.origin).href;
+  } else if (data.url) {
+    urlToOpen = new URL(data.url, self.location.origin).href;
+  }
+
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
