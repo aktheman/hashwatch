@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, cardStyle } from '../utils/design';
 
@@ -10,7 +10,7 @@ interface StatWidgetProps {
   color?: string;
 }
 
-export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetProps) {
+export const StatWidget = React.memo(function StatWidget({ label, value, icon, color: colorProp }: StatWidgetProps) {
   const theme = useTheme();
   const color = colorProp ?? theme.primary;
   const styles = useMemo(
@@ -64,4 +64,4 @@ export function StatWidget({ label, value, icon, color: colorProp }: StatWidgetP
       <Text style={styles.label}>{label}</Text>
     </View>
   );
-}
+});

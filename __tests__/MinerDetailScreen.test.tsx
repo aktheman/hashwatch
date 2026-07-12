@@ -346,7 +346,7 @@ it('shows efficiency trend when snapshots exist', async () => {
 it('shows restart miner button and calls restart API', async () => {
   const mockAlert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  await fireEvent.press(screen.getByLabelText('Restart Miner'));
+  await fireEvent.press(screen.getByLabelText('minerDetail.restartMiner'));
   await waitFor(() => {
     expect(mockAlert).toHaveBeenCalledWith(
       'minerDetail.restartSent',
@@ -571,7 +571,7 @@ it('shows restart failed alert when client.restart returns false', async () => {
     restart: jest.fn().mockResolvedValue(false),
   }));
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  await fireEvent.press(screen.getByLabelText('Restart Miner'));
+  await fireEvent.press(screen.getByLabelText('minerDetail.restartMiner'));
   await waitFor(() => {
     expect(mockAlert).toHaveBeenCalledWith(
       'minerDetail.restartFailed',

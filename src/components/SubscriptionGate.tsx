@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
@@ -10,7 +10,7 @@ interface SubscriptionGateProps {
   feature?: string;
 }
 
-export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
+export const SubscriptionGate = memo(function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
   const { t } = useTranslation();
   const { isPro } = useSubscriptionStore();
   const theme = useTheme();
@@ -65,4 +65,4 @@ export function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
       </View>
     </View>
   );
-}
+});

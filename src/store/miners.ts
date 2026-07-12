@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
 import pLimit from 'p-limit';
-import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule, GroupConfig, GroupAlertConfig } from '../types';
+import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule, GroupConfig, GroupAlertConfig, MinerNoteItem } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
@@ -67,7 +67,7 @@ interface MinersState {
   setMinerMaintenance: (minerId: string, enabled: boolean) => Promise<void>;
   setMinerLocation: (minerId: string, location: string | undefined) => Promise<void>;
   setMinerTags: (minerId: string, tags: string[]) => Promise<void>;
-  setMinerNotes: (minerId: string, notes: string) => Promise<void>;
+  setMinerNotes: (minerId: string, notes: string, noteItems?: MinerNoteItem[]) => Promise<void>;
   applyRemoteSnapshot: (localId: string, snapshot: MinerSnapshot) => Promise<void>;
   updateMinerFromServer: (data: {
     id: string;
@@ -459,10 +459,10 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     }));
   },
 
-  setMinerNotes: async (minerId: string, notes: string) => {
+  setMinerNotes: async (minerId: string, notes: string, noteItems?: MinerNoteItem[]) => {
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
-    const updated = { ...miner, notes: notes || undefined };
+    const updated = { ...miner, notes: notes || undefined, noteItems: noteItems || miner.noteItems };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),

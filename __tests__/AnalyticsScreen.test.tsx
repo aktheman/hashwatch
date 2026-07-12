@@ -339,9 +339,9 @@ it('shows Filter button and toggles filter panel', async () => {
   ];
   await render(<AnalyticsScreen />);
 
-  await fireEvent.press(screen.getByText('Filter'));
+  await fireEvent.press(screen.getByText('analyticsExtra.filter'));
   await waitFor(() => {
-    expect(screen.getByText('All miners')).toBeTruthy();
+    expect(screen.getByText('analyticsExtra.allMiners')).toBeTruthy();
   });
   expect(screen.getByText('Miner 1')).toBeTruthy();
   expect(screen.getByText('Miner 2')).toBeTruthy();
@@ -363,9 +363,9 @@ it('selects individual miner filter chips', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await fireEvent.press(screen.getByText('Filter'));
+  await fireEvent.press(screen.getByText('analyticsExtra.filter'));
   await waitFor(() => {
-    expect(screen.getByText('All miners')).toBeTruthy();
+    expect(screen.getByText('analyticsExtra.allMiners')).toBeTruthy();
   });
 
   await fireEvent.press(screen.getByText('Miner 1'));
@@ -381,12 +381,12 @@ it('selects all miners filter chip resets selection', async () => {
     },
   ];
   await render(<AnalyticsScreen />);
-  await fireEvent.press(screen.getByText('Filter'));
+  await fireEvent.press(screen.getByText('analyticsExtra.filter'));
   await waitFor(() => {
-    expect(screen.getByText('All miners')).toBeTruthy();
+    expect(screen.getByText('analyticsExtra.allMiners')).toBeTruthy();
   });
 
-  await fireEvent.press(screen.getByText('All miners'));
+  await fireEvent.press(screen.getByText('analyticsExtra.allMiners'));
 });
 
 it('loads snapshots on 30d range selection', async () => {
@@ -502,7 +502,7 @@ it('renders hashrate chart with selected miner filter', async () => {
   );
   await render(<AnalyticsScreen />);
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
-  await fireEvent.press(screen.getByLabelText('Filter by miner'));
+  await fireEvent.press(screen.getByLabelText('analyticsExtra.filter'));
   await waitFor(() => expect(screen.getByText('Miner A')).toBeTruthy());
   await fireEvent.press(screen.getByText('Miner A'));
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
@@ -540,7 +540,7 @@ it('renders uptime chart with selected miner filter', async () => {
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
   await fireEvent.press(screen.getByText('analytics.uptimeHistory'));
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
-  await fireEvent.press(screen.getByLabelText('Filter by miner'));
+  await fireEvent.press(screen.getByLabelText('analyticsExtra.filter'));
   await fireEvent.press(screen.getByText('Miner A'));
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
 });
@@ -577,7 +577,7 @@ it('renders efficiency chart with selected miner filter', async () => {
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
   await fireEvent.press(screen.getByText('analytics.efficiencyHistory'));
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
-  await fireEvent.press(screen.getByLabelText('Filter by miner'));
+  await fireEvent.press(screen.getByLabelText('analyticsExtra.filter'));
   await fireEvent.press(screen.getByText('Miner A'));
   await waitFor(() => expect(screen.queryAllByText('analytics.notEnoughData')).toHaveLength(0));
 });

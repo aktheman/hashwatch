@@ -415,6 +415,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         if (cancelled) return;
         setNotes(ns);
       });
+    } else if (miner?.noteItems) {
+      setNotes(miner.noteItems);
     }
     return () => {
       cancelled = true;
@@ -877,8 +879,13 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     hitSlop={8}
                     onPress={async () => {
                       try {
-                        await deleteMinerNote(minerId, note.id);
-                        setNotes((prev) => prev.filter((n) => n.id !== note.id));
+                        const token = useAuthStore.getState().token;
+                        if (token) {
+                          await deleteMinerNote(minerId, note.id);
+                        }
+                        const updated = notes.filter((n) => n.id !== note.id);
+                        setNotes(updated);
+                        setMinerNotes(minerId, updated.map((n) => n.text).join('\n'), updated);
                       } catch {
                         Alert.alert(t('minerDetail.error'), t('minerDetail.deleteNoteFailed'));
                       }
@@ -935,10 +942,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     const newNote = await addMinerNote(minerId, text);
                     setNotes((prev) => [newNote, ...prev]);
                   } else {
-                    setMinerNotes(
-                      minerId,
-                      notes.length > 0 ? `${notes.map((n) => n.text).join('\n')}\n${text}` : text,
-                    );
+                    const newNote: MinerNoteItem = {
+                      id: Date.now(),
+                      minerid: minerId,
+                      text,
+                      createdat: new Date().toISOString(),
+                    };
+                    const updated = [newNote, ...notes];
+                    setNotes(updated);
+                    setMinerNotes(minerId, updated.map((n) => n.text).join('\n'), updated);
                   }
                   setNoteText('');
                 } catch {

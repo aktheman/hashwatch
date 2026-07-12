@@ -62,6 +62,7 @@ export interface Miner {
   isOnline: boolean;
   maintenanceMode?: boolean;
   notes?: string;
+  noteItems?: MinerNoteItem[];
 }
 
 export interface MinerSnapshot {
