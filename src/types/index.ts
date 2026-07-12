@@ -153,3 +153,18 @@ export interface AutoAssignRule {
   group: string;
   enabled: boolean;
 }
+
+export interface GroupConfig {
+  id: string;
+  name: string;
+  parentId?: string;
+  color?: string;
+}
+
+export interface GroupAlertConfig {
+  id: string;
+  groupId: string;
+  type: 'hashrate_drop' | 'temp_high' | 'offline_count' | 'efficiency_drop';
+  threshold: number;
+  enabled: boolean;
+}
