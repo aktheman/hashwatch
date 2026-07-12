@@ -714,5 +714,19 @@
     "fanAppears": "Fan data will appear once collected",
     "notEnoughTemp": "Not enough data for temperature chart",
     "celsius": "°C"
+  },
+  "health": {
+    "title": "Health Score",
+    "temperature": "Temp",
+    "uptime": "Uptime",
+    "shares": "Shares",
+    "hashrate": "Hashrate",
+    "power": "Power"
+  },
+  "pool": {
+    "pools": "Pools",
+    "noData": "No pool data available.",
+    "unknown": "Unknown",
+    "minerCount": "{{count}} miner(s)"
   }
 }

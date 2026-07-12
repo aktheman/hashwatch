@@ -699,5 +699,19 @@
     "fanAppears": "风扇数据将在收集后显示",
     "notEnoughTemp": "温度图表数据不足",
     "celsius": "°C"
+  },
+  "health": {
+    "title": "健康评分",
+    "temperature": "温度",
+    "uptime": "运行时间",
+    "shares": "份额",
+    "hashrate": "算力",
+    "power": "功率"
+  },
+  "pool": {
+    "pools": "矿池",
+    "noData": "暂无矿池数据。",
+    "unknown": "未知",
+    "minerCount": "{{count}} 台矿机"
   }
 }

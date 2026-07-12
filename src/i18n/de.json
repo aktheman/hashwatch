@@ -699,5 +699,19 @@
     "fanAppears": "Lüfterdaten werden nach der Erfassung angezeigt",
     "notEnoughTemp": "Nicht genügend Daten für Temperaturdiagramm",
     "celsius": "°C"
+  },
+  "health": {
+    "title": "Gesundheitsbewertung",
+    "temperature": "Temp",
+    "uptime": "Betriebszeit",
+    "shares": "Anteile",
+    "hashrate": "Hashrate",
+    "power": "Leistung"
+  },
+  "pool": {
+    "pools": "Pools",
+    "noData": "Keine Pool-Daten verfügbar.",
+    "unknown": "Unbekannt",
+    "minerCount": "{{count}} Miner"
   }
 }

@@ -699,5 +699,19 @@
     "fanAppears": "ファンデータは収集後に表示されます",
     "notEnoughTemp": "温度チャートのデータが不足しています",
     "celsius": "°C"
+  },
+  "health": {
+    "title": "ヘルススコア",
+    "temperature": "温度",
+    "uptime": "稼働時間",
+    "shares": "シェア",
+    "hashrate": "ハッシュレート",
+    "power": "消費電力"
+  },
+  "pool": {
+    "pools": "プール",
+    "noData": "プールデータがありません。",
+    "unknown": "不明",
+    "minerCount": "{{count}}台のマイナー"
   }
 }
