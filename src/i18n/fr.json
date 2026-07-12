@@ -699,5 +699,19 @@
     "fanAppears": "Les données du ventilateur apparaîtront une fois collectées",
     "notEnoughTemp": "Pas assez de données pour le graphique de température",
     "celsius": "°C"
+  },
+  "health": {
+    "title": "Score de Santé",
+    "temperature": "Temp",
+    "uptime": "Disponibilité",
+    "shares": "Parts",
+    "hashrate": "Taux de hachage",
+    "power": "Puissance"
+  },
+  "pool": {
+    "pools": "Pools",
+    "noData": "Aucune donnée de pool disponible.",
+    "unknown": "Inconnu",
+    "minerCount": "{{count}} mineur(s)"
   }
 }
