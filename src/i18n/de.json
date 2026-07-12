@@ -359,7 +359,25 @@
     "on": "Ein",
     "off": "Aus",
     "applyAll": "Regeln anwenden",
-    "avgTemp": "{{temp}}°C Durschn"
+    "avgTemp": "{{temp}}°C Durschn",
+    "parentGroup": "Übergeordnete Gruppe",
+    "noParent": "Keine (oberste Ebene)",
+    "color": "Farbe",
+    "nestedGroups": "Verschachtelte Gruppen",
+    "subgroups": "{{count}} Untergruppen",
+    "groupAlerts": "Gruppenwarnungen",
+    "noGroupAlerts": "Keine Gruppenwarnungen konfiguriert. Fügen Sie Warnungen hinzu, um den Gruppenzustand zu überwachen.",
+    "addGroupAlert": "+ Warnung Hinzufügen",
+    "alertType": "Warnungstyp",
+    "alertThreshold": "Schwellenwert",
+    "alertEnabled": "Aktiviert",
+    "alertDisabled": "Deaktiviert",
+    "alertHashrateDrop": "Hashrate-Einbruch (%)",
+    "alertTempHigh": "Maximale Temperatur (°C)",
+    "alertOfflineCount": "Offline-Miner",
+    "alertEfficiencyDrop": "Effizienz-Schwellenwert",
+    "alertTriggered": "Warnung Ausgelöst",
+    "alertTriggeredBody": "Gruppe \"{{group}}\" hat Warnung ausgelöst: {{type}}"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -413,7 +431,12 @@
     "slide3Title": "Sofort-Benachrichtigungen",
     "slide3Body": "Erhalte Benachrichtigungen, wenn ein Miner offline geht, überhitzt oder die Hashrate fällt.",
     "slide4Title": "Bereit zum Minen",
-    "slide4Body": "Überwache alle deine Miner kostenlos. Upgrade auf Pro für unbegrenzte Funktionen."
+    "slide4Body": "Überwache alle deine Miner kostenlos. Upgrade auf Pro für unbegrenzte Funktionen.",
+    "slide5Title": "Ausprobieren",
+    "slide5Body": "Testen Sie die Netzwerk-Scan-Funktion, um Miner in Ihrem lokalen Netzwerk zu finden.",
+    "tutorialScanButton": "Netzwerk scannen",
+    "tutorialScanning": "Scanne...",
+    "tutorialFound": "Miner gefunden! Tippen Sie Weiter, um fortzufahren."
   },
   "themes": {
     "dark": "Dunkel",
@@ -621,5 +644,33 @@
     "csvErrors": "CSV-Fehler",
     "noValidRows": "Keine gültigen Zeilen",
     "checkCsvColumns": "Überprüfe, ob dein CSV die Spalten \"name\" und \"ip\" enthält."
+  },
+  "snapshot": {
+    "hashrate": "Hashrate",
+    "temp": "Temp",
+    "uptime": "Betriebszeit",
+    "power": "Leistung",
+    "efficiency": "Effizienz",
+    "shares": "Anteile",
+    "pool": "Pool",
+    "na": "N.V.",
+    "generatedBy": "Erstellt von HashWatch"
+  },
+  "dashboardExtra": {
+    "profitabilityTitle": "≡ Rentabilität",
+    "btcLabel": "BTC",
+    "networkHashrate": "Netzwerk-Hashrate",
+    "perDay": "/Tag",
+    "total": "Gesamt",
+    "week": "Woche",
+    "month": "Monat",
+    "usdPerDay": "USD/Tag",
+    "netPerDay": "Netto/Tag (nach Strom)",
+    "viewDetails": "{{title}} Details anzeigen"
+  },
+  "powerUsage": {
+    "total": "Gesamt",
+    "peak": "Spitze",
+    "avg": "Durchschn"
   }
 }

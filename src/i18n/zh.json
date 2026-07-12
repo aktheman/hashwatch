@@ -359,7 +359,25 @@
     "on": "开",
     "off": "关",
     "applyAll": "应用规则",
-    "avgTemp": "{{temp}}°C 平均"
+    "avgTemp": "{{temp}}°C 平均",
+    "parentGroup": "父级分组",
+    "noParent": "无（顶层）",
+    "color": "颜色",
+    "nestedGroups": "嵌套分组",
+    "subgroups": "{{count}} 个子分组",
+    "groupAlerts": "分组告警",
+    "noGroupAlerts": "未配置分组告警。添加告警以监控分组健康状态。",
+    "addGroupAlert": "+ 添加告警",
+    "alertType": "告警类型",
+    "alertThreshold": "阈值",
+    "alertEnabled": "已启用",
+    "alertDisabled": "已禁用",
+    "alertHashrateDrop": "算力下降（%）",
+    "alertTempHigh": "最高温度（°C）",
+    "alertOfflineCount": "离线矿机数",
+    "alertEfficiencyDrop": "效率阈值",
+    "alertTriggered": "告警触发",
+    "alertTriggeredBody": "分组「{{group}}」触发告警：{{type}}"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -403,7 +421,12 @@
     "slide3Title": "即时提醒",
     "slide3Body": "当矿机离线、过热或算力下降时接收通知。",
     "slide4Title": "准备挖矿",
-    "slide4Body": "免费监控所有矿机。升级到 Pro 获取无限功能。"
+    "slide4Body": "免费监控所有矿机。升级到 Pro 获取无限功能。",
+    "slide5Title": "试一试",
+    "slide5Body": "测试网络扫描功能，发现本地网络上的矿机。",
+    "tutorialScanButton": "扫描网络",
+    "tutorialScanning": "扫描中...",
+    "tutorialFound": "发现矿机！点击下一步继续。"
   },
   "themes": {
     "dark": "深色",
@@ -611,5 +634,33 @@
     "csvErrors": "CSV错误",
     "noValidRows": "没有有效行",
     "checkCsvColumns": "请检查您的CSV是否包含\"name\"和\"ip\"列。"
+  },
+  "snapshot": {
+    "hashrate": "算力",
+    "temp": "温度",
+    "uptime": "运行时间",
+    "power": "功率",
+    "efficiency": "能效",
+    "shares": "份额",
+    "pool": "矿池",
+    "na": "无",
+    "generatedBy": "由 HashWatch 生成"
+  },
+  "dashboardExtra": {
+    "profitabilityTitle": "≡ 收益性",
+    "btcLabel": "BTC",
+    "networkHashrate": "网络算力",
+    "perDay": "/天",
+    "total": "总计",
+    "week": "周",
+    "month": "月",
+    "usdPerDay": "美元/天",
+    "netPerDay": "每日净收益（扣除电费）",
+    "viewDetails": "查看{{title}}详情"
+  },
+  "powerUsage": {
+    "total": "总计",
+    "peak": "峰值",
+    "avg": "平均"
   }
 }

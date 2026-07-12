@@ -359,7 +359,25 @@
     "on": "On",
     "off": "Off",
     "applyAll": "Aplicar Reglas",
-    "avgTemp": "{{temp}}°C prom"
+    "avgTemp": "{{temp}}°C prom",
+    "parentGroup": "Grupo Padre",
+    "noParent": "Ninguno (nivel superior)",
+    "color": "Color",
+    "nestedGroups": "Grupos Anidados",
+    "subgroups": "{{count}} subgrupos",
+    "groupAlerts": "Alertas de Grupo",
+    "noGroupAlerts": "No hay alertas de grupo configuradas. Agregue alertas para monitorear la salud del grupo.",
+    "addGroupAlert": "+ Agregar Alerta",
+    "alertType": "Tipo de Alerta",
+    "alertThreshold": "Umbral",
+    "alertEnabled": "Activado",
+    "alertDisabled": "Desactivado",
+    "alertHashrateDrop": "Caída de Hashrate (%)",
+    "alertTempHigh": "Temperatura Máxima (°C)",
+    "alertOfflineCount": "Mineros Desconectados",
+    "alertEfficiencyDrop": "Umbral de Eficiencia",
+    "alertTriggered": "Alerta Activada",
+    "alertTriggeredBody": "Grupo \"{{group}}\" activó alerta: {{type}}"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -413,7 +431,12 @@
     "slide3Title": "Alertas Instantáneas",
     "slide3Body": "Recibe notificaciones cuando un minero se desconecta o sobrecalienta.",
     "slide4Title": "Listo para Minar",
-    "slide4Body": "Monitorea todos tus mineros gratis. Actualiza a Pro para funciones ilimitadas."
+    "slide4Body": "Monitorea todos tus mineros gratis. Actualiza a Pro para funciones ilimitadas.",
+    "slide5Title": "Pruébalo",
+    "slide5Body": "Prueba la función de escaneo de red para descubrir mineros en tu red local.",
+    "tutorialScanButton": "Escanear Red",
+    "tutorialScanning": "Escaneando...",
+    "tutorialFound": "¡Mineros encontrados! Toca Siguiente para continuar."
   },
   "comparison": {
     "title": "Comparación de Mineros",
@@ -621,5 +644,33 @@
     "csvErrors": "Errores CSV",
     "noValidRows": "Sin filas válidas",
     "checkCsvColumns": "Verifica que tu CSV tenga las columnas \"name\" e \"ip\"."
+  },
+  "snapshot": {
+    "hashrate": "Hashrate",
+    "temp": "Temp",
+    "uptime": "Tiempo activo",
+    "power": "Potencia",
+    "efficiency": "Eficiencia",
+    "shares": "Shares",
+    "pool": "Pool",
+    "na": "N/D",
+    "generatedBy": "Generado por HashWatch"
+  },
+  "dashboardExtra": {
+    "profitabilityTitle": "≡ Rentabilidad",
+    "btcLabel": "BTC",
+    "networkHashrate": "Hashrate de Red",
+    "perDay": "/día",
+    "total": "Total",
+    "week": "Semana",
+    "month": "Mes",
+    "usdPerDay": "USD/día",
+    "netPerDay": "Neto/día (después de electricidad)",
+    "viewDetails": "Ver detalles de {{title}}"
+  },
+  "powerUsage": {
+    "total": "Total",
+    "peak": "Pico",
+    "avg": "Prom"
   }
 }

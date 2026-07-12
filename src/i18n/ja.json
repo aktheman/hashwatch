@@ -359,7 +359,25 @@
     "on": "オン",
     "off": "オフ",
     "applyAll": "ルールを適用",
-    "avgTemp": "{{temp}}°C 平均"
+    "avgTemp": "{{temp}}°C 平均",
+    "parentGroup": "親グループ",
+    "noParent": "なし（トップレベル）",
+    "color": "色",
+    "nestedGroups": "ネストグループ",
+    "subgroups": "{{count}} 個のサブグループ",
+    "groupAlerts": "グループアラート",
+    "noGroupAlerts": "グループアラートが設定されていません。グループの状態を監視するアラートを追加してください。",
+    "addGroupAlert": "+ アラート追加",
+    "alertType": "アラートタイプ",
+    "alertThreshold": "しきい値",
+    "alertEnabled": "有効",
+    "alertDisabled": "無効",
+    "alertHashrateDrop": "ハッシュレート低下（%）",
+    "alertTempHigh": "最高温度（°C）",
+    "alertOfflineCount": "オフラインマイナー数",
+    "alertEfficiencyDrop": "効率しきい値",
+    "alertTriggered": "アラート発動",
+    "alertTriggeredBody": "グループ「{{group}}」がアラートを発動: {{type}}"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -403,7 +421,12 @@
     "slide3Title": "即時通知",
     "slide3Body": "マイナーがオフライン、過熱、またはハッシュレート低下時に通知。",
     "slide4Title": "マイニング準備完了",
-    "slide4Body": "すべてのマイナーを無料で監視。Pro にアップグレードすると無制限に。"
+    "slide4Body": "すべてのマイナーを無料で監視。Pro にアップグレードすると無制限に。",
+    "slide5Title": "試してみる",
+    "slide5Body": "ネットワークスキャン機能を試して、ローカルネットワーク上のマイナーを検出します。",
+    "tutorialScanButton": "ネットワークをスキャン",
+    "tutorialScanning": "スキャン中...",
+    "tutorialFound": "マイナーが見つかり！次へをタップして続行してください。"
   },
   "themes": {
     "dark": "ダーク",
@@ -611,5 +634,33 @@
     "csvErrors": "CSVエラー",
     "noValidRows": "有効な行がありません",
     "checkCsvColumns": "CSVに「name」と「ip」の列があることを確認してください。"
+  },
+  "snapshot": {
+    "hashrate": "ハッシュレート",
+    "temp": "温度",
+    "uptime": "稼働時間",
+    "power": "消費電力",
+    "efficiency": "効率",
+    "shares": "シェア",
+    "pool": "プール",
+    "na": "N/A",
+    "generatedBy": "HashWatch で生成"
+  },
+  "dashboardExtra": {
+    "profitabilityTitle": "≡ 収益性",
+    "btcLabel": "BTC",
+    "networkHashrate": "ネットワークハッシュレート",
+    "perDay": "/日",
+    "total": "合計",
+    "week": "週",
+    "month": "月",
+    "usdPerDay": "USD/日",
+    "netPerDay": "1日あたりの純利益（電気代差引後）",
+    "viewDetails": "{{title}}の詳細を表示"
+  },
+  "powerUsage": {
+    "total": "合計",
+    "peak": "ピーク",
+    "avg": "平均"
   }
 }
