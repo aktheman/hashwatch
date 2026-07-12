@@ -22,6 +22,7 @@ import { useDashboardMetrics, TimeRange } from '../hooks/useDashboardMetrics';
 import { MinerCard } from '../components/MinerCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { EarningsCard } from '../components/EarningsCard';
+import { PoolUptime } from '../components/PoolUptime';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { Miner, Wallet, NavigationProp } from '../types';
 import {
@@ -1155,6 +1156,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           </Suspense>
         </View>
       )}
+
+      {visibleSections.pools && miners.length > 0 && <PoolUptime miners={miners} />}
 
       {visibleSections.legend && miners.length > 0 && (
         <View

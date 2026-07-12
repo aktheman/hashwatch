@@ -45,6 +45,7 @@ import {
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { MarkdownText } from '../utils/markdown';
+import { MinerHealthScore } from '../components/MinerHealthScore';
 import { useTranslation } from 'react-i18next';
 
 interface MinerDetailScreenProps {
@@ -976,6 +977,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             />
           </View>
         </View>
+
+        <MinerHealthScore miner={miner} />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
