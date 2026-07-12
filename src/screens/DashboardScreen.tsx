@@ -49,6 +49,7 @@ import {
   DashboardCustomizer,
   SectionKey,
   DEFAULT_VISIBLE,
+  ALL_SECTIONS,
 } from '../components/DashboardCustomizer';
 
 interface DashboardScreenProps {
@@ -124,6 +125,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [visibleSections, setVisibleSections] = useState<Record<SectionKey, boolean>>({
     ...DEFAULT_VISIBLE,
   });
+  const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(ALL_SECTIONS);
   const [powerCost, setPowerCost] = useState(0);
 
   const groups = useMemo(() => {
@@ -159,6 +161,16 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       if (saved) {
         try {
           setVisibleSections({ ...DEFAULT_VISIBLE, ...JSON.parse(saved) });
+        } catch {}
+      }
+    });
+    DB.getSetting('dashboard_section_order').then((saved) => {
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === ALL_SECTIONS.length) {
+            setSectionOrder(parsed);
+          }
         } catch {}
       }
     });
@@ -2120,10 +2132,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         onReset={handleResetSections}
         onApplyPreset={handleApplyPreset}
         onReorder={(ordered) => {
+          setSectionOrder(ordered);
           DB.setSetting('dashboard_section_order', JSON.stringify(ordered)).catch(() => {});
         }}
         kioskMode={kioskMode}
         onToggleKiosk={handleToggleKiosk}
+        sectionOrder={sectionOrder}
       />
 
       <MinerDrillDownModal

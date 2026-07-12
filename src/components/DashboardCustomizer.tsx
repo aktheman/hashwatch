@@ -84,9 +84,10 @@ interface DashboardCustomizerProps {
   onReorder: (orderedKeys: SectionKey[]) => void;
   kioskMode: boolean;
   onToggleKiosk: (val: boolean) => void;
+  sectionOrder: SectionKey[];
 }
 
-const ALL_SECTIONS = Object.keys(SECTION_LABELS) as SectionKey[];
+export const ALL_SECTIONS = Object.keys(SECTION_LABELS) as SectionKey[];
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
   const result = [...arr];
@@ -105,13 +106,14 @@ export function DashboardCustomizer({
   onReorder,
   kioskMode,
   onToggleKiosk,
+  sectionOrder: initialSectionOrder,
 }: DashboardCustomizerProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const [presets, setPresets] = useState<DashboardPreset[]>([]);
   const [presetName, setPresetName] = useState('');
   const [showPresets, setShowPresets] = useState(false);
-  const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(ALL_SECTIONS);
+  const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(initialSectionOrder);
   const sectionOrderRef = useRef(sectionOrder);
   sectionOrderRef.current = sectionOrder;
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -179,7 +181,7 @@ export function DashboardCustomizer({
       loadPresets().then(setPresets);
       setShowPresets(false);
       setPresetName('');
-      setSectionOrder(ALL_SECTIONS);
+      setSectionOrder(initialSectionOrder);
       dragAnimating.current = false;
       setDragIdx(null);
       dragY.setValue(0);
