@@ -218,7 +218,8 @@
     "debugProTitle": "调试",
     "debugProBody": "Pro 状态已设置",
     "debugFreeBody": "Free 状态已设置",
-    "cancel": "取消"
+    "cancel": "取消",
+    "unknownError": "未知错误"
   },
   "minerDetail": {
     "notFound": "未找到矿机",
@@ -271,6 +272,7 @@
     "removeConfirm": "这将永久删除 {{name}} 及其所有历史数据。",
     "yesRemove": "是的，移除",
     "minerRemoved": "{{name}} 已移除",
+    "shareAsImage": "分享为图片",
     "sharedVia": "通过 HashWatch 分享",
     "error": "错误",
     "temperatureHistory": "温度历史",
@@ -398,8 +400,18 @@
     "active": "已激活",
     "upgradeToPro": "升级到 Pro",
     "restorePurchases": "恢复购买",
-    "freeFeatures": ["最多4台矿机", "实时仪表盘", "基本统计", "推送通知"],
-    "proFeatures": ["无限矿机", "30天图表", "推送通知", "多钱包"]
+    "freeFeatures": [
+      "最多4台矿机",
+      "实时仪表盘",
+      "基本统计",
+      "推送通知"
+    ],
+    "proFeatures": [
+      "无限矿机",
+      "30天图表",
+      "推送通知",
+      "多钱包"
+    ]
   },
   "import": {
     "title": "导入数据",
@@ -627,6 +639,10 @@
     "thirtyDays": "30天",
     "ninetyDays": "90天",
     "oneYear": "1年"
+  },
+  "worldMap": {
+    "dataCenter": "数据中心",
+    "miningFarm": "矿场"
   },
   "minerHealth": {
     "offline": "离线",

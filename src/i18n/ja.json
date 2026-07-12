@@ -218,7 +218,8 @@
     "debugProTitle": "デバッグ",
     "debugProBody": "Proステータスが設定されました",
     "debugFreeBody": "Freeステータスが設定されました",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "unknownError": "不明なエラー"
   },
   "minerDetail": {
     "notFound": "マイナーが見つかりません",
@@ -271,6 +272,7 @@
     "removeConfirm": "{{name}} とすべての履歴を完全に削除します。",
     "yesRemove": "はい、削除します",
     "minerRemoved": "{{name}} を削除しました",
+    "shareAsImage": "画像として共有",
     "sharedVia": "HashWatch 経由で共有",
     "error": "エラー",
     "temperatureHistory": "温度履歴",
@@ -398,8 +400,18 @@
     "active": "アクティブ",
     "upgradeToPro": "Pro にアップグレード",
     "restorePurchases": "購入を復元",
-    "freeFeatures": ["最大4台のマイナー", "ライブダッシュボード", "基本統計", "プッシュ通知"],
-    "proFeatures": ["無制限のマイナー", "30日間のチャート", "プッシュ通知", "マルチウォレット"]
+    "freeFeatures": [
+      "最大4台のマイナー",
+      "ライブダッシュボード",
+      "基本統計",
+      "プッシュ通知"
+    ],
+    "proFeatures": [
+      "無制限のマイナー",
+      "30日間のチャート",
+      "プッシュ通知",
+      "マルチウォレット"
+    ]
   },
   "import": {
     "title": "データをインポート",
@@ -627,6 +639,10 @@
     "thirtyDays": "30日",
     "ninetyDays": "90日",
     "oneYear": "1年"
+  },
+  "worldMap": {
+    "dataCenter": "データセンター",
+    "miningFarm": "マイニングファーム"
   },
   "minerHealth": {
     "offline": "オフライン",
