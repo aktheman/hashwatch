@@ -35,6 +35,7 @@ describe('POST /api/push/register', () => {
       'test-user-id',
       'expo-push-token-123',
       null,
+      'expo',
     ]);
   });
 
