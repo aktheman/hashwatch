@@ -69,7 +69,7 @@ it('calls onComplete when Get Started is pressed on last slide', async () => {
   const flatList = screen.getByTestId('onboarding-flatlist');
   fireEvent(flatList, 'onMomentumScrollEnd', {
     nativeEvent: {
-      contentOffset: { x: screenWidth * 3, y: 0 },
+      contentOffset: { x: screenWidth * 4, y: 0 },
     },
   });
   await act(async () => {
