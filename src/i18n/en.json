@@ -17,7 +17,8 @@
     "offline": "Offline",
     "close": "Close",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "secondsAgo": "s ago"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -344,6 +345,11 @@
     "deleteWalletBody": "Miners assigned to this wallet will become unassigned.",
     "walletRemoved": "{{name}} removed"
   },
+  "wallet": {
+    "invalidAddress": "Invalid address",
+    "deleted": "Wallet deleted",
+    "saved": "Wallet saved"
+  },
   "groups": {
     "title": "Group Management",
     "namePlaceholder": "New group name",
@@ -483,14 +489,18 @@
     "hashrate_drop": "Hashrate Drop",
     "pool_lost": "Pool Lost",
     "long_uptime": "Long Uptime",
-    "sync": "Sync"
+    "sync": "Sync",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "notificationHistory": {
     "title": "Notification History",
     "sent": "Sent",
     "failed": "Failed",
     "last50": "Last 50",
-    "noNotifications": "No notifications yet"
+    "noNotifications": "No notifications yet",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "themes": {
     "dark": "Dark",
@@ -687,5 +697,16 @@
     "total": "Total",
     "peak": "Peak",
     "avg": "Avg"
+  },
+  "charts": {
+    "notEnoughPower": "Not enough data for power chart",
+    "watts": "W",
+    "notEnoughVoltage": "Not enough data for voltage chart",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "Not enough data for fan chart",
+    "fanAppears": "Fan data will appear once collected",
+    "notEnoughTemp": "Not enough data for temperature chart",
+    "celsius": "°C"
   }
 }

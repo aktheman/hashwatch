@@ -28,14 +28,14 @@ function formatTimestamp(ts: number): string {
   return `${hours}:${mins}`;
 }
 
-function formatDateLabel(ts: number): string {
+function formatDateLabel(ts: number, t: (key: string) => string): string {
   const d = new Date(ts);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  if (d.toDateString() === today.toDateString()) return t('notificationHistory.today');
+  if (d.toDateString() === yesterday.toDateString()) return t('notificationHistory.yesterday');
   return d.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -45,10 +45,11 @@ function formatDateLabel(ts: number): string {
 
 function groupByDate(
   entries: PushNotificationEntry[],
+  t: (key: string) => string,
 ): { date: string; data: PushNotificationEntry[] }[] {
   const groups = new Map<string, PushNotificationEntry[]>();
   for (const ev of entries) {
-    const key = formatDateLabel(ev.sentAt);
+    const key = formatDateLabel(ev.sentAt, t);
     const list = groups.get(key) || [];
     list.push(ev);
     groups.set(key, list);
@@ -90,7 +91,7 @@ export function NotificationHistoryScreen({
     setRefreshing(false);
   }, [loadHistory, isAuthed, syncFromBackend, syncToBackend]);
 
-  const sections = useMemo(() => groupByDate(history), [history]);
+  const sections = useMemo(() => groupByDate(history, t), [history, t]);
 
   const handleClear = useCallback(() => {
     Alert.alert(

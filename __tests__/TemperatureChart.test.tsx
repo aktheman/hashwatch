@@ -41,12 +41,12 @@ beforeEach(() => {
 
 it('shows not enough data message when fewer than 2 snapshots', async () => {
   const tree = await render(<TemperatureChart snapshots={[makeSnapshot(1000)]} />);
-  expect(tree.getByText('temperatureChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughTemp')).toBeTruthy();
 });
 
 it('shows not enough data with empty snapshots', async () => {
   const tree = await render(<TemperatureChart snapshots={[]} />);
-  expect(tree.getByText('temperatureChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughTemp')).toBeTruthy();
 });
 
 it('renders title when provided', async () => {

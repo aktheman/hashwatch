@@ -17,7 +17,8 @@
     "offline": "Fuera de línea",
     "close": "Cerrar",
     "success": "Éxito",
-    "error": "Error"
+    "error": "Error",
+    "secondsAgo": "s atrás"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -319,6 +320,11 @@
     "deleteWalletBody": "Los mineros asignados a esta billetera quedarán sin asignar.",
     "walletRemoved": "{{name}} eliminada"
   },
+  "wallet": {
+    "invalidAddress": "Dirección inválida",
+    "deleted": "Billetera eliminada",
+    "saved": "Billetera guardada"
+  },
   "groups": {
     "title": "Gestión de Grupos",
     "namePlaceholder": "Nombre del nuevo grupo",
@@ -468,14 +474,18 @@
     "hashrate_drop": "Caída de Hashrate",
     "pool_lost": "Pool Perdido",
     "long_uptime": "Uptime Largo",
-    "sync": "Sincronizar"
+    "sync": "Sincronizar",
+    "today": "Hoy",
+    "yesterday": "Ayer"
   },
   "notificationHistory": {
     "title": "Historial de Notificaciones",
     "sent": "Enviadas",
     "failed": "Fallidas",
     "last50": "Últimas 50",
-    "noNotifications": "Sin notificaciones aún"
+    "noNotifications": "Sin notificaciones aún",
+    "today": "Hoy",
+    "yesterday": "Ayer"
   },
   "themes": {
     "dark": "Oscuro",
@@ -672,5 +682,16 @@
     "total": "Total",
     "peak": "Pico",
     "avg": "Prom"
+  },
+  "charts": {
+    "notEnoughPower": "Datos insuficientes para el gráfico de potencia",
+    "watts": "W",
+    "notEnoughVoltage": "Datos insuficientes para el gráfico de voltaje",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "Datos insuficientes para el gráfico de ventilador",
+    "fanAppears": "Los datos del ventilador aparecerán una vez recopilados",
+    "notEnoughTemp": "Datos insuficientes para el gráfico de temperatura",
+    "celsius": "°C"
   }
 }

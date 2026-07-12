@@ -17,7 +17,8 @@
     "offline": "オフライン",
     "close": "閉じる",
     "success": "成功",
-    "error": "エラー"
+    "error": "エラー",
+    "secondsAgo": "秒前"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -319,6 +320,11 @@
     "deleteWalletBody": "このウォレットに割り当てられたマイナーは未割り当てになります。",
     "walletRemoved": "{{name}} を削除しました"
   },
+  "wallet": {
+    "invalidAddress": "無効なアドレス",
+    "deleted": "ウォレットを削除",
+    "saved": "ウォレットを保存"
+  },
   "groups": {
     "title": "グループ管理",
     "namePlaceholder": "新しいグループ名",
@@ -553,14 +559,18 @@
     "hashrate_drop": "ハッシュレート低下",
     "pool_lost": "プール喪失",
     "long_uptime": "長時間稼働",
-    "sync": "同期"
+    "sync": "同期",
+    "today": "今日",
+    "yesterday": "昨日"
   },
   "notificationHistory": {
     "title": "通知履歴",
     "sent": "送信済み",
     "failed": "失敗",
     "last50": "最新50件",
-    "noNotifications": "通知はまだありません"
+    "noNotifications": "通知はまだありません",
+    "today": "今日",
+    "yesterday": "昨日"
   },
   "update": {
     "downloaded": "アップデートをダウンロードしました",
@@ -662,5 +672,16 @@
     "total": "合計",
     "peak": "ピーク",
     "avg": "平均"
+  },
+  "charts": {
+    "notEnoughPower": "電力チャートのデータが不足しています",
+    "watts": "W",
+    "notEnoughVoltage": "電圧チャートのデータが不足しています",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "ファンチャートのデータが不足しています",
+    "fanAppears": "ファンデータは収集後に表示されます",
+    "notEnoughTemp": "温度チャートのデータが不足しています",
+    "celsius": "°C"
   }
 }

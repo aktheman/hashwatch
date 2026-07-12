@@ -73,7 +73,7 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌡</Text>
         <Text style={styles.emptyText}>
-          {t('temperatureChart.notEnoughData', 'Not enough data for temperature chart')}
+          {t('charts.notEnoughTemp')}
         </Text>
       </View>
     );
@@ -109,7 +109,7 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
     >
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.chartWrapper}>
-        <Text style={styles.yLabel}>°C</Text>
+        <Text style={styles.yLabel}>{t('charts.celsius')}</Text>
         <LazyLineChart
           data={{
             labels: filteredLabels,

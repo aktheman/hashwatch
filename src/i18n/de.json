@@ -17,7 +17,8 @@
     "offline": "Offline",
     "close": "Schließen",
     "success": "Erfolg",
-    "error": "Fehler"
+    "error": "Fehler",
+    "secondsAgo": "vor s"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -319,6 +320,11 @@
     "deleteWalletBody": "Diesem Wallet zugeordnete Miner werden nicht zugeordnet.",
     "walletRemoved": "{{name}} entfernt"
   },
+  "wallet": {
+    "invalidAddress": "Ungültige Adresse",
+    "deleted": "Wallet gelöscht",
+    "saved": "Gespeichert"
+  },
   "groups": {
     "title": "Gruppenverwaltung",
     "namePlaceholder": "Neuer Gruppenname",
@@ -559,14 +565,18 @@
     "hashrate_drop": "Hashrate-Abfall",
     "pool_lost": "Pool verloren",
     "long_uptime": "Lange Betriebszeit",
-    "sync": "Synchronisieren"
+    "sync": "Synchronisieren",
+    "today": "Heute",
+    "yesterday": "Gestern"
   },
   "notificationHistory": {
     "title": "Benachrichtigungsverlauf",
     "sent": "Gesendet",
     "failed": "Fehlgeschlagen",
     "last50": "Letzte 50",
-    "noNotifications": "Keine Benachrichtigungen"
+    "noNotifications": "Keine Benachrichtigungen",
+    "today": "Heute",
+    "yesterday": "Gestern"
   },
   "temperatureChart": {
     "notEnoughData": "Nicht genügend Daten für das Temperaturdiagramm",
@@ -672,5 +682,16 @@
     "total": "Gesamt",
     "peak": "Spitze",
     "avg": "Durchschn"
+  },
+  "charts": {
+    "notEnoughPower": "Nicht genügend Daten für Leistungsdiagramm",
+    "watts": "W",
+    "notEnoughVoltage": "Nicht genügend Daten für Spannungsdiagramm",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "Nicht genügend Daten für Lüfterdiagramm",
+    "fanAppears": "Lüfterdaten werden nach der Erfassung angezeigt",
+    "notEnoughTemp": "Nicht genügend Daten für Temperaturdiagramm",
+    "celsius": "°C"
   }
 }

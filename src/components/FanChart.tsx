@@ -64,7 +64,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌀</Text>
         <Text style={styles.emptyText}>
-          {t('fanChart.notEnoughData', 'Not enough data for fan chart')}
+          {t('charts.notEnoughFan')}
         </Text>
       </View>
     );
@@ -77,7 +77,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌀</Text>
         <Text style={styles.emptyText}>
-          {t('fanChart.noFanData', 'Fan data will appear once collected')}
+          {t('charts.fanAppears')}
         </Text>
       </View>
     );
