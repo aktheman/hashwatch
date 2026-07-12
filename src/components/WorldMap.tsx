@@ -29,6 +29,11 @@ const LOCATION_CLUSTERS: Record<string, { x: number; y: number }> = {
   'Mining Farm': { x: 80, y: 32 },
 };
 
+const LOCATION_I18N_KEYS: Record<string, string> = {
+  'Data Center': 'worldMap.dataCenter',
+  'Mining Farm': 'worldMap.miningFarm',
+};
+
 const FALLBACK_POSITIONS = [
   { x: 10, y: 16 },
   { x: 80, y: 14 },
@@ -92,6 +97,7 @@ interface DotInfo {
   x: number;
   y: number;
   location: string;
+  locationDisplay: string;
   color: string;
 }
 
@@ -104,7 +110,7 @@ export const WorldMap = React.memo(function WorldMap() {
   const { dots, connections, locationLabels } = useMemo(() => {
     const result: DotInfo[] = [];
     const conns: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
-    const labels: { x: number; y: number; name: string; color: string }[] = [];
+    const labels: { x: number; y: number; name: string; color: string; rawName: string }[] = [];
     const grouped = new Map<string, typeof miners>();
     for (const m of miners) {
       const key = m.location || '';
@@ -133,6 +139,7 @@ export const WorldMap = React.memo(function WorldMap() {
           x,
           y,
           location: loc,
+          locationDisplay: t(LOCATION_I18N_KEYS[loc] ?? '', loc),
           color,
         });
       }
@@ -149,7 +156,7 @@ export const WorldMap = React.memo(function WorldMap() {
         }
       }
 
-      labels.push({ x: clusterPos.x, y: clusterPos.y + 2.5, name: loc, color });
+      labels.push({ x: clusterPos.x, y: clusterPos.y + 2.5, name: t(LOCATION_I18N_KEYS[loc] ?? '', loc), color, rawName: loc });
     }
 
     for (
@@ -163,12 +170,13 @@ export const WorldMap = React.memo(function WorldMap() {
         x: pos.x,
         y: pos.y,
         location: '',
+        locationDisplay: '',
         color: theme.primaryLight,
       });
     }
 
     return { dots: result, connections: conns, locationLabels: labels };
-  }, [miners, theme.primaryLight]);
+  }, [miners, theme.primaryLight, t]);
 
   const selected = selectedDot !== null ? dots[selectedDot] : null;
 
@@ -204,7 +212,7 @@ export const WorldMap = React.memo(function WorldMap() {
           </Text>
           {selected.location && (
             <Text style={{ color: selected.color, fontSize: 9, fontWeight: fontWeight.semibold }}>
-              {selected.location}
+              {selected.locationDisplay}
             </Text>
           )}
           {miners[selected.minerIndex].status && (

@@ -1342,7 +1342,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             exportBackup().catch((e) => {
               Alert.alert(
                 t('settings.exportFailed'),
-                e instanceof Error ? e.message : 'Unknown error',
+                e instanceof Error ? e.message : t('settings.unknownError'),
               );
             });
           }}
@@ -1368,7 +1368,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     } else {
                       Alert.alert(
                         t('settings.importFailed'),
-                        (r.errors || []).join('\n') || 'Unknown error',
+                        (r.errors || []).join('\n') || t('settings.unknownError'),
                       );
                     }
                   } catch (e) {
@@ -1394,7 +1394,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   } else {
                     Alert.alert(
                       t('settings.importFailed'),
-                      (result.errors || []).join('\n') || 'Unknown error',
+                      (result.errors || []).join('\n') || t('settings.unknownError'),
                     );
                   }
                 } catch (e) {

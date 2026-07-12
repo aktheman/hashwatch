@@ -242,7 +242,8 @@
     "restoreBody": "Restore purchases triggered",
     "debugProTitle": "Debug",
     "debugProBody": "Pro status set",
-    "debugFreeBody": "Free status set"
+    "debugFreeBody": "Free status set",
+    "unknownError": "Unknown error"
   },
   "minerDetail": {
     "notFound": "Miner Not Found",
@@ -296,6 +297,7 @@
     "yesRemove": "Yes, Remove",
     "minerRemoved": "{{name}} removed",
     "shareStats": "Share Stats",
+    "shareAsImage": "Share as Image",
     "sharedVia": "Shared via HashWatch",
     "error": "Error",
     "temperatureHistory": "Temperature History",
@@ -652,6 +654,10 @@
     "thirtyDays": "30 Days",
     "ninetyDays": "90 Days",
     "oneYear": "1 Year"
+  },
+  "worldMap": {
+    "dataCenter": "Data Center",
+    "miningFarm": "Mining Farm"
   },
   "minerHealth": {
     "offline": "Offline",

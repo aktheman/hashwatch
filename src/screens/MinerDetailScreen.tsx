@@ -1441,7 +1441,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Share as Image"
+              accessibilityLabel={t('minerDetail.shareAsImage')}
               style={[
                 styles.actionBtn,
                 { flex: 1, backgroundColor: theme.info + '15', borderColor: theme.info + '30' },
@@ -1449,7 +1449,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               onPress={handleShareAsImage}
             >
               <Text style={styles.actionBtnIcon}>🖼</Text>
-              <Text style={[styles.actionBtnText, { color: theme.info }]}>Share as Image</Text>
+              <Text style={[styles.actionBtnText, { color: theme.info }]}>{t('minerDetail.shareAsImage')}</Text>
             </Pressable>
           </View>
         </View>
@@ -1460,7 +1460,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           </Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Restart Miner"
+              accessibilityLabel={t('minerDetail.restartMiner')}
             style={[
               styles.actionBtn,
               {

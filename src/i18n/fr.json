@@ -218,7 +218,8 @@
     "restoreBody": "Restauration des achats déclenchée",
     "debugProTitle": "Débogage",
     "debugProBody": "Statut Pro défini",
-    "debugFreeBody": "Statut Free défini"
+    "debugFreeBody": "Statut Free défini",
+    "unknownError": "Erreur inconnue"
   },
   "minerDetail": {
     "notFound": "Mineur non trouvé",
@@ -271,6 +272,7 @@
     "removeConfirm": "Cela supprime définitivement {{name}} et tout son historique.",
     "yesRemove": "Oui, supprimer",
     "minerRemoved": "{{name}} supprimé",
+    "shareAsImage": "Partager en image",
     "sharedVia": "Partagé via HashWatch",
     "error": "Erreur",
     "temperatureHistory": "Historique des températures",
@@ -637,6 +639,10 @@
     "thirtyDays": "30 Jours",
     "ninetyDays": "90 Jours",
     "oneYear": "1 An"
+  },
+  "worldMap": {
+    "dataCenter": "Centre de données",
+    "miningFarm": "Ferme de minière"
   },
   "minerHealth": {
     "offline": "Hors ligne",

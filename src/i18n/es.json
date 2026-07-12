@@ -218,7 +218,8 @@
     "restoreBody": "Restauración de compras activada",
     "debugProTitle": "Depuración",
     "debugProBody": "Estado Pro establecido",
-    "debugFreeBody": "Estado Free establecido"
+    "debugFreeBody": "Estado Free establecido",
+    "unknownError": "Error desconocido"
   },
   "minerDetail": {
     "notFound": "Minero No Encontrado",
@@ -271,6 +272,7 @@
     "removeConfirm": "Esto elimina permanentemente {{name}} y todo su historial.",
     "yesRemove": "Sí, Eliminar",
     "minerRemoved": "{{name}} eliminado",
+    "shareAsImage": "Compartir como imagen",
     "sharedVia": "Compartido vía HashWatch",
     "error": "Error",
     "temperatureHistory": "Historial de temperatura",
@@ -637,6 +639,10 @@
     "thirtyDays": "30 Días",
     "ninetyDays": "90 Días",
     "oneYear": "1 Año"
+  },
+  "worldMap": {
+    "dataCenter": "Centro de Datos",
+    "miningFarm": "Granja de Minería"
   },
   "minerHealth": {
     "offline": "Desconectado",

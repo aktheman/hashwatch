@@ -399,6 +399,9 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
     }
   >
     <View
+      accessibilityLabel="dashboard.title map"
+      accessibilityRole="image"
+      accessible={true}
       style={
         {
           "position": "relative",
@@ -932,7 +935,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       >
         <View
-          accessibilityLabel="View dashboard.hashrate details"
+          accessibilityLabel="dashboardExtra.viewDetails"
           accessibilityRole="button"
           accessibilityState={
             {
@@ -1354,7 +1357,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       >
         <View
-          accessibilityLabel="View dashboard.power details"
+          accessibilityLabel="dashboardExtra.viewDetails"
           accessibilityRole="button"
           accessibilityState={
             {
@@ -1510,7 +1513,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       >
         <View
-          accessibilityLabel="View dashboard.temp details"
+          accessibilityLabel="dashboardExtra.viewDetails"
           accessibilityRole="button"
           accessibilityState={
             {
@@ -1806,7 +1809,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
         }
       >
         <View
-          accessibilityLabel="View dashboard.uptime details"
+          accessibilityLabel="dashboardExtra.viewDetails"
           accessibilityRole="button"
           accessibilityState={
             {
@@ -5300,6 +5303,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                 },
               ],
               "props": {
+                "accessibilityHint": "Scans local network for new miners",
                 "accessibilityLabel": "settings.scanNetwork",
                 "accessibilityRole": "button",
                 "accessibilityState": {

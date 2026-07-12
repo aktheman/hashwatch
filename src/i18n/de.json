@@ -218,7 +218,8 @@
     "restoreBody": "Wiederherstellung von Käufen ausgelöst",
     "debugProTitle": "Debug",
     "debugProBody": "Pro-Status gesetzt",
-    "debugFreeBody": "Free-Status gesetzt"
+    "debugFreeBody": "Free-Status gesetzt",
+    "unknownError": "Unbekannter Fehler"
   },
   "minerDetail": {
     "notFound": "Miner nicht gefunden",
@@ -271,6 +272,7 @@
     "removeConfirm": "Dies löscht {{name}} und den gesamten Verlauf endgültig.",
     "yesRemove": "Ja, entfernen",
     "minerRemoved": "{{name}} entfernt",
+    "shareAsImage": "Als Bild teilen",
     "sharedVia": "Geteilt über HashWatch",
     "error": "Fehler",
     "temperatureHistory": "Temperaturverlauf",
@@ -637,6 +639,10 @@
     "thirtyDays": "30 Tage",
     "ninetyDays": "90 Tage",
     "oneYear": "1 Jahr"
+  },
+  "worldMap": {
+    "dataCenter": "Rechenzentrum",
+    "miningFarm": "Mining-Farm"
   },
   "minerHealth": {
     "offline": "Offline",
