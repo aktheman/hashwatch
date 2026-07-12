@@ -17,7 +17,7 @@ import { useToastStore } from '../store/toast';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { SkeletonCard } from '../components/SkeletonCard';
-import { Miner, AutoAssignRule } from '../types';
+import { Miner, AutoAssignRule, GroupConfig, GroupAlertConfig } from '../types';
 import { useTranslation } from 'react-i18next';
 import * as DB from '../db/database';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
@@ -58,6 +58,14 @@ export function GroupsScreen() {
   const [rulePattern, setRulePattern] = useState('');
   const [ruleGroup, setRuleGroup] = useState('');
   const [showRuleEditor, setShowRuleEditor] = useState(false);
+  const [groupConfigs, setGroupConfigs] = useState<GroupConfig[]>([]);
+  const [groupAlerts, setGroupAlerts] = useState<GroupAlertConfig[]>([]);
+  const [showGroupAlerts, setShowGroupAlerts] = useState(false);
+  const [editingAlert, setEditingAlert] = useState<GroupAlertConfig | null>(null);
+  const [alertType, setAlertType] = useState<GroupAlertConfig['type']>('offline_count');
+  const [alertThreshold, setAlertThreshold] = useState('3');
+  const [alertGroupId, setAlertGroupId] = useState('');
+  const [showAlertEditor, setShowAlertEditor] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -74,10 +82,14 @@ export function GroupsScreen() {
         return [];
       }),
       useMinerStore.getState().loadAutoAssignRules(),
-    ]).then(([eg, go, rl]) => {
+      useMinerStore.getState().loadGroupConfigs(),
+      useMinerStore.getState().loadGroupAlerts(),
+    ]).then(([eg, go, rl, gc, ga]) => {
       setEmptyGroups(eg);
       setGroupOrder(go);
       setRules(rl);
+      setGroupConfigs(gc);
+      setGroupAlerts(ga);
       setLoading(false);
     });
   }, []);
@@ -127,6 +139,47 @@ export function GroupsScreen() {
     }
     return arr;
   }, [miners, emptyGroups, groupOrder]);
+
+  const flatGroups = useMemo(() => {
+    const configMap = new Map(groupConfigs.map((c) => [c.name, c]));
+    const childMap = new Map<string, string[]>();
+    for (const c of groupConfigs) {
+      if (c.parentId) {
+        const parentConfig = configMap.get(c.parentId);
+        if (parentConfig) {
+          if (!childMap.has(parentConfig.name)) childMap.set(parentConfig.name, []);
+          childMap.get(parentConfig.name)!.push(c.name);
+        }
+      }
+    }
+    const result: { name: string; miners: Miner[]; depth: number; hasChildren: boolean }[] = [];
+    const visited = new Set<string>();
+
+    function addGroup(name: string, depth: number) {
+      if (visited.has(name)) return;
+      visited.add(name);
+      const entry = groups.find(([n]) => n === name);
+      const miners = entry ? entry[1] : [];
+      const children = childMap.get(name) || [];
+      result.push({ name, miners, depth, hasChildren: children.length > 0 });
+      for (const child of children) {
+        addGroup(child, depth + 1);
+      }
+    }
+
+    for (const [name] of groups) {
+      if (name === 'Ungrouped') continue;
+      const config = configMap.get(name);
+      if (!config || !config.parentId) {
+        addGroup(name, 0);
+      }
+    }
+    const ungrouped = groups.find(([n]) => n === 'Ungrouped');
+    if (ungrouped) {
+      result.push({ name: 'Ungrouped', miners: ungrouped[1], depth: 0, hasChildren: false });
+    }
+    return result;
+  }, [groups, groupConfigs]);
 
   const groupStats = useMemo(() => {
     const map = new Map<string, { totalHash: number; avgTemp: number; count: number }>();
@@ -353,6 +406,56 @@ export function GroupsScreen() {
   const applyRules = useCallback(async () => {
     await useMinerStore.getState().applyAutoAssignRulesAll();
     Alert.alert(t('groups.rulesApplied'), t('groups.applyRules'));
+  }, [t]);
+
+  const addGroupAlert = useCallback(async () => {
+    const threshold = parseFloat(alertThreshold);
+    if (isNaN(threshold) || !alertGroupId) return;
+    const newAlert: GroupAlertConfig = {
+      id: `galert_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      groupId: alertGroupId,
+      type: alertType,
+      threshold,
+      enabled: true,
+    };
+    const updated = [...groupAlerts, newAlert];
+    await useMinerStore.getState().saveGroupAlerts(updated);
+    setGroupAlerts(updated);
+    setShowAlertEditor(false);
+  }, [alertType, alertThreshold, alertGroupId, groupAlerts]);
+
+  const toggleGroupAlert = useCallback(
+    async (id: string) => {
+      const updated = groupAlerts.map((a) =>
+        a.id === id ? { ...a, enabled: !a.enabled } : a,
+      );
+      await useMinerStore.getState().saveGroupAlerts(updated);
+      setGroupAlerts(updated);
+    },
+    [groupAlerts],
+  );
+
+  const deleteGroupAlert = useCallback(
+    async (id: string) => {
+      const updated = groupAlerts.filter((a) => a.id !== id);
+      await useMinerStore.getState().saveGroupAlerts(updated);
+      setGroupAlerts(updated);
+    },
+    [groupAlerts],
+  );
+
+  const evaluateGroupAlerts = useCallback(async () => {
+    const triggered = await useMinerStore.getState().evaluateGroupAlerts();
+    if (triggered.length === 0) {
+      Alert.alert(t('groups.groupAlerts'), t('groups.noGroupAlerts'));
+    } else {
+      for (const alert of triggered) {
+        Alert.alert(
+          t('groups.alertTriggered'),
+          t('groups.alertTriggeredBody', { group: alert.groupId, type: alert.type }),
+        );
+      }
+    }
   }, [t]);
 
   const styles = useMemo(
@@ -584,9 +687,10 @@ export function GroupsScreen() {
       </View>
 
       <FlatList
-        data={groups}
-        keyExtractor={([name]) => name}
-        renderItem={({ item: [name, members] }) => {
+        data={flatGroups}
+        keyExtractor={(item) => item.name}
+        renderItem={({ item }) => {
+          const { name, miners: members, depth } = item;
           const stats = groupStats.get(name);
           const barRatio = stats && maxHash > 0 ? stats.totalHash / maxHash : 0;
           const isDragged = draggedGroup === name;
@@ -598,6 +702,8 @@ export function GroupsScreen() {
           const elevation = isDragged
             ? dragAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] })
             : 0;
+          const groupConfig = groupConfigs.find((c) => c.name === name);
+          const indent = depth * 20;
           return (
             <Animated.View
               style={[
@@ -606,6 +712,7 @@ export function GroupsScreen() {
                 isHovered && isDropTarget && { borderColor: theme.primary, borderWidth: 2 },
                 isDropTarget &&
                   !isHovered && { borderColor: theme.primary + '40', borderWidth: 1.5 },
+                depth > 0 && { marginLeft: indent, borderLeftWidth: 3, borderLeftColor: groupConfig?.color || theme.primary + '40' },
               ]}
             >
               <View style={styles.groupHeader}>
@@ -848,6 +955,103 @@ export function GroupsScreen() {
           )}
         </View>
       )}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Toggle group alerts"
+        style={styles.rulesToggle}
+        onPress={() => setShowGroupAlerts((s) => !s)}
+      >
+        <Text style={styles.rulesToggleText}>{t('groups.groupAlerts')}</Text>
+        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
+          {showGroupAlerts ? '▲' : '▼'}
+        </Text>
+      </Pressable>
+      {showGroupAlerts && (
+        <View style={{ marginBottom: 16 }}>
+          {groupAlerts.length === 0 && (
+            <Text
+              style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}
+            >
+              {t('groups.noGroupAlerts')}
+            </Text>
+          )}
+          {groupAlerts.map((alert) => (
+            <View key={alert.id} style={styles.ruleRow}>
+              <Text
+                style={{
+                  fontSize: fontSize.lg,
+                  color: alert.enabled ? theme.success : theme.textMuted,
+                }}
+              >
+                {alert.enabled ? '✓' : '○'}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('groups.editRule')}
+                style={styles.ruleInfo}
+                onPress={() => {
+                  setEditingAlert(alert);
+                  setAlertType(alert.type);
+                  setAlertThreshold(String(alert.threshold));
+                  setAlertGroupId(alert.groupId);
+                  setShowAlertEditor(true);
+                }}
+              >
+                <Text style={styles.ruleField}>{alert.groupId}</Text>
+                <Text style={styles.rulePattern}>{alert.type}</Text>
+                <Text style={styles.ruleGroup}>≥ {alert.threshold}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={alert.enabled ? t('groups.alertDisabled') : t('groups.alertEnabled')}
+                hitSlop={8}
+                onPress={() => toggleGroupAlert(alert.id)}
+                style={{ padding: 4 }}
+              >
+                <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>
+                  {alert.enabled ? t('groups.off') : t('groups.on')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('groups.deleteRule')}
+                hitSlop={8}
+                onPress={() => deleteGroupAlert(alert.id)}
+                style={{ padding: 4, marginLeft: 4 }}
+              >
+                <Text style={{ color: theme.danger, fontSize: fontSize.sm }}>✕</Text>
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('groups.addGroupAlert')}
+            style={styles.addRuleBtn}
+            onPress={() => {
+              setEditingAlert(null);
+              setAlertType('offline_count');
+              setAlertThreshold('3');
+              setAlertGroupId(groups[0]?.[0] || '');
+              setShowAlertEditor(true);
+            }}
+          >
+            <Text style={styles.addRuleBtnText}>{t('groups.addGroupAlert')}</Text>
+          </Pressable>
+          {groupAlerts.length > 0 && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('groups.groupAlerts')}
+              style={[
+                styles.addRuleBtn,
+                { borderWidth: 1, borderColor: theme.primary + '40', marginTop: 4 },
+              ]}
+              onPress={evaluateGroupAlerts}
+            >
+              <Text style={styles.addRuleBtnText}>{t('groups.groupAlerts')}</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
       <Modal
         visible={showRuleEditor}
         transparent
@@ -942,6 +1146,125 @@ export function GroupsScreen() {
               >
                 <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
                   {editingRule ? t('common.save') : t('common.add')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={showAlertEditor}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAlertEditor(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+              {editingAlert ? t('groups.editRule') : t('groups.addGroupAlert')}
+            </Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('groups.alertType')}
+            </Text>
+            <View style={styles.pickerRow}>
+              {(['offline_count', 'temp_high', 'hashrate_drop', 'efficiency_drop'] as const).map(
+                (tp) => (
+                  <Pressable
+                    key={tp}
+                    accessibilityRole="button"
+                    accessibilityLabel={tp}
+                    style={[
+                      styles.fieldChip,
+                      {
+                        backgroundColor: alertType === tp ? theme.primary + '20' : theme.surfaceLight,
+                        borderColor: alertType === tp ? theme.primary : theme.border,
+                      },
+                    ]}
+                    onPress={() => setAlertType(tp)}
+                  >
+                    <Text
+                      style={[
+                        styles.fieldChipText,
+                        { color: alertType === tp ? theme.primary : theme.textMuted },
+                      ]}
+                    >
+                      {tp === 'offline_count'
+                        ? t('groups.alertOfflineCount')
+                        : tp === 'temp_high'
+                          ? t('groups.alertTempHigh')
+                          : tp === 'hashrate_drop'
+                            ? t('groups.alertHashrateDrop')
+                            : t('groups.alertEfficiencyDrop')}
+                    </Text>
+                  </Pressable>
+                ),
+              )}
+            </View>
+            <TextInput
+              style={styles.ruleInput}
+              value={alertThreshold}
+              onChangeText={setAlertThreshold}
+              placeholder={t('groups.alertThreshold')}
+              placeholderTextColor={theme.textMuted}
+              keyboardType="numeric"
+            />
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs, marginTop: 8 }}>
+              {t('groups.parentGroup')}
+            </Text>
+            <View style={styles.pickerRow}>
+              {groups.map(([name]) => (
+                <Pressable
+                  key={name}
+                  accessibilityRole="button"
+                  accessibilityLabel={name}
+                  style={[
+                    styles.fieldChip,
+                    {
+                      backgroundColor: alertGroupId === name ? theme.primary + '20' : theme.surfaceLight,
+                      borderColor: alertGroupId === name ? theme.primary : theme.border,
+                    },
+                  ]}
+                  onPress={() => setAlertGroupId(name)}
+                >
+                  <Text
+                    style={[
+                      styles.fieldChipText,
+                      { color: alertGroupId === name ? theme.primary : theme.textMuted },
+                    ]}
+                  >
+                    {name}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel')}
+                style={[
+                  styles.ruleInput,
+                  { flex: 0, paddingHorizontal: 16, borderColor: theme.border },
+                ]}
+                onPress={() => setShowAlertEditor(false)}
+              >
+                <Text style={{ color: theme.textMuted }}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={editingAlert ? t('common.save') : t('common.add')}
+                style={[
+                  styles.ruleInput,
+                  {
+                    flex: 0,
+                    paddingHorizontal: 16,
+                    backgroundColor: theme.primary,
+                    borderColor: theme.primary,
+                  },
+                ]}
+                onPress={addGroupAlert}
+              >
+                <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
+                  {editingAlert ? t('common.save') : t('common.add')}
                 </Text>
               </Pressable>
             </View>

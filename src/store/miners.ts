@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
 import pLimit from 'p-limit';
-import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule } from '../types';
+import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule, GroupConfig, GroupAlertConfig } from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
@@ -83,6 +83,11 @@ interface MinersState {
   saveAutoAssignRules: (rules: AutoAssignRule[]) => Promise<void>;
   applyAutoAssignRules: (minerId: string) => Promise<void>;
   applyAutoAssignRulesAll: () => Promise<void>;
+  loadGroupConfigs: () => Promise<GroupConfig[]>;
+  saveGroupConfigs: (configs: GroupConfig[]) => Promise<void>;
+  loadGroupAlerts: () => Promise<GroupAlertConfig[]>;
+  saveGroupAlerts: (alerts: GroupAlertConfig[]) => Promise<void>;
+  evaluateGroupAlerts: () => Promise<GroupAlertConfig[]>;
 }
 
 export const useMinerStore = create<MinersState>((set, get) => ({
@@ -583,6 +588,87 @@ export const useMinerStore = create<MinersState>((set, get) => ({
     for (const m of minersList) {
       await get().applyAutoAssignRules(m.id);
     }
+  },
+
+  loadGroupConfigs: async () => {
+    const raw = await DB.getSetting('group_configs');
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as GroupConfig[];
+    } catch {
+      return [];
+    }
+  },
+
+  saveGroupConfigs: async (configs: GroupConfig[]) => {
+    await DB.setSetting('group_configs', JSON.stringify(configs));
+  },
+
+  loadGroupAlerts: async () => {
+    const raw = await DB.getSetting('group_alerts');
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as GroupAlertConfig[];
+    } catch {
+      return [];
+    }
+  },
+
+  saveGroupAlerts: async (alerts: GroupAlertConfig[]) => {
+    await DB.setSetting('group_alerts', JSON.stringify(alerts));
+  },
+
+  evaluateGroupAlerts: async () => {
+    const alerts = await get().loadGroupAlerts();
+    const activeAlerts = alerts.filter((a) => a.enabled);
+    if (activeAlerts.length === 0) return [];
+
+    const miners = get().miners;
+    const triggered: GroupAlertConfig[] = [];
+
+    for (const alert of activeAlerts) {
+      const groupMiners = miners.filter((m) => m.group === alert.groupId);
+      if (groupMiners.length === 0) continue;
+
+      switch (alert.type) {
+        case 'hashrate_drop': {
+          const onlineMiners = groupMiners.filter((m) => m.isOnline);
+          const dropPct =
+            groupMiners.length > 0
+              ? ((groupMiners.length - onlineMiners.length) / groupMiners.length) * 100
+              : 0;
+          if (dropPct >= alert.threshold) triggered.push(alert);
+          break;
+        }
+        case 'temp_high': {
+          const hotMiners = groupMiners.filter(
+            (m) => (m.status?.temperature ?? 0) >= alert.threshold,
+          );
+          if (hotMiners.length > 0) triggered.push(alert);
+          break;
+        }
+        case 'offline_count': {
+          const offlineCount = groupMiners.filter((m) => !m.isOnline).length;
+          if (offlineCount >= alert.threshold) triggered.push(alert);
+          break;
+        }
+        case 'efficiency_drop': {
+          const efficiencies = groupMiners
+            .filter((m) => m.isOnline && m.status?.power && m.status?.hashRate)
+            .map((m) => {
+              const power = m.status!.power;
+              const hashes = toHashesPerSecond(m.status!.hashRate, m.status!.hashRateUnit);
+              return power > 0 ? hashes / power : 0;
+            });
+          if (efficiencies.length === 0) break;
+          const avgEff = efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length;
+          if (avgEff > 0 && avgEff < alert.threshold) triggered.push(alert);
+          break;
+        }
+      }
+    }
+
+    return triggered;
   },
 }));
 
