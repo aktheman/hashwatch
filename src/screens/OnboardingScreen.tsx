@@ -7,6 +7,7 @@ import {
   Animated,
   FlatList,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { setSetting } from '../db/database';
 import { useTheme } from '../theme';
@@ -23,10 +24,14 @@ export function OnboardingScreen({ onComplete }: Props) {
   const theme = useTheme();
   const { width } = useWindowDimensions();
 
+  const [scanning, setScanning] = useState(false);
+  const [scanComplete, setScanComplete] = useState(false);
+
   const slides = [
     { icon: '⬡', title: t('onboarding.slide1Title'), subtitle: t('onboarding.slide1Body') },
     { icon: '📡', title: t('onboarding.slide2Title'), subtitle: t('onboarding.slide2Body') },
     { icon: '🔔', title: t('onboarding.slide3Title'), subtitle: t('onboarding.slide3Body') },
+    { icon: '🔍', title: t('onboarding.slide5Title'), subtitle: t('onboarding.slide5Body'), interactive: true },
     { icon: '⭐', title: t('onboarding.slide4Title'), subtitle: t('onboarding.slide4Body') },
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -35,6 +40,9 @@ export function OnboardingScreen({ onComplete }: Props) {
   const scrollX = useRef(new Animated.Value(0)).current;
 
   const handleNext = async () => {
+    const currentSlide = slides[currentIndexRef.current];
+    if (currentSlide.interactive && !scanComplete) return;
+
     if (currentIndexRef.current < slides.length - 1) {
       const nextIndex = currentIndexRef.current + 1;
       currentIndexRef.current = nextIndex;
@@ -49,6 +57,14 @@ export function OnboardingScreen({ onComplete }: Props) {
   const handleSkip = async () => {
     await setSetting('onboarding_complete', 'true');
     onComplete();
+  };
+
+  const handleSimulateScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      setScanComplete(true);
+    }, 2000);
   };
 
   const onScroll = Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
@@ -156,6 +172,35 @@ export function OnboardingScreen({ onComplete }: Props) {
           fontSize: fontSize.xl,
           fontWeight: fontWeight.bold,
         },
+        tutorialBox: {
+          marginTop: spacing.xl,
+          alignItems: 'center',
+        },
+        scanBtn: {
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.md,
+          borderRadius: radius.lg,
+          borderWidth: 2,
+          alignItems: 'center',
+          minWidth: 180,
+        },
+        scanBtnText: {
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.bold,
+        },
+        scanStatus: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.sm,
+        },
+        scanText: {
+          fontSize: fontSize.md,
+          fontWeight: fontWeight.semibold,
+        },
+        scanCheck: {
+          fontSize: fontSize.xl,
+          fontWeight: fontWeight.bold,
+        },
       }),
     [theme],
   );
@@ -183,6 +228,36 @@ export function OnboardingScreen({ onComplete }: Props) {
             </View>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.subtitle}>{item.subtitle}</Text>
+            {'interactive' in item && item.interactive && (
+              <View style={styles.tutorialBox}>
+                {scanning ? (
+                  <View style={styles.scanStatus}>
+                    <ActivityIndicator size="small" color={theme.primary} />
+                    <Text style={[styles.scanText, { color: theme.textDim }]}>
+                      {t('onboarding.tutorialScanning')}
+                    </Text>
+                  </View>
+                ) : scanComplete ? (
+                  <View style={styles.scanStatus}>
+                    <Text style={[styles.scanCheck, { color: theme.success }]}>✓</Text>
+                    <Text style={[styles.scanText, { color: theme.success }]}>
+                      {t('onboarding.tutorialFound')}
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('onboarding.tutorialScanButton')}
+                    style={[styles.scanBtn, { backgroundColor: theme.primary + '20', borderColor: theme.primary }]}
+                    onPress={handleSimulateScan}
+                  >
+                    <Text style={[styles.scanBtnText, { color: theme.primary }]}>
+                      {t('onboarding.tutorialScanButton')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
           </View>
         )}
       />
