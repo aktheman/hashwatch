@@ -7,6 +7,8 @@ import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Skeleton } from '../components/Skeleton';
 import { MetricTile } from '../components/DashboardComponents';
 import { EarningsForecast } from '../components/EarningsForecast';
+import { TemperatureHeatmap } from '../components/TemperatureHeatmap';
+import { PowerUsageChart } from '../components/PowerUsageChart';
 import { MinerSnapshot } from '../types';
 import {
   toHashesPerSecond,
@@ -716,6 +718,9 @@ export function AnalyticsScreen() {
         </View>
 
         <EarningsForecast miners={miners} powerCost={powerCost} />
+
+        <TemperatureHeatmap miners={miners} />
+        <PowerUsageChart miners={miners} />
 
         {powerCost > 0 && (
           <View style={styles.chartCard}>

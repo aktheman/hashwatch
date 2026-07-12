@@ -14,6 +14,14 @@ jest.mock('react-native-chart-kit', () => ({
   LineChart: () => null,
 }));
 
+jest.mock('../src/components/TemperatureHeatmap', () => ({
+  TemperatureHeatmap: () => null,
+}));
+
+jest.mock('../src/components/PowerUsageChart', () => ({
+  PowerUsageChart: () => null,
+}));
+
 let mockMiners: any[] = [];
 jest.mock('../src/store/miners', () => ({
   useMinerStore: (selector: any) => selector({ miners: mockMiners }),

@@ -22,14 +22,14 @@ function formatTimestamp(ts: number): string {
   return `${hours}:${mins}`;
 }
 
-function formatDateLabel(ts: number): string {
+function formatDateLabel(ts: number, t: (key: string) => string): string {
   const d = new Date(ts);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  if (d.toDateString() === today.toDateString()) return t('alertHistory.today');
+  if (d.toDateString() === yesterday.toDateString()) return t('alertHistory.yesterday');
   return d.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -47,10 +47,10 @@ const ALERT_ICONS: Record<string, string> = {
   long_uptime: '⏰',
 };
 
-function groupByDate(events: AlertEvent[]): { date: string; data: AlertEvent[] }[] {
+function groupByDate(events: AlertEvent[], t: (key: string) => string): { date: string; data: AlertEvent[] }[] {
   const groups = new Map<string, AlertEvent[]>();
   for (const ev of events) {
-    const key = formatDateLabel(ev.timestamp);
+    const key = formatDateLabel(ev.timestamp, t);
     const list = groups.get(key) || [];
     list.push(ev);
     groups.set(key, list);
@@ -89,7 +89,7 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
     setRefreshing(false);
   }, [loadEvents, isAuthed, syncFromBackend, syncToBackend]);
 
-  const sections = useMemo(() => groupByDate(events), [events]);
+  const sections = useMemo(() => groupByDate(events, t), [events, t]);
 
   const styles = useMemo(
     () =>

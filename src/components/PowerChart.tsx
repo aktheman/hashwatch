@@ -64,7 +64,7 @@ export function PowerChart({ snapshots, title }: PowerChartProps) {
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>⚡</Text>
         <Text style={styles.emptyText}>
-          {t('powerChart.notEnoughData', 'Not enough data for power chart')}
+          {t('charts.notEnoughPower')}
         </Text>
       </View>
     );
@@ -88,7 +88,7 @@ export function PowerChart({ snapshots, title }: PowerChartProps) {
   const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
-  const formatValue = (v: string) => `${parseFloat(v).toFixed(1)}W`;
+  const formatValue = (v: string) => `${parseFloat(v).toFixed(1)}${t('charts.watts')}`;
 
   const lineColor = () => theme.warning;
   const dotColor = theme.warning;

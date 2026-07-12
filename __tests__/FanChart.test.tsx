@@ -44,12 +44,12 @@ beforeEach(() => {
 
 it('shows not enough data message when fewer than 2 snapshots', async () => {
   const tree = await render(<FanChart snapshots={[makeSnapshot(1000, 5000)]} />);
-  expect(tree.getByText('fanChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughFan')).toBeTruthy();
 });
 
 it('shows not enough data with empty snapshots', async () => {
   const tree = await render(<FanChart snapshots={[]} />);
-  expect(tree.getByText('fanChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughFan')).toBeTruthy();
 });
 
 it('renders title when provided', async () => {
@@ -70,7 +70,7 @@ it('shows no fan data message when fanRpm is zero or absent', async () => {
     { ...makeSnapshot(2000), fanRpm: 0, fanSpeed: 0 },
   ];
   const tree = await render(<FanChart snapshots={snapshots} />);
-  expect(tree.getByText('fanChart.noFanData')).toBeTruthy();
+  expect(tree.getByText('charts.fanAppears')).toBeTruthy();
 });
 
 it('sorts snapshots by timestamp', async () => {

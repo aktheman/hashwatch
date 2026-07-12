@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, TextStyle } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface TimeAgoProps {
   timestamp: number | null;
@@ -7,6 +8,7 @@ interface TimeAgoProps {
 }
 
 export function TimeAgo({ timestamp, style }: TimeAgoProps) {
+  const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -19,5 +21,5 @@ export function TimeAgo({ timestamp, style }: TimeAgoProps) {
 
   if (timestamp === null) return null;
 
-  return <Text style={style}>{Math.floor((now - timestamp) / 1000)}s ago</Text>;
+  return <Text style={style}>{Math.floor((now - timestamp) / 1000)}{t('common.secondsAgo')}</Text>;
 }

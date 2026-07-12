@@ -9,14 +9,13 @@ import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
 import {
   darkTheme,
-  lightTheme,
-  matrixTheme,
-  neonTheme,
   useTheme,
   setTheme,
   setThemeMode,
 } from './src/theme';
 import { initProxyUrl } from './src/constants';
+import { initCrashReporting } from './src/utils/crash';
+import { initAnalytics } from './src/utils/analytics';
 
 const OnboardingScreen = lazy(() =>
   import('./src/screens/OnboardingScreen').then((m) => ({ default: m.OnboardingScreen })),
@@ -42,6 +41,8 @@ export default function App() {
     (async () => {
       try {
         requestNotificationPermissions();
+        initCrashReporting({ enabled: true });
+        initAnalytics({ enabled: true });
         await initProxyUrl();
         const saved = await getSetting('theme_mode');
         if (

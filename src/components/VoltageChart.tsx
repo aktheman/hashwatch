@@ -64,7 +64,7 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🔋</Text>
         <Text style={styles.emptyText}>
-          {t('voltageChart.notEnoughData', 'Not enough data for voltage chart')}
+          {t('charts.notEnoughVoltage')}
         </Text>
       </View>
     );
@@ -88,7 +88,7 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
   const step = Math.max(1, Math.floor(labels.length / 4));
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
-  const formatValue = (v: string) => `${parseFloat(v).toFixed(0)}mV`;
+  const formatValue = (v: string) => `${parseFloat(v).toFixed(0)}${t('charts.millivolts')}`;
 
   const lineColor = () => theme.info;
   const dotColor = theme.info;

@@ -17,7 +17,8 @@
     "offline": "离线",
     "close": "关闭",
     "success": "成功",
-    "error": "错误"
+    "error": "错误",
+    "secondsAgo": "秒前"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -319,6 +320,11 @@
     "deleteWalletBody": "分配给此钱包的矿机将变为未分配。",
     "walletRemoved": "{{name}} 已移除"
   },
+  "wallet": {
+    "invalidAddress": "无效地址",
+    "deleted": "钱包已删除",
+    "saved": "钱包已保存"
+  },
   "groups": {
     "title": "分组管理",
     "namePlaceholder": "新分组名称",
@@ -553,14 +559,18 @@
     "hashrate_drop": "算力下降",
     "pool_lost": "矿池丢失",
     "long_uptime": "长时间运行",
-    "sync": "同步"
+    "sync": "同步",
+    "today": "今天",
+    "yesterday": "昨天"
   },
   "notificationHistory": {
     "title": "通知历史",
     "sent": "已发送",
     "failed": "失败",
     "last50": "最近50条",
-    "noNotifications": "暂无通知"
+    "noNotifications": "暂无通知",
+    "today": "今天",
+    "yesterday": "昨天"
   },
   "update": {
     "downloaded": "更新已下载",
@@ -662,5 +672,16 @@
     "total": "总计",
     "peak": "峰值",
     "avg": "平均"
+  },
+  "charts": {
+    "notEnoughPower": "功率图表数据不足",
+    "watts": "W",
+    "notEnoughVoltage": "电压图表数据不足",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "风扇图表数据不足",
+    "fanAppears": "风扇数据将在收集后显示",
+    "notEnoughTemp": "温度图表数据不足",
+    "celsius": "°C"
   }
 }

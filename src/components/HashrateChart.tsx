@@ -92,7 +92,7 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
   const filteredLabels = labels.map((l, i) => (i % step === 0 ? l : ''));
 
   const formatValue = (v: string) => parseFloat(v).toFixed(1);
-  const unit = 'GH/s';
+  const unit = t('charts.ghs');
 
   return (
     <View style={styles.container} accessibilityLabel={t('hashrateChart.notEnoughData')}>

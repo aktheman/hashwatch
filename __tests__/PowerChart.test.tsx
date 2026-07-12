@@ -41,12 +41,12 @@ beforeEach(() => {
 
 it('shows not enough data message when fewer than 2 snapshots', async () => {
   const tree = await render(<PowerChart snapshots={[makeSnapshot(1000)]} />);
-  expect(tree.getByText('powerChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughPower')).toBeTruthy();
 });
 
 it('shows not enough data with empty snapshots', async () => {
   const tree = await render(<PowerChart snapshots={[]} />);
-  expect(tree.getByText('powerChart.notEnoughData')).toBeTruthy();
+  expect(tree.getByText('charts.notEnoughPower')).toBeTruthy();
 });
 
 it('renders title when provided', async () => {

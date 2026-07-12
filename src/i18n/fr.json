@@ -17,7 +17,8 @@
     "offline": "Hors ligne",
     "close": "Fermer",
     "success": "Succès",
-    "error": "Erreur"
+    "error": "Erreur",
+    "secondsAgo": "il y a s"
   },
   "dashboard": {
     "title": "HashWatch",
@@ -319,6 +320,11 @@
     "deleteWalletBody": "Les mineurs assignés à ce portefeuille deviendront non assignés.",
     "walletRemoved": "{{name}} supprimé"
   },
+  "wallet": {
+    "invalidAddress": "Adresse invalide",
+    "deleted": "Portefeuille supprimé",
+    "saved": "Portefeuille enregistré"
+  },
   "groups": {
     "title": "Gestion des groupes",
     "namePlaceholder": "Nom du nouveau groupe",
@@ -559,14 +565,18 @@
     "hashrate_drop": "Baisse du taux de hachage",
     "pool_lost": "Pool perdu",
     "long_uptime": "Longue disponibilité",
-    "sync": "Synchroniser"
+    "sync": "Synchroniser",
+    "today": "Auj.",
+    "yesterday": "Hier"
   },
   "notificationHistory": {
     "title": "Historique des notifications",
     "sent": "Envoyée",
     "failed": "Échouée",
     "last50": "50 dernières",
-    "noNotifications": "Aucune notification"
+    "noNotifications": "Aucune notification",
+    "today": "Auj.",
+    "yesterday": "Hier"
   },
   "temperatureChart": {
     "notEnoughData": "Pas assez de données pour le graphique de température",
@@ -672,5 +682,16 @@
     "total": "Total",
     "peak": "Pic",
     "avg": "Moy"
+  },
+  "charts": {
+    "notEnoughPower": "Pas assez de données pour le graphique de puissance",
+    "watts": "W",
+    "notEnoughVoltage": "Pas assez de données pour le graphique de tension",
+    "millivolts": "mV",
+    "ghs": "GH/s",
+    "notEnoughFan": "Pas assez de données pour le graphique du ventilateur",
+    "fanAppears": "Les données du ventilateur apparaîtront une fois collectées",
+    "notEnoughTemp": "Pas assez de données pour le graphique de température",
+    "celsius": "°C"
   }
 }
