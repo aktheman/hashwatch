@@ -4,6 +4,7 @@ import {
   DashboardCustomizer,
   SectionKey,
   DEFAULT_VISIBLE,
+  ALL_SECTIONS,
 } from '../src/components/DashboardCustomizer';
 
 let mockDbStore: Record<string, string> = {};
@@ -35,8 +36,10 @@ const defaultProps = {
   onToggle: jest.fn(),
   onReset: jest.fn(),
   onApplyPreset: jest.fn(),
+  onReorder: jest.fn(),
   kioskMode: false,
   onToggleKiosk: jest.fn(),
+  sectionOrder: [...ALL_SECTIONS],
 };
 
 let mockAlert: jest.SpyInstance;

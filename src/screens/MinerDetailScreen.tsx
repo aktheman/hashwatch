@@ -46,6 +46,7 @@ import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { MarkdownText } from '../utils/markdown';
 import { MinerHealthScore } from '../components/MinerHealthScore';
+import { TimeAgo } from '../components/TimeAgo';
 import { useTranslation } from 'react-i18next';
 
 interface MinerDetailScreenProps {
@@ -863,6 +864,12 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     <MarkdownText style={{ color: theme.text, fontSize: fontSize.base }}>
                       {note.text}
                     </MarkdownText>
+                    {note.createdat && (
+                      <TimeAgo
+                        timestamp={new Date(note.createdat).getTime()}
+                        style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: 2 }}
+                      />
+                    )}
                   </View>
                   <Pressable
                     accessibilityRole="button"
