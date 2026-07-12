@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense, Fragment } from 'react';
 import {
   View,
   Text,
@@ -997,489 +997,379 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       ? { style: styles.container, contentContainerStyle: { paddingBottom: 80 } }
       : { style: styles.container };
 
-  return (
-    <Outer {...outerProps}>
-      {kioskMode ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Exit kiosk mode"
-          style={{
-            position: 'absolute',
-            top: 50,
-            right: 12,
-            zIndex: 100,
-            width: 24,
-            height: 24,
-            borderRadius: radius.md,
-            backgroundColor: theme.textMuted + '40',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            Alert.alert(t('dashboard.exitKioskTitle'), t('dashboard.exitKioskBody'), [
-              { text: t('common.cancel'), style: 'cancel' },
-              { text: t('dashboard.exitKioskExit'), onPress: () => handleToggleKiosk(false) },
-            ]);
-          }}
-        >
-          <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
-            ✕
-          </Text>
-        </Pressable>
-      ) : (
-        <View style={styles.headerBar}>
-          {selectionMode ? (
-            <>
-              <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cancel selection"
-                style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
-                onPress={() => {
-                  setSelectionMode(false);
-                  setSelectedIds(new Set());
+  const renderSection = (key: SectionKey): React.ReactNode => {
+    switch (key) {
+      case 'earnings':
+        return miners.length > 0 ? <EarningsCard miners={miners} /> : null;
+      case 'ticker':
+        if (miners.length === 0) return null;
+        return (
+          <View
+            style={{
+              paddingHorizontal: spacing.md,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: spacing.xs,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+              <View
+                style={{
+                  width: spacing.xs,
+                  height: spacing.xs,
+                  borderRadius: radius.xs,
+                  backgroundColor: theme.success,
+                  opacity: 0.8,
+                }}
+              />
+              <Text
+                style={{
+                  color: theme.textMuted,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.semibold,
                 }}
               >
-                <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
-              </Pressable>
-            </>
-          ) : (
-            <>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Compare miners"
-                style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
-                onPress={() => setSelectionMode(true)}
+                BTC ${btcPrice.toLocaleString()}
+              </Text>
+              <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>·</Text>
+              <Text
+                style={{
+                  color: theme.textMuted,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.semibold,
+                }}
               >
-                <Text style={styles.settingsIcon}>⇄</Text>
-              </Pressable>
-              <View style={{ alignItems: 'center' }}>
-                <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-                <Text style={styles.headerSub}>
-                  <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
-                </Text>
+                {formatHashrateWithUnit(networkHashrate, 'H/s')}/s
+              </Text>
+            </View>
+            <TimeAgo
+              timestamp={lastRefreshTime}
+              style={{ color: theme.textDim, fontSize: fontSize.xs }}
+            />
+          </View>
+        );
+      case 'map':
+        return (
+          <View
+            style={{
+              paddingHorizontal: spacing.md,
+              gap: spacing.sm,
+              marginTop: spacing.xxs,
+              alignItems: 'center',
+            }}
+          >
+            <Suspense fallback={null}>
+              <LazyWorldMap />
+            </Suspense>
+          </View>
+        );
+      case 'pools':
+        if (miners.length === 0) return null;
+        return (
+          <>
+            <PoolUptime miners={miners} />
+            {poolInfo.size > 0 && (
+              <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}>
+                {Array.from(poolInfo.entries()).map(([pool, info]) => {
+                  const isExpanded = expandedPool === pool;
+                  const totalShares = info.accepted + info.rejected;
+                  const rejectRate =
+                    totalShares > 0 ? ((info.rejected / totalShares) * 100).toFixed(1) : '0.0';
+                  const poolMiners = miners.filter((m) => m.status?.pool === pool);
+                  return (
+                    <View key={pool}>
+                      <Pressable
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          backgroundColor: theme.surface,
+                          borderRadius: radius.md,
+                          paddingHorizontal: spacing.sm,
+                          paddingVertical: spacing.xs,
+                          borderWidth: 1,
+                          borderColor: theme.border,
+                        }}
+                        onPress={() => setExpandedPool(isExpanded ? null : pool)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${pool} pool details`}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={{
+                              color: theme.text,
+                              fontSize: fontSize.base,
+                              fontWeight: fontWeight.bold,
+                            }}
+                            numberOfLines={1}
+                          >
+                            {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
+                          </Text>
+                          <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                            {t('dashboard.minersCount', { count: info.miners })} · {info.responseTime}ms ·{' '}
+                            {t('dashboard.rejectedRate', { rate: rejectRate })}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', marginRight: 4 }}>
+                          <Text
+                            style={{
+                              color: theme.success,
+                              fontSize: fontSize.base,
+                              fontWeight: fontWeight.bold,
+                            }}
+                          >
+                            +{info.accepted}
+                          </Text>
+                          {info.rejected > 0 && (
+                            <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
+                              -{info.rejected}
+                            </Text>
+                          )}
+                        </View>
+                        <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginLeft: 6 }}>
+                          {isExpanded ? '▲' : '▼'}
+                        </Text>
+                      </Pressable>
+                      {isExpanded && (
+                        <View
+                          style={{
+                            backgroundColor: theme.surfaceLight,
+                            borderRadius: 10,
+                            marginTop: spacing.xxs,
+                            padding: spacing.sm,
+                            borderWidth: 1,
+                            borderColor: theme.border,
+                          }}
+                        >
+                          {poolMiners.map((pm) => (
+                            <View
+                              key={pm.id}
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                paddingVertical: spacing.xxs,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  color: theme.text,
+                                  fontSize: fontSize.base,
+                                  fontWeight: fontWeight.semibold,
+                                  flex: 1,
+                                }}
+                                numberOfLines={1}
+                              >
+                                {pm.name}
+                              </Text>
+                              <Text
+                                style={{
+                                  color: theme.success,
+                                  fontSize: fontSize.xs,
+                                  marginHorizontal: spacing.xs,
+                                }}
+                              >
+                                +{pm.status?.sharesAccepted ?? 0}
+                              </Text>
+                              <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
+                                -{pm.status?.sharesRejected ?? 0}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+                {poolInfo.size > 2 && expandedPool === null && (
+                  <Text
+                    style={{
+                      color: theme.textMuted,
+                      fontSize: fontSize.xs,
+                      textAlign: 'center',
+                      paddingVertical: spacing.xxs,
+                    }}
+                  >
+                    {t('dashboard.morePools', { count: poolInfo.size - 2 })}
+                  </Text>
+                )}
               </View>
-              <View
-                style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: spacing.xs }}
-              >
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Customize dashboard"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => setShowCustomizer(true)}
-                >
-                  <Text style={styles.settingsIcon}>✎</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Export data"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => exportAllData()}
-                >
-                  <Text style={styles.settingsIcon}>↓</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Switch theme"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => {
-                    const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
-                    const current = getThemeMode();
-                    const idx = modes.indexOf(current as (typeof modes)[number]);
-                    setThemeMode(modes[(idx + 1) % modes.length]);
-                  }}
-                >
-                  <Text style={styles.settingsIcon}>🎨</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Settings"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => navigation.navigate('Settings')}
-                >
-                  <Text style={styles.settingsIcon}>⚙</Text>
-                </Pressable>
-              </View>
-            </>
-          )}
-        </View>
-      )}
-
-      {visibleSections.earnings && miners.length > 0 && <EarningsCard miners={miners} />}
-
-      {visibleSections.ticker && miners.length > 0 && (
-        <View
-          style={{
-            paddingHorizontal: spacing.md,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: spacing.xs,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-            <View
-              style={{
-                width: spacing.xs,
-                height: spacing.xs,
-                borderRadius: radius.xs,
-                backgroundColor: theme.success,
-                opacity: 0.8,
-              }}
-            />
-            <Text
-              style={{
-                color: theme.textMuted,
-                fontSize: fontSize.sm,
-                fontWeight: fontWeight.semibold,
-              }}
-            >
-              BTC ${btcPrice.toLocaleString()}
-            </Text>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>·</Text>
-            <Text
-              style={{
-                color: theme.textMuted,
-                fontSize: fontSize.sm,
-                fontWeight: fontWeight.semibold,
-              }}
-            >
-              {formatHashrateWithUnit(networkHashrate, 'H/s')}/s
-            </Text>
-          </View>
-          <TimeAgo
-            timestamp={lastRefreshTime}
-            style={{ color: theme.textDim, fontSize: fontSize.xs }}
-          />
-        </View>
-      )}
-
-      {visibleSections.map && (
-        <View
-          style={{
-            paddingHorizontal: spacing.md,
-            gap: spacing.sm,
-            marginTop: spacing.xxs,
-            alignItems: 'center',
-          }}
-        >
-          <Suspense fallback={null}>
-            <LazyWorldMap />
-          </Suspense>
-        </View>
-      )}
-
-      {visibleSections.pools && miners.length > 0 && <PoolUptime miners={miners} />}
-
-      {visibleSections.legend && miners.length > 0 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            gap: spacing.md,
-            paddingHorizontal: spacing.md,
-            marginTop: spacing.xxs,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
-            <View
-              style={{
-                width: spacing.xs,
-                height: spacing.xs,
-                borderRadius: radius.xs,
-                backgroundColor: theme.primaryLight,
-                opacity: 0.85,
-              }}
-            />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-              {t('common.online')}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
-            <View
-              style={{
-                width: spacing.xs,
-                height: spacing.xs,
-                borderRadius: radius.xs,
-                backgroundColor: theme.textMuted,
-                opacity: 0.85,
-              }}
-            />
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-              {t('common.offline')}
-            </Text>
-          </View>
-          {miners.filter((m) => m.status?.pool).length > 0 && (
+            )}
+          </>
+        );
+      case 'legend':
+        if (miners.length === 0) return null;
+        return (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: spacing.md,
+              paddingHorizontal: spacing.md,
+              marginTop: spacing.xxs,
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
               <View
                 style={{
                   width: spacing.xs,
                   height: spacing.xs,
                   borderRadius: radius.xs,
-                  backgroundColor: theme.info,
+                  backgroundColor: theme.primaryLight,
+                  opacity: 0.85,
                 }}
               />
               <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-                {t('dashboard.pool')}
+                {t('common.online')}
               </Text>
             </View>
-          )}
-        </View>
-      )}
-
-      {visibleSections.pools && miners.length > 0 && poolInfo.size > 0 && (
-        <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}>
-          {Array.from(poolInfo.entries()).map(([pool, info]) => {
-            const isExpanded = expandedPool === pool;
-            const totalShares = info.accepted + info.rejected;
-            const rejectRate =
-              totalShares > 0 ? ((info.rejected / totalShares) * 100).toFixed(1) : '0.0';
-            const poolMiners = miners.filter((m) => m.status?.pool === pool);
-            return (
-              <View key={pool}>
-                <Pressable
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
+              <View
+                style={{
+                  width: spacing.xs,
+                  height: spacing.xs,
+                  borderRadius: radius.xs,
+                  backgroundColor: theme.textMuted,
+                  opacity: 0.85,
+                }}
+              />
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                {t('common.offline')}
+              </Text>
+            </View>
+            {miners.filter((m) => m.status?.pool).length > 0 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}>
+                <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    backgroundColor: theme.surface,
-                    borderRadius: radius.md,
-                    paddingHorizontal: spacing.sm,
-                    paddingVertical: spacing.xs,
-                    borderWidth: 1,
-                    borderColor: theme.border,
+                    width: spacing.xs,
+                    height: spacing.xs,
+                    borderRadius: radius.xs,
+                    backgroundColor: theme.info,
                   }}
-                  onPress={() => setExpandedPool(isExpanded ? null : pool)}
+                />
+                <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                  {t('dashboard.pool')}
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+      case 'metrics':
+        return (
+          <View style={{ paddingHorizontal: spacing.md, gap: spacing.sm, marginTop: spacing.xxs }}>
+            <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center' }}>
+              {TIME_RANGE_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt.key}
                   accessibilityRole="button"
-                  accessibilityLabel={`${pool} pool details`}
+                  accessibilityLabel={`Time range: ${opt.label}`}
+                  onPress={() => setTimeRange(opt.key)}
+                  style={[
+                    styles.timeRangeChip,
+                    timeRange === opt.key && {
+                      backgroundColor: theme.primary,
+                      borderColor: theme.primary,
+                    },
+                  ]}
                 >
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        color: theme.text,
-                        fontSize: fontSize.base,
-                        fontWeight: fontWeight.bold,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
-                    </Text>
-                    <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-                      {t('dashboard.minersCount', { count: info.miners })} · {info.responseTime}ms ·{' '}
-                      {t('dashboard.rejectedRate', { rate: rejectRate })}
-                    </Text>
-                  </View>
-                  <View style={{ alignItems: 'flex-end', marginRight: 4 }}>
-                    <Text
-                      style={{
-                        color: theme.success,
-                        fontSize: fontSize.base,
-                        fontWeight: fontWeight.bold,
-                      }}
-                    >
-                      +{info.accepted}
-                    </Text>
-                    {info.rejected > 0 && (
-                      <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
-                        -{info.rejected}
-                      </Text>
-                    )}
-                  </View>
-                  <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginLeft: 6 }}>
-                    {isExpanded ? '▲' : '▼'}
+                  <Text
+                    style={[styles.timeRangeChipText, timeRange === opt.key && { color: buttonText }]}
+                  >
+                    {opt.label}
                   </Text>
                 </Pressable>
-                {isExpanded && (
-                  <View
-                    style={{
-                      backgroundColor: theme.surfaceLight,
-                      borderRadius: 10,
-                      marginTop: spacing.xxs,
-                      padding: spacing.sm,
-                      borderWidth: 1,
-                      borderColor: theme.border,
-                    }}
-                  >
-                    {poolMiners.map((pm) => (
-                      <View
-                        key={pm.id}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          paddingVertical: spacing.xxs,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: theme.text,
-                            fontSize: fontSize.base,
-                            fontWeight: fontWeight.semibold,
-                            flex: 1,
-                          }}
-                          numberOfLines={1}
-                        >
-                          {pm.name}
-                        </Text>
-                        <Text
-                          style={{
-                            color: theme.success,
-                            fontSize: fontSize.xs,
-                            marginHorizontal: spacing.xs,
-                          }}
-                        >
-                          +{pm.status?.sharesAccepted ?? 0}
-                        </Text>
-                        <Text style={{ color: theme.danger, fontSize: fontSize.xs }}>
-                          -{pm.status?.sharesRejected ?? 0}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
+              ))}
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.hashrate'))}
+                  value={formatTotal(totalHashrate)}
+                  unit="H/s"
+                  accent="info"
+                  trend={metrics.hashrateTrend}
+                  chart={metrics.recentHashrates.length > 0 ? 'sparkline' : undefined}
+                  chartData={metrics.recentHashrates}
+                  size="lg"
+                  onPress={() =>
+                    setDrillDown({ metricType: 'hashrate', title: t('dashboard.hashrate') })
+                  }
+                />
               </View>
-            );
-          })}
-          {poolInfo.size > 2 && expandedPool === null && (
-            <Text
-              style={{
-                color: theme.textMuted,
-                fontSize: fontSize.xs,
-                textAlign: 'center',
-                paddingVertical: spacing.xxs,
-              }}
-            >
-              {t('dashboard.morePools', { count: poolInfo.size - 2 })}
-            </Text>
-          )}
-        </View>
-      )}
-
-      {visibleSections.metrics && (
-        <View style={{ paddingHorizontal: spacing.md, gap: spacing.sm, marginTop: spacing.xxs }}>
-          <View style={{ flexDirection: 'row', gap: spacing.xs, justifyContent: 'center' }}>
-            {TIME_RANGE_OPTIONS.map((opt) => (
-              <Pressable
-                key={opt.key}
-                accessibilityRole="button"
-                accessibilityLabel={`Time range: ${opt.label}`}
-                onPress={() => setTimeRange(opt.key)}
-                style={[
-                  styles.timeRangeChip,
-                  timeRange === opt.key && {
-                    backgroundColor: theme.primary,
-                    borderColor: theme.primary,
-                  },
-                ]}
-              >
-                <Text
-                  style={[styles.timeRangeChipText, timeRange === opt.key && { color: buttonText }]}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.hashrate'))}
-                value={formatTotal(totalHashrate)}
-                unit="H/s"
-                accent="info"
-                trend={metrics.hashrateTrend}
-                chart={metrics.recentHashrates.length > 0 ? 'sparkline' : undefined}
-                chartData={metrics.recentHashrates}
-                size="lg"
-                onPress={() =>
-                  setDrillDown({ metricType: 'hashrate', title: t('dashboard.hashrate') })
-                }
-              />
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.efficiency'))}
+                  value={metrics.efficiencyPct > 0 ? metrics.efficiencyPct.toFixed(1) : '—'}
+                  unit="%"
+                  accent={metrics.efficiencyPct > 50 ? 'success' : 'warning'}
+                  chart="donut"
+                  size="lg"
+                />
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.efficiency'))}
-                value={metrics.efficiencyPct > 0 ? metrics.efficiencyPct.toFixed(1) : '—'}
-                unit="%"
-                accent={metrics.efficiencyPct > 50 ? 'success' : 'warning'}
-                chart="donut"
-                size="lg"
-              />
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.power'))}
+                  value={`${totalPower.toFixed(1)}`}
+                  unit="W"
+                  accent="warning"
+                  trend={metrics.powerTrend}
+                  chart={metrics.recentPower.length > 0 ? 'bars' : undefined}
+                  chartData={metrics.recentPower}
+                  size="lg"
+                  onPress={() => setDrillDown({ metricType: 'power', title: t('dashboard.power') })}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.temp'))}
+                  value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
+                  accent={avgTemp > 70 ? 'danger' : 'success'}
+                  chart="gauge"
+                  size="lg"
+                  onPress={() => setDrillDown({ metricType: 'temp', title: t('dashboard.temp') })}
+                />
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.uptime'))}
+                  value={
+                    metrics.uptimeAvg > 0
+                      ? `${Math.round((metrics.uptimeAvg / 86400) * 100) / 100}d`
+                      : '—'
+                  }
+                  accent="primary"
+                  chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
+                  chartData={uptimeChartData}
+                  size="lg"
+                  onPress={() => setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <MetricTile
+                  title={String(t('dashboard.workers'))}
+                  value={String(filteredMiners.length)}
+                  unit={t('dashboard.active')}
+                  accent="info"
+                  trend={metrics.workerTrend}
+                  size="lg"
+                />
+              </View>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.power'))}
-                value={`${totalPower.toFixed(1)}`}
-                unit="W"
-                accent="warning"
-                trend={metrics.powerTrend}
-                chart={metrics.recentPower.length > 0 ? 'bars' : undefined}
-                chartData={metrics.recentPower}
-                size="lg"
-                onPress={() => setDrillDown({ metricType: 'power', title: t('dashboard.power') })}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.temp'))}
-                value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
-                accent={avgTemp > 70 ? 'danger' : 'success'}
-                chart="gauge"
-                size="lg"
-                onPress={() => setDrillDown({ metricType: 'temp', title: t('dashboard.temp') })}
-              />
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.uptime'))}
-                value={
-                  metrics.uptimeAvg > 0
-                    ? `${Math.round((metrics.uptimeAvg / 86400) * 100) / 100}d`
-                    : '—'
-                }
-                accent="primary"
-                chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
-                chartData={uptimeChartData}
-                size="lg"
-                onPress={() => setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <MetricTile
-                title={String(t('dashboard.workers'))}
-                value={String(filteredMiners.length)}
-                unit={t('dashboard.active')}
-                accent="info"
-                trend={metrics.workerTrend}
-                size="lg"
-              />
-            </View>
-          </View>
-        </View>
-      )}
-
-      {visibleSections.profitability && miners.length > 0 && (
-        <ProfitabilityCard miners={filteredMiners} powerCost={powerCost} />
-      )}
-
-      {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
-        <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
-          <Text
-            style={{ color: theme.warning, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
-          >
-            {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
-            {t('dashboard.staleData') || 'stale'}
-          </Text>
-        </View>
-      )}
-
-      {!kioskMode &&
-        visibleSections.filters &&
-        (wallets.length > 0 || groups.length > 0 || locations.length > 0 || allTags.length > 0) && (
+        );
+      case 'profitability':
+        return miners.length > 0 ? (
+          <ProfitabilityCard miners={filteredMiners} powerCost={powerCost} />
+        ) : null;
+      case 'filters':
+        if (kioskMode || miners.length === 0) return null;
+        if (wallets.length === 0 && groups.length === 0 && locations.length === 0 && allTags.length === 0) return null;
+        return (
           <View
             style={{
               flexDirection: 'row',
@@ -1678,107 +1568,236 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               </Pressable>
             ))}
           </View>
-        )}
-
-      {!kioskMode && visibleSections.sort && miners.length > 0 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.xs,
-            paddingHorizontal: spacing.md,
-            marginBottom: 4,
-          }}
-        >
-          <Text
-            style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
-          >
-            {t('dashboard.sortBy')}
-          </Text>
-          {(['name', 'hashrate', 'temp'] as const).map((s) => (
-            <Pressable
-              key={s}
-              accessibilityRole="button"
-              accessibilityLabel={`Sort by ${s}`}
-              onPress={() => setSortBy(s)}
+        );
+      case 'sort':
+        if (kioskMode || miners.length === 0) return null;
+        return (
+          <>
+            <View
               style={{
-                paddingHorizontal: spacing.xs,
-                paddingVertical: spacing.xxs,
-                borderRadius: radius.sm,
-                backgroundColor: sortBy === s ? theme.primaryLight : theme.surface,
-                borderWidth: 1,
-                borderColor: sortBy === s ? theme.primaryLight : theme.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.xs,
+                paddingHorizontal: spacing.md,
+                marginBottom: 4,
               }}
             >
               <Text
-                style={{
-                  fontSize: fontSize.xs,
-                  fontWeight: fontWeight.bold,
-                  color: sortBy === s ? '#FFF' : theme.textMuted,
+                style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+              >
+                {t('dashboard.sortBy')}
+              </Text>
+              {(['name', 'hashrate', 'temp'] as const).map((s) => (
+                <Pressable
+                  key={s}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Sort by ${s}`}
+                  onPress={() => setSortBy(s)}
+                  style={{
+                    paddingHorizontal: spacing.xs,
+                    paddingVertical: spacing.xxs,
+                    borderRadius: radius.sm,
+                    backgroundColor: sortBy === s ? theme.primaryLight : theme.surface,
+                    borderWidth: 1,
+                    borderColor: sortBy === s ? theme.primaryLight : theme.border,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: fontSize.xs,
+                      fontWeight: fontWeight.bold,
+                      color: sortBy === s ? '#FFF' : theme.textMuted,
+                    }}
+                  >
+                    {s === 'name'
+                      ? t('dashboard.sortByName')
+                      : s === 'hashrate'
+                        ? t('dashboard.sortByHashrate')
+                        : t('dashboard.sortByTemp')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.xs,
+                paddingHorizontal: spacing.md,
+                marginBottom: 4,
+              }}
+            >
+              <Text
+                style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+              >
+                {t('dashboard.groupBy')}
+              </Text>
+              {([null, 'location', 'tag'] as const).map((g) => (
+                <Pressable
+                  key={g ?? 'off'}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    g === null
+                      ? t('dashboard.groupOff')
+                      : g === 'location'
+                        ? t('dashboard.groupByLocation')
+                        : t('dashboard.groupByTag')
+                  }
+                  onPress={() => setAutoGroupBy(g)}
+                  style={{
+                    paddingHorizontal: spacing.xs,
+                    paddingVertical: spacing.xxs,
+                    borderRadius: radius.sm,
+                    backgroundColor: autoGroupBy === g ? theme.accent : theme.surface,
+                    borderWidth: 1,
+                    borderColor: autoGroupBy === g ? theme.accent : theme.border,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: fontSize.xs,
+                      fontWeight: fontWeight.bold,
+                      color: autoGroupBy === g ? '#FFF' : theme.textMuted,
+                    }}
+                  >
+                    {g === null
+                      ? t('dashboard.groupOff')
+                      : g === 'location'
+                        ? t('dashboard.groupByLocation')
+                        : t('dashboard.groupByTag')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Outer {...outerProps}>
+      {kioskMode ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Exit kiosk mode"
+          style={{
+            position: 'absolute',
+            top: 50,
+            right: 12,
+            zIndex: 100,
+            width: 24,
+            height: 24,
+            borderRadius: radius.md,
+            backgroundColor: theme.textMuted + '40',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={() => {
+            Alert.alert(t('dashboard.exitKioskTitle'), t('dashboard.exitKioskBody'), [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('dashboard.exitKioskExit'), onPress: () => handleToggleKiosk(false) },
+            ]);
+          }}
+        >
+          <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
+            ✕
+          </Text>
+        </Pressable>
+      ) : (
+        <View style={styles.headerBar}>
+          {selectionMode ? (
+            <>
+              <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cancel selection"
+                style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
+                onPress={() => {
+                  setSelectionMode(false);
+                  setSelectedIds(new Set());
                 }}
               >
-                {s === 'name'
-                  ? t('dashboard.sortByName')
-                  : s === 'hashrate'
-                    ? t('dashboard.sortByHashrate')
-                    : t('dashboard.sortByTemp')}
-              </Text>
-            </Pressable>
-          ))}
+                <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Compare miners"
+                style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
+                onPress={() => setSelectionMode(true)}
+              >
+                <Text style={styles.settingsIcon}>⇄</Text>
+              </Pressable>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+                <Text style={styles.headerSub}>
+                  <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
+                </Text>
+              </View>
+              <View
+                style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: spacing.xs }}
+              >
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Customize dashboard"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => setShowCustomizer(true)}
+                >
+                  <Text style={styles.settingsIcon}>✎</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Export data"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => exportAllData()}
+                >
+                  <Text style={styles.settingsIcon}>↓</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Switch theme"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => {
+                    const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
+                    const current = getThemeMode();
+                    const idx = modes.indexOf(current as (typeof modes)[number]);
+                    setThemeMode(modes[(idx + 1) % modes.length]);
+                  }}
+                >
+                  <Text style={styles.settingsIcon}>🎨</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Settings"
+                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  onPress={() => navigation.navigate('Settings')}
+                >
+                  <Text style={styles.settingsIcon}>⚙</Text>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
       )}
 
-      {!kioskMode && visibleSections.sort && miners.length > 0 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.xs,
-            paddingHorizontal: spacing.md,
-            marginBottom: 4,
-          }}
-        >
+      {sectionOrder.map((key) =>
+        visibleSections[key] ? (
+          <Fragment key={key}>{renderSection(key)}</Fragment>
+        ) : null,
+      )}
+
+      {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
+        <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
           <Text
-            style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+            style={{ color: theme.warning, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
           >
-            {t('dashboard.groupBy')}
+            {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
+            {t('dashboard.staleData') || 'stale'}
           </Text>
-          {([null, 'location', 'tag'] as const).map((g) => (
-            <Pressable
-              key={g ?? 'off'}
-              accessibilityRole="button"
-              accessibilityLabel={
-                g === null
-                  ? t('dashboard.groupOff')
-                  : g === 'location'
-                    ? t('dashboard.groupByLocation')
-                    : t('dashboard.groupByTag')
-              }
-              onPress={() => setAutoGroupBy(g)}
-              style={{
-                paddingHorizontal: spacing.xs,
-                paddingVertical: spacing.xxs,
-                borderRadius: radius.sm,
-                backgroundColor: autoGroupBy === g ? theme.accent : theme.surface,
-                borderWidth: 1,
-                borderColor: autoGroupBy === g ? theme.accent : theme.border,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: fontSize.xs,
-                  fontWeight: fontWeight.bold,
-                  color: autoGroupBy === g ? '#FFF' : theme.textMuted,
-                }}
-              >
-                {g === null
-                  ? t('dashboard.groupOff')
-                  : g === 'location'
-                    ? t('dashboard.groupByLocation')
-                    : t('dashboard.groupByTag')}
-              </Text>
-            </Pressable>
-          ))}
         </View>
       )}
 
