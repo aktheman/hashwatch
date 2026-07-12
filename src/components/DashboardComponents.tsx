@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Svg, { Polyline, Polygon, Circle, Defs, Stop, LinearGradient } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { Miner } from '../types';
@@ -50,6 +51,7 @@ export const MetricTile = React.memo(function MetricTile({
   size = 'md',
   onPress,
 }: MetricTileProps) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const accentColor = useMemo(() => {
     switch (accent) {
@@ -145,7 +147,7 @@ export const MetricTile = React.memo(function MetricTile({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`View ${title} details`}
+      accessibilityLabel={t('dashboardExtra.viewDetails', { title })}
     >
       {TileContent}
     </Pressable>
@@ -327,6 +329,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
   miners: Miner[];
   powerCost?: number;
 }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const btcPrice = getBTCPrice();
   const priceHistory = getBTCPriceHistory();
@@ -375,7 +378,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
       {/* Header row */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text style={{ color: theme.text, fontSize: fontSize.lg, fontWeight: fontWeight.bold }}>
-          ≡ Profitability
+          {t('dashboardExtra.profitabilityTitle')}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
           {priceHistory.length >= 4 && (
@@ -402,7 +405,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           <Text
             style={{ color: theme.textDim, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
           >
-            BTC
+            {t('dashboardExtra.btcLabel')}
           </Text>
           <Text
             style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.extrabold }}
@@ -437,7 +440,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         <Text
           style={{ color: theme.textDim, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
         >
-          Network Hashrate
+          {t('dashboardExtra.networkHashrate')}
         </Text>
         <Text style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}>
           {formatHashrateValue(netHash)}
@@ -469,7 +472,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           <Text
             style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}
           >
-            {formatBTC(m.btcPerDay)}/day
+            {formatBTC(m.btcPerDay)}{t('dashboardExtra.perDay')}
           </Text>
           {btcPrice > 0 && (
             <Text style={{ color: theme.textDim, fontSize: fontSize.sm, marginLeft: 6 }}>
@@ -489,7 +492,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
         <Text
           style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.extrabold }}
         >
-          Total
+          {t('dashboardExtra.total')}
         </Text>
         <Text
           style={{
@@ -498,7 +501,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
             fontWeight: fontWeight.extrabold,
           }}
         >
-          {formatBTC(totalBtcDay)}/day
+          {formatBTC(totalBtcDay)}{t('dashboardExtra.perDay')}
         </Text>
       </View>
       <View style={{ flexDirection: 'row', gap: spacing.xs }}>
@@ -506,7 +509,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           <Text
             style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
           >
-            Week
+            {t('dashboardExtra.week')}
           </Text>
           <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
             {formatBTC(totalBtcDay * 7)}
@@ -516,7 +519,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           <Text
             style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
           >
-            Month
+            {t('dashboardExtra.month')}
           </Text>
           <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
             {formatBTC(totalBtcDay * 30)}
@@ -531,7 +534,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
                 fontWeight: fontWeight.semibold,
               }}
             >
-              USD/day
+              {t('dashboardExtra.usdPerDay')}
             </Text>
             <Text
               style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
@@ -552,7 +555,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
             borderTopColor: theme.border,
           }}
         >
-          <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>Net/day (after power)</Text>
+          <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>{t('dashboardExtra.netPerDay')}</Text>
           <Text
             style={{
               color:

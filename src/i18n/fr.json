@@ -359,7 +359,25 @@
     "on": "On",
     "off": "Off",
     "applyAll": "Appliquer les règles",
-    "avgTemp": "{{temp}}°C moy"
+    "avgTemp": "{{temp}}°C moy",
+    "parentGroup": "Groupe Parent",
+    "noParent": "Aucun (niveau supérieur)",
+    "color": "Couleur",
+    "nestedGroups": "Groupes Imbriqués",
+    "subgroups": "{{count}} sous-groupes",
+    "groupAlerts": "Alertes de Groupe",
+    "noGroupAlerts": "Aucune alerte de groupe configurée. Ajoutez des alertes pour surveiller la santé du groupe.",
+    "addGroupAlert": "+ Ajouter une Alerte",
+    "alertType": "Type d'Alerte",
+    "alertThreshold": "Seuil",
+    "alertEnabled": "Activé",
+    "alertDisabled": "Désactivé",
+    "alertHashrateDrop": "Baisse du Hashrate (%)",
+    "alertTempHigh": "Température Max (°C)",
+    "alertOfflineCount": "Miners Hors Ligne",
+    "alertEfficiencyDrop": "Seuil d'Efficacité",
+    "alertTriggered": "Alerte Déclenchée",
+    "alertTriggeredBody": "Groupe \"{{group}}\" a déclenché l'alerte : {{type}}"
   },
   "subscription": {
     "title": "HashWatch Pro",
@@ -413,7 +431,12 @@
     "slide3Title": "Alertes instantanées",
     "slide3Body": "Recevez des notifications quand un mineur est hors ligne, surchauffe ou a une baisse de hashrate.",
     "slide4Title": "Prêt à miner",
-    "slide4Body": "Surveillez tous vos mineurs gratuitement. Passez à Pro pour des fonctionnalités illimitées."
+    "slide4Body": "Surveillez tous vos mineurs gratuitement. Passez à Pro pour des fonctionnalités illimitées.",
+    "slide5Title": "Essayez",
+    "slide5Body": "Testez la fonction de scan réseau pour découvrir les mineurs sur votre réseau local.",
+    "tutorialScanButton": "Scanner le Réseau",
+    "tutorialScanning": "Scan en cours...",
+    "tutorialFound": "Mineurs trouvés ! Appuyez sur Suivant pour continuer."
   },
   "themes": {
     "dark": "Sombre",
@@ -621,5 +644,33 @@
     "csvErrors": "Erreurs CSV",
     "noValidRows": "Aucune ligne valide",
     "checkCsvColumns": "Vérifiez que votre CSV contient les colonnes \"name\" et \"ip\"."
+  },
+  "snapshot": {
+    "hashrate": "Taux de hachage",
+    "temp": "Temp",
+    "uptime": "Disponibilité",
+    "power": "Puissance",
+    "efficiency": "Efficacité",
+    "shares": "Parts",
+    "pool": "Pool",
+    "na": "N/D",
+    "generatedBy": "Généré par HashWatch"
+  },
+  "dashboardExtra": {
+    "profitabilityTitle": "≡ Rentabilité",
+    "btcLabel": "BTC",
+    "networkHashrate": "Taux de hachage réseau",
+    "perDay": "/jour",
+    "total": "Total",
+    "week": "Semaine",
+    "month": "Mois",
+    "usdPerDay": "USD/jour",
+    "netPerDay": "Net/jour (après électricité)",
+    "viewDetails": "Voir les détails de {{title}}"
+  },
+  "powerUsage": {
+    "total": "Total",
+    "peak": "Pic",
+    "avg": "Moy"
   }
 }
