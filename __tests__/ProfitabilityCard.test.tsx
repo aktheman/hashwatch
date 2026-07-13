@@ -47,8 +47,8 @@ it('renders title and total', async () => {
     },
   ] as any[];
   const tree = await render(<ProfitabilityCard miners={miners} />);
-  expect(tree.getByText('≡ Profitability')).toBeTruthy();
-  expect(tree.getByText('Total')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.profitabilityTitle')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.total')).toBeTruthy();
 });
 
 it('renders per-miner breakdown', async () => {
@@ -78,8 +78,8 @@ it('shows week and month projections', async () => {
     },
   ] as any[];
   const tree = await render(<ProfitabilityCard miners={miners} />);
-  expect(tree.getByText('Week')).toBeTruthy();
-  expect(tree.getByText('Month')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.week')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.month')).toBeTruthy();
 });
 
 it('shows USD/day when BTC price is positive', async () => {
@@ -95,7 +95,7 @@ it('shows USD/day when BTC price is positive', async () => {
     },
   ] as any[];
   const tree = await render(<ProfitabilityCard miners={miners} />);
-  expect(tree.getByText('USD/day')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.usdPerDay')).toBeTruthy();
 });
 
 it('shows net/day after power when powerCost is provided', async () => {
@@ -111,7 +111,7 @@ it('shows net/day after power when powerCost is provided', async () => {
     },
   ] as any[];
   const tree = await render(<ProfitabilityCard miners={miners} powerCost={0.12} />);
-  expect(tree.getByText('Net/day (after power)')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.netPerDay')).toBeTruthy();
 });
 
 it('hides net/day when powerCost is 0', async () => {
@@ -126,7 +126,7 @@ it('hides net/day when powerCost is 0', async () => {
     },
   ] as any[];
   const tree = await render(<ProfitabilityCard miners={miners} powerCost={0} />);
-  expect(tree.queryByText('Net/day (after power)')).toBeNull();
+  expect(tree.queryByText('dashboardExtra.netPerDay')).toBeNull();
 });
 
 it('handles multiple miners', async () => {
@@ -169,5 +169,5 @@ it('uses miner id as fallback when name is missing', async () => {
 
 it('renders with empty miners list', async () => {
   const tree = await render(<ProfitabilityCard miners={[]} />);
-  expect(tree.getByText('≡ Profitability')).toBeTruthy();
+  expect(tree.getByText('dashboardExtra.profitabilityTitle')).toBeTruthy();
 });

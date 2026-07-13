@@ -30,15 +30,17 @@ jest.mock('../src/store/miners', () => ({
     selector({ miners: mockMiners }),
 }));
 
-jest.mock('react-native-svg', () => ({
-  __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) =>
-    React.createElement('Svg', null, children),
-  Path: (props: Record<string, unknown>) => React.createElement('Path', props),
-  Circle: (props: Record<string, unknown>) => React.createElement('Circle', props),
-  G: ({ children }: { children: React.ReactNode }) => React.createElement('G', null, children),
-  Line: (props: Record<string, unknown>) => React.createElement('Line', props),
-}));
+jest.mock('react-native-svg', () => {
+  const R = require('react');
+  return {
+    __esModule: true,
+    default: ({ children }: { children: any }) => R.createElement('Svg', null, children),
+    Path: (props: Record<string, unknown>) => R.createElement('Path', props),
+    Circle: (props: Record<string, unknown>) => R.createElement('Circle', props),
+    G: ({ children }: { children: any }) => R.createElement('G', null, children),
+    Line: (props: Record<string, unknown>) => R.createElement('Line', props),
+  };
+});
 
 interface MinerStatusOverride {
   hashRate?: number;

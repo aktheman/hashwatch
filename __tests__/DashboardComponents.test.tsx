@@ -128,8 +128,8 @@ describe('ProfitabilityCard', () => {
       },
     ] as any[];
     const tree = await render(<ProfitabilityCard miners={miners} />);
-    expect(tree.getByText('≡ Profitability')).toBeTruthy();
-    expect(tree.getByText('BTC')).toBeTruthy();
+    expect(tree.getByText('dashboardExtra.profitabilityTitle')).toBeTruthy();
+    expect(tree.getByText('dashboardExtra.btcLabel')).toBeTruthy();
   });
 
   it('shows trend arrow up when price increased', async () => {
@@ -146,6 +146,6 @@ describe('ProfitabilityCard', () => {
 
   it('shows Total /day for empty miners', async () => {
     const tree = await render(<ProfitabilityCard miners={[]} />);
-    expect(tree.getByText('Total')).toBeTruthy();
+    expect(tree.getByText('dashboardExtra.total')).toBeTruthy();
   });
 });
