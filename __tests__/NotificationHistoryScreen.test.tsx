@@ -68,8 +68,8 @@ it('renders notification entries grouped by date', async () => {
   );
   expect(tree.getByText('Miner Offline')).toBeTruthy();
   expect(tree.getByText('High Temperature')).toBeTruthy();
-  expect(tree.getByText('Today')).toBeTruthy();
-  expect(tree.getByText('Yesterday')).toBeTruthy();
+  expect(tree.getByText('notificationHistory.today')).toBeTruthy();
+  expect(tree.getByText('notificationHistory.yesterday')).toBeTruthy();
 });
 
 it('renders multiple items in the same date group', async () => {

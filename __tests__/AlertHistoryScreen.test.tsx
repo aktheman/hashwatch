@@ -177,8 +177,8 @@ it('groups events by date', async () => {
     ],
   });
   await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('Today')).toBeTruthy();
-  expect(screen.getByText('Yesterday')).toBeTruthy();
+  expect(screen.getByText('alertHistory.today')).toBeTruthy();
+  expect(screen.getByText('alertHistory.yesterday')).toBeTruthy();
 });
 
 it('renders alert icon based on type', async () => {

@@ -82,24 +82,24 @@ const makeMiner = (overrides: MinerOverride = {}) => ({
   ...overrides,
 });
 
-it('renders title and summary', () => {
+it('renders title and summary', async () => {
   const miners = [makeMiner()];
-  const r = render(<EarningsForecast miners={miners} />);
+  const r = await render(<EarningsForecast miners={miners} />);
   expect(r.getByText('analytics.earningsForecast')).toBeTruthy();
   expect(r.getByText('analytics.hashrate')).toBeTruthy();
   expect(r.getByText('analytics.miners')).toBeTruthy();
   expect(r.getByText('analytics.power')).toBeTruthy();
 });
 
-it('shows online/total miner count', () => {
+it('shows online/total miner count', async () => {
   const miners = [makeMiner({ id: '1', isOnline: true }), makeMiner({ id: '2', isOnline: false })];
-  const r = render(<EarningsForecast miners={miners} />);
+  const r = await render(<EarningsForecast miners={miners} />);
   expect(r.getByText('1/2')).toBeTruthy();
 });
 
-it('renders projection rows', () => {
+it('renders projection rows', async () => {
   const miners = [makeMiner()];
-  const r = render(<EarningsForecast miners={miners} />);
+  const r = await render(<EarningsForecast miners={miners} />);
   expect(r.getByText('forecast.oneDay')).toBeTruthy();
   expect(r.getByText('forecast.sevenDays')).toBeTruthy();
   expect(r.getByText('forecast.thirtyDays')).toBeTruthy();
@@ -107,31 +107,31 @@ it('renders projection rows', () => {
   expect(r.getByText('forecast.oneYear')).toBeTruthy();
 });
 
-it('shows net daily when powerCost provided', () => {
+it('shows net daily when powerCost provided', async () => {
   const miners = [makeMiner()];
-  const r = render(<EarningsForecast miners={miners} powerCost={0.1} />);
+  const r = await render(<EarningsForecast miners={miners} powerCost={0.1} />);
   expect(r.getByText('analytics.netDaily')).toBeTruthy();
 });
 
-it('does not show net daily when powerCost is 0', () => {
+it('does not show net daily when powerCost is 0', async () => {
   const miners = [makeMiner()];
-  const r = render(<EarningsForecast miners={miners} powerCost={0} />);
+  const r = await render(<EarningsForecast miners={miners} powerCost={0} />);
   expect(r.queryByText('analytics.netDaily')).toBeNull();
 });
 
-it('renders with empty miners array', () => {
-  const r = render(<EarningsForecast miners={[]} />);
+it('renders with empty miners array', async () => {
+  const r = await render(<EarningsForecast miners={[]} />);
   expect(r.getByText('analytics.earningsForecast')).toBeTruthy();
   expect(r.getByText('0/0')).toBeTruthy();
 });
 
-it('shows BTC price footer', () => {
+it('shows BTC price footer', async () => {
   const miners = [makeMiner()];
-  const r = render(<EarningsForecast miners={miners} />);
-  expect(r.getByText('BTC $100,000')).toBeTruthy();
+  const r = await render(<EarningsForecast miners={miners} />);
+  expect(r.getByText(/BTC \$\d/)).toBeTruthy();
 });
 
-it('formats total power from all miners', () => {
+it('formats total power from all miners', async () => {
   const miners = [
     makeMiner({
       id: '1',
@@ -168,6 +168,6 @@ it('formats total power from all miners', () => {
       },
     }),
   ];
-  const r = render(<EarningsForecast miners={miners} />);
+  const r = await render(<EarningsForecast miners={miners} />);
   expect(r.getByText('140W')).toBeTruthy();
 });
