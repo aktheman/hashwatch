@@ -58,6 +58,21 @@ const NotificationHistoryScreen = lazy(() =>
     default: m.NotificationHistoryScreen,
   })),
 );
+const PoolAnalyticsScreen = lazy(() =>
+  import('../screens/PoolAnalyticsScreen').then((m) => ({
+    default: m.PoolAnalyticsScreen,
+  })),
+);
+const ExportReportScreen = lazy(() =>
+  import('../screens/ExportReportScreen').then((m) => ({
+    default: m.ExportReportScreen,
+  })),
+);
+const SharedGroupsScreen = lazy(() =>
+  import('../screens/SharedGroupsScreen').then((m) => ({
+    default: m.SharedGroupsScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -93,6 +108,9 @@ const WrappedImportData = withScreenBoundary(ImportDataScreen);
 const WrappedMinerComparison = withScreenBoundary(MinerComparisonScreen);
 const WrappedAlertHistory = withScreenBoundary(AlertHistoryScreen);
 const WrappedNotificationHistory = withScreenBoundary(NotificationHistoryScreen);
+const WrappedPoolAnalytics = withScreenBoundary(PoolAnalyticsScreen);
+const WrappedExportReport = withScreenBoundary(ExportReportScreen);
+const WrappedSharedGroups = withScreenBoundary(SharedGroupsScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -254,6 +272,21 @@ export function AppNavigator() {
           name="NotificationHistory"
           component={WrappedNotificationHistory}
           options={{ title: t('notificationHistory.title', 'Notification History') }}
+        />
+        <Stack.Screen
+          name="PoolAnalytics"
+          component={WrappedPoolAnalytics}
+          options={{ title: t('poolAnalytics.title', 'Pool Analytics') }}
+        />
+        <Stack.Screen
+          name="ExportReport"
+          component={WrappedExportReport}
+          options={{ title: t('exportReport.title', 'Export Report') }}
+        />
+        <Stack.Screen
+          name="SharedGroups"
+          component={WrappedSharedGroups}
+          options={{ title: t('groupSharing.title', 'Shared Groups') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

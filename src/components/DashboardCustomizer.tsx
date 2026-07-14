@@ -17,6 +17,22 @@ import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { getSetting, setSetting } from '../db/database';
 
+export interface DashboardSectionConfig {
+  id: string;
+  visible: boolean;
+  order: number;
+  size: 'compact' | 'normal' | 'expanded';
+  settings?: Record<string, unknown>;
+}
+
+export interface DashboardLayout {
+  sections: DashboardSectionConfig[];
+  columns: 1 | 2;
+  compactMode: boolean;
+}
+
+export const LAYOUT_KEY = 'dashboard_layout';
+
 export type SectionKey =
   | 'earnings'
   | 'ticker'
@@ -85,9 +101,62 @@ interface DashboardCustomizerProps {
   kioskMode: boolean;
   onToggleKiosk: (val: boolean) => void;
   sectionOrder: SectionKey[];
+  layout?: DashboardLayout;
+  onLayoutChange?: (layout: DashboardLayout) => void;
 }
 
 export const ALL_SECTIONS = Object.keys(SECTION_LABELS) as SectionKey[];
+
+const DEFAULT_SECTIONS: DashboardSectionConfig[] = ALL_SECTIONS.map((id, order) => ({
+  id,
+  visible: true,
+  order,
+  size: 'normal' as const,
+}));
+
+export function getDefaultLayout(): DashboardLayout {
+  return {
+    sections: DEFAULT_SECTIONS,
+    columns: 1,
+    compactMode: false,
+  };
+}
+
+export async function loadLayout(): Promise<DashboardLayout> {
+  try {
+    const raw = await getSetting(LAYOUT_KEY);
+    if (!raw) return getDefaultLayout();
+    const parsed = JSON.parse(raw);
+    const layout: DashboardLayout = {
+      columns: parsed.columns === 2 ? 2 : 1,
+      compactMode: !!parsed.compactMode,
+      sections: DEFAULT_SECTIONS.map((def) => {
+        const saved = (parsed.sections as DashboardSectionConfig[] | undefined)?.find(
+          (s: DashboardSectionConfig) => s.id === def.id,
+        );
+        return saved
+          ? {
+              ...def,
+              visible: saved.visible,
+              order: saved.order,
+              size: ['compact', 'normal', 'expanded'].includes(saved.size) ? saved.size : 'normal',
+              settings: saved.settings,
+            }
+          : def;
+      }),
+    };
+    layout.sections.sort((a, b) => a.order - b.order);
+    return layout;
+  } catch {
+    return getDefaultLayout();
+  }
+}
+
+export async function saveLayout(layout: DashboardLayout): Promise<void> {
+  try {
+    await setSetting(LAYOUT_KEY, JSON.stringify(layout));
+  } catch {}
+}
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
   const result = [...arr];
@@ -107,6 +176,8 @@ export function DashboardCustomizer({
   kioskMode,
   onToggleKiosk,
   sectionOrder: initialSectionOrder,
+  layout: initialLayout,
+  onLayoutChange,
 }: DashboardCustomizerProps) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -124,8 +195,36 @@ export function DashboardCustomizer({
   const dragAnimating = useRef(false);
   const itemHeights = useRef<number[]>([]);
   const ITEM_HEIGHT = 52;
+  const [dashboardColumns, setDashboardColumns] = useState<1 | 2>(initialLayout?.columns ?? 1);
+  const [compactMode, setCompactMode] = useState(initialLayout?.compactMode ?? false);
+  const [sectionSizes, setSectionSizes] = useState<
+    Record<string, 'compact' | 'normal' | 'expanded'>
+  >(() => {
+    const map: Record<string, 'compact' | 'normal' | 'expanded'> = {};
+    if (initialLayout?.sections) {
+      for (const s of initialLayout.sections) {
+        map[s.id] = s.size;
+      }
+    }
+    return map;
+  });
 
   const sectionListRef = useRef<ScrollView>(null);
+
+  const emitLayoutChange = (
+    cols: 1 | 2,
+    compact: boolean,
+    sizes: Record<string, 'compact' | 'normal' | 'expanded'>,
+  ) => {
+    if (!onLayoutChange) return;
+    const sections: DashboardSectionConfig[] = sectionOrder.map((id, order) => ({
+      id,
+      visible: visibleSections[id as SectionKey],
+      order,
+      size: sizes[id] ?? 'normal',
+    }));
+    onLayoutChange({ sections, columns: cols, compactMode: compact });
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -340,7 +439,7 @@ export function DashboardCustomizer({
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                paddingVertical: spacing.md,
+                paddingVertical: spacing.sm,
                 borderBottomWidth: 1,
                 borderBottomColor: theme.border,
               }}
@@ -353,7 +452,160 @@ export function DashboardCustomizer({
                 onValueChange={(val) => onToggleKiosk(val)}
                 trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
                 thumbColor={kioskMode ? theme.primary : theme.textMuted}
+                testID="kiosk-mode-switch"
               />
+            </View>
+
+            <View
+              style={{
+                paddingVertical: spacing.sm,
+                borderBottomWidth: 1,
+                borderBottomColor: theme.border,
+                gap: spacing.sm,
+              }}
+            >
+              <Text
+                style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
+              >
+                {t('dashboardCustomizer.columns', 'Layout')}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                {([1, 2] as const).map((col) => (
+                  <Pressable
+                    key={col}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      col === 1
+                        ? t('dashboardCustomizer.oneColumn', '1 Column')
+                        : t('dashboardCustomizer.twoColumn', '2 Columns')
+                    }
+                    onPress={() => {
+                      setDashboardColumns(col);
+                      emitLayoutChange(col, compactMode, sectionSizes);
+                    }}
+                    style={{
+                      flex: 1,
+                      paddingVertical: spacing.xs,
+                      borderRadius: radius.sm,
+                      borderWidth: 1,
+                      borderColor: dashboardColumns === col ? theme.primary : theme.border,
+                      backgroundColor:
+                        dashboardColumns === col ? theme.primary + '20' : theme.surfaceLight,
+                      alignItems: 'center',
+                    }}
+                    testID={`layout-columns-${col}`}
+                  >
+                    <Text
+                      style={{
+                        color: dashboardColumns === col ? theme.primary : theme.textMuted,
+                        fontSize: fontSize.sm,
+                        fontWeight: fontWeight.semibold,
+                      }}
+                    >
+                      {col === 1
+                        ? t('dashboardCustomizer.oneColumn', '1 Column')
+                        : t('dashboardCustomizer.twoColumn', '2 Columns')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: theme.text, fontSize: fontSize.base }}>
+                  {t('dashboardCustomizer.compactMode', 'Compact Mode')}
+                </Text>
+                <Switch
+                  value={compactMode}
+                  onValueChange={(val) => {
+                    setCompactMode(val);
+                    emitLayoutChange(dashboardColumns, val, sectionSizes);
+                  }}
+                  trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+                  thumbColor={compactMode ? theme.primary : theme.textMuted}
+                  testID="compact-mode-switch"
+                />
+              </View>
+              <View style={{ gap: spacing.xxs }}>
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  {t('dashboardCustomizer.widgetSize', 'Widget Size')}
+                </Text>
+                {sectionOrder.slice(0, 4).map((key) => {
+                  const label = SECTION_LABELS[key];
+                  const currentSize = sectionSizes[key] ?? 'normal';
+                  const sizes: Array<'compact' | 'normal' | 'expanded'> = [
+                    'compact',
+                    'normal',
+                    'expanded',
+                  ];
+                  return (
+                    <View
+                      key={key}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: spacing.xxs,
+                      }}
+                    >
+                      <Text
+                        style={{ color: theme.textDim, fontSize: fontSize.sm, flex: 1 }}
+                        numberOfLines={1}
+                      >
+                        {label}
+                      </Text>
+                      <View style={{ flexDirection: 'row', gap: 2 }}>
+                        {sizes.map((sz) => (
+                          <Pressable
+                            key={sz}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${label}: ${sz}`}
+                            onPress={() => {
+                              const next = { ...sectionSizes, [key]: sz };
+                              setSectionSizes(next);
+                              emitLayoutChange(dashboardColumns, compactMode, next);
+                            }}
+                            style={{
+                              paddingHorizontal: spacing.xs,
+                              paddingVertical: 2,
+                              borderRadius: radius.xs,
+                              borderWidth: 1,
+                              borderColor: currentSize === sz ? theme.primary : theme.border,
+                              backgroundColor:
+                                currentSize === sz ? theme.primary + '20' : 'transparent',
+                            }}
+                            testID={`section-size-${key}-${sz}`}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 10,
+                                color: currentSize === sz ? theme.primary : theme.textMuted,
+                                fontWeight:
+                                  currentSize === sz ? fontWeight.bold : fontWeight.regular,
+                              }}
+                            >
+                              {t(
+                                `dashboardCustomizer.${sz}` as const,
+                                sz.charAt(0).toUpperCase() + sz.slice(1),
+                              )}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
 
             <View style={{ marginTop: spacing.md, gap: spacing.xs }}>

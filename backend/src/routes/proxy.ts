@@ -171,3 +171,54 @@ proxyRouter.post('/restart', async (req: AuthRequest, res) => {
     res.status(502).json({ error: 'restart_failed', message: 'Could not reach miner' });
   }
 });
+
+proxyRouter.post('/firmware-check', async (req: AuthRequest, res) => {
+  try {
+    const GITHUB_API = 'https://api.github.com/repos/bitaxeorg/AXeOS/releases/latest';
+    const response = await axios.get(GITHUB_API, {
+      timeout: 10000,
+      headers: { Accept: 'application/vnd.github.v3+json' },
+    });
+    res.json(response.data);
+  } catch (e: unknown) {
+    captureException(e as unknown, { route: 'proxy.firmware-check' });
+    res
+      .status(502)
+      .json({ error: 'firmware_check_failed', message: 'Could not check firmware updates' });
+  }
+});
+
+proxyRouter.post('/flash-firmware', async (req: AuthRequest, res) => {
+  try {
+    const { minerIp, firmwareUrl } = req.body;
+    if (!minerIp || !firmwareUrl) {
+      return res.status(400).json({ error: 'minerIp and firmwareUrl are required' });
+    }
+    const minerUrl = `http://${minerIp}/api/system/ota`;
+    if (!isAllowedProxyUrl(minerUrl)) {
+      return res
+        .status(403)
+        .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
+    }
+    const response = await axios({
+      url: minerUrl,
+      method: 'POST',
+      data: JSON.stringify({ url: firmwareUrl }),
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 120000,
+      validateStatus: () => true,
+    });
+    res.json({ success: response.status < 400, data: response.data });
+  } catch (e: unknown) {
+    captureException(e as unknown, { route: 'proxy.flash-firmware' });
+    if (e && typeof e === 'object' && 'code' in e) {
+      const code = (e as { code?: string }).code;
+      if (code === 'ECONNREFUSED' || code === 'EHOSTUNREACH') {
+        return res
+          .status(502)
+          .json({ error: 'unreachable', message: 'Miner is offline (connection refused)' });
+      }
+    }
+    res.status(502).json({ error: 'flash_failed', message: 'Could not flash firmware' });
+  }
+});

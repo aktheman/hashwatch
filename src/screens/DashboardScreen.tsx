@@ -50,7 +50,14 @@ import {
   SectionKey,
   DEFAULT_VISIBLE,
   ALL_SECTIONS,
+  DashboardLayout,
+  loadLayout,
+  saveLayout,
 } from '../components/DashboardCustomizer';
+
+const LazyFirmwareUpdateBanner = lazy(() =>
+  import('../components/FirmwareUpdateBanner').then((m) => ({ default: m.FirmwareUpdateBanner })),
+);
 
 interface DashboardScreenProps {
   navigation: NavigationProp;
@@ -127,6 +134,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   });
   const [sectionOrder, setSectionOrder] = useState<SectionKey[]>(ALL_SECTIONS);
   const [powerCost, setPowerCost] = useState(0);
+  const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>({
+    sections: ALL_SECTIONS.map((id, order) => ({ id, visible: true, order, size: 'normal' })),
+    columns: 1,
+    compactMode: false,
+  });
 
   const groups = useMemo(() => {
     const gs = new Set(miners.map((m) => m.group).filter(Boolean) as string[]);
@@ -179,6 +191,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     });
     DB.getSetting('power_cost').then((v) => {
       setPowerCost(parseFloat(v || '0') || 0);
+    });
+    loadLayout().then((layout) => {
+      setDashboardLayout(layout);
     });
   }, []);
 
@@ -416,6 +431,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     DB.setSetting('kiosk_mode', String(val));
   }, []);
 
+  const handleLayoutChange = useCallback((layout: DashboardLayout) => {
+    setDashboardLayout(layout);
+    saveLayout(layout);
+  }, []);
+
   const handleToggleSection = useCallback((key: SectionKey) => {
     setVisibleSections((prev) => {
       const next = { ...prev, [key]: !prev[key] };
@@ -451,7 +471,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
+    | { type: 'header'; group: string; miners: Miner[] }
+    | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -633,7 +654,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
+      | { type: 'header'; group: string; miners: Miner[] }
+      | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1070,7 +1092,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <>
             <PoolUptime miners={miners} />
             {poolInfo.size > 0 && (
-              <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}>
+              <View
+                style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}
+              >
                 {Array.from(poolInfo.entries()).map(([pool, info]) => {
                   const isExpanded = expandedPool === pool;
                   const totalShares = info.accepted + info.rejected;
@@ -1107,7 +1131,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                             {pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
                           </Text>
                           <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
-                            {t('dashboard.minersCount', { count: info.miners })} · {info.responseTime}ms ·{' '}
+                            {t('dashboard.minersCount', { count: info.miners })} ·{' '}
+                            {info.responseTime}ms ·{' '}
                             {t('dashboard.rejectedRate', { rate: rejectRate })}
                           </Text>
                         </View>
@@ -1127,7 +1152,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                             </Text>
                           )}
                         </View>
-                        <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginLeft: 6 }}>
+                        <Text
+                          style={{ color: theme.textMuted, fontSize: fontSize.xs, marginLeft: 6 }}
+                        >
                           {isExpanded ? '▲' : '▼'}
                         </Text>
                       </Pressable>
@@ -1274,7 +1301,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   ]}
                 >
                   <Text
-                    style={[styles.timeRangeChipText, timeRange === opt.key && { color: buttonText }]}
+                    style={[
+                      styles.timeRangeChipText,
+                      timeRange === opt.key && { color: buttonText },
+                    ]}
                   >
                     {opt.label}
                   </Text>
@@ -1346,7 +1376,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
                   chartData={uptimeChartData}
                   size="lg"
-                  onPress={() => setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })}
+                  onPress={() =>
+                    setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })
+                  }
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -1368,7 +1400,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         ) : null;
       case 'filters':
         if (kioskMode || miners.length === 0) return null;
-        if (wallets.length === 0 && groups.length === 0 && locations.length === 0 && allTags.length === 0) return null;
+        if (
+          wallets.length === 0 &&
+          groups.length === 0 &&
+          locations.length === 0 &&
+          allTags.length === 0
+        )
+          return null;
         return (
           <View
             style={{
@@ -1583,7 +1621,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               }}
             >
               <Text
-                style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+                style={{
+                  color: theme.textDim,
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.semibold,
+                }}
               >
                 {t('dashboard.sortBy')}
               </Text>
@@ -1628,7 +1670,11 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               }}
             >
               <Text
-                style={{ color: theme.textDim, fontSize: fontSize.xs, fontWeight: fontWeight.semibold }}
+                style={{
+                  color: theme.textDim,
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.semibold,
+                }}
               >
                 {t('dashboard.groupBy')}
               </Text>
@@ -1785,9 +1831,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       {sectionOrder.map((key) =>
-        visibleSections[key] ? (
-          <Fragment key={key}>{renderSection(key)}</Fragment>
-        ) : null,
+        visibleSections[key] ? <Fragment key={key}>{renderSection(key)}</Fragment> : null,
       )}
 
       {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
@@ -1813,6 +1857,12 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       )}
 
       <ErrorBanner message={error} onDismiss={clearError} onRetry={loadMiners} />
+
+      {miners.length > 0 && (
+        <Suspense fallback={null}>
+          <LazyFirmwareUpdateBanner />
+        </Suspense>
+      )}
 
       {Object.keys(minerErrors).length > 0 && (
         <ErrorBanner
@@ -2157,6 +2207,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         kioskMode={kioskMode}
         onToggleKiosk={handleToggleKiosk}
         sectionOrder={sectionOrder}
+        layout={dashboardLayout}
+        onLayoutChange={handleLayoutChange}
       />
 
       <MinerDrillDownModal

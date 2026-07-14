@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
 import {
   View,
   Text,
@@ -46,6 +46,11 @@ import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { MarkdownText } from '../utils/markdown';
 import { MinerHealthScore } from '../components/MinerHealthScore';
+import { analyzeMinerHealth, HealthPrediction } from '../utils/healthPredictions';
+
+const LazyHealthPredictionCard = React.lazy(() =>
+  import('../components/HealthPredictionCard').then((m) => ({ default: m.HealthPredictionCard })),
+);
 import { TimeAgo } from '../components/TimeAgo';
 import { useTranslation } from 'react-i18next';
 
@@ -393,6 +398,15 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   }, [minerId]);
 
   const miner = miners.find((m) => m.id === minerId);
+
+  const healthPrediction = useMemo<HealthPrediction | null>(() => {
+    if (miner && snapshots.length > 0) {
+      return analyzeMinerHealth(miner, snapshots);
+    } else if (miner) {
+      return analyzeMinerHealth(miner, []);
+    }
+    return null;
+  }, [miner, snapshots]);
 
   useEffect(() => {
     let cancelled = false;
@@ -999,6 +1013,12 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
         <MinerHealthScore miner={miner} />
 
+        {healthPrediction && (
+          <Suspense fallback={null}>
+            <LazyHealthPredictionCard prediction={healthPrediction} />
+          </Suspense>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             <Text style={styles.sectionIcon}>🔧</Text> {t('minerDetail.hardware')}
@@ -1471,7 +1491,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               onPress={handleShareAsImage}
             >
               <Text style={styles.actionBtnIcon}>🖼</Text>
-              <Text style={[styles.actionBtnText, { color: theme.info }]}>{t('minerDetail.shareAsImage')}</Text>
+              <Text style={[styles.actionBtnText, { color: theme.info }]}>
+                {t('minerDetail.shareAsImage')}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -1482,7 +1504,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           </Text>
           <Pressable
             accessibilityRole="button"
-              accessibilityLabel={t('minerDetail.restartMiner')}
+            accessibilityLabel={t('minerDetail.restartMiner')}
             style={[
               styles.actionBtn,
               {

@@ -96,6 +96,9 @@ export type RootStackParamList = {
   MinerComparison: { minerIds: string[] };
   AlertHistory: undefined;
   NotificationHistory: undefined;
+  PoolAnalytics: undefined;
+  ExportReport: undefined;
+  SharedGroups: undefined;
 };
 
 export type TabParamList = {
@@ -168,4 +171,13 @@ export interface GroupAlertConfig {
   type: 'hashrate_drop' | 'temp_high' | 'offline_count' | 'efficiency_drop';
   threshold: number;
   enabled: boolean;
+}
+
+export interface GroupShare {
+  id: number;
+  groupId: string;
+  accessLevel: string;
+  sharedWithEmail: string;
+  ownerEmail?: string;
+  createdAt: string;
 }

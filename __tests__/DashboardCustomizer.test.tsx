@@ -89,8 +89,8 @@ describe('DashboardCustomizer', () => {
 
   it('calls onToggleKiosk when kiosk switch is toggled', async () => {
     const r = await render(<DashboardCustomizer {...defaultProps} />);
-    const switches = r.getAllByRole('switch');
-    fireEvent(switches[switches.length - 1], 'valueChange', true);
+    const kioskSwitch = r.getByTestId('kiosk-mode-switch');
+    fireEvent(kioskSwitch, 'valueChange', true);
     expect(defaultProps.onToggleKiosk).toHaveBeenCalledWith(true);
   });
 

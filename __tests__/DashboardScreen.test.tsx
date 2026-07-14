@@ -94,6 +94,10 @@ jest.mock('../src/services/websocket', () => ({
   disconnectWebSocket: jest.fn(),
 }));
 
+jest.mock('../src/components/FirmwareUpdateBanner', () => ({
+  FirmwareUpdateBanner: () => null,
+}));
+
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react-native';
 import React from 'react';
 import { Alert, AppState, Platform } from 'react-native';

@@ -1,6 +1,77 @@
 # STATUS
 
-## Session Summary (2026-07-11 — Round 12)
+## Session Summary (2026-07-14 — Round 13)
+
+### Done
+
+- **Pool Analytics**: Braiins/Luxor API integration for real earnings, luck, payout tracking.
+  - Backend service + routes (`/api/pool-analytics`, config CRUD)
+  - `pool_configs` DB table for API key storage
+  - Frontend store + PoolAnalyticsScreen with provider selector, stats display, luck indicator
+  - i18n in all 6 locales
+
+- **Multi-user / Team Sharing**: Share miner groups with other users.
+  - Backend `group_shares` table + 6 API endpoints (share, list, update, revoke, shared-miners)
+  - Frontend `groupSharing` store + SharedGroupsScreen
+  - Share modal in GroupsScreen (email input, access level, revoke)
+  - i18n in all 6 locales
+
+- **Custom Dashboards**: User-configurable widget layout.
+  - Layout persistence (columns 1/2, compact mode, per-section size)
+  - DashboardCustomizer enhanced with layout controls
+  - DB setting `dashboard_layout` for persistence
+  - i18n in all 6 locales
+
+- **Firmware OTA Updates**: Push Bitaxe firmware updates from the app.
+  - `firmwareUpdate.ts` service (GitHub releases check, proxy flash)
+  - FirmwareUpdateBanner with progress bar, confirm/skip/error/success
+  - Backend proxy routes (`/firmware-check`, `/flash-firmware`)
+  - i18n in all 6 locales
+
+- **Dark/Light Auto-Scheduling**: Auto-switch theme by time of day.
+  - `autoTheme.ts` service (reads `auto_dark_hour` setting, handles crossing-midnight)
+  - Runs on foreground + 5-min interval with `.unref()`
+  - Wired into App.tsx lifecycle
+  - 18 tests
+
+- **Export Reports**: PDF/CSV export of miner performance.
+  - `reportExport.ts` utility (CSV/JSON generation, date/miner filtering)
+  - ExportReportScreen with date range, miner select, section toggles, format picker, preview
+  - i18n in all 6 locales
+
+- **Health Scoring Refinement**: Predictive maintenance.
+  - `healthPredictions.ts` — 5 prediction types (fan failure, thermal throttle, hashrate decline, share rejection, power anomaly)
+  - HealthPredictionCard with risk badges, probability bars, recommended actions
+  - Wired into MinerDetailScreen
+  - i18n in all 6 locales
+
+- **Mobile Polish**: Haptics, live activities, dynamic island.
+  - 8 new contextual haptic functions (minerOnline/Offline/Alert/Refresh, pullToRefresh, selection, destructive, navigation)
+  - Live Activities service via expo-activitykit (with fallback)
+  - Dynamic Island compact/expanded content (iOS 16+)
+  - i18n in all 6 locales
+
+- **Test Coverage Push**: 1433 frontend + 218 backend = 1651 total tests.
+  - New tests for: firmware, dashboard layout, firmware banner, performance markers
+  - All 104 frontend suites + 24 backend suites passing
+
+- **Performance Profiling**: Bundle size reduction, lazy-loading.
+  - Split DashboardComponents.tsx → MetricTile.tsx + ProfitabilityCard.tsx + barrel re-export
+  - Lazy-loaded HealthPredictionCard, FirmwareUpdateBanner
+  - Performance markers (markRenderStart/End, slow render detection)
+  - Enhanced bundle analyzer (top 10 modules)
+  - Optimized MinerDetailScreen re-renders (useMemo for healthPrediction)
+
+### Test Results
+
+- **Frontend**: TypeScript clean (0 errors), ESLint clean (0 warnings)
+- **Backend**: 218 tests passing (24 suites)
+- **Frontend**: 1433 tests passing (104 suites)
+- **Total**: 1651 tests
+
+---
+
+## Previous Session Summary (2026-07-11 — Round 12)
 
 ### Done
 

@@ -7,15 +7,11 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
-import {
-  darkTheme,
-  useTheme,
-  setTheme,
-  setThemeMode,
-} from './src/theme';
+import { darkTheme, useTheme, setTheme, setThemeMode } from './src/theme';
 import { initProxyUrl } from './src/constants';
 import { initCrashReporting } from './src/utils/crash';
 import { initAnalytics } from './src/utils/analytics';
+import { startAutoTheme, stopAutoTheme } from './src/services/autoTheme';
 
 const OnboardingScreen = lazy(() =>
   import('./src/screens/OnboardingScreen').then((m) => ({ default: m.OnboardingScreen })),
@@ -60,12 +56,16 @@ export default function App() {
         const done = await getSetting('onboarding_complete');
         setShowOnboarding(done !== 'true');
         await useAuthStore.getState().restoreSession();
+        startAutoTheme();
       } catch {
         // init failed but we still show the app
       } finally {
         setReady(true);
       }
     })();
+    return () => {
+      stopAutoTheme();
+    };
   }, []);
 
   const styles = useMemo(
