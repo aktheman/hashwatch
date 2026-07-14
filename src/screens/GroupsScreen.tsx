@@ -14,10 +14,11 @@ import {
 } from 'react-native';
 import { useMinerStore } from '../store/miners';
 import { useToastStore } from '../store/toast';
+import { useGroupSharingStore } from '../store/groupSharing';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { SkeletonCard } from '../components/SkeletonCard';
-import { Miner, AutoAssignRule, GroupConfig, GroupAlertConfig } from '../types';
+import { Miner, AutoAssignRule, GroupConfig, GroupAlertConfig, GroupShare } from '../types';
 import { useTranslation } from 'react-i18next';
 import * as DB from '../db/database';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
@@ -66,6 +67,11 @@ export function GroupsScreen() {
   const [alertThreshold, setAlertThreshold] = useState('3');
   const [alertGroupId, setAlertGroupId] = useState('');
   const [showAlertEditor, setShowAlertEditor] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareGroupId, setShareGroupId] = useState('');
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareAccessLevel, setShareAccessLevel] = useState('view');
+  const [groupShares, setGroupShares] = useState<GroupShare[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -426,9 +432,7 @@ export function GroupsScreen() {
 
   const toggleGroupAlert = useCallback(
     async (id: string) => {
-      const updated = groupAlerts.map((a) =>
-        a.id === id ? { ...a, enabled: !a.enabled } : a,
-      );
+      const updated = groupAlerts.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
       await useMinerStore.getState().saveGroupAlerts(updated);
       setGroupAlerts(updated);
     },
@@ -457,6 +461,61 @@ export function GroupsScreen() {
       }
     }
   }, [t]);
+
+  const openShareModal = useCallback(async (groupId: string) => {
+    setShareGroupId(groupId);
+    setShareEmail('');
+    setShareAccessLevel('view');
+    const shares = await useGroupSharingStore.getState().sharedByMe;
+    setGroupShares(shares.filter((s) => s.groupId === groupId));
+    setShowShareModal(true);
+  }, []);
+
+  const submitShare = useCallback(async () => {
+    if (!shareEmail.trim() || !shareGroupId) return;
+    try {
+      await useGroupSharingStore
+        .getState()
+        .shareGroup(shareGroupId, shareEmail.trim(), shareAccessLevel);
+      const updated = await useGroupSharingStore.getState().sharedByMe;
+      setGroupShares(updated.filter((s) => s.groupId === shareGroupId));
+      setShareEmail('');
+    } catch {
+      Alert.alert(t('groupSharing.shareError'), t('groupSharing.shareError'));
+    }
+  }, [shareEmail, shareGroupId, shareAccessLevel, t]);
+
+  const handleRevokeShare = useCallback(
+    async (shareId: number) => {
+      Alert.alert(t('groupSharing.revoke'), t('groupSharing.revoke') + '?', [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('groupSharing.revoke'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await useGroupSharingStore.getState().revokeShare(shareId);
+              setGroupShares((prev) => prev.filter((s) => s.id !== shareId));
+            } catch {
+              // silent
+            }
+          },
+        },
+      ]);
+    },
+    [t],
+  );
+
+  const handleUpdateShareAccess = useCallback(async (shareId: number, newLevel: string) => {
+    try {
+      await useGroupSharingStore.getState().updateAccess(shareId, newLevel);
+      setGroupShares((prev) =>
+        prev.map((s) => (s.id === shareId ? { ...s, accessLevel: newLevel } : s)),
+      );
+    } catch {
+      // silent
+    }
+  }, []);
 
   const styles = useMemo(
     () =>
@@ -712,7 +771,11 @@ export function GroupsScreen() {
                 isHovered && isDropTarget && { borderColor: theme.primary, borderWidth: 2 },
                 isDropTarget &&
                   !isHovered && { borderColor: theme.primary + '40', borderWidth: 1.5 },
-                depth > 0 && { marginLeft: indent, borderLeftWidth: 3, borderLeftColor: groupConfig?.color || theme.primary + '40' },
+                depth > 0 && {
+                  marginLeft: indent,
+                  borderLeftWidth: 3,
+                  borderLeftColor: groupConfig?.color || theme.primary + '40',
+                },
               ]}
             >
               <View style={styles.groupHeader}>
@@ -828,6 +891,16 @@ export function GroupsScreen() {
                   >
                     <Text style={[styles.actionBtnText, { color: theme.danger }]}>
                       {t('groups.remove')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('groupSharing.shareGroup')}
+                    style={[styles.actionBtn, { borderColor: theme.accent }]}
+                    onPress={() => openShareModal(name)}
+                  >
+                    <Text style={[styles.actionBtnText, { color: theme.accent }]}>
+                      {t('groupSharing.shareGroup')}
                     </Text>
                   </Pressable>
                 </View>
@@ -1003,7 +1076,9 @@ export function GroupsScreen() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={alert.enabled ? t('groups.alertDisabled') : t('groups.alertEnabled')}
+                accessibilityLabel={
+                  alert.enabled ? t('groups.alertDisabled') : t('groups.alertEnabled')
+                }
                 hitSlop={8}
                 onPress={() => toggleGroupAlert(alert.id)}
                 style={{ padding: 4 }}
@@ -1176,7 +1251,8 @@ export function GroupsScreen() {
                     style={[
                       styles.fieldChip,
                       {
-                        backgroundColor: alertType === tp ? theme.primary + '20' : theme.surfaceLight,
+                        backgroundColor:
+                          alertType === tp ? theme.primary + '20' : theme.surfaceLight,
                         borderColor: alertType === tp ? theme.primary : theme.border,
                       },
                     ]}
@@ -1220,7 +1296,8 @@ export function GroupsScreen() {
                   style={[
                     styles.fieldChip,
                     {
-                      backgroundColor: alertGroupId === name ? theme.primary + '20' : theme.surfaceLight,
+                      backgroundColor:
+                        alertGroupId === name ? theme.primary + '20' : theme.surfaceLight,
                       borderColor: alertGroupId === name ? theme.primary : theme.border,
                     },
                   ]}
@@ -1265,6 +1342,145 @@ export function GroupsScreen() {
               >
                 <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
                   {editingAlert ? t('common.save') : t('common.add')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={showShareModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowShareModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t('groupSharing.shareGroup')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('groupSharing.shareWith')} {shareGroupId}
+            </Text>
+            <TextInput
+              style={styles.ruleInput}
+              value={shareEmail}
+              onChangeText={setShareEmail}
+              placeholder={t('groupSharing.email')}
+              placeholderTextColor={theme.textMuted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('groupSharing.accessLevel')}
+            </Text>
+            <View style={styles.pickerRow}>
+              {(['view', 'edit'] as const).map((lvl) => (
+                <Pressable
+                  key={lvl}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    lvl === 'view' ? t('groupSharing.view') : t('groupSharing.edit')
+                  }
+                  style={[
+                    styles.fieldChip,
+                    {
+                      backgroundColor:
+                        shareAccessLevel === lvl ? theme.primary + '20' : theme.surfaceLight,
+                      borderColor: shareAccessLevel === lvl ? theme.primary : theme.border,
+                    },
+                  ]}
+                  onPress={() => setShareAccessLevel(lvl)}
+                >
+                  <Text
+                    style={[
+                      styles.fieldChipText,
+                      { color: shareAccessLevel === lvl ? theme.primary : theme.textMuted },
+                    ]}
+                  >
+                    {lvl === 'view' ? t('groupSharing.view') : t('groupSharing.edit')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {groupShares.length > 0 && (
+              <View style={{ marginTop: spacing.xs }}>
+                <Text
+                  style={{ color: theme.textDim, fontSize: fontSize.xs, marginBottom: spacing.xxs }}
+                >
+                  {t('groupSharing.sharedByMe')}
+                </Text>
+                {groupShares.map((share) => (
+                  <View key={share.id} style={styles.ruleRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.rulePattern}>{share.sharedWithEmail}</Text>
+                      <Text style={styles.ruleGroup}>{share.accessLevel}</Text>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('groupSharing.revoke')}
+                      style={{ padding: 4 }}
+                      onPress={() => handleRevokeShare(share.id)}
+                    >
+                      <Text style={{ color: theme.danger, fontSize: fontSize.sm }}>
+                        {t('groupSharing.revoke')}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('groupSharing.accessLevel')}
+                      style={{ padding: 4, marginLeft: 4 }}
+                      onPress={() =>
+                        handleUpdateShareAccess(
+                          share.id,
+                          share.accessLevel === 'view' ? 'edit' : 'view',
+                        )
+                      }
+                    >
+                      <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>
+                        {share.accessLevel === 'view'
+                          ? t('groupSharing.edit')
+                          : t('groupSharing.view')}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            )}
+            {groupShares.length === 0 && (
+              <Text
+                style={{ color: theme.textDim, fontSize: fontSize.sm, paddingVertical: spacing.xs }}
+              >
+                {t('groupSharing.noShares')}
+              </Text>
+            )}
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel')}
+                style={[
+                  styles.ruleInput,
+                  { flex: 0, paddingHorizontal: 16, borderColor: theme.border },
+                ]}
+                onPress={() => setShowShareModal(false)}
+              >
+                <Text style={{ color: theme.textMuted }}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('groupSharing.shareGroup')}
+                style={[
+                  styles.ruleInput,
+                  {
+                    flex: 0,
+                    paddingHorizontal: 16,
+                    backgroundColor: theme.accent,
+                    borderColor: theme.accent,
+                  },
+                ]}
+                onPress={submitShare}
+              >
+                <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
+                  {t('groupSharing.shareGroup')}
                 </Text>
               </Pressable>
             </View>

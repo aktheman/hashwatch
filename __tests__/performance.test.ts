@@ -9,6 +9,9 @@ import {
   getAverageApiTime,
   clearMetrics,
   startTiming,
+  markRenderStart,
+  markRenderEnd,
+  getActiveRenders,
 } from '../src/utils/performance';
 
 beforeEach(() => {
@@ -94,5 +97,40 @@ describe('performance utils', () => {
       trackRender(`Comp${i}`, i);
     }
     expect(getRenderMetrics()).toHaveLength(100);
+  });
+
+  test('markRenderStart and markRenderEnd track a render', () => {
+    markRenderStart('MyComponent');
+    const duration = markRenderEnd('MyComponent');
+    expect(typeof duration).toBe('number');
+    expect(duration).toBeGreaterThanOrEqual(0);
+    expect(getRenderMetrics()).toHaveLength(1);
+    expect(getRenderMetrics()[0].name).toBe('MyComponent');
+    expect(getRenderMetrics()[0].duration).toBe(duration);
+  });
+
+  test('markRenderEnd returns 0 for unknown component', () => {
+    const duration = markRenderEnd('Unknown');
+    expect(duration).toBe(0);
+    expect(getRenderMetrics()).toHaveLength(0);
+  });
+
+  test('getActiveRenders returns currently tracked components', () => {
+    markRenderStart('A');
+    markRenderStart('B');
+    expect(getActiveRenders()).toEqual(expect.arrayContaining(['A', 'B']));
+    expect(getActiveRenders()).toHaveLength(2);
+    markRenderEnd('A');
+    expect(getActiveRenders()).toEqual(['B']);
+    markRenderEnd('B');
+    expect(getActiveRenders()).toHaveLength(0);
+  });
+
+  test('clearMetrics clears active render timers', () => {
+    markRenderStart('X');
+    markRenderStart('Y');
+    expect(getActiveRenders()).toHaveLength(2);
+    clearMetrics();
+    expect(getActiveRenders()).toHaveLength(0);
   });
 });

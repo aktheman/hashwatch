@@ -7,6 +7,7 @@ import {
   ReceiptValidationResponse,
   DeleteResponse,
   OkResponse,
+  GroupShare,
 } from '../types';
 
 interface CacheEntry {
@@ -358,5 +359,95 @@ export async function putMinerAlertRules(
   rules: MinerAlertRule,
 ): Promise<OkResponse> {
   const res = await client.put<OkResponse>(`/api/miner-alert-rules/${minerId}`, rules);
+  return res.data;
+}
+
+export interface PoolConfig {
+  id: number;
+  provider: string;
+  apiKey: string;
+  poolUser: string;
+  enabled: boolean;
+}
+
+export interface PoolAnalyticsStats {
+  provider: string;
+  hashrate: number;
+  hashrateUnit: string;
+  btcEarned: number;
+  usdEarned: number;
+  luck: number;
+  activeWorkers: number;
+  lastUpdated: number;
+}
+
+export async function fetchPoolAnalytics(): Promise<{
+  stats: PoolAnalyticsStats[];
+  configs: PoolConfig[];
+}> {
+  const res = await client.get<{ stats: PoolAnalyticsStats[]; configs: PoolConfig[] }>(
+    '/api/pool-analytics',
+  );
+  return res.data;
+}
+
+export async function savePoolConfig(config: {
+  provider: string;
+  apiKey: string;
+  poolUser: string;
+}): Promise<PoolConfig> {
+  const res = await client.post<PoolConfig>('/api/pool-analytics/config', config);
+  return res.data;
+}
+
+export async function fetchPoolConfigs(): Promise<PoolConfig[]> {
+  const res = await client.get<PoolConfig[]>('/api/pool-analytics/config');
+  return res.data;
+}
+
+export async function shareGroup(
+  groupId: string,
+  email: string,
+  accessLevel: string,
+): Promise<{ id: number; accessLevel: string; updated?: boolean }> {
+  const res = await client.post<{ id: number; accessLevel: string; updated?: boolean }>(
+    '/api/groups/share',
+    { groupId, email, accessLevel },
+  );
+  return res.data;
+}
+
+export async function listSharedWithMe(): Promise<GroupShare[]> {
+  const res = await client.get<GroupShare[]>('/api/groups/share');
+  return res.data;
+}
+
+export async function listSharedByMe(): Promise<GroupShare[]> {
+  const res = await client.get<GroupShare[]>('/api/groups/shared-by-me');
+  return res.data;
+}
+
+export async function updateShareAccess(
+  shareId: number,
+  accessLevel: string,
+): Promise<{ id: number; accessLevel: string }> {
+  const res = await client.put<{ id: number; accessLevel: string }>(
+    `/api/groups/share/${shareId}`,
+    { accessLevel },
+  );
+  return res.data;
+}
+
+export async function revokeShare(shareId: number): Promise<{ deleted: boolean }> {
+  const res = await client.delete<{ deleted: boolean }>(`/api/groups/share/${shareId}`);
+  return res.data;
+}
+
+export async function fetchSharedGroupMiners(
+  groupId: string,
+): Promise<{ miners: RemoteMiner[]; accessLevel: string }> {
+  const res = await client.get<{ miners: RemoteMiner[]; accessLevel: string }>(
+    `/api/groups/shared-miners/${groupId}`,
+  );
   return res.data;
 }

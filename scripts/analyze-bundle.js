@@ -18,6 +18,7 @@ const sources = map.sources;
 const sourceContent = map.sourcesContent || [];
 
 const fileSizes = {};
+const moduleSizes = [];
 let totalMapped = 0;
 
 for (let i = 0; i < sources.length; i++) {
@@ -44,6 +45,7 @@ for (let i = 0; i < sources.length; i++) {
     pkg = parts[0];
   }
   fileSizes[pkg] = (fileSizes[pkg] || 0) + size;
+  moduleSizes.push({ name, size });
   totalMapped += size;
 }
 
@@ -51,11 +53,21 @@ const bundleSize = Buffer.byteLength(bundle, 'utf8');
 console.log('Bundle: ' + jsFile);
 console.log('Bundle size: ' + (bundleSize / 1024 / 1024).toFixed(2) + ' MB');
 console.log('Mapped source: ' + (totalMapped / 1024 / 1024).toFixed(2) + ' MB');
+console.log('Total modules: ' + moduleSizes.length);
+console.log('');
+console.log('Top 10 largest modules:');
+moduleSizes
+  .sort((a, b) => b.size - a.size)
+  .slice(0, 10)
+  .forEach((mod, i) => {
+    const sizeStr = (mod.size / 1024).toFixed(1) + ' KB';
+    console.log('  ' + String(i + 1).padStart(2) + '. ' + sizeStr.padStart(8) + '  ' + mod.name);
+  });
 console.log('');
 console.log('Top packages:');
 Object.entries(fileSizes)
   .sort((a, b) => b[1] - a[1])
-  .slice(0, 30)
+  .slice(0, 15)
   .forEach(([name, size]) => {
     const pct = ((size / totalMapped) * 100).toFixed(1);
     const sizeStr = (size / 1024).toFixed(0) + ' KB';

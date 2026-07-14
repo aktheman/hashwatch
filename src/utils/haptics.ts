@@ -42,3 +42,37 @@ export function selection() {
     Haptics.selectionAsync();
   }
 }
+
+export function minerOnlineHaptic() {
+  medium();
+  success();
+}
+
+export function minerOfflineHaptic() {
+  heavy();
+  error();
+}
+
+export function minerAlertHaptic() {
+  warning();
+}
+
+export function minerRefreshHaptic() {
+  light();
+}
+
+export function pullToRefreshHaptic() {
+  light();
+}
+
+export function selectionToggleHaptic() {
+  selection();
+}
+
+export function destructiveActionHaptic() {
+  heavy();
+}
+
+export function navigationHaptic() {
+  light();
+}

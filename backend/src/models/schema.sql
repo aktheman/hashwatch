@@ -135,3 +135,29 @@ CREATE TABLE IF NOT EXISTS webhook_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_webhook_logs_user ON webhook_logs(userId, sentAt DESC);
+
+CREATE TABLE IF NOT EXISTS pool_configs (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL DEFAULT 'braiins',
+  apiKey TEXT NOT NULL DEFAULT '',
+  poolUser TEXT NOT NULL DEFAULT '',
+  enabled BOOLEAN NOT NULL DEFAULT true,
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pool_configs_user ON pool_configs(userId);
+
+CREATE TABLE IF NOT EXISTS group_shares (
+  id BIGSERIAL PRIMARY KEY,
+  ownerId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  groupId TEXT NOT NULL,
+  sharedWithUserId UUID REFERENCES users(id) ON DELETE CASCADE,
+  sharedWithEmail TEXT NOT NULL DEFAULT '',
+  accessLevel TEXT NOT NULL DEFAULT 'view',
+  createdAt TIMESTAMP DEFAULT NOW(),
+  UNIQUE(ownerId, groupId, sharedWithUserId)
+);
+
+CREATE INDEX IF NOT EXISTS idx_group_shares_owner ON group_shares(ownerId);
+CREATE INDEX IF NOT EXISTS idx_group_shares_shared ON group_shares(sharedWithUserId);
