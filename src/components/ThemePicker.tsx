@@ -25,7 +25,7 @@ export function ThemePicker({ onThemeChange }: ThemePickerProps) {
 
   const handlePress = useCallback(
     (mode: string) => {
-      setThemeMode(mode);
+      setThemeMode(mode as Parameters<typeof setThemeMode>[0]);
       onThemeChange?.(mode);
     },
     [onThemeChange],
@@ -53,8 +53,8 @@ export function ThemePicker({ onThemeChange }: ThemePickerProps) {
               style={[
                 styles.cell,
                 {
-                  backgroundColor: isActive ? t.primary + '22' : t.surface,
-                  borderColor: isActive ? t.primary : t.border,
+                  backgroundColor: isActive ? theme.primary + '22' : theme.surface,
+                  borderColor: isActive ? theme.primary : theme.border,
                 },
               ]}
               onPress={() => handlePress(mode)}
@@ -66,7 +66,7 @@ export function ThemePicker({ onThemeChange }: ThemePickerProps) {
                 <View style={[styles.swatch, { backgroundColor: tObj?.accent ?? '#666' }]} />
               </View>
               <Text
-                style={[styles.label, { color: isActive ? t.primary : t.text }]}
+                style={[styles.label, { color: isActive ? theme.primary : theme.text }]}
                 numberOfLines={1}
               >
                 {THEME_EMOJIS[mode]} {t(`themes.${mode}` as const) ?? mode}

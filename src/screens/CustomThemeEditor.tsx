@@ -1,6 +1,15 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
-import { useTheme, darkTheme, THEME_MAP } from '../theme';
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Alert,
+  StyleSheet,
+  Platform,
+} from 'react-native';
+import { useTheme, darkTheme, THEME_MAP, buildThemeFromColors } from '../theme';
 import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { ThemePreviewModal } from '../components/ThemePreviewModal';
@@ -95,11 +104,20 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
     setColors((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const previewTheme = buildThemeFromColors(colors);
+  const isValidHex = (v: string) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+
+  const previewTheme = useMemo(() => buildThemeFromColors(colors), [colors]);
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'Theme name is required');
+      return;
+    }
+    const invalidKeys = Object.entries(colors)
+      .filter(([, v]) => typeof v === 'string' && !isValidHex(v))
+      .map(([key]) => COLOR_LABELS[key] || key);
+    if (invalidKeys.length > 0) {
+      Alert.alert('Invalid Colors', `Fix invalid hex values: ${invalidKeys.join(', ')}`);
       return;
     }
     if (existingTheme) {
@@ -129,6 +147,20 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
     setColors({ ...baseTheme });
   }, [baseTheme]);
 
+  const handleExport = useCallback(async () => {
+    const json = JSON.stringify({ name: name || 'Custom Theme', version: 1, colors }, null, 2);
+    if (Platform.OS === 'web') {
+      try {
+        await navigator.clipboard.writeText(json);
+        Alert.alert('Copied', 'Theme JSON copied to clipboard');
+      } catch {
+        Alert.alert('Export', json);
+      }
+    } else {
+      Alert.alert('Export Theme', json);
+    }
+  }, [name, colors]);
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: theme.bg }]}
@@ -144,7 +176,20 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
               styles.headerBtn,
               { backgroundColor: theme.surfaceLight, borderColor: theme.border },
             ]}
+            onPress={handleExport}
+            accessibilityRole="button"
+            accessibilityLabel="Export theme as JSON"
+          >
+            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Export</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.headerBtn,
+              { backgroundColor: theme.surfaceLight, borderColor: theme.border },
+            ]}
             onPress={() => setPreviewVisible(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Preview theme"
           >
             <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Preview</Text>
           </Pressable>
@@ -154,6 +199,8 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
               { backgroundColor: theme.surfaceLight, borderColor: theme.border },
             ]}
             onPress={handleReset}
+            accessibilityRole="button"
+            accessibilityLabel="Reset colors to base theme"
           >
             <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Reset</Text>
           </Pressable>
@@ -225,13 +272,14 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
                 {
                   backgroundColor: theme.surfaceLight,
                   color: theme.text,
-                  borderColor: theme.border,
+                  borderColor: isValidHex(val) ? theme.border : theme.danger,
                 },
               ]}
               value={val}
               onChangeText={(v) => updateColor(key, v)}
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel={`${COLOR_LABELS[key] || key} color hex value`}
             />
           </View>
         );
@@ -241,6 +289,8 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
         <Pressable
           style={[styles.primaryBtn, { backgroundColor: theme.primary }]}
           onPress={handleSave}
+          accessibilityRole="button"
+          accessibilityLabel={existingTheme ? 'Save theme changes' : 'Create new theme'}
         >
           <Text style={{ color: '#FFF', fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
             {existingTheme ? 'Save Changes' : 'Create Theme'}
@@ -251,6 +301,8 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
           <Pressable
             style={[styles.dangerBtn, { borderColor: theme.danger }]}
             onPress={handleDelete}
+            accessibilityRole="button"
+            accessibilityLabel="Delete this custom theme"
           >
             <Text
               style={{ color: theme.danger, fontSize: fontSize.base, fontWeight: fontWeight.bold }}

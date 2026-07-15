@@ -16,8 +16,8 @@ import { useSubscriptionStore } from '../store/subscription';
 import { useAuthStore, queueSetting } from '../store/auth';
 import {
   useTheme,
-  setThemeMode,
-  getThemeMode,
+  setCustomTheme,
+  getActiveCustomThemeId,
   scheduleThemeSwitch,
   clearThemeSchedule,
 } from '../theme';
@@ -44,13 +44,22 @@ import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes'
 
 function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
   const theme = useTheme();
-  const { themes, load } = useCustomThemesStore();
+  const { themes, load, create } = useCustomThemesStore();
 
   useEffect(() => {
     load();
   }, []);
 
-  if (themes.length === 0) return null;
+  const handleImport = useCallback(async () => {
+    const { pasteThemeFromClipboard } = await import('../utils/themeShare');
+    const imported = await pasteThemeFromClipboard();
+    if (imported) {
+      await create(imported.name, imported.colors);
+      Alert.alert('Imported', `Theme "${imported.name}" imported`);
+    } else {
+      Alert.alert('Import Failed', 'No valid theme in clipboard');
+    }
+  }, [create]);
 
   return (
     <View style={{ marginTop: spacing.md }}>
@@ -67,78 +76,107 @@ function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
         >
           Custom Themes
         </Text>
-        <Pressable
-          onPress={() => navigation.navigate('CustomThemeEditor')}
-          style={{ padding: spacing.xxs }}
-        >
-          <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>+ New</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+          <Pressable onPress={handleImport} style={{ padding: spacing.xxs }}>
+            <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>Import</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => navigation.navigate('CustomThemeEditor')}
+            style={{ padding: spacing.xxs }}
+          >
+            <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>+ New</Text>
+          </Pressable>
+        </View>
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-        {themes.map((ct) => {
-          const ctTheme = customThemeToTheme(ct);
-          return (
-            <Pressable
-              key={ct.id}
-              style={{
-                width: '47%',
-                borderRadius: radius.md,
-                borderWidth: 1.5,
-                borderColor: getThemeMode() === `custom-${ct.id}` ? theme.primary : theme.border,
-                padding: spacing.sm,
-                gap: spacing.xxs,
-                backgroundColor: theme.surface,
-              }}
-              onPress={() => {
-                setThemeMode('dark');
-              }}
-              onLongPress={() => {
-                navigation.navigate('CustomThemeEditor', { themeId: ct.id });
-              }}
-            >
-              <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
-                <View
-                  style={{ width: 16, height: 16, borderRadius: 2, backgroundColor: ctTheme.bg }}
-                />
-                <View
-                  style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 2,
-                    backgroundColor: ctTheme.primary,
-                  }}
-                />
-                <View
-                  style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: 2,
-                    backgroundColor: ctTheme.accent,
-                  }}
-                />
-              </View>
-              <Text style={{ color: theme.text, fontSize: fontSize.sm }} numberOfLines={1}>
-                {ct.name}
-              </Text>
-            </Pressable>
-          );
-        })}
+      {themes.length === 0 ? (
         <Pressable
           style={{
-            width: '47%',
             borderRadius: radius.md,
             borderWidth: 1,
             borderStyle: 'dashed',
             borderColor: theme.border,
-            padding: spacing.sm,
+            padding: spacing.lg,
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: spacing.xs,
+            backgroundColor: theme.surface,
           }}
           onPress={() => navigation.navigate('CustomThemeEditor')}
+          accessibilityRole="button"
+          accessibilityLabel="Create your first custom theme"
         >
-          <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>+ Create</Text>
+          <Text style={{ fontSize: 24 }}>🎨</Text>
+          <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>No custom themes yet</Text>
+          <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>+ Create your first</Text>
         </Pressable>
-      </View>
+      ) : (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+          {themes.map((ct) => {
+            const ctTheme = customThemeToTheme(ct);
+            return (
+              <Pressable
+                key={ct.id}
+                style={{
+                  width: '47%',
+                  borderRadius: radius.md,
+                  borderWidth: 1.5,
+                  borderColor: getActiveCustomThemeId() === ct.id ? theme.primary : theme.border,
+                  padding: spacing.sm,
+                  gap: spacing.xxs,
+                  backgroundColor: theme.surface,
+                }}
+                onPress={() => {
+                  setCustomTheme(customThemeToTheme(ct), ct.id);
+                }}
+                onLongPress={() => {
+                  navigation.navigate('CustomThemeEditor', { themeId: ct.id });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`Apply custom theme ${ct.name}`}
+              >
+                <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
+                  <View
+                    style={{ width: 16, height: 16, borderRadius: 2, backgroundColor: ctTheme.bg }}
+                  />
+                  <View
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: 2,
+                      backgroundColor: ctTheme.primary,
+                    }}
+                  />
+                  <View
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: 2,
+                      backgroundColor: ctTheme.accent,
+                    }}
+                  />
+                </View>
+                <Text style={{ color: theme.text, fontSize: fontSize.sm }} numberOfLines={1}>
+                  {ct.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+          <Pressable
+            style={{
+              width: '47%',
+              borderRadius: radius.md,
+              borderWidth: 1,
+              borderStyle: 'dashed',
+              borderColor: theme.border,
+              padding: spacing.sm,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onPress={() => navigation.navigate('CustomThemeEditor')}
+          >
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>+ Create</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -902,7 +940,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 {t('settings.off')}
               </Text>
             </Pressable>
-            {[18, 19, 20, 21, 22, 23].map((hour) => (
+            {[17, 18, 19, 20, 21, 22, 23, 0, 1, 2].map((hour) => (
               <Pressable
                 key={hour}
                 accessibilityRole="button"
@@ -929,7 +967,13 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     fontWeight: fontWeight.semibold,
                   }}
                 >
-                  {hour}:00
+                  {hour === 0
+                    ? '12a'
+                    : hour < 12
+                      ? `${hour}a`
+                      : hour === 12
+                        ? '12p'
+                        : `${hour - 12}p`}
                 </Text>
               </Pressable>
             ))}

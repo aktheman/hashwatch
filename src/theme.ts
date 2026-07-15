@@ -329,6 +329,7 @@ export const lightTheme: Theme = {
 };
 
 let _current: Theme = darkTheme;
+let _activeCustomId: number | null = null;
 let _mode:
   | 'dark'
   | 'light'
@@ -413,6 +414,16 @@ export function getThemeMode():
 
 export function getTheme() {
   return _current;
+}
+
+export function getActiveCustomThemeId(): number | null {
+  return _activeCustomId;
+}
+
+export function setCustomTheme(t: Theme, id: number) {
+  _current = t;
+  _activeCustomId = id;
+  listeners.forEach((cb) => cb());
 }
 
 function applyMode() {

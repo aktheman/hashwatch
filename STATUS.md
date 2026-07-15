@@ -1,5 +1,28 @@
 # STATUS
 
+## Session Summary (2026-07-15 — Round 18)
+
+### Done
+
+- **Theme Sharing**: Export/import custom themes as JSON. Export button in CustomThemeEditor (copies to clipboard on web). Import button in SettingsScreen custom themes section (reads from clipboard). `src/utils/themeShare.ts` utility module.
+- **Dashboard Theme Toggle**: Cycle button now toggles through all 13 themes (was 5). Long-press on ThemePicker for full preview modal.
+- **Theme Scheduling UX**: Expanded dark mode schedule from 6 hours (18-23) to 10 hours (17-2, covering 5PM-2AM). AM/PM labels (12a/1p/2p/etc.) instead of 24h format.
+- **Accessibility Polish**: Added `accessibilityRole="button"` + `accessibilityLabel` to ThemePreviewModal (overlay, card, close/apply buttons), CustomThemeEditor (export/preview/reset/save/delete buttons, color hex inputs), CustomThemesSection theme cards.
+- **Custom Theme Activation Bug Fix**: Custom theme cards now properly apply via `setCustomTheme()` (was hardcoding `setThemeMode('dark')`). New `setCustomTheme()` and `getActiveCustomThemeId()` in theme module for tracking active custom theme.
+- **Hex Validation**: CustomThemeEditor now validates hex color values on save (shows error with invalid field names). Invalid hex inputs get red border.
+- **Empty State**: CustomThemesSection shows friendly empty state with 🎨 icon + "Create your first" CTA when no custom themes exist (was hidden entirely).
+- **i18n**: 16 new keys in all 6 locales (en/es/fr/de/ja/zh) for theme editor, sharing, and empty state.
+- **Export Feature**: CustomThemeEditor header now has Export button (copies theme JSON to clipboard on web, shows Alert on native).
+- **apiClient Export**: Exported axios client instance as `apiClient` from `api/client.ts` for customThemes store.
+
+### Test Results
+
+- **Frontend**: 1457 tests passing (107 suites) — ESLint clean
+- **Backend**: 227 tests passing (25 suites)
+- **Total**: 1684 tests
+
+---
+
 ## Session Summary (2026-07-15 — Round 15)
 
 ### Done

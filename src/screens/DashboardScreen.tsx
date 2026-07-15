@@ -1808,7 +1808,21 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   accessibilityLabel="Switch theme"
                   style={[styles.settingsBtn, { width: 36, height: 36 }]}
                   onPress={() => {
-                    const modes = ['dark', 'neon', 'matrix', '5tratum', 'light'] as const;
+                    const modes = [
+                      'dark',
+                      'light',
+                      'neon',
+                      'matrix',
+                      '5tratum',
+                      'crimson',
+                      'ocean',
+                      'lavender',
+                      'midnight',
+                      'nord',
+                      'dracula',
+                      'catppuccin',
+                      'rosepine',
+                    ] as const;
                     const current = getThemeMode();
                     const idx = modes.indexOf(current as (typeof modes)[number]);
                     setThemeMode(modes[(idx + 1) % modes.length]);
