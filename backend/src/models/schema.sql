@@ -161,3 +161,14 @@ CREATE TABLE IF NOT EXISTS group_shares (
 
 CREATE INDEX IF NOT EXISTS idx_group_shares_owner ON group_shares(ownerId);
 CREATE INDEX IF NOT EXISTS idx_group_shares_shared ON group_shares(sharedWithUserId);
+
+CREATE TABLE IF NOT EXISTS custom_themes (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL DEFAULT 'Untitled',
+  colors JSONB NOT NULL DEFAULT '{}',
+  createdAt TIMESTAMP DEFAULT NOW(),
+  updatedAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_custom_themes_user ON custom_themes(userId);

@@ -2866,10 +2866,81 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   },
                   "type": "Text",
                 },
+              ],
+              "props": {
+                "style": {
+                  "alignItems": "center",
+                  "backgroundColor": "#13132B",
+                  "borderColor": "#1E1E42",
+                  "borderRadius": 16,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 2,
+                  "padding": 16,
+                },
+              },
+              "type": "View",
+            },
+            {
+              "children": [
                 {
                   "children": [
                     {
                       "children": [
+                        {
+                          "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#000",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#888",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#666",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
                         {
                           "children": [
                             "🔄",
@@ -2877,13 +2948,14 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "themes.system",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -2920,14 +2992,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -2937,18 +3010,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#0A0A1A",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#6C63FF",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#3B82F6",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🌙",
                             " ",
                             "themes.dark",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -2985,14 +3112,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#6C63FF",
-                            "borderColor": "#6C63FF",
+                            "backgroundColor": "undefined22",
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3002,18 +3130,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#F8F9FC",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#5B52E6",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#2563EB",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "☀",
                             " ",
                             "themes.light",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3050,14 +3232,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3067,18 +3250,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#08080F",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00FFFF",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#FF00FF",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "💜",
                             " ",
                             "themes.neon",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3115,14 +3352,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3132,18 +3370,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#000000",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00FF41",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00CC66",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "💚",
                             " ",
                             "themes.matrix",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3180,14 +3472,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3197,18 +3490,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#0C0907",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#FF8C00",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00B4D8",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🔶",
                             " ",
                             "themes.5tratum",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3245,14 +3592,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3262,18 +3610,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#0F0505",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#FF1A4A",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#8B0000",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🔴",
                             " ",
                             "themes.crimson",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3310,14 +3712,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3327,18 +3730,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#050B14",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00B4D8",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#0077B6",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🌊",
                             " ",
                             "themes.ocean",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3375,14 +3832,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3392,18 +3850,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#0E0A1F",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#B388FF",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#7C4DFF",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🌸",
                             " ",
                             "themes.lavender",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3440,14 +3952,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3457,18 +3970,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#060612",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#4488FF",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#00B4D8",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🌃",
                             " ",
                             "themes.midnight",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3505,14 +4072,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3522,18 +4090,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#2E3440",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#88C0D0",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#81A1C1",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "❄️",
                             " ",
                             "themes.nord",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3570,14 +4192,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3587,18 +4210,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#282A36",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#FF79C6",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#BD93F9",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🧛",
                             " ",
                             "themes.dracula",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3635,14 +4312,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3652,18 +4330,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#1E1E2E",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#CBA6F7",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#F5C2E7",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🐱",
                             " ",
                             "themes.catppuccin",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3700,14 +4432,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3717,18 +4450,72 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#191724",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#EB6F92",
+                                  },
+                                ]
+                              }
+                            />,
+                            <View
+                              style={
+                                [
+                                  {
+                                    "borderRadius": 2,
+                                    "height": 20,
+                                    "width": 20,
+                                  },
+                                  {
+                                    "backgroundColor": "#31748F",
+                                  },
+                                ]
+                              }
+                            />,
+                          ],
+                          "props": {
+                            "style": {
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                        {
+                          "children": [
                             "🌲",
                             " ",
                             "themes.rosepine",
                           ],
                           "props": {
+                            "numberOfLines": 1,
                             "style": [
                               {
                                 "fontSize": 11,
                                 "fontWeight": "600",
                               },
                               {
-                                "color": "#FFFFFF",
+                                "color": undefined,
                               },
                             ],
                           },
@@ -3765,14 +4552,15 @@ exports[`SettingsScreen matches snapshot 1`] = `
                         "onStartShouldSetResponder": [Function],
                         "style": [
                           {
-                            "borderRadius": 8,
-                            "borderWidth": 1,
-                            "paddingHorizontal": 8,
-                            "paddingVertical": 8,
+                            "borderRadius": 12,
+                            "borderWidth": 1.5,
+                            "gap": 8,
+                            "padding": 12,
+                            "width": "47%",
                           },
                           {
-                            "backgroundColor": "#1A1A3E",
-                            "borderColor": "#1E1E42",
+                            "backgroundColor": undefined,
+                            "borderColor": undefined,
                           },
                         ],
                       },
@@ -3782,23 +4570,34 @@ exports[`SettingsScreen matches snapshot 1`] = `
                   "props": {
                     "style": {
                       "flexDirection": "row",
-                      "gap": 6,
+                      "flexWrap": "wrap",
+                      "gap": 8,
                     },
                   },
                   "type": "View",
                 },
+                {
+                  "children": [
+                    "Tap to apply · Long-press to preview",
+                  ],
+                  "props": {
+                    "style": [
+                      {
+                        "fontSize": 10,
+                        "marginTop": 4,
+                        "textAlign": "center",
+                      },
+                      {
+                        "color": "#5C5F7A",
+                      },
+                    ],
+                  },
+                  "type": "Text",
+                },
               ],
               "props": {
                 "style": {
-                  "alignItems": "center",
-                  "backgroundColor": "#13132B",
-                  "borderColor": "#1E1E42",
-                  "borderRadius": 16,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "marginBottom": 2,
-                  "padding": 16,
+                  "gap": 8,
                 },
               },
               "type": "View",

@@ -535,7 +535,11 @@
     "nord": "Nord",
     "dracula": "Dracula",
     "catppuccin": "Catppuccin",
-    "rosepine": "Rose Pine"
+    "rosepine": "Rose Pine",
+    "customEditor": "Theme Editor",
+    "customThemes": "Custom Themes",
+    "createTheme": "Create Theme",
+    "tapToApply": "Tap to apply · Long-press to preview"
   },
   "tabs": {
     "dashboard": "Dashboard",

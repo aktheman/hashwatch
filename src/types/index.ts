@@ -99,6 +99,7 @@ export type RootStackParamList = {
   PoolAnalytics: undefined;
   ExportReport: undefined;
   SharedGroups: undefined;
+  CustomThemeEditor: { themeId?: number; cloneFrom?: string } | undefined;
 };
 
 export type TabParamList = {

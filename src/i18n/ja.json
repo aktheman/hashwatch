@@ -467,7 +467,11 @@
     "nord": "ノルド",
     "dracula": "ドラキュラ",
     "catppuccin": "カトゥッチン",
-    "rosepine": "ローズパイン"
+    "rosepine": "ローズパイン",
+    "customEditor": "テーマエディター",
+    "customThemes": "カスタムテーマ",
+    "createTheme": "テーマ作成",
+    "tapToApply": "タップで適用 · 長押しでプレビュー"
   },
   "tabs": {
     "dashboard": "ダッシュボード",

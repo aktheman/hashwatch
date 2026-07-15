@@ -39,6 +39,109 @@ import { useNotificationHistoryStore } from '../store/notificationHistory';
 import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import i18n from '../i18n';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
+import { ThemePicker } from '../components/ThemePicker';
+import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes';
+
+function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
+  const theme = useTheme();
+  const { themes, load } = useCustomThemesStore();
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (themes.length === 0) return null;
+
+  return (
+    <View style={{ marginTop: spacing.md }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: spacing.xs,
+        }}
+      >
+        <Text
+          style={{ color: theme.textDim, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
+        >
+          Custom Themes
+        </Text>
+        <Pressable
+          onPress={() => navigation.navigate('CustomThemeEditor')}
+          style={{ padding: spacing.xxs }}
+        >
+          <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>+ New</Text>
+        </Pressable>
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+        {themes.map((ct) => {
+          const ctTheme = customThemeToTheme(ct);
+          return (
+            <Pressable
+              key={ct.id}
+              style={{
+                width: '47%',
+                borderRadius: radius.md,
+                borderWidth: 1.5,
+                borderColor: getThemeMode() === `custom-${ct.id}` ? theme.primary : theme.border,
+                padding: spacing.sm,
+                gap: spacing.xxs,
+                backgroundColor: theme.surface,
+              }}
+              onPress={() => {
+                setThemeMode('dark');
+              }}
+              onLongPress={() => {
+                navigation.navigate('CustomThemeEditor', { themeId: ct.id });
+              }}
+            >
+              <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
+                <View
+                  style={{ width: 16, height: 16, borderRadius: 2, backgroundColor: ctTheme.bg }}
+                />
+                <View
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 2,
+                    backgroundColor: ctTheme.primary,
+                  }}
+                />
+                <View
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 2,
+                    backgroundColor: ctTheme.accent,
+                  }}
+                />
+              </View>
+              <Text style={{ color: theme.text, fontSize: fontSize.sm }} numberOfLines={1}>
+                {ct.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+        <Pressable
+          style={{
+            width: '47%',
+            borderRadius: radius.md,
+            borderWidth: 1,
+            borderStyle: 'dashed',
+            borderColor: theme.border,
+            padding: spacing.sm,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={() => navigation.navigate('CustomThemeEditor')}
+        >
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>+ Create</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 function NotificationHistorySection() {
   const theme = useTheme();
@@ -702,90 +805,25 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.theme')}</Text>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(
-              [
-                'system',
-                'dark',
-                'light',
-                'neon',
-                'matrix',
-                '5tratum',
-                'crimson',
-                'ocean',
-                'lavender',
-                'midnight',
-                'nord',
-                'dracula',
-                'catppuccin',
-                'rosepine',
-              ] as const
-            ).map((mode) => (
-              <Pressable
-                accessibilityRole="button"
-                key={mode}
-                accessibilityLabel={`${mode} theme`}
-                style={[
-                  styles.themeBtn,
-                  {
-                    backgroundColor: getThemeMode() === mode ? theme.primary : theme.surfaceLight,
-                    borderColor: getThemeMode() === mode ? theme.primary : theme.border,
-                  },
-                ]}
-                onPress={() => {
-                  setThemeMode(mode);
-                  const val = mode === 'system' ? 'system' : mode;
-                  setSetting('theme_mode', val);
-                  if (token) {
-                    if (isOnline) {
-                      putRemoteSetting('theme_mode', val).catch(() =>
-                        console.warn('Failed to sync theme_mode'),
-                      );
-                    } else {
-                      queueSetting('theme_mode', val);
-                    }
-                  }
-                }}
-              >
-                <Text
-                  style={[
-                    styles.themeBtnText,
-                    { color: getThemeMode() === mode ? '#FFF' : theme.text },
-                  ]}
-                >
-                  {mode === 'dark'
-                    ? '🌙'
-                    : mode === 'light'
-                      ? '☀'
-                      : mode === 'neon'
-                        ? '💜'
-                        : mode === 'matrix'
-                          ? '💚'
-                          : mode === '5tratum'
-                            ? '🔶'
-                            : mode === 'crimson'
-                              ? '🔴'
-                              : mode === 'ocean'
-                                ? '🌊'
-                                : mode === 'lavender'
-                                  ? '🌸'
-                                  : mode === 'midnight'
-                                    ? '🌃'
-                                    : mode === 'nord'
-                                      ? '❄️'
-                                      : mode === 'dracula'
-                                        ? '🧛'
-                                        : mode === 'catppuccin'
-                                          ? '🐱'
-                                          : mode === 'rosepine'
-                                            ? '🌲'
-                                            : '🔄'}{' '}
-                  {t(`themes.${mode}`)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
         </View>
+        <ThemePicker
+          onThemeChange={(mode) => {
+            const val = mode === 'system' ? 'system' : mode;
+            setSetting('theme_mode', val);
+            if (token) {
+              if (isOnline) {
+                putRemoteSetting('theme_mode', val).catch(() =>
+                  console.warn('Failed to sync theme_mode'),
+                );
+              } else {
+                queueSetting('theme_mode', val);
+              }
+            }
+          }}
+        />
+
+        {token && <CustomThemesSection navigation={navigation} />}
+
         <View style={{ ...styles.row, marginTop: spacing.xs }}>
           <Text style={styles.rowLabel}>{t('settings.language')}</Text>
         </View>

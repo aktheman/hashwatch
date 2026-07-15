@@ -73,6 +73,11 @@ const SharedGroupsScreen = lazy(() =>
     default: m.SharedGroupsScreen,
   })),
 );
+const CustomThemeEditorScreen = lazy(() =>
+  import('../screens/CustomThemeEditor').then((m) => ({
+    default: m.default,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -111,6 +116,7 @@ const WrappedNotificationHistory = withScreenBoundary(NotificationHistoryScreen)
 const WrappedPoolAnalytics = withScreenBoundary(PoolAnalyticsScreen);
 const WrappedExportReport = withScreenBoundary(ExportReportScreen);
 const WrappedSharedGroups = withScreenBoundary(SharedGroupsScreen);
+const WrappedCustomThemeEditor = withScreenBoundary(CustomThemeEditorScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -287,6 +293,11 @@ export function AppNavigator() {
           name="SharedGroups"
           component={WrappedSharedGroups}
           options={{ title: t('groupSharing.title', 'Shared Groups') }}
+        />
+        <Stack.Screen
+          name="CustomThemeEditor"
+          component={WrappedCustomThemeEditor}
+          options={{ title: t('themes.customEditor', 'Theme Editor') }}
         />
       </Stack.Navigator>
     </NavigationContainer>
