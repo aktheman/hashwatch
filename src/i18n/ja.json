@@ -463,7 +463,11 @@
     "crimson": "クリムゾン",
     "ocean": "オーシャン",
     "lavender": "ラベンダー",
-    "midnight": "ミッドナイト"
+    "midnight": "ミッドナイト",
+    "nord": "ノルド",
+    "dracula": "ドラキュラ",
+    "catppuccin": "カトゥッチン",
+    "rosepine": "ローズパイン"
   },
   "tabs": {
     "dashboard": "ダッシュボード",

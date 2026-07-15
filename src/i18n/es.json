@@ -516,7 +516,11 @@
     "crimson": "Carmesí",
     "ocean": "Océano",
     "lavender": "Lavanda",
-    "midnight": "Medianoche"
+    "midnight": "Medianoche",
+    "nord": "Nord",
+    "dracula": "Drácula",
+    "catppuccin": "Catppuccin",
+    "rosepine": "Pino Rosa"
   },
   "tabs": {
     "dashboard": "Dashboard",

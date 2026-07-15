@@ -20,6 +20,10 @@ import {
   neonTheme,
   matrixTheme,
   stratumTheme,
+  nordTheme,
+  draculaTheme,
+  catppuccinTheme,
+  rosepineTheme,
 } from '../src/theme';
 
 beforeEach(() => {
@@ -61,6 +65,30 @@ describe('setTheme / getTheme', () => {
     setTheme(stratumTheme);
     expect(getTheme().bg).toBe(stratumTheme.bg);
     expect(getTheme().primary).toBe(stratumTheme.primary);
+  });
+
+  it('switches to nord theme', () => {
+    setTheme(nordTheme);
+    expect(getTheme().bg).toBe(nordTheme.bg);
+    expect(getTheme().primary).toBe(nordTheme.primary);
+  });
+
+  it('switches to dracula theme', () => {
+    setTheme(draculaTheme);
+    expect(getTheme().bg).toBe(draculaTheme.bg);
+    expect(getTheme().primary).toBe(draculaTheme.primary);
+  });
+
+  it('switches to catppuccin theme', () => {
+    setTheme(catppuccinTheme);
+    expect(getTheme().bg).toBe(catppuccinTheme.bg);
+    expect(getTheme().primary).toBe(catppuccinTheme.primary);
+  });
+
+  it('switches to rosepine theme', () => {
+    setTheme(rosepineTheme);
+    expect(getTheme().bg).toBe(rosepineTheme.bg);
+    expect(getTheme().primary).toBe(rosepineTheme.primary);
   });
 });
 
@@ -108,6 +136,30 @@ describe('setThemeMode / getThemeMode', () => {
   it('setThemeMode 5tratum applies stratum theme', () => {
     setThemeMode('5tratum');
     expect(getTheme().bg).toBe(stratumTheme.bg);
+  });
+
+  it('setThemeMode nord applies nord theme', () => {
+    setThemeMode('nord');
+    expect(getTheme().bg).toBe(nordTheme.bg);
+    expect(getThemeMode()).toBe('nord');
+  });
+
+  it('setThemeMode dracula applies dracula theme', () => {
+    setThemeMode('dracula');
+    expect(getTheme().bg).toBe(draculaTheme.bg);
+    expect(getThemeMode()).toBe('dracula');
+  });
+
+  it('setThemeMode catppuccin applies catppuccin theme', () => {
+    setThemeMode('catppuccin');
+    expect(getTheme().bg).toBe(catppuccinTheme.bg);
+    expect(getThemeMode()).toBe('catppuccin');
+  });
+
+  it('setThemeMode rosepine applies rosepine theme', () => {
+    setThemeMode('rosepine');
+    expect(getTheme().bg).toBe(rosepineTheme.bg);
+    expect(getThemeMode()).toBe('rosepine');
   });
 
   it('setThemeMode light applies light theme', () => {

@@ -715,6 +715,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 'ocean',
                 'lavender',
                 'midnight',
+                'nord',
+                'dracula',
+                'catppuccin',
+                'rosepine',
               ] as const
             ).map((mode) => (
               <Pressable
@@ -767,7 +771,15 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                                   ? '🌸'
                                   : mode === 'midnight'
                                     ? '🌃'
-                                    : '🔄'}{' '}
+                                    : mode === 'nord'
+                                      ? '❄️'
+                                      : mode === 'dracula'
+                                        ? '🧛'
+                                        : mode === 'catppuccin'
+                                          ? '🐱'
+                                          : mode === 'rosepine'
+                                            ? '🌲'
+                                            : '🔄'}{' '}
                   {t(`themes.${mode}`)}
                 </Text>
               </Pressable>

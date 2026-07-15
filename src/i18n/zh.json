@@ -463,7 +463,11 @@
     "crimson": "深红",
     "ocean": "海洋",
     "lavender": "薰衣草",
-    "midnight": "午夜"
+    "midnight": "午夜",
+    "nord": "北欧",
+    "dracula": "德古拉",
+    "catppuccin": "猫抓布丁",
+    "rosepine": "玫瑰松"
   },
   "tabs": {
     "dashboard": "仪表盘",

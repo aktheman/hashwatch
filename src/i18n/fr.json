@@ -473,7 +473,11 @@
     "crimson": "Pourpre",
     "ocean": "Océan",
     "lavender": "Lavande",
-    "midnight": "Minuit"
+    "midnight": "Minuit",
+    "nord": "Nord",
+    "dracula": "Dracula",
+    "catppuccin": "Catppuccin",
+    "rosepine": "Pin Rose"
   },
   "tabs": {
     "dashboard": "Tableau de bord",
