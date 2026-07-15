@@ -184,7 +184,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               null,
               2,
             )
-          : 'No active entitlements',
+          : t('settings.noActiveEntitlements'),
       );
     } catch (e) {
       setCustomerInfo('Error loading: ' + String(e));
@@ -229,7 +229,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
     if (token) {
       putRemoteSetting('webhook_url', webhookUrl).catch(() => {});
     }
-    Alert.alert(t('common.success'), 'Webhook URL saved');
+    Alert.alert(t('common.success'), t('settingsExtra.webhookSaved'));
   }, [webhookUrl, t]);
 
   const styles = useMemo(
@@ -990,7 +990,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       <NotificationHistorySection />
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Webhooks</Text>
+        <Text style={styles.sectionTitle}>{t('settingsExtra.webhooks')}</Text>
         <View style={styles.row}>
           <TextInput
             style={{
@@ -1217,7 +1217,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                       Alert.alert(
                         t('settings.importComplete'),
                         `${t('settings.import')}: ${result.imported} miner${result.imported !== 1 ? 's' : ''}${result.errors.length > 0 ? `\nErrors: ${result.errors.length}` : ''}`,
-                        [{ text: 'OK' }],
+                        [{ text: t('common.ok') }],
                       );
                       if (result.errors.length > 0) {
                         console.warn('CSV import errors:', result.errors);
@@ -1288,14 +1288,14 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     onPress={() => {
                       const preview = previewCSV(csvInput);
                       if (preview.errors.length > 0) {
-                        Alert.alert('CSV Errors', preview.errors.join('\n'));
+                        Alert.alert(t('settingsExtra.csvErrors'), preview.errors.join('\n'));
                       }
                       if (preview.valid.length > 0) {
                         setCsvPreview(preview.valid);
                       } else {
                         Alert.alert(
-                          'No valid rows',
-                          'Check that your CSV has "name" and "ip" columns.',
+                          t('settingsExtra.noValidRows'),
+                          t('settingsExtra.checkCsvColumns'),
                         );
                       }
                     }}
@@ -1436,9 +1436,11 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             }}
           >
             <Text style={[styles.rowLabel, { color: theme.primary }]}>
-              Update v{electronUpdate.version} Available
+              {t('settingsExtra.updateAvailable', { version: electronUpdate.version })}
             </Text>
-            <Text style={[styles.actionText, { color: theme.primary }]}>Download</Text>
+            <Text style={[styles.actionText, { color: theme.primary }]}>
+              {t('settings.download')}
+            </Text>
           </Pressable>
         )}
         <View style={styles.row}>

@@ -13,6 +13,12 @@ pushRouter.post('/register', async (req: AuthRequest, res) => {
   }
   const alertTypesStr = Array.isArray(alertTypes) ? alertTypes.join(',') : null;
   const type = tokenType === 'web' ? 'web' : 'expo';
+
+  const existing = await query('SELECT userId FROM push_tokens WHERE token = $1', [token]);
+  if (existing.rows.length > 0 && existing.rows[0].userId !== req.userId) {
+    return res.status(409).json({ error: 'Token is already registered to another user' });
+  }
+
   await query(
     `INSERT INTO push_tokens (userId, token, alert_types, token_type) VALUES ($1, $2, $3, $4)
      ON CONFLICT (token) DO UPDATE SET userId = EXCLUDED.userId, alert_types = EXCLUDED.alert_types, token_type = EXCLUDED.token_type`,

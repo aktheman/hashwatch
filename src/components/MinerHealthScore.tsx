@@ -30,42 +30,68 @@ function calculateHealth(miner: Miner): HealthFactors {
 
   const uptime = status?.uptimeSeconds ?? 0;
   const uptimeDays = uptime / 86400;
-  const uptimeScore = uptimeDays < 1 ? 80 : uptimeDays < 7 ? 95 : uptimeDays < 30 ? 100 : uptimeDays < 90 ? 90 : 75;
+  const uptimeScore =
+    uptimeDays < 1 ? 80 : uptimeDays < 7 ? 95 : uptimeDays < 30 ? 100 : uptimeDays < 90 ? 90 : 75;
 
   const sharesAccepted = status?.sharesAccepted ?? 0;
   const sharesRejected = status?.sharesRejected ?? 0;
   const totalShares = sharesAccepted + sharesRejected;
-  const shareScore = totalShares === 0 ? 80 : Math.max(0, Math.min(100, (sharesAccepted / totalShares) * 100));
+  const shareScore =
+    totalShares === 0 ? 80 : Math.max(0, Math.min(100, (sharesAccepted / totalShares) * 100));
 
   const hashrate = status?.hashRate ?? 0;
   const hashrateScore = hashrate > 0 ? 90 : 0;
 
   const power = status?.power ?? 0;
   const efficiency = power > 0 && hashrate > 0 ? hashrate / power : 0;
-  const powerScore = efficiency > 0.5 ? 95 : efficiency > 0.3 ? 85 : efficiency > 0.1 ? 70 : hashrate > 0 ? 60 : 30;
+  const powerScore =
+    efficiency > 0.5 ? 95 : efficiency > 0.3 ? 85 : efficiency > 0.1 ? 70 : hashrate > 0 ? 60 : 30;
 
   const overall = Math.round(
-    tempScore * 0.25 + uptimeScore * 0.2 + shareScore * 0.25 + hashrateScore * 0.15 + powerScore * 0.15,
+    tempScore * 0.25 +
+      uptimeScore * 0.2 +
+      shareScore * 0.25 +
+      hashrateScore * 0.15 +
+      powerScore * 0.15,
   );
 
   const grade: HealthFactors['grade'] =
     overall >= 90 ? 'A' : overall >= 75 ? 'B' : overall >= 60 ? 'C' : overall >= 40 ? 'D' : 'F';
 
-  return { temperature: tempScore, hashrate: hashrateScore, uptime: uptimeScore, shares: shareScore, power: powerScore, overall, grade };
+  return {
+    temperature: tempScore,
+    hashrate: hashrateScore,
+    uptime: uptimeScore,
+    shares: shareScore,
+    power: powerScore,
+    overall,
+    grade,
+  };
 }
 
-function gradeColor(grade: string, theme: { success: string; info: string; warning: string; danger: string; text: string }): string {
+function gradeColor(
+  grade: string,
+  theme: { success: string; info: string; warning: string; danger: string; text: string },
+): string {
   switch (grade) {
-    case 'A': return theme.success;
-    case 'B': return theme.info;
-    case 'C': return theme.warning;
-    case 'D': return '#F97316';
-    case 'F': return theme.danger;
-    default: return theme.text;
+    case 'A':
+      return theme.success;
+    case 'B':
+      return theme.info;
+    case 'C':
+      return theme.warning;
+    case 'D':
+      return '#F97316';
+    case 'F':
+      return theme.danger;
+    default:
+      return theme.text;
   }
 }
 
-export const MinerHealthScore = React.memo(function MinerHealthScore({ miner }: MinerHealthScoreProps) {
+export const MinerHealthScore = React.memo(function MinerHealthScore({
+  miner,
+}: MinerHealthScoreProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -81,7 +107,11 @@ export const MinerHealthScore = React.memo(function MinerHealthScore({ miner }: 
   ];
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      accessibilityRole="summary"
+      accessibilityLabel={`${t('health.title', 'Health Score')} ${health.grade} ${health.overall}/100`}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+    >
       <View style={styles.header}>
         <View style={[styles.gradeBadge, { backgroundColor: color + '20', borderColor: color }]}>
           <Text style={[styles.gradeText, { color }]}>{health.grade}</Text>
@@ -90,9 +120,7 @@ export const MinerHealthScore = React.memo(function MinerHealthScore({ miner }: 
           <Text style={[styles.title, { color: theme.text }]}>
             {t('health.title', 'Health Score')}
           </Text>
-          <Text style={[styles.subtitle, { color: theme.textDim }]}>
-            {health.overall}/100
-          </Text>
+          <Text style={[styles.subtitle, { color: theme.textDim }]}>{health.overall}/100</Text>
         </View>
       </View>
 
@@ -105,7 +133,8 @@ export const MinerHealthScore = React.memo(function MinerHealthScore({ miner }: 
                 styles.barFill,
                 {
                   width: `${f.score}%`,
-                  backgroundColor: f.score >= 80 ? theme.success : f.score >= 60 ? theme.warning : theme.danger,
+                  backgroundColor:
+                    f.score >= 80 ? theme.success : f.score >= 60 ? theme.warning : theme.danger,
                 },
               ]}
             />

@@ -50,12 +50,50 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/SummaryCard.test.tsx`: 4 tests (icon/value/label, custom color, accent bar)
 - `__tests__/design.test.ts`: 23 tests (tokens, cardShadow, cardStyle, layout constants, inputStyle)
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, Android build, deploy, e2e, coverage threshold verification, `workflow_dispatch` trigger
-- `backend/openapi.json`: OpenAPI 3.0 spec with 14 paths, 22 schemas
+- `backend/openapi.json`: OpenAPI 3.0 spec with 35 paths, 40 schemas
 - `backend/src/__tests__/webhook.test.ts`: 7 tests (sendWebhook success/failure, no URL, empty URL, invalid URL, deleteLogs)
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-10 — Round 11)
+## Latest Round (Session 2026-07-15 — Round 15)
+
+### Changes (Round 15 — Backend security, structured logging, re-entrancy guard, OpenAPI)
+
+- **Push token ownership**: `POST /api/push/register` returns 409 if token belongs to another user
+- **Proxy security**: axios response size limits (1MB), flash endpoint method allowlist (POST/PUT only)
+- **Webhook logs pagination**: returns `{ logs, total, limit, offset }` with `limit`/`offset` query params
+- **Structured logging**: all `console.error` → `log.error(...)` in 8 route files + services + init
+- **Re-entrancy guard**: `miners.ts` `let refreshing = false` prevents concurrent `refreshAll`
+- **ESLint**: removed 7 unused callbacks in `DashboardCustomizer.tsx`
+- **OpenAPI**: added 5 endpoint groups + 5 schemas to `openapi.json`
+- **Test fixes**: `push.test.ts` ownership mock, `webhooks.test.ts` paginated response format
+
+### Test results
+
+- Frontend: 1433 tests passing (104 suites) — ESLint clean
+- Backend: 218 tests passing (24 suites)
+- Total: 1651 tests
+
+## Previous Round (Session 2026-07-14 — Round 14)
+
+### Changes (Round 14 — Bug fixes, security hardening, performance, i18n, CI)
+
+- **Crash bugs fixed**: `notifications.ts` JSON.parse try/catch, `MinerDetailScreen` restart try/catch
+- **`.unref()` compliance**: toast.ts, websocket.ts, FirmwareUpdateBanner.tsx, backend/ws.ts, backend/services/poolAnalytics.ts — all 6 missing calls added
+- **i18n**: 11 new keys in SettingsScreen/MinerDetailScreen/ImportDataScreen across all 6 locales
+- **Backend hardening**: input validation (8 routes), try/catch error handling, API key masking, generic error messages
+- **React.memo**: 13 components wrapped (EarningsCard, FirmwareBanner, MinerDrillDownModal, MinerSnapshotCard, NotificationPrefs, PoolCoverage, EfficiencyTrend, FanChart, HashrateChart, PowerChart, TemperatureChart, VoltageChart, OfflineBanner)
+- **Accessibility**: 12 components added `accessibilityRole` + `accessibilityLabel`
+- **CI**: npm caching, removed redundant web-lockfile job, Vercel token as env var, `!failure()` deploy condition
+- **Magic numbers → constants**: 6 service files (firmwareUpdate, notifications, networkStatus, autoTheme, websocket, dynamicIsland)
+
+### Test results
+
+- Frontend: 1433 tests passing (104 suites) — TypeScript clean, ESLint clean
+- Backend: 218 tests passing (24 suites)
+- Total: 1651 tests
+
+## Previous Round (Session 2026-07-10 — Round 11)
 
 ### Changes (Round 11 — GroupsScreen i18n completion)
 
@@ -95,14 +133,23 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
+- Tests: 1433 frontend (104 suites) + 218 backend (24 suites) = 1651 total
+- TypeScript: clean (0 errors) — frontend + backend
+- ESLint: clean (0 warnings) — frontend + backend
+- Backend security: push token ownership check, proxy size limits, method allowlist, webhook pagination
+- Backend logging: structured `log.error(...)` across all route files and services
+- i18n: `react-i18next` configured with en/es/de/fr/ja/zh locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded UI strings remain. Accessibility labels kept as readable English (screen readers need human-readable text, not i18n keys).
 - Auto-assign rules: fully implemented (UI + store + tests)
 - Webhooks: fully implemented (service + routes + schema + tests + SettingsScreen UI)
 - Docker: Dockerfile + docker-compose.yml ready
-- i18n: DashboardScreen fully i18n'd; GroupsScreen i18n'd (all 6 locales have auto-assign rules section + avgTemp key)
 - Markdown notes: MinerDetailScreen renders notes with MarkdownText
 - Web push: VAPID subscription support in pushRegistration.ts
 - Notifications: web platform sends alerts (not just native)
-- Tests: 1182 frontend (83 suites) + 194 backend (22 suites) = 1376 total
+- React.memo: all chart/display components memoized (EarningsCard, FirmwareBanner, MinerDrillDownModal, MinerSnapshotCard, NotificationPrefs, PoolCoverage, EfficiencyTrend, FanChart, HashrateChart, PowerChart, TemperatureChart, VoltageChart, OfflineBanner, MetricTile, ProfitabilityCard, ErrorBanner, WorldMap)
+- Accessibility: 12 components have `accessibilityRole` + `accessibilityLabel` on root containers
+- Backend: input validation on all routes, API key masking, generic error messages (no internal leak), try/catch on all route handlers
+- CI: npm caching on all jobs, removed redundant web-lockfile job, Vercel token as env var, `!failure()` deploy condition
+- Service constants: magic numbers extracted to named constants in 6 service files
 - `__tests__/DashboardCustomizer.test.tsx`: 20 tests all passing (was 9/20). Key fix: use render result queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references; `await` all `fireEvent.changeText`/`fireEvent.press` calls for state flush
 - `__tests__/AnalyticsScreen.test.tsx`: 20 tests all passing (was 17). Same `await fireEvent.press` fix for filter chip tests
 - Coverage: thresholds: 78/85/90/90 (global branches/funcs/lines/stmts) — currently 83.54/91.95/96.24/94.38 (all thresholds met)
@@ -110,7 +157,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - AnalyticsScreen: parallel snapshot fetch via `Promise.all`, LRU cache keyed by `minerCacheKey-range`, chart theme colors via refs (avoids recomputation on theme change)
 - MinerDetailScreen: inline IP editing via TextInput on pencil icon tap, saves via `setMinerIp` store action
 - Native SQLite: schema version tracking via `PRAGMA user_version` — guard ALTER TABLE behind version checks (no more unconditional runs on startup)
-- CI: removed duplicate coverage step (npx jest --coverage --silent), made `npm audit` non-blocking (`|| echo`)
+- CI: npm caching on all jobs, removed redundant web-lockfile job, Vercel token as env var, `!failure()` deploy condition, `working-directory` for Android build
 - web bundle: 2.2MB / 820 modules. Top deps: RevenueCat ~800kB, react-dom 524kB, chart-kit ~200kB, react-native-svg ~70kB
 - i18n: `react-i18next` configured with en/es/de/fr/ja/zh locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded UI strings remain. Accessibility labels kept as readable English (screen readers need human-readable text, not i18n keys).
 - Skeleton loading: `SkeletonCard` replaces `ActivityIndicator` in DashboardScreen (initial load), AnalyticsScreen (chart loading), WalletsScreen (DB load)
@@ -144,7 +191,7 @@ The dev VM has a 100GB root partition that fills up to 99-100% frequently. When 
 
 ## Memoization
 
-- `MetricTile`, `ProfitabilityCard`, `ErrorBanner`, `WorldMap` all wrapped in `React.memo` to skip re-renders when parent re-renders but props haven't changed
+- `MetricTile`, `ProfitabilityCard`, `ErrorBanner`, `WorldMap`, `EarningsCard`, `FirmwareBanner`, `MinerDrillDownModal`, `MinerSnapshotCard`, `NotificationPrefs`, `PoolCoverage`, `EfficiencyTrend`, `FanChart`, `HashrateChart`, `PowerChart`, `TemperatureChart`, `VoltageChart`, `OfflineBanner` all wrapped in `React.memo`
 - `DashboardScreen.tsx` inline `metrics.recentUptimes.map(u => Math.round(u / 3600))` stabilized via `useMemo` — prevents MetricTile from re-rendering on every parent render (the map was creating a new array ref each time)
 
 ## Desktop Polish

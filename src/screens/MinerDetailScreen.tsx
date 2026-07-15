@@ -783,7 +783,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 setShowLocationPicker(false);
               }}
             >
-              <Text style={[styles.walletName, { padding: 12 }]}>None</Text>
+              <Text style={[styles.walletName, { padding: 12 }]}>{t('common.none')}</Text>
             </Pressable>
             {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
               <Pressable
@@ -795,7 +795,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                   setShowLocationPicker(false);
                 }}
               >
-                <Text style={[styles.walletName, { padding: 12 }]}>{loc}</Text>
+                <Text style={[styles.walletName, { padding: 12 }]}>
+                  {t(`minerDetail.location${loc.replace(/\s+/g, '')}`)}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -1102,9 +1104,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 label={t('minerDetail.powerMode', 'Mode')}
                 value={
                   miner.info.powerMode === 0
-                    ? 'Standard'
+                    ? t('minerDetail.powerModeStandard')
                     : miner.info.powerMode === 1
-                      ? 'ECO'
+                      ? t('minerDetail.powerModeECO')
                       : `P${miner.info.powerMode}`
                 }
                 color={theme.primary}
@@ -1514,17 +1516,21 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               },
             ]}
             onPress={async () => {
-              const client = new BitAxeClient(
-                miner.ip,
-                miner.port,
-                miner.apiPath ?? undefined,
-                miner.statusPath ?? undefined,
-              );
-              const ok = await client.restart();
-              Alert.alert(
-                ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
-                ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
-              );
+              try {
+                const client = new BitAxeClient(
+                  miner.ip,
+                  miner.port,
+                  miner.apiPath ?? undefined,
+                  miner.statusPath ?? undefined,
+                );
+                const ok = await client.restart();
+                Alert.alert(
+                  ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
+                  ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
+                );
+              } catch {
+                Alert.alert(t('minerDetail.restartFailed'), t('minerDetail.restartFailedBody'));
+              }
             }}
           >
             <Text style={styles.actionBtnIcon}>🔄</Text>

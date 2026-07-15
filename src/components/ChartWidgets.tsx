@@ -104,7 +104,11 @@ export const Donut = React.memo(function Donut({
   const offset = circumference - (value / max) * circumference;
 
   return (
-    <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+    <View
+      style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}
+      accessibilityRole="image"
+      accessibilityLabel="Chart"
+    >
       <Svg width={size} height={size}>
         <Circle
           cx={size / 2}
@@ -161,7 +165,7 @@ export const Gauge = React.memo(function Gauge({
   const offset = circumference - (value / max) * circumference;
 
   return (
-    <View style={{ width, height }}>
+    <View style={{ width, height }} accessibilityRole="image" accessibilityLabel="Chart">
       <Svg width={width} height={height}>
         <Circle
           cx={width / 2}

@@ -2,6 +2,8 @@ import { AppState, AppStateStatus } from 'react-native';
 import { getSetting } from '../db/database';
 import { setThemeMode, getThemeMode } from '../theme';
 
+const AUTO_THEME_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+
 let _intervalId: ReturnType<typeof setInterval> | null = null;
 let _appStateSub: { remove(): void } | null = null;
 let _active = false;
@@ -62,7 +64,7 @@ export async function startAutoTheme(): Promise<void> {
   }
 
   evaluate();
-  _intervalId = setInterval(() => evaluate(), 5 * 60 * 1000);
+  _intervalId = setInterval(() => evaluate(), AUTO_THEME_CHECK_INTERVAL_MS);
   if (_intervalId && typeof _intervalId === 'object' && 'unref' in _intervalId) {
     (_intervalId as NodeJS.Timeout).unref();
   }

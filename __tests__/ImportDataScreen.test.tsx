@@ -163,7 +163,7 @@ it('shows generic error alert for non-Error throws', async () => {
   });
 
   await waitFor(() => {
-    expect(alertSpy).toHaveBeenCalledWith('import.failed', 'Invalid data');
+    expect(alertSpy).toHaveBeenCalledWith('import.failed', 'import.invalidData');
   });
   alertSpy.mockRestore();
 });

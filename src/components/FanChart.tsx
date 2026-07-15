@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
@@ -11,7 +11,7 @@ interface FanChartProps {
   title?: string;
 }
 
-export function FanChart({ snapshots, title }: FanChartProps) {
+export const FanChart = React.memo(function FanChart({ snapshots, title }: FanChartProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -63,9 +63,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌀</Text>
-        <Text style={styles.emptyText}>
-          {t('charts.notEnoughFan')}
-        </Text>
+        <Text style={styles.emptyText}>{t('charts.notEnoughFan')}</Text>
       </View>
     );
   }
@@ -76,9 +74,7 @@ export function FanChart({ snapshots, title }: FanChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌀</Text>
-        <Text style={styles.emptyText}>
-          {t('charts.fanAppears')}
-        </Text>
+        <Text style={styles.emptyText}>{t('charts.fanAppears')}</Text>
       </View>
     );
   }
@@ -142,4 +138,4 @@ export function FanChart({ snapshots, title }: FanChartProps) {
       </View>
     </View>
   );
-}
+});

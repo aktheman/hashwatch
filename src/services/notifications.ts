@@ -4,6 +4,8 @@ import { Miner } from '../types';
 import * as DB from '../db/database';
 import { useAlertHistoryStore } from '../store/alertHistory';
 
+const OFFLINE_REMINDER_TEXT = 'offline for over 5 minutes';
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -149,7 +151,11 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
     }
     if (!alertPrefCache.has(miner.id)) {
       const raw = await DB.getSetting(`notify_${miner.id}`);
-      alertPrefCache.set(miner.id, raw ? JSON.parse(raw) : {});
+      try {
+        alertPrefCache.set(miner.id, raw ? JSON.parse(raw) : {});
+      } catch {
+        alertPrefCache.set(miner.id, {});
+      }
     }
   }
 
@@ -292,7 +298,7 @@ async function sendOfflineAlert(miner: Miner) {
 }
 
 async function sendOfflineReminder(miner: Miner) {
-  await send('Still Offline', `${miner.name} has been offline for over 5 minutes`, {
+  await send('Still Offline', `${miner.name} has been ${OFFLINE_REMINDER_TEXT}`, {
     minerId: miner.id,
     type: 'offline_reminder',
   });

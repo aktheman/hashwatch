@@ -21,5 +21,11 @@ export function TimeAgo({ timestamp, style }: TimeAgoProps) {
 
   if (timestamp === null) return null;
 
-  return <Text style={style}>{Math.floor((now - timestamp) / 1000)}{t('common.secondsAgo')}</Text>;
+  const seconds = Math.floor((now - timestamp) / 1000);
+  return (
+    <Text style={style} accessibilityLabel={`${seconds}${t('common.secondsAgo')}`}>
+      {seconds}
+      {t('common.secondsAgo')}
+    </Text>
+  );
 }

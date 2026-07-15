@@ -23,7 +23,7 @@ beforeEach(() => {
 
 describe('POST /api/push/register', () => {
   it('registers a push token', async () => {
-    mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+    mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rowCount: 1 });
 
     const res = await request(app)
       .post('/api/push/register')
@@ -37,6 +37,17 @@ describe('POST /api/push/register', () => {
       null,
       'expo',
     ]);
+  });
+
+  it('returns 409 if token belongs to another user', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ userId: 'other-user-id' }] });
+
+    const res = await request(app)
+      .post('/api/push/register')
+      .send({ token: 'expo-push-token-123' });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error).toContain('another user');
   });
 
   it('returns 400 if token is missing', async () => {

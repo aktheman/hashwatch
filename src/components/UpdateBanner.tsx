@@ -52,10 +52,20 @@ export function UpdateBanner() {
               {t('update.downloadedBody', { version: updateInfo.version })}
             </Text>
             <View style={styles.actions}>
-              <Pressable style={[styles.btn, styles.btnPrimary]} onPress={handleInstall}>
+              <Pressable
+                style={[styles.btn, styles.btnPrimary]}
+                onPress={handleInstall}
+                accessibilityRole="button"
+                accessibilityLabel="Download update"
+              >
                 <Text style={styles.btnPrimaryText}>{t('update.restartInstall')}</Text>
               </Pressable>
-              <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleDismiss}>
+              <Pressable
+                style={[styles.btn, styles.btnSecondary]}
+                onPress={handleDismiss}
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss update"
+              >
                 <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>
                   {t('update.later')}
                 </Text>
@@ -68,7 +78,12 @@ export function UpdateBanner() {
             <Text style={styles.body}>
               {t('update.availableBody', { version: updateInfo.version })}
             </Text>
-            <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleDismiss}>
+            <Pressable
+              style={[styles.btn, styles.btnSecondary]}
+              onPress={handleDismiss}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss update"
+            >
               <Text style={[styles.btnSecondaryText, { color: '#fff' }]}>
                 {t('update.dismiss')}
               </Text>

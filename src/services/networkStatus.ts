@@ -6,6 +6,8 @@ interface NetworkStatus {
   type: Network.NetworkStateType | null;
 }
 
+const POLL_INTERVAL_MS = 10000;
+
 let _listeners: Array<(status: NetworkStatus) => void> = [];
 let _currentStatus: NetworkStatus = { isOnline: true, type: null };
 let _onReconnect: (() => void) | null = null;
@@ -38,7 +40,7 @@ let _interval: ReturnType<typeof setInterval> | null = null;
 function startPolling() {
   if (_interval) return;
   pollNetwork();
-  _interval = setInterval(pollNetwork, 10000);
+  _interval = setInterval(pollNetwork, POLL_INTERVAL_MS);
   if (_interval && typeof _interval === 'object' && 'unref' in _interval) {
     (_interval as { unref: () => void }).unref();
   }

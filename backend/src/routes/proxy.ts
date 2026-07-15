@@ -49,6 +49,8 @@ proxyRouter.post('/', async (req: AuthRequest, res) => {
       timeout: 8000,
       responseType: 'json',
       validateStatus: () => true,
+      maxContentLength: 1024 * 1024,
+      maxBodyLength: 1024 * 1024,
     });
 
     if (response.status >= 400) {
@@ -106,12 +108,18 @@ proxyRouter.post('/flash', async (req: AuthRequest, res) => {
         .status(403)
         .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
     }
+    const upperMethod = method.toUpperCase();
+    if (upperMethod !== 'POST' && upperMethod !== 'PUT') {
+      return res.status(400).json({ error: 'Only POST and PUT methods are allowed' });
+    }
     const response = await axios({
       url,
-      method: method.toUpperCase(),
+      method: upperMethod,
       data: body,
       timeout: 120000,
       validateStatus: () => true,
+      maxContentLength: 1024 * 1024,
+      maxBodyLength: 1024 * 1024,
     });
     res.json({ success: response.status < 400, data: response.data });
   } catch (e: unknown) {
@@ -145,6 +153,8 @@ proxyRouter.post('/pool', async (req: AuthRequest, res) => {
       data: body,
       timeout: 10000,
       validateStatus: () => true,
+      maxContentLength: 1024 * 1024,
+      maxBodyLength: 1024 * 1024,
     });
     res.json({ success: response.status < 400, data: response.data });
   } catch (e: unknown) {
@@ -164,7 +174,14 @@ proxyRouter.post('/restart', async (req: AuthRequest, res) => {
         .status(403)
         .json({ error: 'forbidden', message: 'Only private miner URLs are allowed' });
     }
-    await axios({ url, method: 'POST', timeout: 5000, validateStatus: () => true });
+    await axios({
+      url,
+      method: 'POST',
+      timeout: 5000,
+      validateStatus: () => true,
+      maxContentLength: 1024 * 1024,
+      maxBodyLength: 1024 * 1024,
+    });
     res.json({ success: true });
   } catch (e: unknown) {
     captureException(e as unknown, { route: 'proxy.restart' });
@@ -178,6 +195,7 @@ proxyRouter.post('/firmware-check', async (req: AuthRequest, res) => {
     const response = await axios.get(GITHUB_API, {
       timeout: 10000,
       headers: { Accept: 'application/vnd.github.v3+json' },
+      maxContentLength: 1024 * 1024,
     });
     res.json(response.data);
   } catch (e: unknown) {
@@ -207,6 +225,8 @@ proxyRouter.post('/flash-firmware', async (req: AuthRequest, res) => {
       headers: { 'Content-Type': 'application/json' },
       timeout: 120000,
       validateStatus: () => true,
+      maxContentLength: 1024 * 1024,
+      maxBodyLength: 1024 * 1024,
     });
     res.json({ success: response.status < 400, data: response.data });
   } catch (e: unknown) {

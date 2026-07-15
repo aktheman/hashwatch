@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ interface MinerDrillDownProps {
   title: string;
 }
 
-export function MinerDrillDownModal({
+export const MinerDrillDownModal = React.memo(function MinerDrillDownModal({
   visible,
   onClose,
   miners,
@@ -197,7 +197,7 @@ export function MinerDrillDownModal({
       </View>
     </Modal>
   );
-}
+});
 
 function formatValue(val: number, type: string): string {
   if (type === 'hashrate') return formatHashrateValue(val);

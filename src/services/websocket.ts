@@ -2,6 +2,8 @@ import { useMinerStore } from '../store/miners';
 import { MinerSnapshot, WSMessage } from '../types';
 import { getExtra } from '../constants';
 
+const RECONNECT_DELAY_MS = 5000;
+
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let url: string | null = null;
@@ -61,7 +63,8 @@ function scheduleReconnect() {
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
     doConnect();
-  }, 5000);
+  }, RECONNECT_DELAY_MS);
+  reconnectTimer.unref();
 }
 
 function handleMessage(msg: WSMessage) {

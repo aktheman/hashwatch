@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
@@ -11,7 +11,10 @@ interface VoltageChartProps {
   title?: string;
 }
 
-export function VoltageChart({ snapshots, title }: VoltageChartProps) {
+export const VoltageChart = React.memo(function VoltageChart({
+  snapshots,
+  title,
+}: VoltageChartProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -63,9 +66,7 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🔋</Text>
-        <Text style={styles.emptyText}>
-          {t('charts.notEnoughVoltage')}
-        </Text>
+        <Text style={styles.emptyText}>{t('charts.notEnoughVoltage')}</Text>
       </View>
     );
   }
@@ -135,4 +136,4 @@ export function VoltageChart({ snapshots, title }: VoltageChartProps) {
       </View>
     </View>
   );
-}
+});

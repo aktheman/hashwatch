@@ -228,7 +228,8 @@
     "debugProTitle": "Debug",
     "debugProBody": "Pro-Status gesetzt",
     "debugFreeBody": "Free-Status gesetzt",
-    "unknownError": "Unbekannter Fehler"
+    "unknownError": "Unbekannter Fehler",
+    "noActiveEntitlements": "Keine aktiven Berechtigungen"
   },
   "minerDetail": {
     "notFound": "Miner nicht gefunden",
@@ -291,7 +292,14 @@
     "recentPoolChanges": "Letzte Pool-Wechsel",
     "port": "Port",
     "poolUpdated": "Pool aktualisiert",
-    "poolUpdateFailed": "Pool-Update fehlgeschlagen"
+    "poolUpdateFailed": "Pool-Update fehlgeschlagen",
+    "locationHome": "Zuhause",
+    "locationOffice": "Büro",
+    "locationDataCenter": "Rechenzentrum",
+    "locationMiningFarm": "Mining-Farm",
+    "locationColocation": "Koloation",
+    "powerModeStandard": "Standard",
+    "powerModeECO": "ECO"
   },
   "addMiner": {
     "addByIp": "Per IP hinzufügen",
@@ -435,7 +443,8 @@
     "success": "Import erfolgreich",
     "minersImported": "{{count}} Miner importiert",
     "snapshotsImported": "{{count}} Schnappschüsse importiert",
-    "walletsImported": "{{count}} Wallets importiert"
+    "walletsImported": "{{count}} Wallets importiert",
+    "invalidData": "Ungültige Daten"
   },
   "onboarding": {
     "skip": "Überspringen",
@@ -677,7 +686,9 @@
     "webhookDescription": "POST-Anfragen erhalten, wenn Miner-Alerts ausgelöst werden.",
     "csvErrors": "CSV-Fehler",
     "noValidRows": "Keine gültigen Zeilen",
-    "checkCsvColumns": "Überprüfe, ob dein CSV die Spalten \"name\" und \"ip\" enthält."
+    "checkCsvColumns": "Überprüfe, ob dein CSV die Spalten \"name\" und \"ip\" enthält.",
+    "webhookSaved": "Webhook-URL gespeichert",
+    "updateAvailable": "Update v{{version}} verfügbar"
   },
   "snapshot": {
     "hashrate": "Hashrate",

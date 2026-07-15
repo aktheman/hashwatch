@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -226,6 +226,20 @@ export function DashboardCustomizer({
     onLayoutChange({ sections, columns: cols, compactMode: compact });
   };
 
+  const handleDragStart = useCallback(
+    (idx: number) => {
+      if (dragIdx !== null) return;
+      setDragIdx(idx);
+      dragAnimating.current = true;
+      setScrollEnabled(false);
+    },
+    [dragIdx],
+  );
+
+  const handlePressIn = useCallback((idx: number) => {
+    itemHeights.current[idx] = ITEM_HEIGHT;
+  }, []);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
@@ -267,13 +281,6 @@ export function DashboardCustomizer({
       },
     }),
   ).current;
-
-  const startDrag = (idx: number) => {
-    if (dragIdx !== null) return;
-    setDragIdx(idx);
-    dragAnimating.current = true;
-    setScrollEnabled(false);
-  };
 
   useEffect(() => {
     if (visible) {
@@ -387,10 +394,8 @@ export function DashboardCustomizer({
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`Drag ${label} to reorder`}
-                      onLongPress={() => startDrag(idx)}
-                      onPressIn={() => {
-                        itemHeights.current[idx] = ITEM_HEIGHT;
-                      }}
+                      onLongPress={() => handleDragStart(idx)}
+                      onPressIn={() => handlePressIn(idx)}
                       style={{ padding: spacing.xxs, cursor: 'grab' } as any}
                     >
                       <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>≡</Text>

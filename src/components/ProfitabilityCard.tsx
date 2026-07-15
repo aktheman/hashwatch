@@ -56,6 +56,8 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
 
   return (
     <View
+      accessibilityRole="summary"
+      accessibilityLabel={t('dashboardExtra.profitabilityTitle')}
       style={{
         marginHorizontal: spacing.md,
         marginTop: spacing.sm,

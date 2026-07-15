@@ -1,6 +1,86 @@
 # STATUS
 
-## Session Summary (2026-07-14 — Round 13)
+## Session Summary (2026-07-15 — Round 15)
+
+### Done
+
+- **Push Token Ownership Check**: `POST /api/push/register` now checks if token already belongs to a different user → 409 error. Prevents token hijacking.
+- **Proxy Security**: Response size limits (`maxContentLength: 1MB`, `maxBodyLength: 1MB`) on axios proxy requests. Flash endpoint restricted to POST/PUT methods only.
+- **Webhook Logs Pagination**: `GET /api/webhooks/logs` now returns `{ logs, total, limit, offset }` instead of plain array. Supports `limit` and `offset` query params.
+- **Structured Logging**: Replaced `console.error` with structured `log.error(...)` across 8 route files + minerPoller + pushNotifications + poolAnalytics + all init files.
+- **Poll Re-entrancy Guard**: `miners.ts` store now tracks `let refreshing = false` flag to prevent concurrent `refreshAll` calls from overlapping network requests.
+- **ESLint Cleanup**: Removed 7 unused callback extractions in `DashboardCustomizer.tsx`.
+- **OpenAPI Spec Expansion**: Added 5 new endpoint groups (webhooks/logs, pool-analytics, group shares, proxy/pool, proxy/flash-firmware) + 5 new schemas.
+- **Test Fixes**: Updated `push.test.ts` (token ownership mock) and `webhooks.test.ts` (paginated response format).
+
+### Test Results
+
+- **Frontend**: 1433 tests passing (104 suites) — ESLint clean
+- **Backend**: 218 tests passing (24 suites) — 1 flaky test in isolation only (alertHistory mock leak)
+- **Total**: 1651 tests
+
+---
+
+## Session Summary (2026-07-14 — Round 14)
+
+### Done
+
+- **Crash Bug Fixes**:
+  - `notifications.ts:152`: `JSON.parse(raw)` wrapped in try/catch — malformed DB data no longer crashes alert check loop
+  - `MinerDetailScreen.tsx:1516`: `BitAxeClient.restart()` wrapped in try/catch — network errors handled gracefully
+
+- **Timer `.unref()` Compliance**: All 6 missing `.unref()` calls added per project policy:
+  - `toast.ts:27` — undo auto-confirm timer
+  - `websocket.ts:64` — reconnect timer
+  - `FirmwareUpdateBanner.tsx:79` — success dismiss timer
+  - `backend/ws.ts:86` — WebSocket heartbeat interval
+  - `backend/services/poolAnalytics.ts:16` — fetch abort timeout
+
+- **i18n Completion**: 11 new keys added across all 6 locales (en/es/fr/de/ja/zh):
+  - SettingsScreen: `noActiveEntitlements`, `webhookSaved`, `updateAvailable`, `csvErrors`, `noValidRows`, `checkCsvColumns`, `download`
+  - MinerDetailScreen: `locationHome`, `locationOffice`, `locationDataCenter`, `locationMiningFarm`, `locationColocation`, `powerModeStandard`, `powerModeECO`
+  - ImportDataScreen: `invalidData`
+  - ExportReportScreen: reused `common.online`/`common.offline`
+
+- **Backend Input Validation**: 8 route files hardened:
+  - `alertRules.ts`: numeric field range validation (0-200 temps, 0-100%, 0-1440 min, 0-8760 hrs)
+  - `settings.ts`: key/value length limits (100/10000 chars)
+  - `poolChanges.ts`: timestamp validation
+  - `groupShares.ts`: email regex validation + generic error messages (no internal leak)
+  - `poolAnalytics.ts`: API key masking in responses (shows `****` + last 4)
+  - `miners.ts`, `stats.ts`, `notificationHistory.ts`: try/catch with generic 500 errors
+
+- **React.memo**: 13 chart/display components wrapped to skip unnecessary re-renders:
+  - EarningsCard, FirmwareBanner, MinerDrillDownModal, MinerSnapshotCard, NotificationPrefs, PoolCoverage, EfficiencyTrend, FanChart, HashrateChart, PowerChart, TemperatureChart, VoltageChart, OfflineBanner
+
+- **Accessibility**: 12 components added `accessibilityRole` + `accessibilityLabel`:
+  - EarningsCard, MinerSnapshotCard, PoolCoverage, PoolChangeHistory, Skeleton, SkeletonCard, TimeAgo, HealthPredictionCard, MinerHealthScore, PoolUptime, PowerUsageChart, ProfitabilityCard
+
+- **CI Pipeline Optimization**:
+  - Added `cache: npm` to frontend, web-build, e2e, and deploy jobs
+  - Removed redundant `web-lockfile` job (was duplicating frontend test suite)
+  - Fixed Vercel token passed as env var instead of CLI arg (security)
+  - Added `!failure()` to deploy condition
+  - Android build uses `working-directory` instead of shell `cd`
+
+- **Magic Numbers → Constants**: 6 service files cleaned up:
+  - `firmwareUpdate.ts`: `FIRMWARE_CHECK_TIMEOUT_MS`, `FIRMWARE_FLASH_TIMEOUT_MS`, `AXEOS_GITHUB_REPO`
+  - `notifications.ts`: `OFFLINE_REMINDER_TEXT`
+  - `networkStatus.ts`: `POLL_INTERVAL_MS`
+  - `autoTheme.ts`: `AUTO_THEME_CHECK_INTERVAL_MS`
+  - `websocket.ts`: `RECONNECT_DELAY_MS`
+  - `dynamicIsland.ts`: `DYNAMIC_ISLAND_IOS_VERSION`
+
+### Test Results
+
+- **Frontend**: 1433 tests passing (104 suites) — TypeScript clean, ESLint clean
+- **Backend**: 218 tests passing (24 suites)
+- **Total**: 1651 tests
+- **Snapshot**: 1 updated (SettingsScreen)
+
+---
+
+## Previous Session Summary (2026-07-14 — Round 13)
 
 ### Done
 

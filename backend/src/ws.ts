@@ -94,6 +94,7 @@ export function createWebSocketServer(server: ReturnType<typeof createServer>, p
       client.ping();
     });
   }, HEARTBEAT_INTERVAL);
+  heartbeatTimer.unref();
 
   wss.on('close', () => {
     if (heartbeatTimer) clearInterval(heartbeatTimer);

@@ -228,7 +228,8 @@
     "debugProTitle": "Débogage",
     "debugProBody": "Statut Pro défini",
     "debugFreeBody": "Statut Free défini",
-    "unknownError": "Erreur inconnue"
+    "unknownError": "Erreur inconnue",
+    "noActiveEntitlements": "Aucun droit actif"
   },
   "minerDetail": {
     "notFound": "Mineur non trouvé",
@@ -291,7 +292,14 @@
     "recentPoolChanges": "Changements de pool récents",
     "port": "Port",
     "poolUpdated": "Pool mis à jour",
-    "poolUpdateFailed": "Échec de la mise à jour du pool"
+    "poolUpdateFailed": "Échec de la mise à jour du pool",
+    "locationHome": "Maison",
+    "locationOffice": "Bureau",
+    "locationDataCenter": "Centre de données",
+    "locationMiningFarm": "Ferme de minage",
+    "locationColocation": "Colocation",
+    "powerModeStandard": "Standard",
+    "powerModeECO": "ECO"
   },
   "addMiner": {
     "addByIp": "Ajouter par IP",
@@ -435,7 +443,8 @@
     "success": "Importation réussie",
     "minersImported": "{{count}} mineur(s) importé(s)",
     "snapshotsImported": "{{count}} instantané(s) importé(s)",
-    "walletsImported": "{{count}} portefeuille(s) importé(s)"
+    "walletsImported": "{{count}} portefeuille(s) importé(s)",
+    "invalidData": "Données invalides"
   },
   "onboarding": {
     "skip": "Passer",
@@ -677,7 +686,9 @@
     "webhookDescription": "Recevez des requêtes POST lorsque les alertes de mineurs se déclenchent.",
     "csvErrors": "Erreurs CSV",
     "noValidRows": "Aucune ligne valide",
-    "checkCsvColumns": "Vérifiez que votre CSV contient les colonnes \"name\" et \"ip\"."
+    "checkCsvColumns": "Vérifiez que votre CSV contient les colonnes \"name\" et \"ip\".",
+    "webhookSaved": "URL Webhook enregistrée",
+    "updateAvailable": "Mise à jour v{{version}} disponible"
   },
   "snapshot": {
     "hashrate": "Taux de hachage",

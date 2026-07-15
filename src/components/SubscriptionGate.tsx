@@ -10,7 +10,10 @@ interface SubscriptionGateProps {
   feature?: string;
 }
 
-export const SubscriptionGate = memo(function SubscriptionGate({ children, feature }: SubscriptionGateProps) {
+export const SubscriptionGate = memo(function SubscriptionGate({
+  children,
+  feature,
+}: SubscriptionGateProps) {
   const { t } = useTranslation();
   const { isPro } = useSubscriptionStore();
   const theme = useTheme();
@@ -58,6 +61,8 @@ export const SubscriptionGate = memo(function SubscriptionGate({ children, featu
         pointerEvents="auto"
         accessibilityElementsHidden
         accessible={false}
+        accessibilityLabel="Premium content"
+        accessibilityRole="none"
       >
         <Text style={styles.lockIcon}>🔒</Text>
         {feature && <Text style={styles.text}>{feature}</Text>}

@@ -1,6 +1,12 @@
 import { query } from '../db';
 import { sendWebhook } from './webhook';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 interface NotificationAction {
   action: string;
   title: string;
@@ -27,7 +33,10 @@ async function getWebPush() {
   }
 }
 
-function filterByType(rows: { token: string; alert_types?: string; token_type?: string }[], type: string) {
+function filterByType(
+  rows: { token: string; alert_types?: string; token_type?: string }[],
+  type: string,
+) {
   return rows.filter((row) => {
     if (!row.alert_types) return true;
     const types = row.alert_types.split(',');
@@ -59,7 +68,7 @@ async function sendExpoPush(
     try {
       await expo.sendPushNotificationsAsync(chunk);
     } catch (error) {
-      console.error('Expo push send failed:', error);
+      log.error('Expo push send failed:', error);
     }
   }
 }
@@ -93,7 +102,7 @@ async function sendWebPushToTokens(
       const subscription = JSON.parse(row.token);
       await wp.sendNotification(subscription, payload, { TTL: 86400 });
     } catch (error) {
-      console.error('Web push send failed:', error);
+      log.error('Web push send failed:', error);
       if ((error as { statusCode?: number }).statusCode === 410) {
         await query('DELETE FROM push_tokens WHERE token = $1', [row.token]).catch(() => {});
       }
@@ -153,15 +162,21 @@ export async function sendMinerOfflineNotification(
   ip: string,
   minerId: string,
 ): Promise<void> {
-  await sendRichNotification(userId, 'offline', 'Miner Offline', `${minerName} (${ip}) has gone offline`, {
-    icon: '/icons/miner-offline.png',
-    badge: '/icons/badge.png',
-    data: { minerId, ip, url: `/miner/${minerId}` },
-    actions: [
-      { action: 'view_miner', title: 'View Miner' },
-      { action: 'dismiss', title: 'Dismiss' },
-    ],
-  });
+  await sendRichNotification(
+    userId,
+    'offline',
+    'Miner Offline',
+    `${minerName} (${ip}) has gone offline`,
+    {
+      icon: '/icons/miner-offline.png',
+      badge: '/icons/badge.png',
+      data: { minerId, ip, url: `/miner/${minerId}` },
+      actions: [
+        { action: 'view_miner', title: 'View Miner' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+    },
+  );
   await sendWebhook(userId, {
     event: 'offline',
     minerId,
@@ -178,7 +193,12 @@ export async function sendMinerOnlineNotification(
   ip: string,
   minerId: string,
 ): Promise<void> {
-  await sendPushNotification(userId, 'online', 'Miner Reconnected', `${minerName} (${ip}) is back online`);
+  await sendPushNotification(
+    userId,
+    'online',
+    'Miner Reconnected',
+    `${minerName} (${ip}) is back online`,
+  );
   await sendWebhook(userId, {
     event: 'online',
     minerId,
@@ -196,14 +216,20 @@ export async function sendMinerHotNotification(
   temperature: number,
   minerId: string,
 ): Promise<void> {
-  await sendRichNotification(userId, 'hot', 'High Temperature', `${minerName} is ${temperature.toFixed(0)}°C — check cooling`, {
-    icon: '/icons/temperature.png',
-    data: { minerId, temperature, url: `/miner/${minerId}` },
-    actions: [
-      { action: 'view_miner', title: 'View Miner' },
-      { action: 'dismiss', title: 'Dismiss' },
-    ],
-  });
+  await sendRichNotification(
+    userId,
+    'hot',
+    'High Temperature',
+    `${minerName} is ${temperature.toFixed(0)}°C — check cooling`,
+    {
+      icon: '/icons/temperature.png',
+      data: { minerId, temperature, url: `/miner/${minerId}` },
+      actions: [
+        { action: 'view_miner', title: 'View Miner' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+    },
+  );
   await sendWebhook(userId, {
     event: 'hot',
     minerId,
@@ -220,7 +246,12 @@ export async function sendHashrateDropNotification(
   minerId: string,
   pct: number,
 ): Promise<void> {
-  await sendPushNotification(userId, 'hashrate_drop', 'Hashrate Drop', `${minerName} hashrate dropped ${pct}%`);
+  await sendPushNotification(
+    userId,
+    'hashrate_drop',
+    'Hashrate Drop',
+    `${minerName} hashrate dropped ${pct}%`,
+  );
   await sendWebhook(userId, {
     event: 'hashrate_drop',
     minerId,
@@ -238,7 +269,12 @@ export async function sendLongUptimeNotification(
   uptimeSeconds: number,
 ): Promise<void> {
   const hours = Math.round(uptimeSeconds / 3600);
-  await sendPushNotification(userId, 'long_uptime', 'Long Uptime', `${minerName} has been running for ${hours}h`);
+  await sendPushNotification(
+    userId,
+    'long_uptime',
+    'Long Uptime',
+    `${minerName} has been running for ${hours}h`,
+  );
   await sendWebhook(userId, {
     event: 'long_uptime',
     minerId,
@@ -258,7 +294,12 @@ export async function sendPoolChangeNotification(
 ): Promise<void> {
   const from = oldPool || 'unknown';
   const to = newPool || 'unknown';
-  await sendPushNotification(userId, 'pool_lost', 'Pool Changed', `${minerName} moved from ${from} to ${to}`);
+  await sendPushNotification(
+    userId,
+    'pool_lost',
+    'Pool Changed',
+    `${minerName} moved from ${from} to ${to}`,
+  );
   await sendWebhook(userId, {
     event: 'pool_lost',
     minerId,
@@ -275,15 +316,21 @@ export async function sendShareRejectionNotification(
   minerId: string,
   rejectionRate: number,
 ): Promise<void> {
-  await sendRichNotification(userId, 'share_rejection', 'Share Rejection', `${minerName} rejecting ${rejectionRate}% of shares`, {
-    icon: '/icons/share-rejection.png',
-    badge: '/icons/badge.png',
-    data: { minerId, rejectionRate, url: `/miner/${minerId}` },
-    actions: [
-      { action: 'view_miner', title: 'View Miner' },
-      { action: 'dismiss', title: 'Dismiss' },
-    ],
-  });
+  await sendRichNotification(
+    userId,
+    'share_rejection',
+    'Share Rejection',
+    `${minerName} rejecting ${rejectionRate}% of shares`,
+    {
+      icon: '/icons/share-rejection.png',
+      badge: '/icons/badge.png',
+      data: { minerId, rejectionRate, url: `/miner/${minerId}` },
+      actions: [
+        { action: 'view_miner', title: 'View Miner' },
+        { action: 'dismiss', title: 'Dismiss' },
+      ],
+    },
+  );
   await sendWebhook(userId, {
     event: 'share_rejection',
     minerId,

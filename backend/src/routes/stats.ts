@@ -5,6 +5,12 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { broadcast } from '../ws';
 import { checkMinerStatus } from '../services/minerMonitor';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 export const statsRouter = Router();
 statsRouter.use(authMiddleware);
 
@@ -29,18 +35,23 @@ const snapshotSchema = z.object({
 });
 
 statsRouter.get('/:minerId', async (req: AuthRequest, res) => {
-  const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
-  const minerId = req.params.minerId as string;
-  const result = await query(
-    `SELECT * FROM miner_snapshots
-     WHERE minerId = $1 AND minerId IN (
-       SELECT id FROM miners WHERE userId = $2
-     )
-     ORDER BY timestamp DESC
-     LIMIT $3`,
-    [minerId, req.userId, limit],
-  );
-  res.json(result.rows);
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 1000);
+    const minerId = req.params.minerId as string;
+    const result = await query(
+      `SELECT * FROM miner_snapshots
+       WHERE minerId = $1 AND minerId IN (
+         SELECT id FROM miners WHERE userId = $2
+       )
+       ORDER BY timestamp DESC
+       LIMIT $3`,
+      [minerId, req.userId, limit],
+    );
+    res.json(result.rows);
+  } catch (err: unknown) {
+    log.error('Error fetching stats:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 statsRouter.post('/:minerId', async (req: AuthRequest, res) => {

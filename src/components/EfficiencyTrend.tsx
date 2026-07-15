@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
@@ -18,7 +18,9 @@ function calcJperTH(snap: MinerSnapshot): number | null {
   return snap.power / th;
 }
 
-export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
+export const EfficiencyTrend = React.memo(function EfficiencyTrend({
+  snapshots,
+}: EfficiencyTrendProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -89,7 +91,7 @@ export function EfficiencyTrend({ snapshots }: EfficiencyTrendProps) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

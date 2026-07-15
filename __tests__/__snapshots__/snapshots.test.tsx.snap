@@ -4916,7 +4916,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
           "children": [
             {
               "children": [
-                "Webhooks",
+                "settingsExtra.webhooks",
               ],
               "props": {
                 "style": {

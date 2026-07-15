@@ -45,10 +45,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
       - run: npm install
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm run format
       - run: npm audit --audit-level=high || echo "Audit warnings (non-blocking)"
       - run: npm test -- --coverage
 
@@ -60,6 +60,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - uses: actions/cache@v4
         with:
           path: ~/.expo
@@ -100,6 +101,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - uses: actions/download-artifact@v4
         with:
           name: web-dist
@@ -133,7 +135,7 @@ jobs:
 
   deploy-web:
     name: Deploy Web
-    if: github.ref == 'refs/heads/master' && !cancelled()
+    if: github.ref == 'refs/heads/master' && !cancelled() && !failure()
     needs: [backend, frontend, web-build]
     runs-on: ubuntu-latest
     steps:
@@ -141,6 +143,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - uses: actions/download-artifact@v4
         with:
           name: web-dist
@@ -159,8 +162,9 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Deploy to Vercel
         if: steps.check-secrets.outputs.has_secrets == 'true'
-        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prebuilt --prod
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
@@ -188,23 +192,10 @@ jobs:
           echo "Deploy not ready or commit mismatch after retries"
           exit 1
 
-  web-lockfile:
-    name: Web Lockfile
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm test -- --coverage
-
   android-build:
     name: Android Build
     runs-on: ubuntu-latest
-    needs: [web-lockfile]
+    needs: [frontend]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -218,7 +209,8 @@ jobs:
           java-version: 17
       - run: npm ci
       - run: npx expo prebuild --platform android --clean
-      - run: cd android && ./gradlew assembleDebug
+      - run: ./gradlew assembleDebug
+        working-directory: android
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk

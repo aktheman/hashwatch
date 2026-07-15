@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -11,7 +11,7 @@ interface EarningsCardProps {
   title?: string;
 }
 
-export function EarningsCard({ miners, title }: EarningsCardProps) {
+export const EarningsCard = React.memo(function EarningsCard({ miners, title }: EarningsCardProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -25,7 +25,11 @@ export function EarningsCard({ miners, title }: EarningsCardProps) {
   }, [miners]);
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+      accessibilityRole="summary"
+      accessibilityLabel={title ?? t('earningsCard.title')}
+    >
       <Text style={[styles.title, { color: theme.textDim }]}>
         {title ?? t('earningsCard.title')}
       </Text>
@@ -52,7 +56,7 @@ export function EarningsCard({ miners, title }: EarningsCardProps) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
