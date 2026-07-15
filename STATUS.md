@@ -45,6 +45,28 @@
 
 ---
 
+## Session Summary (2026-07-15 — Round 17)
+
+### Done
+
+- **Theme Picker Redesign**: 2-column grid with color swatches (bg, primary, accent) per theme. Tap to apply, long-press to preview.
+- **Theme Preview Modal**: Full preview with color swatches, text samples, and action buttons before applying. Shows primary/success/danger buttons.
+- **Custom Themes Backend**: `custom_themes` table + CRUD API (`GET/POST/PUT/DELETE /api/custom-themes`). Max 20 per user, input validation.
+- **Custom Theme Editor Screen**: Tabbed color editor (Background/Primary/Status/Text/Glow groups), hex input per property, clone from built-in themes, preview before save.
+- **Theme Picker Component**: Reusable `ThemePicker` component with 2-column grid, preview modal integration.
+- **Custom Theme Store**: Zustand store (`customThemes`) with load/create/update/delete + API sync.
+- **i18n**: Theme editor strings in all 6 locales.
+- **Tests**: 16 new tests (ThemePicker: 4, ThemePreviewModal: 5, theme-extensions: 7, backend customThemes: 8)
+- **Snapshot**: Updated for SettingsScreen.
+
+### Test Results
+
+- **Frontend**: 1457 tests passing (107 suites) — ESLint clean
+- **Backend**: 227 tests passing (25 suites)
+- **Total**: 1684 tests
+
+---
+
 ## Session Summary (2026-07-14 — Round 14)
 
 ### Done

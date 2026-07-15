@@ -467,7 +467,11 @@
     "nord": "北欧",
     "dracula": "德古拉",
     "catppuccin": "猫抓布丁",
-    "rosepine": "玫瑰松"
+    "rosepine": "玫瑰松",
+    "customEditor": "主题编辑器",
+    "customThemes": "自定义主题",
+    "createTheme": "创建主题",
+    "tapToApply": "点击应用 · 长按预览"
   },
   "tabs": {
     "dashboard": "仪表盘",

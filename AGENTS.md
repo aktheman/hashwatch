@@ -50,12 +50,32 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/SummaryCard.test.tsx`: 4 tests (icon/value/label, custom color, accent bar)
 - `__tests__/design.test.ts`: 23 tests (tokens, cardShadow, cardStyle, layout constants, inputStyle)
 - `.github/workflows/ci.yml`: CI pipeline with backend, frontend, web-build, iOS build, Android build, deploy, e2e, coverage threshold verification, `workflow_dispatch` trigger
-- `backend/openapi.json`: OpenAPI 3.0 spec with 35 paths, 40 schemas
+- `backend/openapi.json`: OpenAPI 3.0 spec with 37 paths, 42 schemas
 - `backend/src/__tests__/webhook.test.ts`: 7 tests (sendWebhook success/failure, no URL, empty URL, invalid URL, deleteLogs)
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-15 — Round 16)
+## Latest Round (Session 2026-07-15 — Round 17)
+
+### Changes (Round 17 — Theme picker redesign, preview modal, custom themes)
+
+- **Theme picker redesign**: 2-column grid with color swatches (bg/primary/accent per theme)
+- **Theme preview modal**: Full preview with color swatches, text samples, action buttons
+- **Custom themes backend**: `custom_themes` table + CRUD API (max 20/user)
+- **Custom theme editor**: Tabbed color editor (5 groups), hex input, clone from built-in themes
+- **ThemePicker component**: Reusable component with grid + preview modal
+- **Custom theme store**: Zustand store with API sync
+- **i18n**: Theme editor strings in all 6 locales
+- **Tests**: +24 new (ThemePicker: 4, ThemePreviewModal: 5, theme-extensions: 7, customThemes: 8)
+- **Snapshot**: Updated for SettingsScreen
+
+### Test results
+
+- Frontend: 1457 tests passing (107 suites) — ESLint clean
+- Backend: 227 tests passing (25 suites)
+- Total: 1684 tests
+
+## Previous Round (Session 2026-07-15 — Round 16)
 
 ### Changes (Round 16 — Flaky test fix, 4 new themes)
 
@@ -151,7 +171,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
-- Tests: 1441 frontend (104 suites) + 219 backend (24 suites) = 1660 total
+- Tests: 1457 frontend (107 suites) + 227 backend (25 suites) = 1684 total
 - TypeScript: clean (0 errors) — frontend + backend
 - ESLint: clean (0 warnings) — frontend + backend
 - Themes: 14 total (dark, light, neon, matrix, 5tratum, crimson, ocean, lavender, midnight, nord, dracula, catppuccin, rosepine, system)

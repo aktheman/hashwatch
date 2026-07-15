@@ -512,3 +512,81 @@ export function clearThemeSchedule() {
   }
   scheduledMode = null;
 }
+
+export const THEME_MAP: Record<string, Theme> = {
+  dark: darkTheme,
+  light: lightTheme,
+  neon: neonTheme,
+  matrix: matrixTheme,
+  '5tratum': stratumTheme,
+  crimson: crimsonTheme,
+  ocean: oceanTheme,
+  lavender: lavenderTheme,
+  midnight: midnightTheme,
+  nord: nordTheme,
+  dracula: draculaTheme,
+  catppuccin: catppuccinTheme,
+  rosepine: rosepineTheme,
+};
+
+export const THEME_ORDER: string[] = [
+  'system',
+  'dark',
+  'light',
+  'neon',
+  'matrix',
+  '5tratum',
+  'crimson',
+  'ocean',
+  'lavender',
+  'midnight',
+  'nord',
+  'dracula',
+  'catppuccin',
+  'rosepine',
+];
+
+export const THEME_EMOJIS: Record<string, string> = {
+  system: '🔄',
+  dark: '🌙',
+  light: '☀',
+  neon: '💜',
+  matrix: '💚',
+  '5tratum': '🔶',
+  crimson: '🔴',
+  ocean: '🌊',
+  lavender: '🌸',
+  midnight: '🌃',
+  nord: '❄️',
+  dracula: '🧛',
+  catppuccin: '🐱',
+  rosepine: '🌲',
+};
+
+export function buildThemeFromColors(colors: Partial<Theme>): Theme {
+  const base = darkTheme;
+  return {
+    bg: colors.bg ?? base.bg,
+    surface: colors.surface ?? base.surface,
+    surfaceLight: colors.surfaceLight ?? base.surfaceLight,
+    border: colors.border ?? base.border,
+    primary: colors.primary ?? base.primary,
+    primaryLight: colors.primaryLight ?? base.primaryLight,
+    primaryDark: colors.primaryDark ?? base.primaryDark,
+    accent: colors.accent ?? base.accent,
+    success: colors.success ?? base.success,
+    successLight: colors.successLight ?? base.successLight,
+    danger: colors.danger ?? base.danger,
+    dangerLight: colors.dangerLight ?? base.dangerLight,
+    warning: colors.warning ?? base.warning,
+    warningLight: colors.warningLight ?? base.warningLight,
+    info: colors.info ?? base.info,
+    text: colors.text ?? base.text,
+    textDim: colors.textDim ?? base.textDim,
+    textMuted: colors.textMuted ?? base.textMuted,
+    glow: colors.glow ?? base.glow,
+    glowSuccess: colors.glowSuccess ?? base.glowSuccess,
+    glowDanger: colors.glowDanger ?? base.glowDanger,
+    glowWarning: colors.glowWarning ?? base.glowWarning,
+  };
+}

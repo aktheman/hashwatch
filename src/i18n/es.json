@@ -520,7 +520,11 @@
     "nord": "Nord",
     "dracula": "Drácula",
     "catppuccin": "Catppuccin",
-    "rosepine": "Pino Rosa"
+    "rosepine": "Pino Rosa",
+    "customEditor": "Editor de Temas",
+    "customThemes": "Temas Personalizados",
+    "createTheme": "Crear Tema",
+    "tapToApply": "Toca para aplicar · Mantén para previsualizar"
   },
   "tabs": {
     "dashboard": "Dashboard",
