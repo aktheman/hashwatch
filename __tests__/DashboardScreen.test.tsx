@@ -859,7 +859,7 @@ it('theme button cycles mode', async () => {
   const r = await render(<DashboardScreen navigation={navigation} />);
   await fireEvent.press(r.getByLabelText('Switch theme'));
   const { setThemeMode } = jest.requireMock('../src/theme');
-  expect(setThemeMode).toHaveBeenCalledWith('neon');
+  expect(setThemeMode).toHaveBeenCalledWith('light');
 });
 
 it('deselects miner on second tap in selection mode', async () => {

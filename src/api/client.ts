@@ -75,6 +75,8 @@ const client: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+export { client as apiClient };
+
 client.interceptors.request.use((config) => {
   const token = _getToken();
   if (token) {

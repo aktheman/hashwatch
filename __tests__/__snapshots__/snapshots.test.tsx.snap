@@ -2955,7 +2955,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -2999,8 +2999,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3075,7 +3075,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#6C63FF",
                               },
                             ],
                           },
@@ -3119,8 +3119,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": "undefined22",
-                            "borderColor": undefined,
+                            "backgroundColor": "#6C63FF22",
+                            "borderColor": "#6C63FF",
                           },
                         ],
                       },
@@ -3195,7 +3195,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3239,8 +3239,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3315,7 +3315,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3359,8 +3359,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3435,7 +3435,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3479,8 +3479,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3555,7 +3555,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3599,8 +3599,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3675,7 +3675,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3719,8 +3719,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3795,7 +3795,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3839,8 +3839,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -3915,7 +3915,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -3959,8 +3959,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -4035,7 +4035,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -4079,8 +4079,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -4155,7 +4155,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -4199,8 +4199,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -4275,7 +4275,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -4319,8 +4319,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -4395,7 +4395,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -4439,8 +4439,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -4515,7 +4515,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                                 "fontWeight": "600",
                               },
                               {
-                                "color": undefined,
+                                "color": "#FFFFFF",
                               },
                             ],
                           },
@@ -4559,8 +4559,8 @@ exports[`SettingsScreen matches snapshot 1`] = `
                             "width": "47%",
                           },
                           {
-                            "backgroundColor": undefined,
-                            "borderColor": undefined,
+                            "backgroundColor": "#13132B",
+                            "borderColor": "#1E1E42",
                           },
                         ],
                       },
@@ -5082,8 +5082,62 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "18",
-                            ":00",
+                            "5p",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 13,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Schedule dark mode at 17:00",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "6p",
                           ],
                           "props": {
                             "style": {
@@ -5138,8 +5192,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "19",
-                            ":00",
+                            "7p",
                           ],
                           "props": {
                             "style": {
@@ -5194,8 +5247,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "20",
-                            ":00",
+                            "8p",
                           ],
                           "props": {
                             "style": {
@@ -5250,8 +5302,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "21",
-                            ":00",
+                            "9p",
                           ],
                           "props": {
                             "style": {
@@ -5306,8 +5357,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "22",
-                            ":00",
+                            "10p",
                           ],
                           "props": {
                             "style": {
@@ -5362,8 +5412,7 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       "children": [
                         {
                           "children": [
-                            "23",
-                            ":00",
+                            "11p",
                           ],
                           "props": {
                             "style": {
@@ -5377,6 +5426,171 @@ exports[`SettingsScreen matches snapshot 1`] = `
                       ],
                       "props": {
                         "accessibilityLabel": "Schedule dark mode at 23:00",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "12a",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 13,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Schedule dark mode at 0:00",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "1a",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 13,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Schedule dark mode at 1:00",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "2a",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 13,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Schedule dark mode at 2:00",
                         "accessibilityRole": "button",
                         "accessibilityState": {
                           "busy": undefined,

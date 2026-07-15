@@ -26,10 +26,11 @@ export function ThemePreviewModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable style={styles.overlay} onPress={onClose} accessibilityLabel="Close theme preview">
         <Pressable
           style={[styles.card, { backgroundColor: t.bg, borderColor: t.border }]}
           onPress={(e) => e.stopPropagation()}
+          accessibilityLabel={`Theme preview: ${themeName}`}
         >
           <Text style={[styles.title, { color: t.text }]}>
             {emoji} {themeName}
@@ -75,6 +76,8 @@ export function ThemePreviewModal({
             <Pressable
               style={[styles.btn, { backgroundColor: t.surfaceLight, borderColor: t.border }]}
               onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close preview"
             >
               <Text style={{ color: t.text, fontSize: fontSize.base }}>Close</Text>
             </Pressable>
@@ -85,6 +88,8 @@ export function ThemePreviewModal({
               ]}
               onPress={onApply}
               disabled={isActive}
+              accessibilityRole="button"
+              accessibilityLabel={isActive ? 'Theme is active' : `Apply ${themeName} theme`}
             >
               <Text
                 style={{
