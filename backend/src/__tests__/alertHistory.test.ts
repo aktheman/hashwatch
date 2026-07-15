@@ -21,6 +21,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 describe('GET /api/alert-history', () => {
   it('returns alerts list', async () => {
     const fakeAlerts = [

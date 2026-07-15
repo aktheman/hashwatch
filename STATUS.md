@@ -16,8 +16,32 @@
 ### Test Results
 
 - **Frontend**: 1433 tests passing (104 suites) — ESLint clean
-- **Backend**: 218 tests passing (24 suites) — 1 flaky test in isolation only (alertHistory mock leak)
+- **Backend**: 218 tests passing (24 suites)
 - **Total**: 1651 tests
+
+---
+
+## Session Summary (2026-07-15 — Round 16)
+
+### Done
+
+- **Flaky Test Fix**: `alertHistory.test.ts` now passes consistently in full suite (added `afterEach(() => jest.restoreAllMocks())` to prevent mock leaking between Jest workers).
+- **4 New Themes**: Added Nord, Dracula, Catppuccin, and Rose Pine themes (14 total themes):
+  - `nordTheme`: Arctic blue-gray palette (Nord color scheme)
+  - `draculaTheme`: Purple-pink cyberpunk (Dracula color scheme)
+  - `catppuccinTheme`: Soft pastel dark theme (Catppuccin Mocha palette)
+  - `rosepineTheme`: Muted rose and pine tones (Rosé Pine palette)
+  - All 23 color properties per theme, contrast-validated
+- **Theme Picker**: SettingsScreen now shows 14 theme buttons with emoji icons (❄️🧛🐱🌲)
+- **i18n**: Theme names translated in all 6 locales (en/es/fr/de/ja/zh)
+- **Tests**: 8 new theme tests (42 total in theme.test.ts, was 22)
+- **Snapshot**: Updated for SettingsScreen with new theme buttons
+
+### Test Results
+
+- **Frontend**: 1441 tests passing (104 suites) — ESLint clean
+- **Backend**: 219 tests passing (24 suites) — no flaky tests
+- **Total**: 1660 tests
 
 ---
 

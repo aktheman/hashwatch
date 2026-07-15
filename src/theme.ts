@@ -203,6 +203,106 @@ export const midnightTheme: Theme = {
   glowWarning: 'rgba(245, 158, 11, 0.25)',
 };
 
+export const nordTheme: Theme = {
+  bg: '#2E3440',
+  surface: '#3B4252',
+  surfaceLight: '#434C5E',
+  border: '#4C566A',
+  primary: '#88C0D0',
+  primaryLight: '#8FBCBB',
+  primaryDark: '#5E81AC',
+  accent: '#81A1C1',
+  success: '#A3BE8C',
+  successLight: '#B4D8A0',
+  danger: '#BF616A',
+  dangerLight: '#D08770',
+  warning: '#EBCB8B',
+  warningLight: '#D8DEE9',
+  info: '#5E81AC',
+  text: '#ECEFF4',
+  textDim: '#A0AABF',
+  textMuted: '#616E88',
+  glow: 'rgba(136, 192, 208, 0.2)',
+  glowSuccess: 'rgba(163, 190, 140, 0.2)',
+  glowDanger: 'rgba(191, 97, 106, 0.2)',
+  glowWarning: 'rgba(235, 203, 139, 0.2)',
+};
+
+export const draculaTheme: Theme = {
+  bg: '#282A36',
+  surface: '#343746',
+  surfaceLight: '#3E4155',
+  border: '#44475A',
+  primary: '#FF79C6',
+  primaryLight: '#FF92D0',
+  primaryDark: '#BD93F9',
+  accent: '#BD93F9',
+  success: '#50FA7B',
+  successLight: '#69FF97',
+  danger: '#FF5555',
+  dangerLight: '#FF6E6E',
+  warning: '#F1FA8C',
+  warningLight: '#F4F4A8',
+  info: '#8BE9FD',
+  text: '#F8F8F2',
+  textDim: '#BFBFBF',
+  textMuted: '#6272A4',
+  glow: 'rgba(255, 121, 198, 0.25)',
+  glowSuccess: 'rgba(80, 250, 123, 0.25)',
+  glowDanger: 'rgba(255, 85, 85, 0.25)',
+  glowWarning: 'rgba(241, 250, 140, 0.25)',
+};
+
+export const catppuccinTheme: Theme = {
+  bg: '#1E1E2E',
+  surface: '#313244',
+  surfaceLight: '#45475A',
+  border: '#585B70',
+  primary: '#CBA6F7',
+  primaryLight: '#D4BFFF',
+  primaryDark: '#B4BEFE',
+  accent: '#F5C2E7',
+  success: '#A6E3A1',
+  successLight: '#BDFBC8',
+  danger: '#F38BA8',
+  dangerLight: '#F5A0BC',
+  warning: '#F9E2AF',
+  warningLight: '#FDF0D5',
+  info: '#89DCEB',
+  text: '#CDD6F4',
+  textDim: '#A6ADC8',
+  textMuted: '#6C7086',
+  glow: 'rgba(203, 166, 247, 0.2)',
+  glowSuccess: 'rgba(166, 227, 161, 0.2)',
+  glowDanger: 'rgba(243, 139, 168, 0.2)',
+  glowWarning: 'rgba(249, 226, 175, 0.2)',
+};
+
+export const rosepineTheme: Theme = {
+  bg: '#191724',
+  surface: '#1F1D2E',
+  surfaceLight: '#26233A',
+  border: '#393552',
+  primary: '#EB6F92',
+  primaryLight: '#F2A0B8',
+  primaryDark: '#C4A0D0',
+  accent: '#31748F',
+  success: '#9CCFD8',
+  successLight: '#B4E4EC',
+  danger: '#EB6F92',
+  dangerLight: '#F2A0B8',
+  warning: '#F6C177',
+  warningLight: '#F9DCA8',
+  info: '#9CCFD8',
+  text: '#E0DEF4',
+  textDim: '#908CAA',
+  textMuted: '#6E6A86',
+  glow: 'rgba(235, 111, 146, 0.2)',
+  glowSuccess: 'rgba(156, 207, 216, 0.2)',
+  glowDanger: 'rgba(235, 111, 146, 0.2)',
+  glowWarning: 'rgba(246, 193, 119, 0.2)',
+};
+
 export const lightTheme: Theme = {
   bg: '#F8F9FC',
   surface: '#FFFFFF',
@@ -239,7 +339,11 @@ let _mode:
   | 'crimson'
   | 'ocean'
   | 'lavender'
-  | 'midnight' = 'dark';
+  | 'midnight'
+  | 'nord'
+  | 'dracula'
+  | 'catppuccin'
+  | 'rosepine' = 'dark';
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -260,6 +364,10 @@ export function setTheme(t: Theme) {
   else if (t === oceanTheme) _mode = 'ocean';
   else if (t === lavenderTheme) _mode = 'lavender';
   else if (t === midnightTheme) _mode = 'midnight';
+  else if (t === nordTheme) _mode = 'nord';
+  else if (t === draculaTheme) _mode = 'dracula';
+  else if (t === catppuccinTheme) _mode = 'catppuccin';
+  else if (t === rosepineTheme) _mode = 'rosepine';
   else _mode = t === darkTheme ? 'dark' : 'light';
   listeners.forEach((cb) => cb());
 }
@@ -275,7 +383,11 @@ export function setThemeMode(
     | 'crimson'
     | 'ocean'
     | 'lavender'
-    | 'midnight',
+    | 'midnight'
+    | 'nord'
+    | 'dracula'
+    | 'catppuccin'
+    | 'rosepine',
 ) {
   _mode = mode;
   applyMode();
@@ -291,7 +403,11 @@ export function getThemeMode():
   | 'crimson'
   | 'ocean'
   | 'lavender'
-  | 'midnight' {
+  | 'midnight'
+  | 'nord'
+  | 'dracula'
+  | 'catppuccin'
+  | 'rosepine' {
   return _mode;
 }
 
@@ -314,6 +430,14 @@ function applyMode() {
     _current = lavenderTheme;
   } else if (_mode === 'midnight') {
     _current = midnightTheme;
+  } else if (_mode === 'nord') {
+    _current = nordTheme;
+  } else if (_mode === 'dracula') {
+    _current = draculaTheme;
+  } else if (_mode === 'catppuccin') {
+    _current = catppuccinTheme;
+  } else if (_mode === 'rosepine') {
+    _current = rosepineTheme;
   } else if (_mode === 'system') {
     const prefersDark =
       Platform.OS === 'web'

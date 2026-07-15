@@ -22,7 +22,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `__tests__/authToken.test.ts`: 6 tests (getter, setter, login callbacks)
 - `__tests__/networkStatus.test.ts`: 11 tests (online, offline, null fallback, catch, multi-listener, cleanup, onNetworkReconnect staying-online, staying-offline, override) + 1 untestable branch comment
 - `__tests__/version.test.ts`: 13 tests (parse, needsUpdate, fetch success/failure, changelog URL, fetchNetworkHashrate)
-- `__tests__/theme.test.ts`: 22 tests (all 5 themes, setThemeMode, mode tracking, custom themes, useTheme hook, system mode web/non-web/matchMedia)
+- `__tests__/theme.test.ts`: 42 tests (all 14 themes, setThemeMode, mode tracking, custom themes, useTheme hook, system mode web/non-web/matchMedia)
 - `__tests__/api-client.test.ts`: 28 tests (auth, interceptors, caching, error handling)
 - `__tests__/DashboardScreen.test.tsx`: 38 tests (filtering, upgrade banner, error banner, scanning, wallet/group filters, temp display, comparison selection mode, batch operations)
 - `__tests__/WalletsScreen.test.tsx`: 14 tests (CRUD, modal, color picker, validation)
@@ -55,7 +55,25 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-15 — Round 15)
+## Latest Round (Session 2026-07-15 — Round 16)
+
+### Changes (Round 16 — Flaky test fix, 4 new themes)
+
+- **Flaky test fix**: `alertHistory.test.ts` — added `afterEach(() => jest.restoreAllMocks())` to prevent mock leaking between Jest workers
+- **4 new themes**: `nordTheme`, `draculaTheme`, `catppuccinTheme`, `rosepineTheme` — all 23 color properties each
+- **Theme mode union**: updated to include `'nord' | 'dracula' | 'catppuccin' | 'rosepine'`
+- **SettingsScreen**: 14 theme buttons (added ❄️🧛🐱🌲)
+- **i18n**: 4 new theme name keys in all 6 locales (en/es/fr/de/ja/zh)
+- **Theme tests**: 42 total (was 22), +8 new tests for setTheme/setThemeMode/applyMode
+- **Snapshot**: updated for SettingsScreen theme picker
+
+### Test results
+
+- Frontend: 1441 tests passing (104 suites) — ESLint clean
+- Backend: 219 tests passing (24 suites) — no flaky tests
+- Total: 1660 tests
+
+## Previous Round (Session 2026-07-15 — Round 15)
 
 ### Changes (Round 15 — Backend security, structured logging, re-entrancy guard, OpenAPI)
 
@@ -133,9 +151,10 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
-- Tests: 1433 frontend (104 suites) + 218 backend (24 suites) = 1651 total
+- Tests: 1441 frontend (104 suites) + 219 backend (24 suites) = 1660 total
 - TypeScript: clean (0 errors) — frontend + backend
 - ESLint: clean (0 warnings) — frontend + backend
+- Themes: 14 total (dark, light, neon, matrix, 5tratum, crimson, ocean, lavender, midnight, nord, dracula, catppuccin, rosepine, system)
 - Backend security: push token ownership check, proxy size limits, method allowlist, webhook pagination
 - Backend logging: structured `log.error(...)` across all route files and services
 - i18n: `react-i18next` configured with en/es/de/fr/ja/zh locales, imported in `App.tsx`. All screens use `useTranslation()` — no hardcoded UI strings remain. Accessibility labels kept as readable English (screen readers need human-readable text, not i18n keys).

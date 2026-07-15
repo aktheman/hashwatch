@@ -473,7 +473,11 @@
     "crimson": "Purpurrot",
     "ocean": "Ozean",
     "lavender": "Lavendel",
-    "midnight": "Mitternacht"
+    "midnight": "Mitternacht",
+    "nord": "Nord",
+    "dracula": "Dracula",
+    "catppuccin": "Catppuccin",
+    "rosepine": "Rosenholz"
   },
   "tabs": {
     "dashboard": "Dashboard",
