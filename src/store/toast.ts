@@ -29,6 +29,7 @@ export const useToastStore = create<ToastStore>((set) => ({
       set({ undo: null });
       timers.delete(action.id);
     }, 5000);
+    timer.unref();
     timers.set(action.id, timer);
     set({ undo: action });
   },

@@ -76,7 +76,8 @@ export function FirmwareUpdateBanner({
 
             if (ok) {
               setSuccess(true);
-              setTimeout(() => setFirmware(null), 5000);
+              const t = setTimeout(() => setFirmware(null), 5000);
+              t.unref();
             } else {
               setError(t('firmwareBanner.flashFailed'));
             }

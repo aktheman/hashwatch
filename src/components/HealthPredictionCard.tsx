@@ -158,7 +158,11 @@ export const HealthPredictionCard = React.memo(function HealthPredictionCard({
   const hasPredictions = prediction.predictions.length > 0;
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      accessibilityRole="summary"
+      accessibilityLabel={t('healthPrediction.title')}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+    >
       <View style={styles.header}>
         <View style={[styles.badge, { backgroundColor: color + '20', borderColor: color }]}>
           <Text style={[styles.badgeText, { color }]}>

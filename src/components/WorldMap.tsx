@@ -156,7 +156,13 @@ export const WorldMap = React.memo(function WorldMap() {
         }
       }
 
-      labels.push({ x: clusterPos.x, y: clusterPos.y + 2.5, name: t(LOCATION_I18N_KEYS[loc] ?? '', loc), color, rawName: loc });
+      labels.push({
+        x: clusterPos.x,
+        y: clusterPos.y + 2.5,
+        name: t(LOCATION_I18N_KEYS[loc] ?? '', loc),
+        color,
+        rawName: loc,
+      });
     }
 
     for (
@@ -273,7 +279,7 @@ export const WorldMap = React.memo(function WorldMap() {
           const healthColor = miner ? getHealthColor(miner, theme) : theme.textMuted;
           return (
             <Circle
-              key={i}
+              key={miner?.id ?? `dot-${i}`}
               cx={dot.x}
               cy={dot.y}
               r={1.5 + (i % 3) * 0.4}

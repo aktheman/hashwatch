@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Miner } from '../types';
@@ -24,13 +25,17 @@ interface MinerSnapshotCardProps {
   miner: Miner;
 }
 
-export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
+export const MinerSnapshotCard = React.memo(function MinerSnapshotCard({
+  miner,
+}: MinerSnapshotCardProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const s = miner.status;
 
   return (
     <View
+      accessibilityRole="button"
+      accessibilityLabel={`Miner snapshot for ${miner.name}`}
       style={{
         backgroundColor: theme.surface,
         borderRadius: radius.xl,
@@ -121,7 +126,9 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
       {s && (
         <View style={{ width: '100%', gap: spacing.xxs }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>{t('snapshot.power')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+              {t('snapshot.power')}
+            </Text>
             <Text
               style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
             >
@@ -129,7 +136,9 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>{t('snapshot.efficiency')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+              {t('snapshot.efficiency')}
+            </Text>
             <Text
               style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
             >
@@ -137,7 +146,9 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>{t('snapshot.shares')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+              {t('snapshot.shares')}
+            </Text>
             <Text
               style={{ color: theme.text, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
             >
@@ -145,7 +156,9 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>{t('snapshot.pool')}</Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+              {t('snapshot.pool')}
+            </Text>
             <Text
               style={{
                 color: theme.text,
@@ -165,4 +178,4 @@ export function MinerSnapshotCard({ miner }: MinerSnapshotCardProps) {
       </Text>
     </View>
   );
-}
+});

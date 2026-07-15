@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,10 @@ interface PoolCoverageProps {
   minersCount: number;
 }
 
-export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
+export const PoolCoverage = React.memo(function PoolCoverage({
+  pools,
+  minersCount,
+}: PoolCoverageProps) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -39,6 +42,8 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
 
   return (
     <View
+      accessibilityRole="summary"
+      accessibilityLabel={`${t('poolCoverage.title')} ${coverage}%`}
       style={{
         backgroundColor: theme.surface,
         borderRadius: radius.xl,
@@ -108,4 +113,4 @@ export function PoolCoverage({ pools, minersCount }: PoolCoverageProps) {
       </Text>
     </View>
   );
-}
+});

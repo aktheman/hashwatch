@@ -252,7 +252,8 @@
     "debugProTitle": "Debug",
     "debugProBody": "Pro status set",
     "debugFreeBody": "Free status set",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "noActiveEntitlements": "No active entitlements"
   },
   "minerDetail": {
     "notFound": "Miner Not Found",
@@ -316,7 +317,14 @@
     "recentPoolChanges": "Recent Pool Changes",
     "port": "Port",
     "poolUpdated": "Pool updated",
-    "poolUpdateFailed": "Failed to update pool"
+    "poolUpdateFailed": "Failed to update pool",
+    "locationHome": "Home",
+    "locationOffice": "Office",
+    "locationDataCenter": "Data Center",
+    "locationMiningFarm": "Mining Farm",
+    "locationColocation": "Colocation",
+    "powerModeStandard": "Standard",
+    "powerModeECO": "ECO"
   },
   "addMiner": {
     "addByIp": "Add by IP",
@@ -450,7 +458,8 @@
     "success": "Import Successful",
     "minersImported": "{{count}} miner(s) imported",
     "snapshotsImported": "{{count}} snapshot(s) imported",
-    "walletsImported": "{{count}} wallet(s) imported"
+    "walletsImported": "{{count}} wallet(s) imported",
+    "invalidData": "Invalid data"
   },
   "onboarding": {
     "skip": "Skip",
@@ -692,7 +701,9 @@
     "webhookDescription": "Receive POST requests when miner alerts fire.",
     "csvErrors": "CSV Errors",
     "noValidRows": "No valid rows",
-    "checkCsvColumns": "Check that your CSV has \"name\" and \"ip\" columns."
+    "checkCsvColumns": "Check that your CSV has \"name\" and \"ip\" columns.",
+    "webhookSaved": "Webhook URL saved",
+    "updateAvailable": "Update v{{version}} Available"
   },
   "snapshot": {
     "hashrate": "Hashrate",

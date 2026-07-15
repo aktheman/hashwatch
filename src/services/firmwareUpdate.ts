@@ -21,7 +21,11 @@ export interface FirmwareUpdateState {
   error: string | null;
 }
 
-const GITHUB_API = 'https://api.github.com/repos/bitaxeorg/AXeOS/releases/latest';
+const FIRMWARE_CHECK_TIMEOUT_MS = 10000;
+const FIRMWARE_FLASH_TIMEOUT_MS = 120000;
+const AXEOS_GITHUB_REPO = 'bitaxeorg/AXeOS';
+
+const GITHUB_API = `https://api.github.com/repos/${AXEOS_GITHUB_REPO}/releases/latest`;
 
 export async function checkForFirmwareUpdate(
   currentVersion: string,
@@ -40,12 +44,12 @@ export async function checkForFirmwareUpdate(
       const res = await axios.post(
         `${getProxyUrl()}/api/proxy/firmware-check`,
         { currentVersion },
-        { timeout: 10000, headers },
+        { timeout: FIRMWARE_CHECK_TIMEOUT_MS, headers },
       );
       data = res.data;
     } else {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 10000);
+      const id = setTimeout(() => controller.abort(), FIRMWARE_CHECK_TIMEOUT_MS);
       if (typeof id === 'object' && id !== null && 'unref' in id) {
         (id as { unref: () => void }).unref();
       }
@@ -108,7 +112,7 @@ export async function flashFirmware(
           minerIp,
           firmwareUrl: firmware.downloadUrl,
         },
-        { timeout: 120000, headers, validateStatus: () => true },
+        { timeout: FIRMWARE_FLASH_TIMEOUT_MS, headers, validateStatus: () => true },
       );
       onProgress(100);
       return res.data?.success === true;

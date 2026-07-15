@@ -1,10 +1,12 @@
 import { Platform, NativeModules } from 'react-native';
 import type { Miner } from '../types';
 
+const DYNAMIC_ISLAND_IOS_VERSION = 16;
+
 export function isDynamicIslandSupported(): boolean {
   if (Platform.OS !== 'ios') return false;
   const majorVersion = parseInt(String(Platform.Version), 10);
-  return majorVersion >= 16;
+  return majorVersion >= DYNAMIC_ISLAND_IOS_VERSION;
 }
 
 function computeIslandData(miners: Miner[]) {

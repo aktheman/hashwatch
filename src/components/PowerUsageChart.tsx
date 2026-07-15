@@ -83,7 +83,11 @@ export const PowerUsageChart = React.memo(function PowerUsageChart({
   }
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      accessibilityRole="image"
+      accessibilityLabel={t('analytics.power', 'Power (W)')}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+    >
       <Text style={[styles.title, { color: theme.textDim }]}>
         {t('analytics.power', 'Power (W)')}
       </Text>
@@ -91,17 +95,25 @@ export const PowerUsageChart = React.memo(function PowerUsageChart({
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
           <Text style={[styles.summaryValue, { color: theme.warning }]}>{chart.totalPower}W</Text>
-          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{t('powerUsage.total', 'Total')}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>
+            {t('powerUsage.total', 'Total')}
+          </Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryValue, { color: theme.info }]}>{chart.maxPower.toFixed(0)}W</Text>
-          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{t('powerUsage.peak', 'Peak')}</Text>
+          <Text style={[styles.summaryValue, { color: theme.info }]}>
+            {chart.maxPower.toFixed(0)}W
+          </Text>
+          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>
+            {t('powerUsage.peak', 'Peak')}
+          </Text>
         </View>
         <View style={styles.summaryItem}>
           <Text style={[styles.summaryValue, { color: theme.success }]}>
             {(chart.totalPower / chart.minerCount).toFixed(0)}W
           </Text>
-          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{t('powerUsage.avg', 'Avg')}</Text>
+          <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>
+            {t('powerUsage.avg', 'Avg')}
+          </Text>
         </View>
       </View>
 
@@ -117,26 +129,26 @@ export const PowerUsageChart = React.memo(function PowerUsageChart({
       </Svg>
 
       <View style={styles.minerBars}>
-        {miners.filter((m) => m.isOnline).slice(0, 5).map((m) => {
-          const power = m.status?.power ?? 0;
-          const pct = Math.min((power / chart.maxPower) * 100, 100);
-          return (
-            <View key={m.id} style={styles.barRow}>
-              <Text style={[styles.barLabel, { color: theme.textMuted }]} numberOfLines={1}>
-                {m.name.slice(0, 10)}
-              </Text>
-              <View style={[styles.barTrack, { backgroundColor: theme.surfaceLight }]}>
-                <View
-                  style={[
-                    styles.barFill,
-                    { width: `${pct}%`, backgroundColor: theme.warning },
-                  ]}
-                />
+        {miners
+          .filter((m) => m.isOnline)
+          .slice(0, 5)
+          .map((m) => {
+            const power = m.status?.power ?? 0;
+            const pct = Math.min((power / chart.maxPower) * 100, 100);
+            return (
+              <View key={m.id} style={styles.barRow}>
+                <Text style={[styles.barLabel, { color: theme.textMuted }]} numberOfLines={1}>
+                  {m.name.slice(0, 10)}
+                </Text>
+                <View style={[styles.barTrack, { backgroundColor: theme.surfaceLight }]}>
+                  <View
+                    style={[styles.barFill, { width: `${pct}%`, backgroundColor: theme.warning }]}
+                  />
+                </View>
+                <Text style={[styles.barValue, { color: theme.text }]}>{power}W</Text>
               </View>
-              <Text style={[styles.barValue, { color: theme.text }]}>{power}W</Text>
-            </View>
-          );
-        })}
+            );
+          })}
       </View>
     </View>
   );

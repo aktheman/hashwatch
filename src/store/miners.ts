@@ -1,7 +1,16 @@
 import { create } from 'zustand';
 import { AppState } from 'react-native';
 import pLimit from 'p-limit';
-import { Miner, MinerInfo, MinerSnapshot, MinerStatus, AutoAssignRule, GroupConfig, GroupAlertConfig, MinerNoteItem } from '../types';
+import {
+  Miner,
+  MinerInfo,
+  MinerSnapshot,
+  MinerStatus,
+  AutoAssignRule,
+  GroupConfig,
+  GroupAlertConfig,
+  MinerNoteItem,
+} from '../types';
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
@@ -15,6 +24,8 @@ import {
   estimateBTCPerDay,
   formatBTC,
 } from '../utils/hashrate';
+
+let refreshing = false;
 
 function generateId(): string {
   return `miner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -255,11 +266,35 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   },
 
   refreshAll: async () => {
-    const prev = get().miners;
-    const now = Date.now();
-    const nav = navigator as Navigator & { onLine?: boolean };
-    if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+    if (refreshing) return;
+    refreshing = true;
+    try {
+      const prev = get().miners;
+      const now = Date.now();
+      const nav = navigator as Navigator & { onLine?: boolean };
+      if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+        const current = get().miners;
+        const totalHash = current.reduce(
+          (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+          0,
+        );
+        const online = current.filter((m) => m.isOnline).length;
+        const btc = estimateBTCPerDay(totalHash);
+        updateWidget(
+          totalHash > 0 ? formatHashrateValue(totalHash) : '---',
+          online,
+          current.length,
+          btc > 0 ? formatBTC(btc) : '---',
+        );
+        set({ lastRefreshTimestamp: now });
+        return;
+      }
+      const limit = pLimit(20);
+      await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
       const current = get().miners;
+      if (current.length > 0) {
+        checkMinerAlerts(prev, current);
+      }
       const totalHash = current.reduce(
         (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
         0,
@@ -273,27 +308,9 @@ export const useMinerStore = create<MinersState>((set, get) => ({
         btc > 0 ? formatBTC(btc) : '---',
       );
       set({ lastRefreshTimestamp: now });
-      return;
+    } finally {
+      refreshing = false;
     }
-    const limit = pLimit(20);
-    await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
-    const current = get().miners;
-    if (current.length > 0) {
-      checkMinerAlerts(prev, current);
-    }
-    const totalHash = current.reduce(
-      (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-      0,
-    );
-    const online = current.filter((m) => m.isOnline).length;
-    const btc = estimateBTCPerDay(totalHash);
-    updateWidget(
-      totalHash > 0 ? formatHashrateValue(totalHash) : '---',
-      online,
-      current.length,
-      btc > 0 ? formatBTC(btc) : '---',
-    );
-    set({ lastRefreshTimestamp: now });
   },
 
   startPolling: (intervalMs: number = 30000) => {
@@ -462,7 +479,11 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   setMinerNotes: async (minerId: string, notes: string, noteItems?: MinerNoteItem[]) => {
     const miner = get().miners.find((m) => m.id === minerId);
     if (!miner) return;
-    const updated = { ...miner, notes: notes || undefined, noteItems: noteItems || miner.noteItems };
+    const updated = {
+      ...miner,
+      notes: notes || undefined,
+      noteItems: noteItems || miner.noteItems,
+    };
     await DB.saveMiner(updated);
     set((s) => ({
       miners: s.miners.map((m) => (m.id === minerId ? updated : m)),

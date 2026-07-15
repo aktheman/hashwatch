@@ -1618,6 +1618,253 @@
           }
         }
       }
+    },
+    "/webhooks/logs": {
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "List webhook delivery logs (paginated)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 50, "maximum": 200 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated webhook logs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/WebhookLog" }
+                    },
+                    "total": { "type": "integer" },
+                    "limit": { "type": "integer" },
+                    "offset": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Webhooks"],
+        "summary": "Clear all webhook logs",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logs cleared",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/DeleteResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/pool-analytics/config": {
+      "get": {
+        "tags": ["Pool Analytics"],
+        "summary": "Get pool analytics API config (keys masked)",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pool config",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/PoolConfig" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pool Analytics"],
+        "summary": "Save pool analytics API config",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PoolConfigSaveRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Config saved",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/OkResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/pool-analytics": {
+      "get": {
+        "tags": ["Pool Analytics"],
+        "summary": "Fetch pool analytics stats",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pool stats",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PoolAnalyticsStats" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/share": {
+      "post": {
+        "tags": ["Group Sharing"],
+        "summary": "Share a miner group with another user",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/GroupShareRequest" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Group shared" },
+          "400": { "description": "Invalid email" },
+          "409": { "description": "Already shared" }
+        }
+      }
+    },
+    "/groups": {
+      "get": {
+        "tags": ["Group Sharing"],
+        "summary": "List shared groups",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of group shares",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GroupShare" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/{id}": {
+      "put": {
+        "tags": ["Group Sharing"],
+        "summary": "Update group share access level",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "accessLevel": { "type": "string", "enum": ["view", "edit"] } }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Share updated" } }
+      },
+      "delete": {
+        "tags": ["Group Sharing"],
+        "summary": "Revoke a group share",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Share revoked" } }
+      }
+    },
+    "/groups/shared-miners": {
+      "get": {
+        "tags": ["Group Sharing"],
+        "summary": "Get miners shared with the authenticated user",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Shared miners",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Miner" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/pool": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Change pool settings on a miner",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "minerUrl": { "type": "string" },
+                  "body": { "description": "Pool config payload" }
+                },
+                "required": ["minerUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pool change result" },
+          "502": { "description": "Could not update pool" }
+        }
+      }
+    },
+    "/proxy/flash-firmware": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Flash firmware OTA to a miner by IP",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "minerIp": { "type": "string" },
+                  "firmwareUrl": { "type": "string" }
+                },
+                "required": ["minerIp", "firmwareUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Flash result" },
+          "403": { "description": "Forbidden URL" },
+          "502": { "description": "Miner unreachable" }
+        }
+      }
     }
   },
   "components": {
@@ -2312,6 +2559,62 @@
               }
             }
           }
+        }
+      },
+      "WebhookLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "event": { "type": "string" },
+          "url": { "type": "string" },
+          "status": { "type": "string" },
+          "responseCode": { "type": "integer" },
+          "sentAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PoolConfig": {
+        "type": "object",
+        "properties": {
+          "provider": { "type": "string", "enum": ["braiins", "luxor"] },
+          "apiKey": { "type": "string", "description": "Masked (****XXXX)" },
+          "poolUser": { "type": "string" }
+        }
+      },
+      "PoolConfigSaveRequest": {
+        "type": "object",
+        "required": ["provider", "apiKey", "poolUser"],
+        "properties": {
+          "provider": { "type": "string", "enum": ["braiins", "luxor"] },
+          "apiKey": { "type": "string" },
+          "poolUser": { "type": "string" }
+        }
+      },
+      "PoolAnalyticsStats": {
+        "type": "object",
+        "properties": {
+          "hashrate": { "type": "number" },
+          "earnings": { "type": "number" },
+          "luck": { "type": "number" },
+          "payouts": { "type": "number" }
+        }
+      },
+      "GroupShareRequest": {
+        "type": "object",
+        "required": ["groupId", "email"],
+        "properties": {
+          "groupId": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "accessLevel": { "type": "string", "enum": ["view", "edit"], "default": "view" }
+        }
+      },
+      "GroupShare": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "groupId": { "type": "string" },
+          "sharedWith": { "type": "string" },
+          "accessLevel": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       }
     }

@@ -1,11 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useNetworkStatus } from '../services/networkStatus';
 import { spacing, fontSize, fontWeight } from '../utils/design';
 
-export function OfflineBanner() {
+export const OfflineBanner = React.memo(function OfflineBanner() {
   const { t } = useTranslation();
   const { isOnline } = useNetworkStatus();
   const theme = useTheme();
@@ -39,4 +39,4 @@ export function OfflineBanner() {
       <Text style={styles.text}>{t('offlineBanner.offline')}</Text>
     </View>
   );
-}
+});

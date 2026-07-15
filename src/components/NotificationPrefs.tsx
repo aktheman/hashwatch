@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -32,7 +32,9 @@ async function setLocalPref(minerId: string, alertType: string, enabled: boolean
   await DB.setSetting(`notify_${minerId}`, JSON.stringify(prefs));
 }
 
-export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
+export const NotificationPrefs = React.memo(function NotificationPrefs({
+  minerId,
+}: NotificationPrefsProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const token = useAuthStore((s) => s.token);
@@ -67,19 +69,24 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
     };
   }, [minerId, token]);
 
-  if (!prefs) return null;
-
-  const toggle = async (alertType: string, enabled: boolean) => {
-    setPrefs((p) => (p ? { ...p, [alertType]: enabled } : p));
-    try {
-      if (token) {
-        await setNotificationPref(minerId, alertType, enabled);
+  const toggle = useCallback(
+    async (alertType: string, enabled: boolean) => {
+      setPrefs((p) => (p ? { ...p, [alertType]: enabled } : p));
+      try {
+        if (token) {
+          await setNotificationPref(minerId, alertType, enabled);
+        }
+        await setLocalPref(minerId, alertType, enabled);
+      } catch {
+        setPrefs((p) => (p ? { ...p, [alertType]: !enabled } : p));
       }
-      await setLocalPref(minerId, alertType, enabled);
-    } catch {
-      setPrefs((p) => (p ? { ...p, [alertType]: !enabled } : p));
-    }
-  };
+    },
+    [minerId, token],
+  );
+
+  const makeToggleHandler = useCallback((k: string) => (v: boolean) => toggle(k, v), [toggle]);
+
+  if (!prefs) return null;
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -89,7 +96,7 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
           <Text style={[styles.label, { color: theme.text }]}>{t(label)}</Text>
           <Switch
             value={prefs[key] ?? true}
-            onValueChange={(v) => toggle(key, v)}
+            onValueChange={makeToggleHandler(key)}
             trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
             thumbColor={prefs[key] ? theme.primary : theme.textMuted}
             accessibilityLabel={`${t(label)} notification`}
@@ -98,7 +105,7 @@ export function NotificationPrefs({ minerId }: NotificationPrefsProps) {
       ))}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

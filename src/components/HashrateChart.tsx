@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
@@ -12,7 +12,10 @@ interface HashrateChartProps {
   title?: string;
 }
 
-export function HashrateChart({ snapshots, title }: HashrateChartProps) {
+export const HashrateChart = React.memo(function HashrateChart({
+  snapshots,
+  title,
+}: HashrateChartProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -137,4 +140,4 @@ export function HashrateChart({ snapshots, title }: HashrateChartProps) {
       </View>
     </View>
   );
-}
+});

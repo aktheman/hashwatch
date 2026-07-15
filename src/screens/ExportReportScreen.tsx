@@ -380,7 +380,7 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
             previewMiners.map((m) => (
               <View key={m.id} style={styles.previewRow}>
                 <Text style={styles.previewText}>
-                  {m.name} · {m.ip} · {m.isOnline ? 'Online' : 'Offline'}
+                  {m.name} · {m.ip} · {m.isOnline ? t('common.online') : t('common.offline')}
                 </Text>
               </View>
             ))

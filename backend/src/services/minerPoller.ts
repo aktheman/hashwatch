@@ -2,6 +2,12 @@ import { query } from '../db';
 import { checkMinerStatus } from './minerMonitor';
 import { broadcast } from '../ws';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 interface MinerRow {
   id: string;
   userid: string;
@@ -128,7 +134,7 @@ let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
 export function startMinerPoller(): void {
   if (intervalHandle) return;
-  console.log(`Miner poller started (every ${POLL_INTERVAL / 1000}s)`);
+  log.info(`Miner poller started (every ${POLL_INTERVAL / 1000}s)`);
   pollAll();
   intervalHandle = setInterval(pollAll, POLL_INTERVAL).unref();
 }

@@ -46,7 +46,7 @@ export function ImportDataScreen() {
         }),
       );
     } catch (e: unknown) {
-      Alert.alert(t('import.failed'), e instanceof Error ? e.message : 'Invalid data');
+      Alert.alert(t('import.failed'), e instanceof Error ? e.message : t('import.invalidData'));
     } finally {
       setImporting(false);
     }

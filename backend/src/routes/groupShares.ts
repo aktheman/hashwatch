@@ -3,6 +3,12 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { invalidateCache } from '../middleware/cache';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 export const groupSharesRouter = Router();
 groupSharesRouter.use(authMiddleware);
 
@@ -11,6 +17,9 @@ groupSharesRouter.post('/share', async (req: AuthRequest, res) => {
     const { groupId, email, accessLevel } = req.body;
     if (!groupId || !email) {
       return res.status(400).json({ error: 'groupId and email are required' });
+    }
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
     const level = accessLevel === 'edit' ? 'edit' : 'view';
     const userResult = await query('SELECT id FROM users WHERE email = $1', [email]);
@@ -40,9 +49,8 @@ groupSharesRouter.post('/share', async (req: AuthRequest, res) => {
     invalidateCache('/api/groups');
     res.status(201).json({ id: result.rows[0].id, accessLevel: result.rows[0].accessLevel });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error sharing group:', message);
-    res.status(500).json({ error: message });
+    log.error('Error sharing group:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -59,9 +67,8 @@ groupSharesRouter.get('/share', async (req: AuthRequest, res) => {
     );
     res.json(result.rows);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error listing shared with me:', message);
-    res.status(500).json({ error: message });
+    log.error('Error listing shared with me:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -76,9 +83,8 @@ groupSharesRouter.get('/shared-by-me', async (req: AuthRequest, res) => {
     );
     res.json(result.rows);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error listing shared by me:', message);
-    res.status(500).json({ error: message });
+    log.error('Error listing shared by me:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -97,9 +103,8 @@ groupSharesRouter.put('/share/:id', async (req: AuthRequest, res) => {
     invalidateCache('/api/groups');
     res.json({ id: result.rows[0].id, accessLevel: result.rows[0].accessLevel });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error updating share:', message);
-    res.status(500).json({ error: message });
+    log.error('Error updating share:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -116,9 +121,8 @@ groupSharesRouter.delete('/share/:id', async (req: AuthRequest, res) => {
     invalidateCache('/api/groups');
     res.json({ deleted: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error revoking share:', message);
-    res.status(500).json({ error: message });
+    log.error('Error revoking share:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -144,8 +148,7 @@ groupSharesRouter.get('/shared-miners/:groupId', async (req: AuthRequest, res) =
     );
     res.json({ miners: result.rows, accessLevel: shareCheck.rows[0].accessLevel });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    console.error('Error fetching shared miners:', message);
-    res.status(500).json({ error: message });
+    log.error('Error fetching shared miners:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });

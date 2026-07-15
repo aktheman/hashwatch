@@ -228,7 +228,8 @@
     "debugProBody": "Pro 状态已设置",
     "debugFreeBody": "Free 状态已设置",
     "cancel": "取消",
-    "unknownError": "未知错误"
+    "unknownError": "未知错误",
+    "noActiveEntitlements": "无有效权限"
   },
   "minerDetail": {
     "notFound": "未找到矿机",
@@ -291,7 +292,14 @@
     "recentPoolChanges": "最近的矿池变更",
     "port": "端口",
     "poolUpdated": "矿池已更新",
-    "poolUpdateFailed": "更新矿池失败"
+    "poolUpdateFailed": "更新矿池失败",
+    "locationHome": "家庭",
+    "locationOffice": "办公室",
+    "locationDataCenter": "数据中心",
+    "locationMiningFarm": "矿场",
+    "locationColocation": "托管",
+    "powerModeStandard": "标准",
+    "powerModeECO": "ECO"
   },
   "addMiner": {
     "addByIp": "通过 IP 添加",
@@ -425,7 +433,8 @@
     "success": "导入成功",
     "minersImported": "已导入 {{count}} 台矿机",
     "snapshotsImported": "已导入 {{count}} 个快照",
-    "walletsImported": "已导入 {{count}} 个钱包"
+    "walletsImported": "已导入 {{count}} 个钱包",
+    "invalidData": "无效数据"
   },
   "onboarding": {
     "skip": "跳过",
@@ -667,7 +676,9 @@
     "webhookDescription": "当矿机警报触发时接收POST请求。",
     "csvErrors": "CSV错误",
     "noValidRows": "没有有效行",
-    "checkCsvColumns": "请检查您的CSV是否包含\"name\"和\"ip\"列。"
+    "checkCsvColumns": "请检查您的CSV是否包含\"name\"和\"ip\"列。",
+    "webhookSaved": "Webhook URL 已保存",
+    "updateAvailable": "更新 v{{version}} 可用"
   },
   "snapshot": {
     "hashrate": "算力",

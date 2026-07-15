@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ interface FirmwareBannerProps {
   statusPath?: string | null;
 }
 
-export function FirmwareBanner({
+export const FirmwareBanner = React.memo(function FirmwareBanner({
   rawVersion,
   minerIp,
   minerPort,
@@ -181,7 +181,7 @@ export function FirmwareBanner({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

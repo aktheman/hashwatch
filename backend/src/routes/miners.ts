@@ -5,6 +5,12 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { captureException } from '../services/sentry';
 import { listPoolStats } from '../services/minerState';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 export const minersRouter = Router();
 minersRouter.use(authMiddleware);
 
@@ -17,10 +23,15 @@ const minerSchema = z.object({
 const getUserId = (req: AuthRequest) => req.userId as string;
 
 minersRouter.get('/', async (req: AuthRequest, res) => {
-  const result = await query('SELECT * FROM miners WHERE userId = $1 ORDER BY addedAt DESC', [
-    getUserId(req),
-  ]);
-  res.json(result.rows);
+  try {
+    const result = await query('SELECT * FROM miners WHERE userId = $1 ORDER BY addedAt DESC', [
+      getUserId(req),
+    ]);
+    res.json(result.rows);
+  } catch (err: unknown) {
+    log.error('Error fetching miners:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 minersRouter.post('/', async (req: AuthRequest, res) => {
@@ -88,15 +99,20 @@ minersRouter.put('/:id', async (req: AuthRequest, res) => {
 });
 
 minersRouter.delete('/:id', async (req: AuthRequest, res) => {
-  const id = req.params.id;
-  const result = await query('DELETE FROM miners WHERE id = $1 AND userId = $2 RETURNING id', [
-    id,
-    getUserId(req),
-  ]);
-  if (result.rows.length === 0) {
-    return res.status(404).json({ error: 'miner not found' });
+  try {
+    const id = req.params.id;
+    const result = await query('DELETE FROM miners WHERE id = $1 AND userId = $2 RETURNING id', [
+      id,
+      getUserId(req),
+    ]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'miner not found' });
+    }
+    res.json({ deleted: true });
+  } catch (err: unknown) {
+    log.error('Error deleting miner:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  res.json({ deleted: true });
 });
 
 minersRouter.get('/pools', async (_req: AuthRequest, res) => {

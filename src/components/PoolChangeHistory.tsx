@@ -56,7 +56,11 @@ export function PoolChangeHistory({ minerId }: Props) {
   if (error || changes.length === 0) return null;
 
   return (
-    <View style={{ marginTop: spacing.xs, gap: spacing.xxs }}>
+    <View
+      accessibilityRole="list"
+      accessibilityLabel={t('minerDetail.recentPoolChanges', 'Recent Pool Changes')}
+      style={{ marginTop: spacing.xs, gap: spacing.xxs }}
+    >
       <Text
         style={{
           color: theme.textDim,
@@ -68,9 +72,9 @@ export function PoolChangeHistory({ minerId }: Props) {
       >
         {t('minerDetail.recentPoolChanges', 'Recent Pool Changes')}
       </Text>
-      {changes.map((c, i) => (
+      {changes.map((c) => (
         <View
-          key={i}
+          key={`${c.newpool}-${c.changedat}`}
           style={{
             flexDirection: 'row',
             alignItems: 'center',

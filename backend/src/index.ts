@@ -29,6 +29,12 @@ import { webhooksRouter } from './routes/webhooks';
 import { poolAnalyticsRouter } from './routes/poolAnalytics';
 import { groupSharesRouter } from './routes/groupShares';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 const app = express();
 const server = createServer(app);
 createWebSocketServer(server, '/ws');
@@ -95,7 +101,7 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Unhandled error:', err.message);
+  log.error('Unhandled error:', err.message);
   res.status(500).json({ error: 'internal server error' });
 });
 
@@ -104,9 +110,9 @@ async function initSchema() {
     const schemaPath = join(__dirname, 'models', 'schema.sql');
     const sql = readFileSync(schemaPath, 'utf-8');
     await query(sql);
-    console.log('DB schema initialized');
+    log.info('DB schema initialized');
   } catch (e) {
-    console.error('Schema init error:', e);
+    log.error('Schema init error:', e);
   }
 }
 
@@ -121,7 +127,7 @@ function validateEnv() {
     }
   }
   if (!process.env.RAILWAY_API_TOKEN || process.env.RAILWAY_API_TOKEN.trim() === '') {
-    console.warn(
+    log.warn(
       'Optional env var RAILWAY_API_TOKEN is missing; Railway-specific features are disabled',
     );
   }
@@ -132,21 +138,21 @@ initSentry();
 initSchema().then(() => {
   invalidateCache();
   server.listen(PORT, () => {
-    console.log(`HashWatch API running on :${PORT}`);
+    log.info(`HashWatch API running on :${PORT}`);
     startMinerPoller();
   });
 });
 
 function gracefulShutdown(signal: string) {
-  console.log(`Received ${signal}, shutting down gracefully...`);
+  log.info(`Received ${signal}, shutting down gracefully...`);
   stopMinerPoller();
   invalidateCache();
   server.close(() => {
-    console.log('HTTP server closed');
+    log.info('HTTP server closed');
     process.exit(0);
   });
   setTimeout(() => {
-    console.error('Forced shutdown after timeout');
+    log.error('Forced shutdown after timeout');
     process.exit(1);
   }, 10000);
 }

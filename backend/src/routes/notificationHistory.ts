@@ -2,21 +2,32 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 export const notificationHistoryRouter = Router();
 notificationHistoryRouter.use(authMiddleware);
 
 notificationHistoryRouter.get('/', async (req: AuthRequest, res) => {
-  const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
-  const offset = parseInt(req.query.offset as string) || 0;
-  const result = await query(
-    `SELECT id, token, title, body, data, sentAt, status
-     FROM notification_history
-     WHERE userId = $1
-     ORDER BY sentAt DESC
-     LIMIT $2 OFFSET $3`,
-    [req.userId as string, limit, offset],
-  );
-  res.json(result.rows);
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const result = await query(
+      `SELECT id, token, title, body, data, sentAt, status
+       FROM notification_history
+       WHERE userId = $1
+       ORDER BY sentAt DESC
+       LIMIT $2 OFFSET $3`,
+      [req.userId as string, limit, offset],
+    );
+    res.json(result.rows);
+  } catch (err: unknown) {
+    log.error('Error fetching notification history:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 notificationHistoryRouter.post('/sync', async (req: AuthRequest, res) => {
@@ -51,6 +62,11 @@ notificationHistoryRouter.post('/sync', async (req: AuthRequest, res) => {
 });
 
 notificationHistoryRouter.delete('/', async (req: AuthRequest, res) => {
-  await query('DELETE FROM notification_history WHERE userId = $1', [req.userId as string]);
-  res.json({ ok: true });
+  try {
+    await query('DELETE FROM notification_history WHERE userId = $1', [req.userId as string]);
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error clearing notification history:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });

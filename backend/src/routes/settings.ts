@@ -2,6 +2,12 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 
+const log = {
+  info: (...args: unknown[]) => console.log('[INFO]', ...args),
+  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
+  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
+};
+
 export const settingsRouter = Router();
 settingsRouter.use(authMiddleware);
 
@@ -17,17 +23,29 @@ settingsRouter.get('/', async (req: AuthRequest, res) => {
 });
 
 settingsRouter.put('/', async (req: AuthRequest, res) => {
-  const { key, value } = req.body;
-  if (!key || typeof key !== 'string') {
-    return res.status(400).json({ error: 'key is required' });
+  try {
+    const { key, value } = req.body;
+    if (!key || typeof key !== 'string') {
+      return res.status(400).json({ error: 'key is required' });
+    }
+    if (key.length > 100) {
+      return res.status(400).json({ error: 'key must be 100 characters or fewer' });
+    }
+    const strValue = String(value ?? '');
+    if (strValue.length > 10000) {
+      return res.status(400).json({ error: 'value must be 10000 characters or fewer' });
+    }
+    await query(
+      `INSERT INTO user_settings (userId, key, value)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (userId, key) DO UPDATE SET value = EXCLUDED.value`,
+      [req.userId, key, strValue],
+    );
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error updating setting:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  await query(
-    `INSERT INTO user_settings (userId, key, value)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (userId, key) DO UPDATE SET value = EXCLUDED.value`,
-    [req.userId, key, String(value ?? '')],
-  );
-  res.json({ ok: true });
 });
 
 settingsRouter.delete('/:key', async (req: AuthRequest, res) => {

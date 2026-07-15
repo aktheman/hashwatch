@@ -35,6 +35,8 @@ export function Skeleton({ width, height = 16, borderRadius = radius.sm, style }
 
   return (
     <Animated.View
+      accessibilityLabel="Loading"
+      accessibilityState={{ busy: true }}
       style={[
         {
           width: width ?? '100%',

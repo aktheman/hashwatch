@@ -14,6 +14,7 @@ const TIMEOUT_MS = 10000;
 async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  timeout.unref();
   try {
     return await fetch(url, { ...options, signal: controller.signal });
   } finally {

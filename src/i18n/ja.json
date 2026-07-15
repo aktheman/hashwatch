@@ -228,7 +228,8 @@
     "debugProBody": "Proステータスが設定されました",
     "debugFreeBody": "Freeステータスが設定されました",
     "cancel": "キャンセル",
-    "unknownError": "不明なエラー"
+    "unknownError": "不明なエラー",
+    "noActiveEntitlements": "有効なエンタイトルメントなし"
   },
   "minerDetail": {
     "notFound": "マイナーが見つかりません",
@@ -291,7 +292,14 @@
     "recentPoolChanges": "最近のプール変更",
     "port": "ポート",
     "poolUpdated": "プールを更新しました",
-    "poolUpdateFailed": "プールの更新に失敗しました"
+    "poolUpdateFailed": "プールの更新に失敗しました",
+    "locationHome": "自宅",
+    "locationOffice": "オフィス",
+    "locationDataCenter": "データセンター",
+    "locationMiningFarm": "マイニングファーム",
+    "locationColocation": "コロケーション",
+    "powerModeStandard": "Standard",
+    "powerModeECO": "ECO"
   },
   "addMiner": {
     "addByIp": "IP で追加",
@@ -425,7 +433,8 @@
     "success": "インポート成功",
     "minersImported": "{{count}} 台のマイナーをインポートしました",
     "snapshotsImported": "{{count}} 個のスナップショットをインポートしました",
-    "walletsImported": "{{count}} 個のウォレットをインポートしました"
+    "walletsImported": "{{count}} 個のウォレットをインポートしました",
+    "invalidData": "無効なデータ"
   },
   "onboarding": {
     "skip": "スキップ",
@@ -667,7 +676,9 @@
     "webhookDescription": "マイナーアラートが発火した時にPOSTリクエストを受信します。",
     "csvErrors": "CSVエラー",
     "noValidRows": "有効な行がありません",
-    "checkCsvColumns": "CSVに「name」と「ip」の列があることを確認してください。"
+    "checkCsvColumns": "CSVに「name」と「ip」の列があることを確認してください。",
+    "webhookSaved": "Webhook URL が保存されました",
+    "updateAvailable": "アップデート v{{version}} 利用可能"
   },
   "snapshot": {
     "hashrate": "ハッシュレート",

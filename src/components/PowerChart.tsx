@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
@@ -11,7 +11,7 @@ interface PowerChartProps {
   title?: string;
 }
 
-export function PowerChart({ snapshots, title }: PowerChartProps) {
+export const PowerChart = React.memo(function PowerChart({ snapshots, title }: PowerChartProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -63,9 +63,7 @@ export function PowerChart({ snapshots, title }: PowerChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>⚡</Text>
-        <Text style={styles.emptyText}>
-          {t('charts.notEnoughPower')}
-        </Text>
+        <Text style={styles.emptyText}>{t('charts.notEnoughPower')}</Text>
       </View>
     );
   }
@@ -135,4 +133,4 @@ export function PowerChart({ snapshots, title }: PowerChartProps) {
       </View>
     </View>
   );
-}
+});

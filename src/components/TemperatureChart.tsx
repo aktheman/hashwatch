@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
@@ -11,7 +11,10 @@ interface TemperatureChartProps {
   title?: string;
 }
 
-export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
+export const TemperatureChart = React.memo(function TemperatureChart({
+  snapshots,
+  title,
+}: TemperatureChartProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width: windowWidth } = useWindowDimensions();
@@ -72,9 +75,7 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>🌡</Text>
-        <Text style={styles.emptyText}>
-          {t('charts.notEnoughTemp')}
-        </Text>
+        <Text style={styles.emptyText}>{t('charts.notEnoughTemp')}</Text>
       </View>
     );
   }
@@ -148,4 +149,4 @@ export function TemperatureChart({ snapshots, title }: TemperatureChartProps) {
       </View>
     </View>
   );
-}
+});

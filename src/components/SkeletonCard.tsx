@@ -12,6 +12,8 @@ export function SkeletonCard({ rows = 3 }: SkeletonCardProps) {
 
   return (
     <View
+      accessibilityRole="none"
+      accessibilityState={{ busy: true }}
       style={[
         styles.card,
         {

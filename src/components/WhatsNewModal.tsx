@@ -79,6 +79,7 @@ export function WhatsNewModal() {
       transparent
       animationType="fade"
       onRequestClose={() => setVisible(false)}
+      accessibilityLabel="What's new"
     >
       <View style={styles.backdrop}>
         <View style={[styles.modal, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -147,6 +148,8 @@ export function WhatsNewModal() {
           <Pressable
             style={[styles.closeButton, { backgroundColor: theme.primary }]}
             onPress={() => setVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
           >
             <Text style={{ color: '#FFF', fontWeight: fontWeight.bold, fontSize: fontSize.md }}>
               {t('whatsNew.gotIt')}

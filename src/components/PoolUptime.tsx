@@ -56,9 +56,7 @@ export const PoolUptime = React.memo(function PoolUptime({ miners }: PoolUptimeP
   if (pools.length === 0) {
     return (
       <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-        <Text style={[styles.title, { color: theme.textDim }]}>
-          {t('pool.pools', 'Pools')}
-        </Text>
+        <Text style={[styles.title, { color: theme.textDim }]}>{t('pool.pools', 'Pools')}</Text>
         <Text style={[styles.empty, { color: theme.textMuted }]}>
           {t('pool.noData', 'No pool data available.')}
         </Text>
@@ -69,10 +67,12 @@ export const PoolUptime = React.memo(function PoolUptime({ miners }: PoolUptimeP
   const totalMiners = pools.reduce((sum, p) => sum + p.miners, 0);
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-      <Text style={[styles.title, { color: theme.textDim }]}>
-        {t('pool.pools', 'Pools')}
-      </Text>
+    <View
+      accessibilityRole="summary"
+      accessibilityLabel={`${pools.length} pools`}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+    >
+      <Text style={[styles.title, { color: theme.textDim }]}>{t('pool.pools', 'Pools')}</Text>
 
       {pools.map((pool) => {
         const pct = totalMiners > 0 ? (pool.miners / totalMiners) * 100 : 0;

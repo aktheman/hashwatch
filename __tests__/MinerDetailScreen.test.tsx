@@ -437,7 +437,7 @@ it('clears location via None option', async () => {
   const r = await render(<MinerDetailScreen route={route} navigation={navigation} />);
 
   await fireEvent.press(r.getByText('Set location...'));
-  await fireEvent.press(r.getByText('None'));
+  await fireEvent.press(r.getByText('common.none'));
 
   expect(mockSetMinerLocation).toHaveBeenCalledWith('m1', undefined);
 });
@@ -509,7 +509,7 @@ it('renders Power Mode stat widget (Standard)', async () => {
     ],
   });
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText('Standard')).toBeTruthy();
+  expect(screen.getByText('minerDetail.powerModeStandard')).toBeTruthy();
 });
 
 it('renders Power Mode stat widget (ECO)', async () => {
@@ -522,7 +522,7 @@ it('renders Power Mode stat widget (ECO)', async () => {
     ],
   });
   await render(<MinerDetailScreen route={route} navigation={navigation} />);
-  expect(screen.getByText('ECO')).toBeTruthy();
+  expect(screen.getByText('minerDetail.powerModeECO')).toBeTruthy();
 });
 
 it('renders Power Mode stat widget (P2)', async () => {

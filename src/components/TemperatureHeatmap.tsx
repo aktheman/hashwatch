@@ -86,7 +86,11 @@ export const TemperatureHeatmap = React.memo(function TemperatureHeatmap({
   }
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
+      accessibilityRole="image"
+      accessibilityLabel="Temperature heatmap"
+    >
       <Text style={[styles.title, { color: theme.textDim }]}>
         {t('analytics.temperatureHistory', 'Temperature History')}
       </Text>
