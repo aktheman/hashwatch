@@ -1307,6 +1307,28 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('navigator.firmware', 'Firmware')}
+          style={styles.row}
+          onPress={() => navigation.navigate('Firmware')}
+        >
+          <Text style={styles.rowLabel}>{t('navigator.firmware', 'Firmware')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('navigator.darkPool', 'Dark Pool')}
+          style={styles.row}
+          onPress={() => navigation.navigate('DarkPool')}
+        >
+          <Text style={styles.rowLabel}>{t('navigator.darkPool', 'Dark Pool')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel="Export CSV"
           style={styles.row}
           onPress={() => {
