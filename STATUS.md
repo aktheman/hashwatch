@@ -1,21 +1,25 @@
 # STATUS
 
-## Session Summary (2026-07-15 — Round 19)
+## Session Summary (2026-07-16 — Round 20)
 
 ### Done
 
-- **Theme Crossfade Overlay**: `ThemeTransitionOverlay` component using React Native `Animated` API. Smooth 300ms opacity transition when switching themes. `switchThemeWithTransition()` captures old bg, shows overlay, calls theme switch, fades out. `pointerEvents="none"` so taps work during transition. Integrated into DashboardScreen cycle button and ThemePicker.
-- **Onboarding Error Boundary**: Wrapped `OnboardingScreen` in `ErrorBoundary` in App.tsx (was the only screen without crash protection).
-- **Sunrise/Sunset Auto Theme**: Pure-JS NOAA sun calculator (`src/utils/sunCalc.ts`) — `getSunTimes(lat, lng, date)` returns sunrise/sunset using Jean Meeus algorithm. `autoTheme.ts` extended with `sunrise_sunset` mode that computes dark range from sunset→sunrise daily. SettingsScreen UI with lat/lng inputs and "Save Location" button. Settings: `auto_theme_mode`, `user_latitude`, `user_longitude`.
-- **Bug Fix**: `sunCalc.ts` had wrong time conversion (multiplied by 3600000 instead of 60000) — values were in minutes but treated as hours. Fixed.
-- **i18n**: Sunrise/sunset UI strings in SettingsScreen.
-- **Tests**: +20 new tests (sunCalc: 13, ThemeTransitionOverlay: 7). Total: 1704 (1477 frontend + 227 backend).
+- **Firmware OTA Screen**: `FirmwareScreen.tsx` — batch flash (select multiple miners, flash in parallel), per-miner progress tracking (pending/flashing/success/failed states), version checking against latest release, skip version support, firmware info display. Registered in navigation and SettingsScreen.
+- **Dark Pool Backend**: 4 Express routes (`/api/darkpool/contribute|aggregate|my-contributions|DELETE`), auth middleware, 5-minute cooldown rate limiting, input validation, `darkpool_contributions` + `darkpool_aggregates` tables. Mounted in backend index.ts.
+- **Dark Pool Frontend**: `DarkPoolScreen.tsx` — opt-in toggle, "Contribute Now" button (sends aggregated miner stats), network stats dashboard (total hashrate, contributors, avg efficiency), pool distribution colored bars, contribution history (last 10), delete data with confirmation, period selector (1h/24h/7d/30d). Registered in navigation and SettingsScreen.
+- **Smart Alerts Enhancements**: Share rejection slider (1-50% per-miner), "Reset to Defaults" button in MinerDetailScreen alert rules section. Global default alert rules API (`getDefaultAlertRules`/`setDefaultAlertRules` in notifications.ts).
+- **Profitability Dashboard**: Pool earnings comparison, break-even analysis, pool fee deduction (2% default).
+- **Navigation**: Firmware + DarkPool screens registered in `AppNavigator.tsx`, `RootStackParamList`, lazy imports, `withScreenBoundary` wrappers. Both accessible from SettingsScreen.
+- **Dark Pool API Client**: 4 functions in `client.ts` — `contributeDarkPool`, `getDarkPoolAggregate`, `getDarkPoolMyContributions`, `deleteDarkPoolMyContributions`.
+- **i18n**: 25+ new keys in all 6 locales (darkPool section, firmware, shareRejection, resetDefaults, navigator.firmware/darkPool).
+- **Bug Fix**: ProfitabilityCard test failures fixed — added missing `db/database` mock to `DashboardComponents.test.tsx`.
+- **Tests**: 3 new test files — `DarkPoolScreen.test.tsx` (7 tests), `FirmwareScreen.test.tsx` (4 tests), `darkPool.test.ts` (15 backend tests). Snapshot updated for SettingsScreen (Firmware/DarkPool rows).
 
 ### Test Results
 
-- **Frontend**: 1477 tests passing (109 suites) — ESLint clean
-- **Backend**: 227 tests passing (25 suites)
-- **Total**: 1704 tests
+- **Frontend**: 1488 tests passing (111 suites) — ESLint clean
+- **Backend**: 242 tests passing (26 suites)
+- **Total**: 1730 tests
 
 ---
 

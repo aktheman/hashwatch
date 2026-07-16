@@ -52,6 +52,16 @@ jest.mock('../src/utils/hashrate', () => ({
   formatHashrateValue: (h: number) => `${(h / 1e15).toFixed(1)} EH/s`,
 }));
 
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn().mockResolvedValue(null),
+  setSetting: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('../src/store/poolAnalytics', () => ({
+  usePoolAnalyticsStore: (sel: (s: { stats: never[] }) => unknown) =>
+    sel({ stats: [], config: [], loading: false, error: null }),
+}));
+
 beforeEach(() => {
   cleanup();
 });
