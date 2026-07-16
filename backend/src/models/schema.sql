@@ -172,3 +172,32 @@ CREATE TABLE IF NOT EXISTS custom_themes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_custom_themes_user ON custom_themes(userId);
+
+CREATE TABLE IF NOT EXISTS darkpool_contributions (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  minerHashrate BIGINT NOT NULL,
+  minerPower REAL NOT NULL,
+  minerTemp REAL,
+  poolName TEXT,
+  region TEXT,
+  contributedAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_user ON darkpool_contributions("userId", "contributedAt" DESC);
+CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_time ON darkpool_contributions("contributedAt");
+
+CREATE TABLE IF NOT EXISTS darkpool_aggregates (
+  id BIGSERIAL PRIMARY KEY,
+  periodStart TIMESTAMP NOT NULL,
+  periodEnd TIMESTAMP NOT NULL,
+  totalHashrate BIGINT NOT NULL,
+  avgPower REAL NOT NULL,
+  avgTemp REAL,
+  contributorCount INTEGER NOT NULL,
+  poolBreakdown JSONB DEFAULT '{}',
+  regionBreakdown JSONB DEFAULT '{}',
+  computedAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_darkpool_aggregates_time ON darkpool_aggregates("periodEnd", "computedAt" DESC);

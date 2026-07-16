@@ -453,3 +453,53 @@ export async function fetchSharedGroupMiners(
   );
   return res.data;
 }
+
+export interface DarkPoolContribution {
+  id: number;
+  minerHashrate: number;
+  minerPower: number;
+  minerTemp: number | null;
+  poolName: string | null;
+  region: string | null;
+  contributedAt: string;
+}
+
+export interface DarkPoolAggregate {
+  totalHashrate: number;
+  avgPower: number;
+  avgTemp: number;
+  contributorCount: number;
+  poolBreakdown: Record<string, number>;
+  regionBreakdown: Record<string, number>;
+  period: string;
+}
+
+export async function contributeDarkPool(data: {
+  hashrate: number;
+  power: number;
+  temp?: number;
+  poolName?: string;
+  region?: string;
+}): Promise<{ ok: boolean; id: number }> {
+  const res = await client.post<{ ok: boolean; id: number }>('/api/darkpool/contribute', data);
+  return res.data;
+}
+
+export async function getDarkPoolAggregate(period: string): Promise<DarkPoolAggregate> {
+  const res = await client.get<DarkPoolAggregate>('/api/darkpool/aggregate', {
+    params: { period },
+  });
+  return res.data;
+}
+
+export async function getDarkPoolMyContributions(): Promise<DarkPoolContribution[]> {
+  const res = await client.get<DarkPoolContribution[]>('/api/darkpool/my-contributions');
+  return res.data;
+}
+
+export async function deleteDarkPoolMyContributions(): Promise<{ ok: boolean; deleted: number }> {
+  const res = await client.delete<{ ok: boolean; deleted: number }>(
+    '/api/darkpool/my-contributions',
+  );
+  return res.data;
+}

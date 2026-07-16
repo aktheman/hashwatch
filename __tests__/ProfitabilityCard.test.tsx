@@ -3,6 +3,16 @@ import React from 'react';
 import { ProfitabilityCard } from '../src/components/DashboardComponents';
 import { setBTCPrice } from '../src/utils/hashrate';
 
+jest.mock('../src/store/poolAnalytics', () => ({
+  usePoolAnalyticsStore: (sel: (s: { stats: never[] }) => unknown) =>
+    sel({ stats: [], config: [], loading: false, error: null }),
+}));
+
+jest.mock('../src/db/database', () => ({
+  getSetting: jest.fn().mockResolvedValue(null),
+  setSetting: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../src/theme', () => ({
   useTheme: () => ({
     bg: '#0a0a1a',

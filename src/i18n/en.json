@@ -228,7 +228,6 @@
     "alertHistory": "Alert History",
     "language": "Language / 语言 / Sprache",
     "darkModeSchedule": "Dark Mode Schedule",
-    "off": "Off",
     "importCsv": "Import CSV",
     "csvHelp": "Paste CSV (columns: name, ip, port):",
     "csvPlaceholder": "name,ip,port\nMiner1,192.168.1.10,80",
@@ -237,7 +236,6 @@
     "download": "Download",
     "import": "Import",
     "cancel": "Cancel",
-    "restore": "Restore",
     "importComplete": "Import Complete",
     "importFailed": "Import Failed",
     "failedToReadFile": "Failed to read file",
@@ -306,7 +304,6 @@
     "removeConfirm": "This permanently deletes {{name}} and all its history.",
     "yesRemove": "Yes, Remove",
     "minerRemoved": "{{name}} removed",
-    "shareStats": "Share Stats",
     "shareAsImage": "Share as Image",
     "sharedVia": "Shared via HashWatch",
     "error": "Error",
@@ -324,7 +321,9 @@
     "locationMiningFarm": "Mining Farm",
     "locationColocation": "Colocation",
     "powerModeStandard": "Standard",
-    "powerModeECO": "ECO"
+    "powerModeECO": "ECO",
+    "shareRejection": "Share Rejection %",
+    "resetDefaults": "Reset to Defaults"
   },
   "addMiner": {
     "addByIp": "Add by IP",
@@ -574,7 +573,9 @@
     "wallets": "Wallets",
     "groups": "Groups",
     "importData": "Import Data",
-    "minerComparison": "Miner Comparison"
+    "minerComparison": "Miner Comparison",
+    "firmware": "Firmware",
+    "darkPool": "Dark Pool"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -645,7 +646,7 @@
     "shareRejectionThreshold": "Share Rejection %"
   },
   "offlineBanner": {
-    "offline": "You are offline \u2014 showing cached data"
+    "offline": "You are offline — showing cached data"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Upgrade to Pro to unlock"
@@ -754,7 +755,21 @@
     "month": "Month",
     "usdPerDay": "USD/day",
     "netPerDay": "Net/day (after power)",
-    "viewDetails": "View {{title}} details"
+    "viewDetails": "View {{title}} details",
+    "poolEarnings": "Pool Earnings",
+    "estVsPool": "Estimated vs Pool-Reported",
+    "poolReported": "Pool-Reported",
+    "variance": "Variance",
+    "breakEvenAnalysis": "Break-Even Analysis",
+    "hardwareInvestment": "Hardware Investment",
+    "monthlyElectricity": "Monthly Electricity",
+    "monthlyRevenue": "Monthly Revenue",
+    "monthlyNet": "Monthly Net",
+    "breakEvenDays": "Break-Even Days",
+    "poolFeeNet": "Net After 2% Pool Fee",
+    "hardwareCostPlaceholder": "Enter hardware cost...",
+    "noBreakEven": "Not yet profitable",
+    "vsEstimated": "vs estimated"
   },
   "powerUsage": {
     "total": "Total",
@@ -812,8 +827,7 @@
     "stats": "Pool Stats",
     "addConfig": "Add Pool Config",
     "apiKeyPlaceholder": "Enter API key",
-    "poolUserPlaceholder": "Enter pool username",
-    "subtitle": "Real earnings, luck & payouts"
+    "poolUserPlaceholder": "Enter pool username"
   },
   "exportReport": {
     "title": "Export Report",
@@ -890,5 +904,28 @@
     "shareError": "Failed to share group",
     "revokeSuccess": "Share revoked",
     "sharedMiners": "Shared Miners"
+  },
+  "darkPool": {
+    "title": "Dark Pool",
+    "description": "Contribute anonymized stats to the collective dark pool.",
+    "optIn": "Participate",
+    "optInDescription": "Share your miner stats anonymously",
+    "yourMiners": "Your Miners",
+    "onlineMiners": "Online",
+    "yourHashrate": "Hashrate",
+    "yourPower": "Power",
+    "contributeNow": "Contribute Now",
+    "contributing": "Contributing...",
+    "contributionFailed": "Contribution failed",
+    "noMiners": "No online miners",
+    "networkStats": "Network Stats",
+    "totalHashrate": "Total Hashrate",
+    "contributors": "Contributors",
+    "avgEfficiency": "Avg Efficiency",
+    "poolDistribution": "Pool Distribution",
+    "recentContributions": "Recent Contributions",
+    "deleteMyData": "Delete My Data",
+    "confirmDelete": "Delete All Data",
+    "confirmDeleteBody": "This will remove all your contributions permanently."
   }
 }

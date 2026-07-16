@@ -100,6 +100,8 @@ export type RootStackParamList = {
   ExportReport: undefined;
   SharedGroups: undefined;
   CustomThemeEditor: { themeId?: number; cloneFrom?: string } | undefined;
+  Firmware: undefined;
+  DarkPool: undefined;
 };
 
 export type TabParamList = {

@@ -29,6 +29,7 @@ import { webhooksRouter } from './routes/webhooks';
 import { poolAnalyticsRouter } from './routes/poolAnalytics';
 import { groupSharesRouter } from './routes/groupShares';
 import { customThemesRouter } from './routes/customThemes';
+import { darkPoolRouter } from './routes/darkPool';
 
 const log = {
   info: (...args: unknown[]) => console.log('[INFO]', ...args),
@@ -89,6 +90,7 @@ app.use('/api/webhooks', webhooksRouter);
 app.use('/api/pool-analytics', poolAnalyticsRouter);
 app.use('/api/groups', groupSharesRouter);
 app.use('/api/custom-themes', customThemesRouter);
+app.use('/api/darkpool', darkPoolRouter);
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;

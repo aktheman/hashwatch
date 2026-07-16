@@ -299,7 +299,9 @@
     "locationMiningFarm": "Mining-Farm",
     "locationColocation": "Koloation",
     "powerModeStandard": "Standard",
-    "powerModeECO": "ECO"
+    "powerModeECO": "ECO",
+    "shareRejection": "Share-Ablehnung %",
+    "resetDefaults": "Auf Standard zurücksetzen"
   },
   "addMiner": {
     "addByIp": "Per IP hinzufügen",
@@ -516,7 +518,9 @@
     "wallets": "Wallets",
     "groups": "Gruppen",
     "importData": "Daten importieren",
-    "minerComparison": "Miner-Vergleich"
+    "minerComparison": "Miner-Vergleich",
+    "firmware": "Firmware",
+    "darkPool": "Dunkler Pool"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -739,7 +743,21 @@
     "month": "Monat",
     "usdPerDay": "USD/Tag",
     "netPerDay": "Netto/Tag (nach Strom)",
-    "viewDetails": "{{title}} Details anzeigen"
+    "viewDetails": "{{title}} Details anzeigen",
+    "poolEarnings": "Pool-Einnahmen",
+    "estVsPool": "Geschatzt vs Pool-meldung",
+    "poolReported": "Pool-meldung",
+    "variance": "Abweichung",
+    "breakEvenAnalysis": "Break-Even-Analyse",
+    "hardwareInvestment": "Hardware-Investition",
+    "monthlyElectricity": "Monatliche Stromkosten",
+    "monthlyRevenue": "Monatlicher Umsatz",
+    "monthlyNet": "Monatlicher Netto",
+    "breakEvenDays": "Tage bis Break-Even",
+    "poolFeeNet": "Netto nach 2% Pool-Gebuehr",
+    "hardwareCostPlaceholder": "Hardware-Kosten eingeben...",
+    "noBreakEven": "Noch nicht profitabel",
+    "vsEstimated": "vs geschatzt"
   },
   "powerUsage": {
     "total": "Gesamt",
@@ -874,5 +892,28 @@
     "shareError": "Gruppe konnte nicht geteilt werden",
     "revokeSuccess": "Freigabe widerrufen",
     "sharedMiners": "Geteilte Miner"
+  },
+  "darkPool": {
+    "title": "Dunkler Pool",
+    "description": "Trage anonymisierte Statistiken zum gemeinsamen dunklen Pool bei.",
+    "optIn": "Teilnehmen",
+    "optInDescription": "Teile deine Miner-Statistiken anonym",
+    "yourMiners": "Deine Miner",
+    "onlineMiners": "Online",
+    "yourHashrate": "Hashrate",
+    "yourPower": "Leistung",
+    "contributeNow": "Jetzt beitragen",
+    "contributing": "Beitragen...",
+    "contributionFailed": "Beitrag fehlgeschlagen",
+    "noMiners": "Keine Miner online",
+    "networkStats": "Netzwerkstatistiken",
+    "totalHashrate": "Gesamte Hashrate",
+    "contributors": "Beitragende",
+    "avgEfficiency": "Durchschn. Effizienz",
+    "poolDistribution": "Pool-Verteilung",
+    "recentContributions": "Letzte Beiträge",
+    "deleteMyData": "Meine Daten löschen",
+    "confirmDelete": "Alle Daten löschen",
+    "confirmDeleteBody": "Dies wird alle Ihre Beiträge dauerhaft löschen."
   }
 }
