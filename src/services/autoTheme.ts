@@ -1,6 +1,7 @@
 import { AppState, AppStateStatus } from 'react-native';
 import { getSetting } from '../db/database';
 import { setThemeMode, getThemeMode } from '../theme';
+import { getSunTimes } from '../utils/sunCalc';
 
 const AUTO_THEME_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -9,8 +10,10 @@ let _appStateSub: { remove(): void } | null = null;
 let _active = false;
 let _darkRange: { start: number; end: number } | null = null;
 let _fallbackMode: 'system' | 'light' = 'system';
+let _sunMode = false;
+let _lastSunDate = '';
 
-function parseRange(raw: string): { start: number; end: number } | null {
+export function parseRange(raw: string): { start: number; end: number } | null {
   const m = raw.match(/^(\d{1,2})-(\d{1,2})$/);
   if (!m) return null;
   const start = parseInt(m[1], 10);
@@ -19,7 +22,7 @@ function parseRange(raw: string): { start: number; end: number } | null {
   return { start, end };
 }
 
-function isDarkHour(hour: number, range: { start: number; end: number }): boolean {
+export function isDarkHour(hour: number, range: { start: number; end: number }): boolean {
   if (range.start < range.end) {
     return hour >= range.start && hour < range.end;
   }
@@ -27,8 +30,18 @@ function isDarkHour(hour: number, range: { start: number; end: number }): boolea
 }
 
 async function evaluate(now?: Date) {
-  if (!_active || !_darkRange) return;
-  const hour = (now ?? new Date()).getHours();
+  if (!_active) return;
+  const n = now ?? new Date();
+
+  if (_sunMode) {
+    const today = n.toISOString().slice(0, 10);
+    if (today !== _lastSunDate) {
+      await recalcSunTimes(n);
+    }
+  }
+
+  if (!_darkRange) return;
+  const hour = n.getHours();
   if (isDarkHour(hour, _darkRange)) {
     if (getThemeMode() !== 'dark') {
       setThemeMode('dark');
@@ -41,6 +54,22 @@ async function evaluate(now?: Date) {
   }
 }
 
+async function recalcSunTimes(now?: Date) {
+  const latRaw = await getSetting('user_latitude');
+  const lngRaw = await getSetting('user_longitude');
+  if (!latRaw || !lngRaw) return;
+  const lat = parseFloat(latRaw);
+  const lng = parseFloat(lngRaw);
+  if (isNaN(lat) || isNaN(lng)) return;
+
+  const times = getSunTimes(lat, lng, now);
+  const sunHour = times.sunset.getHours();
+  const riseHour = times.sunrise.getHours();
+
+  _darkRange = { start: sunHour, end: riseHour };
+  _lastSunDate = (now ?? new Date()).toISOString().slice(0, 10);
+}
+
 function handleAppState(state: AppStateStatus) {
   if (state === 'active') {
     evaluate();
@@ -49,6 +78,26 @@ function handleAppState(state: AppStateStatus) {
 
 export async function startAutoTheme(): Promise<void> {
   if (_active) return;
+
+  const modeRaw = await getSetting('auto_theme_mode');
+
+  if (modeRaw === 'sunrise_sunset') {
+    const latRaw = await getSetting('user_latitude');
+    const lngRaw = await getSetting('user_longitude');
+    if (latRaw && lngRaw) {
+      _sunMode = true;
+      _active = true;
+      await recalcSunTimes();
+      evaluate();
+      _intervalId = setInterval(() => evaluate(), AUTO_THEME_CHECK_INTERVAL_MS);
+      if (_intervalId && typeof _intervalId === 'object' && 'unref' in _intervalId) {
+        (_intervalId as NodeJS.Timeout).unref();
+      }
+      _appStateSub = AppState.addEventListener('change', handleAppState);
+      return;
+    }
+  }
+
   const raw = await getSetting('auto_dark_hour');
   if (!raw) return;
   const range = parseRange(raw);
@@ -74,6 +123,8 @@ export async function startAutoTheme(): Promise<void> {
 export function stopAutoTheme(): void {
   _active = false;
   _darkRange = null;
+  _sunMode = false;
+  _lastSunDate = '';
   if (_intervalId !== null) {
     clearInterval(_intervalId);
     _intervalId = null;
@@ -88,4 +139,4 @@ export function isAutoThemeActive(): boolean {
   return _active;
 }
 
-export { parseRange, isDarkHour, evaluate as _evaluate };
+export { parseRange as _parseRange, isDarkHour as _isDarkHour, evaluate as _evaluate };

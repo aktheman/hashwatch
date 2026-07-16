@@ -8,6 +8,7 @@ import {
   THEME_ORDER,
   THEME_EMOJIS,
 } from '../theme';
+import { switchThemeWithTransition } from './ThemeTransitionOverlay';
 import type { Theme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
@@ -25,7 +26,7 @@ export function ThemePicker({ onThemeChange }: ThemePickerProps) {
 
   const handlePress = useCallback(
     (mode: string) => {
-      setThemeMode(mode as Parameters<typeof setThemeMode>[0]);
+      switchThemeWithTransition(() => setThemeMode(mode as Parameters<typeof setThemeMode>[0]));
       onThemeChange?.(mode);
     },
     [onThemeChange],
