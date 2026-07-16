@@ -33,6 +33,7 @@ import {
   formatHashrateWithUnit,
 } from '../utils/hashrate';
 import { useTheme, setThemeMode, getThemeMode } from '../theme';
+import { switchThemeWithTransition } from '../components/ThemeTransitionOverlay';
 import { spacing, radius, fontSize, fontWeight, buttonText, cardShadow } from '../utils/design';
 import { exportAllData } from '../utils/export';
 import { BitAxeClient } from '../api/bitaxe';
@@ -1825,7 +1826,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                     ] as const;
                     const current = getThemeMode();
                     const idx = modes.indexOf(current as (typeof modes)[number]);
-                    setThemeMode(modes[(idx + 1) % modes.length]);
+                    const next = modes[(idx + 1) % modes.length];
+                    switchThemeWithTransition(() => setThemeMode(next));
                   }}
                 >
                   <Text style={styles.settingsIcon}>🎨</Text>

@@ -4,6 +4,7 @@ import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import './src/i18n';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { ThemeTransitionOverlay } from './src/components/ThemeTransitionOverlay';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
@@ -91,12 +92,12 @@ export default function App() {
 
   if (showOnboarding) {
     return (
-      <>
+      <ErrorBoundary>
         <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
         <Suspense fallback={null}>
           <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
         </Suspense>
-      </>
+      </ErrorBoundary>
     );
   }
 
@@ -107,6 +108,7 @@ export default function App() {
         <WhatsNewModal />
       </Suspense>
       <AppNavigator />
+      <ThemeTransitionOverlay />
     </ErrorBoundary>
   );
 }

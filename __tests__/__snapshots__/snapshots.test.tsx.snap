@@ -5647,6 +5647,83 @@ exports[`SettingsScreen matches snapshot 1`] = `
               },
               "type": "View",
             },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "Follow sunrise & sunset",
+                          ],
+                          "props": {
+                            "style": [
+                              {
+                                "color": "#FFFFFF",
+                                "fontSize": 15,
+                                "fontWeight": "600",
+                              },
+                              {
+                                "marginBottom": 4,
+                              },
+                            ],
+                          },
+                          "type": "Text",
+                        },
+                        {
+                          "children": [
+                            "Auto dark at sunset, light at sunrise",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#5C5F7A",
+                              "fontSize": 10,
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "style": {
+                          "flex": 1,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    <RCTSwitch
+                      accessibilityRole="switch"
+                      onChange={[Function]}
+                      onResponderTerminationRequest={[Function]}
+                      onStartShouldSetResponder={[Function]}
+                      onTintColor="#6C63FF88"
+                      style={
+                        {
+                          "alignSelf": "flex-start",
+                        }
+                      }
+                      thumbTintColor="#13132B"
+                      tintColor="#1A1A3E"
+                      value={false}
+                    />,
+                  ],
+                  "props": {
+                    "style": {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "justifyContent": "space-between",
+                    },
+                  },
+                  "type": "View",
+                },
+              ],
+              "props": {
+                "style": {
+                  "marginTop": 16,
+                },
+              },
+              "type": "View",
+            },
           ],
           "props": {
             "style": {
@@ -5657,23 +5734,6 @@ exports[`SettingsScreen matches snapshot 1`] = `
         },
         {
           "children": [
-            {
-              "children": [
-                "settings.power",
-              ],
-              "props": {
-                "style": {
-                  "color": "#8B8FA3",
-                  "fontSize": 10,
-                  "fontWeight": "700",
-                  "letterSpacing": 0.8,
-                  "marginBottom": 8,
-                  "marginLeft": 8,
-                  "textTransform": "uppercase",
-                },
-              },
-              "type": "Text",
-            },
             {
               "children": [
                 "settings.powerCostHelp",

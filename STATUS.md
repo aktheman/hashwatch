@@ -1,5 +1,24 @@
 # STATUS
 
+## Session Summary (2026-07-15 — Round 19)
+
+### Done
+
+- **Theme Crossfade Overlay**: `ThemeTransitionOverlay` component using React Native `Animated` API. Smooth 300ms opacity transition when switching themes. `switchThemeWithTransition()` captures old bg, shows overlay, calls theme switch, fades out. `pointerEvents="none"` so taps work during transition. Integrated into DashboardScreen cycle button and ThemePicker.
+- **Onboarding Error Boundary**: Wrapped `OnboardingScreen` in `ErrorBoundary` in App.tsx (was the only screen without crash protection).
+- **Sunrise/Sunset Auto Theme**: Pure-JS NOAA sun calculator (`src/utils/sunCalc.ts`) — `getSunTimes(lat, lng, date)` returns sunrise/sunset using Jean Meeus algorithm. `autoTheme.ts` extended with `sunrise_sunset` mode that computes dark range from sunset→sunrise daily. SettingsScreen UI with lat/lng inputs and "Save Location" button. Settings: `auto_theme_mode`, `user_latitude`, `user_longitude`.
+- **Bug Fix**: `sunCalc.ts` had wrong time conversion (multiplied by 3600000 instead of 60000) — values were in minutes but treated as hours. Fixed.
+- **i18n**: Sunrise/sunset UI strings in SettingsScreen.
+- **Tests**: +20 new tests (sunCalc: 13, ThemeTransitionOverlay: 7). Total: 1704 (1477 frontend + 227 backend).
+
+### Test Results
+
+- **Frontend**: 1477 tests passing (109 suites) — ESLint clean
+- **Backend**: 227 tests passing (25 suites)
+- **Total**: 1704 tests
+
+---
+
 ## Session Summary (2026-07-15 — Round 18)
 
 ### Done

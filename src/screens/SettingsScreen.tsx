@@ -21,6 +21,7 @@ import {
   scheduleThemeSwitch,
   clearThemeSchedule,
 } from '../theme';
+import { startAutoTheme, stopAutoTheme } from '../services/autoTheme';
 import { getSetting, setSetting } from '../db/database';
 import {
   exportAllData,
@@ -282,6 +283,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [autoScan, setAutoScan] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
   const [autoDarkHour, setAutoDarkHour] = useState<number | null>(null);
+  const [sunMode, setSunMode] = useState(false);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const powerCostDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -339,6 +343,9 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
       if (saved) i18n.changeLanguage(saved);
     });
     getSetting('auto_dark_hour').then((v) => setAutoDarkHour(v ? parseInt(v) : null));
+    getSetting('auto_theme_mode').then((v) => setSunMode(v === 'sunrise_sunset'));
+    getSetting('user_latitude').then((v) => setLatitude(v || ''));
+    getSetting('user_longitude').then((v) => setLongitude(v || ''));
     getSetting('webhook_url').then((v) => setWebhookUrl(v || ''));
     useNotificationHistoryStore.getState().loadHistory();
   }, []);
@@ -979,10 +986,105 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             ))}
           </View>
         </View>
+
+        <View style={{ marginTop: spacing.md }}>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.rowLabel, { marginBottom: spacing.xxs }]}>
+                Follow sunrise & sunset
+              </Text>
+              <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>
+                Auto dark at sunset, light at sunrise
+              </Text>
+            </View>
+            <Switch
+              value={sunMode}
+              onValueChange={async (v) => {
+                setSunMode(v);
+                if (v) {
+                  setAutoDarkHour(null);
+                  setSetting('auto_dark_hour', '');
+                  clearThemeSchedule();
+                  await setSetting('auto_theme_mode', 'sunrise_sunset');
+                } else {
+                  await setSetting('auto_theme_mode', '');
+                }
+                stopAutoTheme();
+                startAutoTheme();
+              }}
+              trackColor={{ false: theme.surfaceLight, true: theme.primary + '88' }}
+              thumbColor={sunMode ? theme.primary : theme.surface}
+            />
+          </View>
+          {sunMode && (
+            <View style={{ marginTop: spacing.sm, gap: spacing.xs }}>
+              <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                <TextInput
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.surfaceLight,
+                    borderRadius: radius.sm,
+                    padding: spacing.sm,
+                    color: theme.text,
+                    fontSize: fontSize.sm,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                  value={latitude}
+                  onChangeText={setLatitude}
+                  placeholder="Latitude (e.g. 40.71)"
+                  placeholderTextColor={theme.textMuted}
+                  keyboardType="decimal-pad"
+                  autoCapitalize="none"
+                />
+                <TextInput
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.surfaceLight,
+                    borderRadius: radius.sm,
+                    padding: spacing.sm,
+                    color: theme.text,
+                    fontSize: fontSize.sm,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                  value={longitude}
+                  onChangeText={setLongitude}
+                  placeholder="Longitude (e.g. -74.00)"
+                  placeholderTextColor={theme.textMuted}
+                  keyboardType="decimal-pad"
+                  autoCapitalize="none"
+                />
+              </View>
+              <Pressable
+                style={{
+                  backgroundColor: theme.primary,
+                  borderRadius: radius.sm,
+                  padding: spacing.sm,
+                  alignItems: 'center',
+                }}
+                onPress={async () => {
+                  await setSetting('user_latitude', latitude);
+                  await setSetting('user_longitude', longitude);
+                  stopAutoTheme();
+                  startAutoTheme();
+                  Alert.alert('Saved', 'Location saved. Theme will follow sunrise/sunset.');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Save location for sunrise sunset"
+              >
+                <Text style={{ color: '#FFF', fontSize: fontSize.sm, fontWeight: fontWeight.bold }}>
+                  Save Location
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.power')}</Text>
         <Text style={[styles.sectionSub, { marginBottom: 10 }]}>{t('settings.powerCostHelp')}</Text>
         <View style={styles.row}>
           <Text style={styles.rowLabel}>{t('settings.perKwh')}</Text>
