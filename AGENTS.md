@@ -55,7 +55,28 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-15 — Round 17)
+## Latest Round (Session 2026-07-16 — Round 20)
+
+### Changes (Round 20 — Firmware OTA, dark pool, smart alerts, profitability dashboard)
+
+- **Firmware OTA screen**: `FirmwareScreen.tsx` — batch flash, per-miner progress, version checking, skip version
+- **Dark pool backend**: 4 routes (contribute, aggregate, my-contributions, delete) with auth, rate limiting (5min cooldown), input validation
+- **Dark pool frontend**: `DarkPoolScreen.tsx` — opt-in toggle, contribute button, network stats (total hashrate, contributors, efficiency), pool distribution bars, contribution history, delete data, period selector (1h/24h/7d/30d)
+- **Smart alerts**: Share rejection slider (1-50%, per-miner), "Reset to Defaults" button, global default alert rules (`getDefaultAlertRules`/`setDefaultAlertRules`)
+- **ProfitabilityCard**: Pool earnings comparison, break-even analysis, pool fee deduction
+- **Navigation**: Registered `FirmwareScreen` + `DarkPoolScreen` in AppNavigator + RootStackParamList
+- **Dark pool API**: 4 client functions (`contributeDarkPool`, `getDarkPoolAggregate`, `getDarkPoolMyContributions`, `deleteDarkPoolMyContributions`)
+- **i18n**: 25+ new keys across all 6 locales (darkPool, firmware, shareRejection, resetDefaults)
+- **TypeScript**: clean, **ESLint**: clean
+- **Tests**: 1472 frontend + 227 backend = 1699 passing (5 pre-existing ProfitabilityCard SQLite failures)
+
+### Test results
+
+- Frontend: 1472 tests passing (109 suites) — ESLint clean
+- Backend: 227 tests passing (25 suites)
+- Total: 1699 tests
+
+## Previous Round (Session 2026-07-15 — Round 17)
 
 ### Changes (Round 17 — Theme picker redesign, preview modal, custom themes)
 
@@ -171,7 +192,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
-- Tests: 1457 frontend (107 suites) + 227 backend (25 suites) = 1684 total
+- Tests: 1472 frontend (109 suites) + 227 backend (25 suites) = 1699 total
 - TypeScript: clean (0 errors) — frontend + backend
 - ESLint: clean (0 warnings) — frontend + backend
 - Themes: 14 total (dark, light, neon, matrix, 5tratum, crimson, ocean, lavender, midnight, nord, dracula, catppuccin, rosepine, system)
