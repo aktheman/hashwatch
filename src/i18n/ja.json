@@ -299,7 +299,9 @@
     "locationMiningFarm": "マイニングファーム",
     "locationColocation": "コロケーション",
     "powerModeStandard": "Standard",
-    "powerModeECO": "ECO"
+    "powerModeECO": "ECO",
+    "shareRejection": "シェア拒否率 %",
+    "resetDefaults": "デフォルトに戻す"
   },
   "addMiner": {
     "addByIp": "IP で追加",
@@ -506,7 +508,9 @@
     "wallets": "ウォレット",
     "groups": "グループ",
     "importData": "データをインポート",
-    "minerComparison": "マイナー比較"
+    "minerComparison": "マイナー比較",
+    "firmware": "ファームウェア",
+    "darkPool": "ダークプール"
   },
   "minerCard": {
     "hashrate": "ハッシュレート",
@@ -729,7 +733,21 @@
     "month": "月",
     "usdPerDay": "USD/日",
     "netPerDay": "1日あたりの純利益（電気代差引後）",
-    "viewDetails": "{{title}}の詳細を表示"
+    "viewDetails": "{{title}}の詳細を表示",
+    "poolEarnings": "プール収益",
+    "estVsPool": "推定 vs プール報告",
+    "poolReported": "プール報告",
+    "variance": "差分",
+    "breakEvenAnalysis": "損益分岐点分析",
+    "hardwareInvestment": "ハードウェア投資",
+    "monthlyElectricity": "月間電気代",
+    "monthlyRevenue": "月間収入",
+    "monthlyNet": "月間純利益",
+    "breakEvenDays": "損益分岐までの日数",
+    "poolFeeNet": "2%プール手数料後の純利益",
+    "hardwareCostPlaceholder": "ハードウェアコストを入力...",
+    "noBreakEven": "まだ利益が出ていません",
+    "vsEstimated": "推定対比"
   },
   "powerUsage": {
     "total": "合計",
@@ -864,5 +882,28 @@
     "shareError": "グループの共有に失敗しました",
     "revokeSuccess": "共有を取り消しました",
     "sharedMiners": "共有されたマイナー"
+  },
+  "darkPool": {
+    "title": "ダークプール",
+    "description": "匿名化された統計を共同ダークプールに貢献します。",
+    "optIn": "参加する",
+    "optInDescription": "マイナーの統計を匿名で共有",
+    "yourMiners": "あなたのマイナー",
+    "onlineMiners": "オンライン",
+    "yourHashrate": "ハッシュレート",
+    "yourPower": "電力",
+    "contributeNow": "今すぐ貢献",
+    "contributing": "貢献中...",
+    "contributionFailed": "貢献に失敗しました",
+    "noMiners": "オンラインのマイナーがいません",
+    "networkStats": "ネットワーク統計",
+    "totalHashrate": "合計ハッシュレート",
+    "contributors": "貢献者数",
+    "avgEfficiency": "平均効率",
+    "poolDistribution": "プール配分",
+    "recentContributions": "最近の貢献",
+    "deleteMyData": "データを削除",
+    "confirmDelete": "全データを削除",
+    "confirmDeleteBody": "すべての貢献が完全に削除されます。"
   }
 }

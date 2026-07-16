@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, TextInput } from 'react-native';
 import Svg, { Polyline } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -13,6 +13,10 @@ import {
   getBTCPriceHistory,
   getNetworkHashrate,
 } from '../utils/hashrate';
+import { usePoolAnalyticsStore } from '../store/poolAnalytics';
+import { getSetting, setSetting } from '../db/database';
+
+const POOL_FEE_RATE = 0.02;
 
 export const ProfitabilityCard = React.memo(function ProfitabilityCard({
   miners,
@@ -26,6 +30,38 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
   const btcPrice = getBTCPrice();
   const priceHistory = getBTCPriceHistory();
   const netHash = getNetworkHashrate();
+  const poolStats = usePoolAnalyticsStore((s) => s.stats);
+
+  const [hardwareCost, setHardwareCost] = useState<number | null>(null);
+  const [hardwareCostInput, setHardwareCostInput] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    getSetting('hardware_cost').then((val) => {
+      if (cancelled) return;
+      if (val) {
+        const num = parseFloat(val);
+        if (!isNaN(num)) {
+          setHardwareCost(num);
+          setHardwareCostInput(String(num));
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleHardwareCostBlur = () => {
+    const num = parseFloat(hardwareCostInput);
+    if (!isNaN(num) && num >= 0) {
+      setHardwareCost(num);
+      setSetting('hardware_cost', String(num));
+    } else {
+      setHardwareCost(null);
+      setHardwareCostInput('');
+    }
+  };
 
   const priceTrend =
     priceHistory.length >= 2 ? priceHistory[priceHistory.length - 1] - priceHistory[0] : 0;
@@ -51,8 +87,24 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
   );
 
   const totalBtcDay = useMemo(() => perMiner.reduce((sum, m) => sum + m.btcPerDay, 0), [perMiner]);
-
+  const totalWatts = useMemo(
+    () => miners.reduce((s, m) => s + (m.status?.power ?? 0), 0),
+    [miners],
+  );
   const usdPerDay = totalBtcDay * btcPrice;
+  const dailyElectricityCost =
+    typeof powerCost === 'number' && powerCost > 0 ? (totalWatts / 1000) * 24 * powerCost : 0;
+  const dailyNet = usdPerDay - dailyElectricityCost;
+  const poolFeeBtcDay = totalBtcDay * POOL_FEE_RATE;
+  const netAfterPoolFeeBtcDay = totalBtcDay - poolFeeBtcDay;
+  const monthlyElectricityCost =
+    typeof powerCost === 'number' && powerCost > 0 ? (totalWatts / 1000) * 24 * 30 * powerCost : 0;
+  const monthlyRevenue = totalBtcDay * 30 * btcPrice;
+  const monthlyNet = monthlyRevenue - monthlyElectricityCost;
+  const breakEvenDays =
+    hardwareCost !== null && hardwareCost > 0 && monthlyNet > 0
+      ? Math.ceil(hardwareCost / (monthlyNet / 30))
+      : null;
 
   return (
     <View
@@ -242,6 +294,7 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
       </View>
       {typeof powerCost === 'number' && powerCost > 0 && totalBtcDay > 0 && (
         <View
+          accessibilityLabel={t('dashboardExtra.netPerDay')}
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -256,24 +309,279 @@ export const ProfitabilityCard = React.memo(function ProfitabilityCard({
           </Text>
           <Text
             style={{
-              color:
-                totalBtcDay * btcPrice -
-                  (miners.reduce((s, m) => s + (m.status?.power ?? 0), 0) / 1000) * 24 * powerCost >
-                0
-                  ? theme.success
-                  : theme.danger,
+              color: dailyNet > 0 ? theme.success : theme.danger,
               fontSize: fontSize.base,
               fontWeight: fontWeight.bold,
             }}
           >
-            $
-            {(
-              totalBtcDay * btcPrice -
-              (miners.reduce((s, m) => s + (m.status?.power ?? 0), 0) / 1000) * 24 * powerCost
-            ).toFixed(2)}
+            ${dailyNet.toFixed(2)}
           </Text>
         </View>
       )}
+      {totalBtcDay > 0 && (
+        <View
+          accessibilityLabel={t('dashboardExtra.poolFeeNet')}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: 4,
+            borderTopWidth: 1,
+            borderTopColor: theme.border,
+          }}
+        >
+          <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+            {t('dashboardExtra.poolFeeNet')}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: fontSize.base,
+                fontWeight: fontWeight.bold,
+              }}
+            >
+              {formatBTC(netAfterPoolFeeBtcDay)}
+              {t('dashboardExtra.perDay')}
+            </Text>
+            {btcPrice > 0 && (
+              <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+                (~${(netAfterPoolFeeBtcDay * btcPrice).toFixed(2)})
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
+      {poolStats.length > 0 && totalBtcDay > 0 && (
+        <View
+          accessibilityLabel={t('dashboardExtra.estVsPool')}
+          style={{
+            backgroundColor: theme.surfaceLight,
+            borderRadius: radius.md,
+            padding: spacing.sm,
+            gap: spacing.xs,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.textDim,
+              fontSize: fontSize.sm,
+              fontWeight: fontWeight.semibold,
+            }}
+          >
+            {t('dashboardExtra.estVsPool')}
+          </Text>
+          {poolStats.map((ps) => {
+            const variancePct =
+              ps.btcEarned > 0 ? ((totalBtcDay - ps.btcEarned) / ps.btcEarned) * 100 : 0;
+            return (
+              <View key={ps.provider} style={{ gap: spacing.xxs }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ color: theme.text, fontSize: fontSize.sm }}>
+                    {t('dashboardExtra.btcLabel')} ({ps.provider})
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                    {t('dashboardExtra.perDay')}
+                  </Text>
+                  <Text style={{ color: theme.text, fontSize: fontSize.xs }}>
+                    {formatBTC(totalBtcDay)}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                    {t('dashboardExtra.poolReported')}
+                  </Text>
+                  <Text style={{ color: theme.primary, fontSize: fontSize.xs }}>
+                    {formatBTC(ps.btcEarned)}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                    {t('dashboardExtra.variance')}
+                  </Text>
+                  <Text
+                    style={{
+                      color: variancePct >= 0 ? theme.success : theme.danger,
+                      fontSize: fontSize.xs,
+                      fontWeight: fontWeight.bold,
+                    }}
+                  >
+                    {variancePct >= 0 ? '+' : ''}
+                    {variancePct.toFixed(1)}% {t('dashboardExtra.vsEstimated')}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+      {(typeof powerCost === 'number' && powerCost > 0 && totalBtcDay > 0) ||
+      hardwareCost !== null ? (
+        <View
+          accessibilityLabel={t('dashboardExtra.breakEvenAnalysis')}
+          style={{
+            backgroundColor: theme.surfaceLight,
+            borderRadius: radius.md,
+            padding: spacing.sm,
+            gap: spacing.xs,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.textDim,
+              fontSize: fontSize.sm,
+              fontWeight: fontWeight.semibold,
+            }}
+          >
+            {t('dashboardExtra.breakEvenAnalysis')}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('dashboardExtra.hardwareInvestment')}
+            </Text>
+            <TextInput
+              accessibilityLabel={t('dashboardExtra.hardwareInvestment')}
+              placeholder={t('dashboardExtra.hardwareCostPlaceholder')}
+              placeholderTextColor={theme.textDim}
+              keyboardType="numeric"
+              value={hardwareCostInput}
+              onChangeText={setHardwareCostInput}
+              onBlur={handleHardwareCostBlur}
+              style={{
+                backgroundColor: theme.surface,
+                borderRadius: radius.xs,
+                borderWidth: 1,
+                borderColor: theme.border,
+                color: theme.text,
+                fontSize: fontSize.xs,
+                paddingHorizontal: spacing.xs,
+                paddingVertical: spacing.xxs,
+                textAlign: 'right',
+                minWidth: 100,
+              }}
+            />
+          </View>
+          {monthlyElectricityCost > 0 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+                {t('dashboardExtra.monthlyElectricity')}
+              </Text>
+              <Text style={{ color: theme.text, fontSize: fontSize.xs }}>
+                ${monthlyElectricityCost.toFixed(2)}
+              </Text>
+            </View>
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('dashboardExtra.monthlyRevenue')}
+            </Text>
+            <Text style={{ color: theme.success, fontSize: fontSize.xs }}>
+              ${monthlyRevenue.toFixed(2)}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
+              {t('dashboardExtra.monthlyNet')}
+            </Text>
+            <Text
+              style={{
+                color: monthlyNet > 0 ? theme.success : theme.danger,
+                fontSize: fontSize.xs,
+                fontWeight: fontWeight.bold,
+              }}
+            >
+              ${monthlyNet.toFixed(2)}
+            </Text>
+          </View>
+          {breakEvenDays !== null && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingTop: spacing.xxs,
+                borderTopWidth: 1,
+                borderTopColor: theme.border,
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.text,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.semibold,
+                }}
+              >
+                {t('dashboardExtra.breakEvenDays')}
+              </Text>
+              <Text
+                style={{
+                  color: theme.primary,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.extrabold,
+                }}
+              >
+                {breakEvenDays}
+              </Text>
+            </View>
+          )}
+          {breakEvenDays === null &&
+            monthlyNet <= 0 &&
+            hardwareCost !== null &&
+            hardwareCost > 0 && (
+              <Text
+                style={{
+                  color: theme.danger,
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.semibold,
+                }}
+              >
+                {t('dashboardExtra.noBreakEven')}
+              </Text>
+            )}
+        </View>
+      ) : null}
     </View>
   );
 });

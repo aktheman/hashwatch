@@ -31,7 +31,7 @@ import { useAuthStore } from '../store/auth';
 import { NotificationPrefs } from '../components/NotificationPrefs';
 import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
 import { PoolChangeHistory } from '../components/PoolChangeHistory';
-import { getAlertRules, setAlertRules, AlertRule } from '../services/notifications';
+import { getAlertRules, setAlertRules, DEFAULT_RULES, AlertRule } from '../services/notifications';
 import {
   formatHashrate,
   formatTemperature,
@@ -1385,6 +1385,40 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                       setAlertRules(minerId, next);
                     }}
                   />
+                  <AlertRuleSlider
+                    label={t('minerDetail.shareRejection', 'Share Rejection %')}
+                    value={alertRules.shareRejectionPercent}
+                    min={1}
+                    max={50}
+                    unit="%"
+                    theme={theme}
+                    onChange={(v) => {
+                      const next = { ...alertRules, shareRejectionPercent: v };
+                      setAlertRulesState(next);
+                      setAlertRules(minerId, next);
+                    }}
+                  />
+                  <Pressable
+                    onPress={() => {
+                      setAlertRulesState(DEFAULT_RULES);
+                      setAlertRules(minerId, DEFAULT_RULES);
+                    }}
+                    style={({ pressed }) => ({
+                      paddingVertical: spacing.xs,
+                      paddingHorizontal: spacing.md,
+                      borderRadius: radius.sm,
+                      backgroundColor: theme.surfaceLight,
+                      opacity: pressed ? 0.6 : 1,
+                      alignItems: 'center',
+                      marginTop: spacing.xs,
+                    })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Reset alert rules to defaults"
+                  >
+                    <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+                      {t('minerDetail.resetDefaults', 'Reset to Defaults')}
+                    </Text>
+                  </Pressable>
                 </>
               )}
             </View>

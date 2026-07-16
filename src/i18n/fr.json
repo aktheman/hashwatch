@@ -299,7 +299,9 @@
     "locationMiningFarm": "Ferme de minage",
     "locationColocation": "Colocation",
     "powerModeStandard": "Standard",
-    "powerModeECO": "ECO"
+    "powerModeECO": "ECO",
+    "shareRejection": "Rejet de Shares %",
+    "resetDefaults": "Réinitialiser les Valeurs par Défaut"
   },
   "addMiner": {
     "addByIp": "Ajouter par IP",
@@ -516,7 +518,9 @@
     "wallets": "Portefeuilles",
     "groups": "Groupes",
     "importData": "Importer des données",
-    "minerComparison": "Comparaison de mineurs"
+    "minerComparison": "Comparaison de mineurs",
+    "firmware": "Firmware",
+    "darkPool": "Pool Noir"
   },
   "minerCard": {
     "hashrate": "Taux de hachage",
@@ -739,7 +743,21 @@
     "month": "Mois",
     "usdPerDay": "USD/jour",
     "netPerDay": "Net/jour (après électricité)",
-    "viewDetails": "Voir les détails de {{title}}"
+    "viewDetails": "Voir les détails de {{title}}",
+    "poolEarnings": "Gains du Pool",
+    "estVsPool": "Estime vs Rapporte par le Pool",
+    "poolReported": "Rapporte par le Pool",
+    "variance": "Variance",
+    "breakEvenAnalysis": "Analyse du Seuil de Rentabilite",
+    "hardwareInvestment": "Investissement Materiel",
+    "monthlyElectricity": "Electricite Mensuelle",
+    "monthlyRevenue": "Revenu Mensuel",
+    "monthlyNet": "Net Mensuel",
+    "breakEvenDays": "Jours avant Rentabilite",
+    "poolFeeNet": "Net apres 2% de frais de pool",
+    "hardwareCostPlaceholder": "Entrez le cout du materiel...",
+    "noBreakEven": "Pas encore rentable",
+    "vsEstimated": "vs estime"
   },
   "powerUsage": {
     "total": "Total",
@@ -874,5 +892,28 @@
     "shareError": "Échec du partage du groupe",
     "revokeSuccess": "Partage révoqué",
     "sharedMiners": "Mineurs Partagés"
+  },
+  "darkPool": {
+    "title": "Pool Noir",
+    "description": "Contribuez des statistiques anonymisées au pool noir collectif.",
+    "optIn": "Participer",
+    "optInDescription": "Partagez vos statistiques de mineurs anonymement",
+    "yourMiners": "Vos Mineurs",
+    "onlineMiners": "En ligne",
+    "yourHashrate": "Hashrate",
+    "yourPower": "Puissance",
+    "contributeNow": "Contribuer Maintenant",
+    "contributing": "Contribution...",
+    "contributionFailed": "Échec de la contribution",
+    "noMiners": "Aucun mineur en ligne",
+    "networkStats": "Statistiques Réseau",
+    "totalHashrate": "Hashrate Total",
+    "contributors": "Contributeurs",
+    "avgEfficiency": "Efficacité Moyenne",
+    "poolDistribution": "Distribution du Pool",
+    "recentContributions": "Contributions Récentes",
+    "deleteMyData": "Supprimer Mes Données",
+    "confirmDelete": "Supprimer Toutes les Données",
+    "confirmDeleteBody": "Cela supprimera définitivement toutes vos contributions."
   }
 }

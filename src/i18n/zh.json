@@ -299,7 +299,9 @@
     "locationMiningFarm": "矿场",
     "locationColocation": "托管",
     "powerModeStandard": "标准",
-    "powerModeECO": "ECO"
+    "powerModeECO": "ECO",
+    "shareRejection": "Share拒绝率 %",
+    "resetDefaults": "恢复默认值"
   },
   "addMiner": {
     "addByIp": "通过 IP 添加",
@@ -506,7 +508,9 @@
     "wallets": "钱包",
     "groups": "分组",
     "importData": "导入数据",
-    "minerComparison": "矿机比较"
+    "minerComparison": "矿机比较",
+    "firmware": "固件",
+    "darkPool": "暗池"
   },
   "minerCard": {
     "hashrate": "算力",
@@ -729,7 +733,21 @@
     "month": "月",
     "usdPerDay": "美元/天",
     "netPerDay": "每日净收益（扣除电费）",
-    "viewDetails": "查看{{title}}详情"
+    "viewDetails": "查看{{title}}详情",
+    "poolEarnings": "矿池收益",
+    "estVsPool": "预估 vs 矿池报告",
+    "poolReported": "矿池报告",
+    "variance": "差异",
+    "breakEvenAnalysis": "回本分析",
+    "hardwareInvestment": "硬件投资",
+    "monthlyElectricity": "月电费",
+    "monthlyRevenue": "月收入",
+    "monthlyNet": "月净收入",
+    "breakEvenDays": "回本天数",
+    "poolFeeNet": "扣除2%矿池费后净收入",
+    "hardwareCostPlaceholder": "输入硬件成本...",
+    "noBreakEven": "尚未盈利",
+    "vsEstimated": "与预估相比"
   },
   "powerUsage": {
     "total": "总计",
@@ -864,5 +882,28 @@
     "shareError": "共享分组失败",
     "revokeSuccess": "共享已撤销",
     "sharedMiners": "共享的矿机"
+  },
+  "darkPool": {
+    "title": "暗池",
+    "description": "向集体暗池贡献匿名化的统计数据。",
+    "optIn": "参与",
+    "optInDescription": "匿名分享矿机统计数据",
+    "yourMiners": "你的矿机",
+    "onlineMiners": "在线",
+    "yourHashrate": "算力",
+    "yourPower": "功耗",
+    "contributeNow": "立即贡献",
+    "contributing": "贡献中...",
+    "contributionFailed": "贡献失败",
+    "noMiners": "没有在线矿机",
+    "networkStats": "网络统计",
+    "totalHashrate": "总算力",
+    "contributors": "贡献者",
+    "avgEfficiency": "平均效率",
+    "poolDistribution": "矿池分布",
+    "recentContributions": "最近贡献",
+    "deleteMyData": "删除我的数据",
+    "confirmDelete": "删除所有数据",
+    "confirmDeleteBody": "这将永久删除您的所有贡献数据。"
   }
 }

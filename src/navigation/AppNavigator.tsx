@@ -78,6 +78,16 @@ const CustomThemeEditorScreen = lazy(() =>
     default: m.default,
   })),
 );
+const FirmwareScreen = lazy(() =>
+  import('../screens/FirmwareScreen').then((m) => ({
+    default: m.default,
+  })),
+);
+const DarkPoolScreen = lazy(() =>
+  import('../screens/DarkPoolScreen').then((m) => ({
+    default: m.DarkPoolScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -117,6 +127,8 @@ const WrappedPoolAnalytics = withScreenBoundary(PoolAnalyticsScreen);
 const WrappedExportReport = withScreenBoundary(ExportReportScreen);
 const WrappedSharedGroups = withScreenBoundary(SharedGroupsScreen);
 const WrappedCustomThemeEditor = withScreenBoundary(CustomThemeEditorScreen);
+const WrappedFirmware = withScreenBoundary(FirmwareScreen);
+const WrappedDarkPool = withScreenBoundary(DarkPoolScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -298,6 +310,16 @@ export function AppNavigator() {
           name="CustomThemeEditor"
           component={WrappedCustomThemeEditor}
           options={{ title: t('themes.customEditor', 'Theme Editor') }}
+        />
+        <Stack.Screen
+          name="Firmware"
+          component={WrappedFirmware}
+          options={{ title: t('navigator.firmware', 'Firmware') }}
+        />
+        <Stack.Screen
+          name="DarkPool"
+          component={WrappedDarkPool}
+          options={{ title: t('darkPool.title', 'Dark Pool') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

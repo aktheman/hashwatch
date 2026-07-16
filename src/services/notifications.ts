@@ -74,6 +74,22 @@ export async function setAlertRules(minerId: string, rules: AlertRule): Promise<
   }
 }
 
+export { DEFAULT_RULES };
+
+export async function getDefaultAlertRules(): Promise<AlertRule> {
+  const saved = await DB.getSetting('default_alert_rules');
+  if (saved) {
+    try {
+      return { ...DEFAULT_RULES, ...JSON.parse(saved) };
+    } catch {}
+  }
+  return { ...DEFAULT_RULES };
+}
+
+export async function setDefaultAlertRules(rules: AlertRule): Promise<void> {
+  await DB.setSetting('default_alert_rules', JSON.stringify(rules));
+}
+
 export async function requestNotificationPermissions(): Promise<boolean> {
   try {
     const { status } = await Notifications.requestPermissionsAsync();
