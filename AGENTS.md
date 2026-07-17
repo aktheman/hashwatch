@@ -55,7 +55,24 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-16 — Round 20)
+## Latest Round (Session 2026-07-16 — Round 22)
+
+### Changes (Round 22 — Health score UI, pool recs, auto-switch, Sentry, docs)
+
+- **Health Score UI**: MinerDetailScreen health score section (grade badge + factor breakdown bars). MinerCard small health grade badge.
+- **Pool Recommendations**: DashboardScreen collapsible section with pool recommendations. Auto-hides when empty.
+- **Auto-pool-switching**: SettingsScreen opt-in toggle. `autoPoolSwitch.ts` service.
+- **Sentry + Analytics**: `errorTracking.ts` (no-op until DSN), `analytics.ts` (8 tracking functions), ErrorBoundary captureError.
+- **Documentation**: README.md, CONTRIBUTING.md, API.md (18 endpoint groups).
+- **Tests**: 1560 frontend + 242 backend = 1802 total, all passing.
+
+### Test results
+
+- Frontend: 1560 tests passing (115 suites) — ESLint clean
+- Backend: 242 tests passing (26 suites)
+- Total: 1802 tests
+
+## Previous Round (Session 2026-07-16 — Round 20)
 
 ### Changes (Round 20 — Firmware OTA, dark pool, smart alerts, profitability dashboard)
 
