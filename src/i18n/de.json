@@ -69,7 +69,10 @@
     "usdEquivalent": "USD-Äquivalent",
     "perMiner": "Pro Miner",
     "total": "Gesamt",
-    "noData": "Keine Daten"
+    "noData": "Keine Daten",
+    "poolRecommendations": "Pool-Empfehlungen",
+    "poolRecCount": "{{count}} Vorschlag",
+    "poolRecCount_plural": "{{count}} Vorschläge"
   },
   "dashboardCustomizer": {
     "title": "Dashboard anpassen",
@@ -178,6 +181,8 @@
     "totalMiners": "Miner gesamt",
     "online": "Online",
     "autoScan": "Auto-Scan Netzwerk",
+    "autoPoolSwitch": "Pool automatisch wechseln",
+    "lastPoolSwitch": "Letzter Wechsel",
     "refreshAll": "Alle aktualisieren",
     "refresh": "Aktualisieren",
     "scanNetwork": "Netzwerk scannen",

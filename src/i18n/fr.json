@@ -69,7 +69,10 @@
     "usdEquivalent": "Équivalent USD",
     "perMiner": "Par Mineur",
     "total": "Total",
-    "noData": "Aucune donnée"
+    "noData": "Aucune donnée",
+    "poolRecommendations": "Recommandations de Pool",
+    "poolRecCount": "{{count}} suggestion",
+    "poolRecCount_plural": "{{count}} suggestions"
   },
   "dashboardCustomizer": {
     "title": "Personnaliser le tableau de bord",
@@ -178,6 +181,8 @@
     "totalMiners": "Total des mineurs",
     "online": "En ligne",
     "autoScan": "Scan auto. du réseau",
+    "autoPoolSwitch": "Changement auto. de Pool",
+    "lastPoolSwitch": "Dernier changement",
     "refreshAll": "Tout actualiser",
     "refresh": "Actualiser",
     "scanNetwork": "Scanner le réseau",

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import {
   View,
   Text,
@@ -38,7 +38,7 @@ import {
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { MarkdownText } from '../utils/markdown';
-import { MinerHealthScore } from '../components/MinerHealthScore';
+import { calculateHealthScore, HealthBreakdown } from '../utils/healthScore';
 
 const LazyHealthPredictionCard = React.lazy(() =>
   import('../components/HealthPredictionCard').then((m) => ({ default: m.HealthPredictionCard })),
@@ -47,6 +47,7 @@ import { TimeAgo } from '../components/TimeAgo';
 import { useTranslation } from 'react-i18next';
 import { useMinerDetail } from '../hooks/useMinerDetail';
 import { AlertRuleSlider } from '../components/AlertRuleSlider';
+import { trackScreenView } from '../services/analytics';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
@@ -56,6 +57,10 @@ interface MinerDetailScreenProps {
 export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    trackScreenView('MinerDetail');
+  }, []);
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -416,6 +421,36 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   }
 
   const s = miner.status;
+
+  const healthScore = useMemo(() => calculateHealthScore(miner), [miner]);
+
+  const healthGradeColor = useMemo(() => {
+    switch (healthScore.grade) {
+      case 'A+':
+      case 'A':
+        return theme.success;
+      case 'B+':
+      case 'B':
+        return theme.info;
+      case 'C+':
+      case 'C':
+        return theme.warning;
+      case 'D':
+        return theme.danger;
+      case 'F':
+        return '#7F1D1D';
+      default:
+        return theme.text;
+    }
+  }, [healthScore.grade, theme]);
+
+  const healthFactors: { key: keyof HealthBreakdown; label: string }[] = [
+    { key: 'temperature', label: t('health.temperature', 'Temperature') },
+    { key: 'hashrate', label: t('health.hashrate', 'Hashrate') },
+    { key: 'uptime', label: t('health.uptime', 'Uptime') },
+    { key: 'shares', label: t('health.shares', 'Shares') },
+    { key: 'stability', label: t('health.stability', 'Stability') },
+  ];
 
   const handleShareAsImage = async () => {
     try {
@@ -887,7 +922,125 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           </View>
         </View>
 
-        <MinerHealthScore miner={miner} />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            <Text style={styles.sectionIcon}>💊</Text> {t('health.title', 'Health Score')}
+          </Text>
+          <View
+            accessibilityRole="summary"
+            accessibilityLabel={`${t('health.title', 'Health Score')} ${healthScore.grade} ${healthScore.score}/100`}
+            style={[styles.poolCard, { borderColor: healthGradeColor + '40' }]}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: spacing.md,
+              }}
+            >
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  borderWidth: 2,
+                  borderColor: healthGradeColor,
+                  backgroundColor: healthGradeColor + '18',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: spacing.md,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: fontSize.xl,
+                    fontWeight: fontWeight.extrabold,
+                    color: healthGradeColor,
+                  }}
+                  accessibilityLabel={`${t('health.grade', 'Grade')} ${healthScore.grade}`}
+                >
+                  {healthScore.grade}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: fontSize.md,
+                    fontWeight: fontWeight.bold,
+                    color: theme.text,
+                  }}
+                >
+                  {t('health.title', 'Health Score')}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: fontSize.sm,
+                    color: theme.textDim,
+                  }}
+                  accessibilityLabel={`${healthScore.score} ${t('health.outOf100', 'out of 100')}`}
+                >
+                  {healthScore.score}/100
+                </Text>
+              </View>
+            </View>
+
+            {healthFactors.map((f) => {
+              const value = healthScore[f.key] as number;
+              const barColor =
+                value >= 80 ? theme.success : value >= 60 ? theme.warning : theme.danger;
+              return (
+                <View
+                  key={f.key}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: spacing.xs,
+                    gap: spacing.xs,
+                  }}
+                >
+                  <Text
+                    accessibilityLabel={`${f.label}: ${value}`}
+                    style={{
+                      width: 80,
+                      fontSize: fontSize.xs,
+                      color: theme.textMuted,
+                    }}
+                  >
+                    {f.label}
+                  </Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 5,
+                      borderRadius: 3,
+                      backgroundColor: theme.surfaceLight,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: '100%',
+                        width: `${value}%`,
+                        borderRadius: 3,
+                        backgroundColor: barColor,
+                      }}
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      width: 28,
+                      fontSize: fontSize.xs,
+                      color: theme.text,
+                      textAlign: 'right',
+                    }}
+                  >
+                    {value}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
 
         {healthPrediction && (
           <Suspense fallback={null}>

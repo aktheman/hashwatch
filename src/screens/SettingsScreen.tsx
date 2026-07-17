@@ -282,6 +282,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   const [authError, setAuthError] = useState('');
   const [powerCost, setPowerCost] = useState('');
   const [autoScan, setAutoScan] = useState(false);
+  const [autoPoolSwitch, setAutoPoolSwitch] = useState(false);
+  const [lastSwitchTimestamp, setLastSwitchTimestamp] = useState<number | null>(null);
   const [language, setLanguage] = useState(i18n.language);
   const [autoDarkHour, setAutoDarkHour] = useState<number | null>(null);
   const [sunMode, setSunMode] = useState(false);
@@ -340,6 +342,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
   useEffect(() => {
     getSetting('power_cost').then((v) => setPowerCost(v || ''));
     getSetting('auto_scan').then((v) => setAutoScan(v === 'true'));
+    getSetting('auto_pool_switch').then((v) => setAutoPoolSwitch(v === 'true'));
+    import('../services/autoPoolSwitch').then((m) =>
+      m.getLastSwitchTimestamp().then(setLastSwitchTimestamp),
+    );
     getSetting('language').then((saved) => {
       if (saved) i18n.changeLanguage(saved);
     });
@@ -1309,6 +1315,35 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Auto-scan network"
           />
         </View>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>{t('settings.autoPoolSwitch')}</Text>
+          <Switch
+            value={autoPoolSwitch}
+            onValueChange={(v) => {
+              setAutoPoolSwitch(v);
+              const val = String(v);
+              setSetting('auto_pool_switch', val);
+              if (token) {
+                if (isOnline) {
+                  putRemoteSetting('auto_pool_switch', val).catch(() =>
+                    console.warn('Failed to sync auto_pool_switch'),
+                  );
+                } else {
+                  queueSetting('auto_pool_switch', val);
+                }
+              }
+            }}
+            trackColor={{ false: theme.border, true: theme.primary + '60' }}
+            thumbColor={autoPoolSwitch ? theme.primary : theme.textMuted}
+            accessibilityLabel="Auto-switch pools"
+          />
+        </View>
+        {autoPoolSwitch && lastSwitchTimestamp && (
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>{t('settings.lastPoolSwitch')}</Text>
+            <Text style={styles.rowValue}>{new Date(lastSwitchTimestamp).toLocaleString()}</Text>
+          </View>
+        )}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('settings.refreshAll')}

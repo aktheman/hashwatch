@@ -38,9 +38,11 @@ import { spacing, radius, fontSize, fontWeight, buttonText, cardShadow } from '.
 import { exportAllData } from '../utils/export';
 import { BitAxeClient } from '../api/bitaxe';
 import { LATEST_FIRMWARE, getFirmwareBinaryUrl } from '../utils/version';
+import { trackScreenView } from '../services/analytics';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
 import { MinerDrillDownModal } from '../components/MinerDrillDownModal';
 import { TimeAgo } from '../components/TimeAgo';
+import { recommendPools } from '../utils/poolRecommendation';
 
 const LazyWorldMap = lazy(() =>
   import('../components/WorldMap').then((m) => ({ default: m.WorldMap })),
@@ -68,6 +70,10 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
+
+  useEffect(() => {
+    trackScreenView('Dashboard');
+  }, []);
   const loading = useMinerStore((s) => s.loading);
   const initialized = useMinerStore((s) => s.initialized);
   const scanning = useMinerStore((s) => s.scanning);
@@ -100,6 +106,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [groupPickerInput, setGroupPickerInput] = useState('');
   const [expandedPool, setExpandedPool] = useState<string | null>(null);
+  const [poolRecExpanded, setPoolRecExpanded] = useState(true);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [autoGroupBy, setAutoGroupBy] = useState<null | 'location' | 'tag'>(null);
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
@@ -623,6 +630,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
     return pools;
   }, [miners]);
+
+  const poolRecommendations = useMemo(() => recommendPools(miners), [miners]);
 
   const [sortBy, setSortBy] = useState<'name' | 'hashrate' | 'temp'>('name');
   const sortedMiners = useMemo(() => {
@@ -1399,6 +1408,132 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
         return miners.length > 0 ? (
           <ProfitabilityCard miners={filteredMiners} powerCost={powerCost} />
         ) : null;
+      case 'poolRecommendations':
+        if (miners.length === 0 || poolRecommendations.length === 0) return null;
+        return (
+          <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs, gap: spacing.xxs }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('dashboard.poolRecommendations')}
+              onPress={() => setPoolRecExpanded(!poolRecExpanded)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: theme.surface,
+                borderRadius: radius.md,
+                paddingHorizontal: spacing.sm,
+                paddingVertical: spacing.xs,
+                borderWidth: 1,
+                borderColor: theme.border,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                <Text
+                  style={{
+                    color: theme.primary,
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.bold,
+                  }}
+                >
+                  {t('dashboard.poolRecCount', { count: poolRecommendations.length })}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontSize: fontSize.base,
+                    fontWeight: fontWeight.bold,
+                  }}
+                >
+                  {t('dashboard.poolRecommendations')}
+                </Text>
+              </View>
+              <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>
+                {poolRecExpanded ? '\u25B2' : '\u25BC'}
+              </Text>
+            </Pressable>
+            {poolRecExpanded &&
+              poolRecommendations.map((rec, i) => {
+                const confidenceColor =
+                  rec.confidence === 'high'
+                    ? theme.success
+                    : rec.confidence === 'medium'
+                      ? theme.warning
+                      : theme.textMuted;
+                return (
+                  <View
+                    key={`${rec.pool}-${i}`}
+                    style={{
+                      backgroundColor: theme.surface,
+                      borderRadius: radius.md,
+                      padding: spacing.sm,
+                      borderWidth: 1,
+                      borderColor: theme.border,
+                      gap: spacing.xxs,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: theme.text,
+                          fontSize: fontSize.base,
+                          fontWeight: fontWeight.bold,
+                          flex: 1,
+                        }}
+                        numberOfLines={1}
+                      >
+                        {rec.pool.replace(/^stratum\+tcp:\/\//, '').split(':')[0]}
+                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+                        <View
+                          style={{
+                            backgroundColor: confidenceColor + '20',
+                            borderRadius: radius.sm,
+                            paddingHorizontal: spacing.xs,
+                            paddingVertical: 2,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: confidenceColor,
+                              fontSize: fontSize.xs,
+                              fontWeight: fontWeight.bold,
+                            }}
+                          >
+                            {rec.confidence}
+                          </Text>
+                        </View>
+                        <Text
+                          style={{
+                            color: theme.success,
+                            fontSize: fontSize.base,
+                            fontWeight: fontWeight.bold,
+                          }}
+                        >
+                          +{rec.estimatedImprovement}%
+                        </Text>
+                      </View>
+                    </View>
+                    <Text
+                      style={{
+                        color: theme.textDim,
+                        fontSize: fontSize.xs,
+                        lineHeight: 18,
+                      }}
+                    >
+                      {rec.reason}
+                    </Text>
+                  </View>
+                );
+              })}
+          </View>
+        );
       case 'filters':
         if (kioskMode || miners.length === 0) return null;
         if (
