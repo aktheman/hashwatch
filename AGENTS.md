@@ -55,7 +55,23 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-17 — Round 24)
+## Latest Round (Session 2026-07-17 — Round 25)
+
+### Changes (Round 25 — WebSocket polling replacement, RevenueCat init, native downsampling, PWA background sync)
+
+- **WebSocket polling replacement**: WS auto-connect on login; polling interval extends to 5min when WS active (30s fallback). `onWebSocketMessage` callback for WS message forwarding to store.
+- **RevenueCat initialization**: `useSubscriptionStore.initialize()` called on app restore in `App.tsx`. `SubscriptionScreen` already wired in navigator with full purchase/restore UI.
+- **Native data downsampling**: `downsampleSnapshots()` in `database.native.ts` aggregates 7–30 day snapshots into hourly buckets (avg hashRate, temp, power, etc.). `cleanupOldSnapshots()` restored to pure delete.
+- **PWA background sync**: Service worker `sync` event handler sends `SW_RECONNECT` message to all clients when reconnect tag fires. `websocket.ts` listens for `SW_RECONNECT` and auto-reconnects.
+- **Tests**: 1565 frontend + 242 backend = 1807 total, all passing.
+
+### Test results
+
+- Frontend: 1565 tests passing (115 suites) — ESLint clean
+- Backend: 242 tests passing (26 suites)
+- Total: 1807 tests
+
+## Previous Round (Session 2026-07-17 — Round 24)
 
 ### Changes (Round 24 — Notification batching, export, PWA install, theme marketplace)
 
