@@ -11,6 +11,7 @@ import {
 } from '../utils/formatters';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
+import { calculateHealthScore } from '../utils/healthScore';
 
 interface MinerCardProps {
   miner: Miner;
@@ -182,6 +183,27 @@ export const MinerCard = memo(
     const [editingName, setEditingName] = useState(false);
     const [editNameValue, setEditNameValue] = useState('');
 
+    const healthScore = useMemo(() => calculateHealthScore(miner), [miner]);
+    const gradeColor = useMemo(() => {
+      switch (healthScore.grade) {
+        case 'A+':
+        case 'A':
+          return theme.success;
+        case 'B+':
+        case 'B':
+          return theme.info;
+        case 'C+':
+        case 'C':
+          return theme.warning;
+        case 'D':
+          return theme.danger;
+        case 'F':
+          return '#7F1D1D';
+        default:
+          return theme.text;
+      }
+    }, [healthScore.grade, theme]);
+
     const { status, isOnline } = miner;
     const hashrate = status ? formatHashrate(status.hashRate, status.hashRateUnit) : '---';
     const tempColor = !status
@@ -275,6 +297,31 @@ export const MinerCard = memo(
                 )}
               </View>
             )}
+          </View>
+          <View
+            accessibilityRole="text"
+            accessibilityLabel={`${t('health.grade', 'Grade')} ${healthScore.grade}`}
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              borderWidth: 1.5,
+              borderColor: gradeColor,
+              backgroundColor: gradeColor + '18',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: spacing.xs,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: fontSize.xs,
+                fontWeight: fontWeight.extrabold,
+                color: gradeColor,
+              }}
+            >
+              {healthScore.grade}
+            </Text>
           </View>
           <View style={[styles.pulse, { backgroundColor: accentColor + '20' }]}>
             <View style={[styles.pulseInner, { backgroundColor: accentColor }]} />

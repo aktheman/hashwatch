@@ -12,6 +12,7 @@ import { darkTheme, useTheme, setTheme, setThemeMode } from './src/theme';
 import { initProxyUrl } from './src/constants';
 import { initCrashReporting } from './src/utils/crash';
 import { initAnalytics } from './src/utils/analytics';
+import { initErrorTracking } from './src/services/errorTracking';
 import { startAutoTheme, stopAutoTheme } from './src/services/autoTheme';
 
 const OnboardingScreen = lazy(() =>
@@ -40,6 +41,7 @@ export default function App() {
         requestNotificationPermissions();
         initCrashReporting({ enabled: true });
         initAnalytics({ enabled: true });
+        initErrorTracking({ dsn: '', enabled: __DEV__ === false });
         await initProxyUrl();
         const saved = await getSetting('theme_mode');
         if (

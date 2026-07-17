@@ -69,7 +69,10 @@
     "assignWallet": "ウォレットを割り当て",
     "noWallet": "ウォレットなし",
     "assignLocation": "場所を割り当て",
-    "noData": "データなし"
+    "noData": "データなし",
+    "poolRecommendations": "プールの推奨",
+    "poolRecCount": "{{count}} 件の提案",
+    "poolRecCount_plural": "{{count}} 件の提案"
   },
   "dashboardCustomizer": {
     "title": "ダッシュボードをカスタマイズ",
@@ -178,6 +181,8 @@
     "totalMiners": "マイナー総数",
     "online": "オンライン",
     "autoScan": "自動ネットワークスキャン",
+    "autoPoolSwitch": "プールを自動切替",
+    "lastPoolSwitch": "最終切替",
     "refreshAll": "すべて更新",
     "refresh": "更新",
     "scanNetwork": "ネットワークをスキャン",

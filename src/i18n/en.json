@@ -89,6 +89,9 @@
     "active": "active",
     "workersActive": "active",
     "pool": "Pool",
+    "poolRecommendations": "Pool Recommendations",
+    "poolRecCount": "{{count}} suggestion",
+    "poolRecCount_plural": "{{count}} suggestions",
     "exitKioskTitle": "Exit Kiosk",
     "exitKioskBody": "Tap \"Exit\" to leave kiosk mode.",
     "exitKioskExit": "Exit"
@@ -200,6 +203,8 @@
     "totalMiners": "Total Miners",
     "online": "Online",
     "autoScan": "Auto-Scan Network",
+    "autoPoolSwitch": "Auto-Switch Pools",
+    "lastPoolSwitch": "Last Switched",
     "refreshAll": "Refresh All",
     "refresh": "Refresh",
     "scanNetwork": "Scan Network",

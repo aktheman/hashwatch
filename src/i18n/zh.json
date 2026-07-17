@@ -69,7 +69,10 @@
     "assignWallet": "分配钱包",
     "noWallet": "无钱包",
     "assignLocation": "分配位置",
-    "noData": "无数据"
+    "noData": "无数据",
+    "poolRecommendations": "矿池推荐",
+    "poolRecCount": "{{count}} 条建议",
+    "poolRecCount_plural": "{{count}} 条建议"
   },
   "dashboardCustomizer": {
     "title": "自定义仪表盘",
@@ -178,6 +181,8 @@
     "totalMiners": "矿机总数",
     "online": "在线",
     "autoScan": "自动扫描网络",
+    "autoPoolSwitch": "自动切换矿池",
+    "lastPoolSwitch": "上次切换",
     "refreshAll": "刷新全部",
     "refresh": "刷新",
     "scanNetwork": "扫描网络",

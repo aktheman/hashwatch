@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { theme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
+import { captureError } from '../services/errorTracking';
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -21,7 +22,7 @@ class ErrorBoundaryInternal extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('App crash:', error, errorInfo);
+    captureError(error, { componentStack: errorInfo.componentStack });
   }
 
   handleRetry = () => {

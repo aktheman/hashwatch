@@ -6539,6 +6539,53 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "children": [
                 {
                   "children": [
+                    "settings.autoPoolSwitch",
+                  ],
+                  "props": {
+                    "style": {
+                      "color": "#FFFFFF",
+                      "fontSize": 15,
+                      "fontWeight": "600",
+                    },
+                  },
+                  "type": "Text",
+                },
+                <RCTSwitch
+                  accessibilityLabel="Auto-switch pools"
+                  accessibilityRole="switch"
+                  onChange={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  onTintColor="#6C63FF60"
+                  style={
+                    {
+                      "alignSelf": "flex-start",
+                    }
+                  }
+                  thumbTintColor="#5C5F7A"
+                  tintColor="#1E1E42"
+                  value={false}
+                />,
+              ],
+              "props": {
+                "style": {
+                  "alignItems": "center",
+                  "backgroundColor": "#13132B",
+                  "borderColor": "#1E1E42",
+                  "borderRadius": 16,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 2,
+                  "padding": 16,
+                },
+              },
+              "type": "View",
+            },
+            {
+              "children": [
+                {
+                  "children": [
                     "settings.refreshAll",
                   ],
                   "props": {

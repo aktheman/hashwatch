@@ -42,7 +42,8 @@ export type SectionKey =
   | 'metrics'
   | 'filters'
   | 'sort'
-  | 'profitability';
+  | 'profitability'
+  | 'poolRecommendations';
 
 export const SECTION_LABELS: Record<SectionKey, string> = {
   earnings: 'Earnings Card',
@@ -54,6 +55,7 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   filters: 'Wallet / Group Filters',
   sort: 'Sort Controls',
   profitability: 'Profitability',
+  poolRecommendations: 'Pool Recommendations',
 };
 
 export const DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
@@ -66,6 +68,7 @@ export const DEFAULT_VISIBLE: Record<SectionKey, boolean> = {
   filters: true,
   sort: true,
   profitability: true,
+  poolRecommendations: true,
 };
 
 interface DashboardPreset {
