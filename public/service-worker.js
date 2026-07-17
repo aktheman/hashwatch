@@ -134,3 +134,15 @@ self.addEventListener('notificationclick', (e) => {
     }),
   );
 });
+
+self.addEventListener('sync', (e) => {
+  if (e.tag === 'hashwatch-reconnect') {
+    e.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+        for (const client of windowClients) {
+          client.postMessage({ type: 'SW_RECONNECT' });
+        }
+      }),
+    );
+  }
+});
