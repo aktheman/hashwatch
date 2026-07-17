@@ -1,38 +1,52 @@
-const CACHE = 'hashwatch-v2';
-const ASSETS = ['/', '/index.html'];
-const API_CACHE = 'hashwatch-api-v1';
+const CACHE = 'hashwatch-v3';
+const API_CACHE = 'hashwatch-api-v2';
+const STATIC_ASSETS = ['/', '/index.html', '/offline.html'];
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/manifest.json',
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()),
+    caches.open(CACHE).then((c) => c.addAll(PRECACHE_URLS)).then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener('activate', (e) => {
+  const KEEP = [CACHE, API_CACHE];
   e.waitUntil(
-    Promise.all(
-      ['hashwatch-v1', 'hashwatch-api-v1'].map((name) =>
-        caches.keys().then((keys) =>
-          Promise.all(keys.filter((k) => k !== CACHE && k !== API_CACHE).map((k) => caches.delete(k)))
-        )
-      )
-    )
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => !KEEP.includes(k)).map((k) => caches.delete(k)),
+      ),
+    ).then(() => self.clients.claim()),
   );
 });
 
 self.addEventListener('fetch', (e) => {
   const { request } = e;
+  if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
 
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       caches.open(API_CACHE).then(async (cache) => {
-        const cached = await cache.match(request);
-        const fetchPromise = fetch(request).then((res) => {
-          cache.put(request, res.clone());
-          return res;
-        }).catch(() => cached);
-        return cached || fetchPromise;
+        try {
+          const networkRes = await fetch(request);
+          if (networkRes.ok) {
+            cache.put(request, networkRes.clone());
+          }
+          return networkRes;
+        } catch {
+          const cached = await cache.match(request);
+          return cached || new Response(JSON.stringify({ error: 'offline' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
       }),
     );
     return;
@@ -40,17 +54,36 @@ self.addEventListener('fetch', (e) => {
 
   if (url.origin === self.location.origin) {
     e.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request).then((res) => {
-        const clone = res.clone();
-        caches.open(CACHE).then((c) => c.put(request, clone));
-        return res;
-      })),
+      caches.match(request).then(async (cached) => {
+        if (cached) {
+          fetch(request).then((res) => {
+            if (res.ok) {
+              caches.open(CACHE).then((c) => c.put(request, res));
+            }
+          }).catch(() => {});
+          return cached;
+        }
+        try {
+          const res = await fetch(request);
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE).then((c) => c.put(request, clone));
+          }
+          return res;
+        } catch {
+          if (request.mode === 'navigate') {
+            const offlinePage = await caches.match('/offline.html');
+            return offlinePage || new Response('Offline', { status: 503 });
+          }
+          return new Response('', { status: 503 });
+        }
+      }),
     );
   }
 });
 
 self.addEventListener('push', (e) => {
-  let data = { title: 'HashWatch', body: '', icon: '/favicon.ico', badge: '/favicon.ico' };
+  let data = { title: 'HashWatch', body: '', icon: '/assets/icon.png', badge: '/assets/favicon.png' };
   if (e.data) {
     try {
       data = { ...data, ...e.data.json() };

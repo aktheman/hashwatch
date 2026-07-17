@@ -65,7 +65,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build:web": "expo export --platform web && cp public/service-worker.js dist/ 2>/dev/null; echo '{\"name\":\"HashWatch\",\"short_name\":\"HashWatch\",\"description\":\"Real-time BitAxe miner monitoring\",\"start_url\":\"/\",\"display\":\"standalone\",\"background_color\":\"#0A0A1A\",\"theme_color\":\"#0A0A1A\",\"icons\":[{\"src\":\"/favicon.ico\",\"sizes\":\"64x64\",\"type\":\"image/x-icon\"}]}' > dist/manifest.json 2>/dev/null; true",
+    "build:web": "expo export --platform web && cp public/service-worker.js dist/ 2>/dev/null; cp public/manifest.json dist/ 2>/dev/null; cp public/offline.html dist/ 2>/dev/null; true",
     "build:web:analyze": "expo export --platform web --dump-sourcemap && node scripts/analyze-bundle.js",
     "electron": "NODE_ENV=development electron electron/main.js",
     "electron:build": "npm run build:web && electron-builder",

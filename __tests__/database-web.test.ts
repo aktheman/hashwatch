@@ -36,6 +36,8 @@ const {
   saveWallet,
   deleteWallet,
   cleanupOldSnapshots,
+  getSnapshotCount,
+  getStorageUsage,
 } = db;
 
 import { Miner, MinerSnapshot, Wallet } from '../src/types';
@@ -227,6 +229,71 @@ describe('database (web)', () => {
       mockStorage['hashwatch_schema_version'] = '2';
       const miners = await loadMiners();
       expect(Array.isArray(miners)).toBe(true);
+    });
+  });
+
+  describe('snapshot retention', () => {
+    const snapshot: MinerSnapshot = {
+      minerId: 'm1',
+      timestamp: Date.now(),
+      hashRate: 1.5,
+      hashRateUnit: 'TH/s',
+      temperature: 65,
+      voltage: 500,
+      current: 5,
+      power: 120,
+      sharesAccepted: 100,
+      sharesRejected: 2,
+      uptimeSeconds: 3600,
+      frequency: 500,
+    };
+
+    beforeEach(async () => {
+      Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+    });
+
+    it('cleanupOldSnapshots uses 7-day default when no setting', async () => {
+      const now = Date.now();
+      await saveSnapshot({ ...snapshot, timestamp: now - 1000 });
+      await saveSnapshot({ ...snapshot, timestamp: now - 8 * 24 * 60 * 60 * 1000 });
+      await cleanupOldSnapshots();
+      const result = await getSnapshots('m1');
+      expect(result).toHaveLength(1);
+    });
+
+    it('cleanupOldSnapshots respects custom retention setting', async () => {
+      await setSetting('snapshot_retention_days', '3');
+      const now = Date.now();
+      await saveSnapshot({ ...snapshot, timestamp: now - 1000 });
+      await saveSnapshot({ ...snapshot, timestamp: now - 2 * 24 * 60 * 60 * 1000 });
+      await saveSnapshot({ ...snapshot, timestamp: now - 4 * 24 * 60 * 60 * 1000 });
+      await cleanupOldSnapshots();
+      const result = await getSnapshots('m1');
+      expect(result).toHaveLength(2);
+    });
+
+    it('cleanupOldSnapshots accepts explicit olderThan override', async () => {
+      const now = Date.now();
+      await saveSnapshot({ ...snapshot, timestamp: now - 1000 });
+      await saveSnapshot({ ...snapshot, timestamp: now - 2 * 24 * 60 * 60 * 1000 });
+      await cleanupOldSnapshots(24 * 60 * 60 * 1000);
+      const result = await getSnapshots('m1');
+      expect(result).toHaveLength(1);
+    });
+
+    it('getSnapshotCount returns total count', async () => {
+      await saveSnapshot({ ...snapshot, minerId: 'm1', timestamp: 1000 });
+      await saveSnapshot({ ...snapshot, minerId: 'm2', timestamp: 2000 });
+      const count = await getSnapshotCount();
+      expect(count).toBe(2);
+    });
+
+    it('getStorageUsage returns object with used and estimate', async () => {
+      await saveSnapshot(snapshot);
+      const usage = await getStorageUsage();
+      expect(typeof usage.used).toBe('number');
+      expect(typeof usage.estimate).toBe('number');
+      expect(usage.used).toBeGreaterThan(0);
     });
   });
 });
