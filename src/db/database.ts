@@ -162,13 +162,53 @@ export async function deleteWallet(id: string): Promise<void> {
   saveJSON(STORAGE_KEY_WALLETS, wallets);
 }
 
-export async function cleanupOldSnapshots(
-  olderThan: number = 7 * 24 * 60 * 60 * 1000,
-): Promise<void> {
-  const cutoff = Date.now() - olderThan;
+export async function cleanupOldSnapshots(olderThan?: number): Promise<void> {
+  let retentionDays = 7;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    if (stored) {
+      const settings = JSON.parse(stored) as Record<string, string>;
+      const val = settings['snapshot_retention_days'];
+      if (val) {
+        const parsed = parseInt(val, 10);
+        if (parsed >= 1 && parsed <= 90) retentionDays = parsed;
+      }
+    }
+  } catch {}
+  const cutoff = Date.now() - (olderThan ?? retentionDays * 24 * 60 * 60 * 1000);
   const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
   const filtered = snapshots.filter((s) => s.timestamp >= cutoff);
   saveJSON(STORAGE_KEY_SNAPSHOTS, filtered);
+}
+
+export async function getSnapshotCount(): Promise<number> {
+  const snapshots = loadJSON<MinerSnapshot[]>(STORAGE_KEY_SNAPSHOTS, []);
+  return snapshots.length;
+}
+
+export async function getStorageUsage(): Promise<{ used: number; estimate: number }> {
+  let used = 0;
+  try {
+    for (const key of Object.values({
+      a: STORAGE_KEY_MINERS,
+      b: STORAGE_KEY_SNAPSHOTS,
+      c: STORAGE_KEY_SETTINGS,
+      d: STORAGE_KEY_WALLETS,
+      e: STORAGE_KEY_ALERT_HISTORY,
+      f: STORAGE_KEY_NOTIFICATION_HISTORY,
+    })) {
+      const raw = localStorage.getItem(key);
+      if (raw) used += raw.length * 2;
+    }
+  } catch {}
+  let estimate = 0;
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const est = await navigator.storage.estimate();
+      estimate = est.usage || 0;
+    }
+  } catch {}
+  return { used, estimate };
 }
 
 export interface FullExport {

@@ -1,0 +1,46 @@
+{
+  "name": "HashWatch — BitAxe Monitor",
+  "short_name": "HashWatch",
+  "description": "Real-time BitAxe miner monitoring — track hashrate, temperature, pool stats, and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0A1A",
+  "theme_color": "#0A0A1A",
+  "id": "/",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "description": "View all miners"
+    },
+    {
+      "name": "Analytics",
+      "url": "/analytics",
+      "description": "View mining analytics"
+    }
+  ]
+}

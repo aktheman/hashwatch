@@ -6987,6 +6987,519 @@ exports[`SettingsScreen matches snapshot 1`] = `
               },
               "type": "View",
             },
+          ],
+          "props": {
+            "style": {
+              "marginBottom": 20,
+            },
+          },
+          "type": "View",
+        },
+        {
+          "children": [
+            {
+              "children": [
+                "settings.dataStorage",
+              ],
+              "props": {
+                "style": {
+                  "color": "#8B8FA3",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 0.8,
+                  "marginBottom": 8,
+                  "marginLeft": 8,
+                  "textTransform": "uppercase",
+                },
+              },
+              "type": "Text",
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    "settings.snapshotRetention",
+                  ],
+                  "props": {
+                    "style": {
+                      "color": "#FFFFFF",
+                      "fontSize": 15,
+                      "fontWeight": "600",
+                    },
+                  },
+                  "type": "Text",
+                },
+                {
+                  "children": [
+                    "7",
+                    " ",
+                    "settings.days",
+                    " (",
+                    "0",
+                    ")",
+                  ],
+                  "props": {
+                    "style": {
+                      "color": "#8B8FA3",
+                      "fontSize": 15,
+                    },
+                  },
+                  "type": "Text",
+                },
+              ],
+              "props": {
+                "style": {
+                  "alignItems": "center",
+                  "backgroundColor": "#13132B",
+                  "borderColor": "#1E1E42",
+                  "borderRadius": 16,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 2,
+                  "padding": 16,
+                },
+              },
+              "type": "View",
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "1",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 1 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "3",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 3 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "7",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 7 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#6C63FF",
+                          "borderColor": "#6C63FF",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "14",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 14 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "30",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 30 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "60",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 60 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "90",
+                            "d",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "Set retention to 90 days",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "backgroundColor": "#1A1A3E",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "paddingHorizontal": 16,
+                          "paddingVertical": 8,
+                        },
+                      },
+                      "type": "View",
+                    },
+                  ],
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4,
+                    },
+                  },
+                  "type": "View",
+                },
+                {
+                  "children": [
+                    "settings.retentionHelp",
+                  ],
+                  "props": {
+                    "style": {
+                      "color": "#5C5F7A",
+                      "fontSize": 10,
+                      "marginTop": 8,
+                    },
+                  },
+                  "type": "Text",
+                },
+              ],
+              "props": {
+                "style": {
+                  "paddingHorizontal": 16,
+                  "paddingTop": 8,
+                },
+              },
+              "type": "View",
+            },
+          ],
+          "props": {
+            "style": {
+              "marginBottom": 20,
+            },
+          },
+          "type": "View",
+        },
+        {
+          "children": [
             {
               "children": [
                 {

@@ -297,6 +297,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
     null,
   );
   const [showCsvImport, setShowCsvImport] = useState(false);
+  const [retentionDays, setRetentionDays] = useState(7);
+  const [snapshotCount, setSnapshotCount] = useState(0);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<string | null>(null);
   const [entitlements, setEntitlements] = useState<string | null>(null);
@@ -354,6 +356,12 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
     getSetting('user_latitude').then((v) => setLatitude(v || ''));
     getSetting('user_longitude').then((v) => setLongitude(v || ''));
     getSetting('webhook_url').then((v) => setWebhookUrl(v || ''));
+    getSetting('snapshot_retention_days').then((v) => setRetentionDays(v ? parseInt(v, 10) : 7));
+    import('../db/database').then((m) =>
+      m
+        .getSnapshots('*', 0)
+        .then(() => m.getSnapshots('*', 999999).then((snaps) => setSnapshotCount(snaps.length))),
+    );
     useNotificationHistoryStore.getState().loadHistory();
   }, []);
 
@@ -1416,6 +1424,63 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.chevron}>›</Text>
           </View>
         </Pressable>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.dataStorage', 'Data Storage')}</Text>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>
+            {t('settings.snapshotRetention', 'Snapshot Retention')}
+          </Text>
+          <Text style={styles.rowValue}>
+            {retentionDays} {t('settings.days', 'days')} ({snapshotCount})
+          </Text>
+        </View>
+        <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.xs }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xxs }}>
+            {[1, 3, 7, 14, 30, 60, 90].map((days) => (
+              <Pressable
+                key={days}
+                accessibilityRole="button"
+                accessibilityLabel={`Set retention to ${days} days`}
+                style={{
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.xs,
+                  borderRadius: radius.md,
+                  backgroundColor: retentionDays === days ? theme.primary : theme.surfaceLight,
+                  borderWidth: 1,
+                  borderColor: retentionDays === days ? theme.primary : theme.border,
+                }}
+                onPress={() => {
+                  haptic.selection();
+                  setRetentionDays(days);
+                  setSetting('snapshot_retention_days', String(days));
+                  if (token && isOnline) {
+                    putRemoteSetting('snapshot_retention_days', String(days)).catch(() => {});
+                  } else if (token) {
+                    queueSetting('snapshot_retention_days', String(days));
+                  }
+                }}
+              >
+                <Text
+                  style={{
+                    color: retentionDays === days ? '#FFF' : theme.text,
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  {days}d
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: spacing.xs }}>
+            {t('settings.retentionHelp', 'Snapshots older than this are auto-cleaned.')}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export CSV"
