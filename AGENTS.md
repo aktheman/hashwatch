@@ -55,7 +55,31 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-16 — Round 22)
+## Latest Round (Session 2026-07-17 — Round 24)
+
+### Changes (Round 24 — Notification batching, export, PWA install, theme marketplace)
+
+- **Notification batching**: Alerts within 2s window grouped into single summary notification ("3 miners went offline")
+- **Per-miner export**: MinerDetailScreen "Export CSV" button, `exportMinerCSV()` for individual miner snapshots
+- **Date-range export**: `exportSnapshotsWithRange(startMs, endMs)` for filtered CSV export
+- **PWA install prompt**: `PWAInstallBanner` detects `beforeinstallprompt`, shows bottom banner, dismissible per session
+- **Theme marketplace**: `ThemeMarketplaceScreen` — browse community themes, import from URL/clipboard/file, share themes
+- **Settings navigation**: Marketplace link in custom themes section header
+- **Backend CSP**: Explicit Helmet directives (script/style/font/img/connect/worker/manifest/frame/object/base/form)
+- **PWA manifest**: `public/manifest.json` with multi-size icons (1024/48), shortcuts, categories
+- **Offline page**: `public/offline.html` branded fallback
+- **Service worker v3**: Stale-while-revalidate API caching, offline navigation fallback, versioned caches
+- **Data retention UI**: SettingsScreen 1-90 day picker, `cleanupOldSnapshots` reads from settings
+- **i18n**: marketplace (24 keys) + pwa (3 keys) × 6 locales
+- **Tests**: 1565 frontend + 242 backend = 1807 total, all passing.
+
+### Test results
+
+- Frontend: 1565 tests passing (115 suites) — ESLint clean
+- Backend: 242 tests passing (26 suites)
+- Total: 1807 tests
+
+## Previous Round (Session 2026-07-16 — Round 22)
 
 ### Changes (Round 22 — Health score UI, pool recs, auto-switch, Sentry, docs)
 
@@ -209,7 +233,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
-- Tests: 1565 frontend (115 suites) + 242 backend (26 suites) = 1807 total
+- Tests: 1565 frontend (115 suites) + 242 backend (26 suites) = 1807 total, all passing.
 - TypeScript: clean (0 errors) — frontend + backend
 - ESLint: clean (0 warnings) — frontend + backend
 - Themes: 14 total (dark, light, neon, matrix, 5tratum, crimson, ocean, lavender, midnight, nord, dracula, catppuccin, rosepine, system)
