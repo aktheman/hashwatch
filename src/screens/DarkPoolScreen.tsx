@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { useMinerStore } from '../store/miners';
+import { SkeletonCard } from '../components/SkeletonCard';
 import {
   contributeDarkPool,
   getDarkPoolAggregate,
@@ -21,6 +22,7 @@ import {
   DarkPoolContribution,
   DarkPoolAggregate,
 } from '../api/client';
+import * as haptic from '../utils/haptics';
 
 type Period = '1h' | '24h' | '7d' | '30d';
 
@@ -40,6 +42,7 @@ export function DarkPoolScreen() {
   const miners = useMinerStore((s) => s.miners);
 
   const [optedIn, setOptedIn] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [period, setPeriod] = useState<Period>('24h');
   const [aggregate, setAggregate] = useState<DarkPoolAggregate | null>(null);
   const [contributions, setContributions] = useState<DarkPoolContribution[]>([]);
@@ -92,6 +95,11 @@ export function DarkPoolScreen() {
     }
   }, [period, fetchAggregate, optedIn]);
 
+  useEffect(() => {
+    const t = setTimeout(() => setInitialLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([fetchAggregate(), fetchContributions()]);
@@ -113,9 +121,11 @@ export function DarkPoolScreen() {
       });
       await fetchAggregate();
       await fetchContributions();
+      haptic.success();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       Alert.alert(t('darkPool.contributionFailed', 'Contribution failed'), msg);
+      haptic.error();
     } finally {
       setContributing(false);
     }
@@ -134,6 +144,7 @@ export function DarkPoolScreen() {
             try {
               await deleteDarkPoolMyContributions();
               setContributions([]);
+              haptic.success();
             } catch {}
           },
         },
@@ -288,151 +299,181 @@ export function DarkPoolScreen() {
 
         {optedIn && (
           <>
-            <View style={styles.section}>
-              <Text style={styles.subtitle}>{t('darkPool.yourMiners', 'Your Miners')}</Text>
-              <View style={styles.card}>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.onlineMiners', 'Online')}</Text>
-                  <Text style={styles.value}>{onlineMiners.length}</Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.yourHashrate', 'Hashrate')}</Text>
-                  <Text style={styles.value}>{(totalHashrate / 1e12).toFixed(2)} TH/s</Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.yourPower', 'Power')}</Text>
-                  <Text style={styles.value}>{totalPower.toFixed(0)} W</Text>
-                </View>
-                <Pressable
-                  onPress={handleContribute}
-                  disabled={contributing || onlineMiners.length === 0}
-                  style={({ pressed }) => [
-                    styles.contributeBtn,
-                    { opacity: pressed || contributing ? 0.6 : 1 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Contribute stats to dark pool"
-                >
-                  <Text style={styles.contributeBtnText}>
-                    {contributing
-                      ? t('darkPool.contributing', 'Contributing...')
-                      : t('darkPool.contributeNow', 'Contribute Now')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.subtitle}>{t('darkPool.networkStats', 'Network Stats')}</Text>
-              <View style={styles.periodSelector}>
-                {PERIODS.map((p) => (
-                  <Pressable
-                    key={p}
-                    onPress={() => setPeriod(p)}
-                    style={[
-                      styles.periodChip,
-                      {
-                        backgroundColor: period === p ? theme.primary + '20' : 'transparent',
-                        borderColor: period === p ? theme.primary : theme.border,
-                      },
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Select period ${p}`}
-                  >
-                    <Text
-                      style={{
-                        color: period === p ? theme.primary : theme.textDim,
-                        fontSize: fontSize.sm,
-                        fontWeight: fontWeight.semibold,
+            {initialLoading ? (
+              <SkeletonCard rows={2} />
+            ) : (
+              <>
+                <View style={styles.section}>
+                  <Text style={styles.subtitle}>{t('darkPool.yourMiners', 'Your Miners')}</Text>
+                  <View style={styles.card}>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>{t('darkPool.onlineMiners', 'Online')}</Text>
+                      <Text style={styles.value}>{onlineMiners.length}</Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>{t('darkPool.yourHashrate', 'Hashrate')}</Text>
+                      <Text style={styles.value}>{(totalHashrate / 1e12).toFixed(2)} TH/s</Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>{t('darkPool.yourPower', 'Power')}</Text>
+                      <Text style={styles.value}>{totalPower.toFixed(0)} W</Text>
+                    </View>
+                    <Pressable
+                      onPress={() => {
+                        haptic.medium();
+                        handleContribute();
                       }}
+                      disabled={contributing || onlineMiners.length === 0}
+                      style={({ pressed }) => [
+                        styles.contributeBtn,
+                        { opacity: pressed || contributing ? 0.6 : 1 },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Contribute stats to dark pool"
                     >
-                      {p}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              <View style={styles.card}>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.totalHashrate', 'Total Hashrate')}</Text>
-                  <Text style={styles.value}>
-                    {aggregate ? `${(aggregate.totalHashrate / 1e12).toFixed(2)} TH/s` : '—'}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.contributors', 'Contributors')}</Text>
-                  <Text style={styles.value}>{aggregate?.contributorCount ?? '—'}</Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={styles.label}>{t('darkPool.avgEfficiency', 'Avg Efficiency')}</Text>
-                  <Text style={styles.value}>
-                    {aggregate && aggregate.totalHashrate > 0
-                      ? `${(aggregate.avgPower / (aggregate.totalHashrate / 1e6)).toFixed(2)} W/TH`
-                      : '—'}
-                  </Text>
+                      <Text style={styles.contributeBtnText}>
+                        {contributing
+                          ? t('darkPool.contributing', 'Contributing...')
+                          : t('darkPool.contributeNow', 'Contribute Now')}
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
 
-                {aggregate && poolTotal > 0 && (
-                  <>
-                    <Text style={[styles.subtitle, { marginTop: spacing.sm }]}>
-                      {t('darkPool.poolDistribution', 'Pool Distribution')}
-                    </Text>
-                    {Object.entries(aggregate.poolBreakdown)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([pool, hashrate]) => {
-                        const pct = (hashrate / poolTotal) * 100;
-                        return (
-                          <View key={pool}>
-                            <View style={styles.row}>
-                              <Text style={styles.label}>{pool}</Text>
-                              <Text style={styles.value}>{pct.toFixed(1)}%</Text>
-                            </View>
-                            <View style={styles.barContainer}>
-                              <View
-                                style={[
-                                  styles.bar,
-                                  {
-                                    width: `${pct}%`,
-                                    backgroundColor: POOL_COLORS[pool] || theme.primary,
-                                  },
-                                ]}
-                              />
-                            </View>
-                          </View>
-                        );
-                      })}
-                  </>
-                )}
-              </View>
-            </View>
+                <View style={styles.section}>
+                  <Text style={styles.subtitle}>{t('darkPool.networkStats', 'Network Stats')}</Text>
+                  <View style={styles.periodSelector}>
+                    {PERIODS.map((p) => (
+                      <Pressable
+                        key={p}
+                        onPress={() => {
+                          haptic.selection();
+                          setPeriod(p);
+                        }}
+                        style={[
+                          styles.periodChip,
+                          {
+                            backgroundColor: period === p ? theme.primary + '20' : 'transparent',
+                            borderColor: period === p ? theme.primary : theme.border,
+                          },
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Select period ${p}`}
+                      >
+                        <Text
+                          style={{
+                            color: period === p ? theme.primary : theme.textDim,
+                            fontSize: fontSize.sm,
+                            fontWeight: fontWeight.semibold,
+                          }}
+                        >
+                          {p}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
 
-            {contributions.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.subtitle}>
-                  {t('darkPool.recentContributions', 'Recent Contributions')}
-                </Text>
-                <View style={styles.card}>
-                  {contributions.map((c) => (
-                    <View key={c.id} style={styles.contribItem}>
-                      <Text style={styles.contribText}>
-                        {(c.minerHashrate / 1e6).toFixed(2)} TH/s • {c.minerPower.toFixed(0)}W •{' '}
-                        {new Date(c.contributedAt).toLocaleDateString()}
+                  <View style={styles.card}>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>
+                        {t('darkPool.totalHashrate', 'Total Hashrate')}
+                      </Text>
+                      <Text style={styles.value}>
+                        {aggregate ? `${(aggregate.totalHashrate / 1e12).toFixed(2)} TH/s` : '—'}
                       </Text>
                     </View>
-                  ))}
+                    <View style={styles.row}>
+                      <Text style={styles.label}>{t('darkPool.contributors', 'Contributors')}</Text>
+                      <Text style={styles.value}>{aggregate?.contributorCount ?? '—'}</Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>
+                        {t('darkPool.avgEfficiency', 'Avg Efficiency')}
+                      </Text>
+                      <Text style={styles.value}>
+                        {aggregate && aggregate.totalHashrate > 0
+                          ? `${(aggregate.avgPower / (aggregate.totalHashrate / 1e6)).toFixed(2)} W/TH`
+                          : '—'}
+                      </Text>
+                    </View>
+
+                    {aggregate && poolTotal > 0 && (
+                      <>
+                        <Text style={[styles.subtitle, { marginTop: spacing.sm }]}>
+                          {t('darkPool.poolDistribution', 'Pool Distribution')}
+                        </Text>
+                        {Object.entries(aggregate.poolBreakdown)
+                          .sort(([, a], [, b]) => b - a)
+                          .map(([pool, hashrate]) => {
+                            const pct = (hashrate / poolTotal) * 100;
+                            return (
+                              <View key={pool}>
+                                <View style={styles.row}>
+                                  <Text style={styles.label}>{pool}</Text>
+                                  <Text style={styles.value}>{pct.toFixed(1)}%</Text>
+                                </View>
+                                <View style={styles.barContainer}>
+                                  <View
+                                    style={[
+                                      styles.bar,
+                                      {
+                                        width: `${pct}%`,
+                                        backgroundColor: POOL_COLORS[pool] || theme.primary,
+                                      },
+                                    ]}
+                                  />
+                                </View>
+                              </View>
+                            );
+                          })}
+                      </>
+                    )}
+                  </View>
                 </View>
-                <Pressable
-                  onPress={handleDeleteData}
-                  style={styles.deleteBtn}
-                  accessibilityRole="button"
-                  accessibilityLabel="Delete all contribution data"
-                >
-                  <Text style={styles.deleteBtnText}>
-                    {t('darkPool.deleteMyData', 'Delete My Data')}
-                  </Text>
-                </Pressable>
-              </View>
+              </>
             )}
+
+            <View style={styles.section}>
+              <Text style={styles.subtitle}>
+                {t('darkPool.recentContributions', 'Recent Contributions')}
+              </Text>
+              {contributions.length === 0 ? (
+                <View style={styles.card}>
+                  <Text style={styles.emptyText}>
+                    {t(
+                      'darkPool.noContributions',
+                      'No contributions yet. Tap Contribute Now to share your first stats.',
+                    )}
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.card}>
+                    {contributions.map((c) => (
+                      <View key={c.id} style={styles.contribItem}>
+                        <Text style={styles.contribText}>
+                          {(c.minerHashrate / 1e6).toFixed(2)} TH/s • {c.minerPower.toFixed(0)}W •{' '}
+                          {new Date(c.contributedAt).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Pressable
+                    onPress={() => {
+                      haptic.heavy();
+                      handleDeleteData();
+                    }}
+                    style={styles.deleteBtn}
+                    accessibilityRole="button"
+                    accessibilityLabel="Delete all contribution data"
+                  >
+                    <Text style={styles.deleteBtnText}>
+                      {t('darkPool.deleteMyData', 'Delete My Data')}
+                    </Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
           </>
         )}
       </ScrollView>

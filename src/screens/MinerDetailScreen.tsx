@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
+import React, { useState, useMemo, useRef, Suspense } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,8 @@ import {
   Switch,
 } from 'react-native';
 
-import { useMinerStore } from '../store/miners';
-import { useToastStore } from '../store/toast';
-import { MinerSnapshot, Wallet, NavigationProp, MinerNoteItem } from '../types';
-import * as DB from '../db/database';
+import { NavigationProp } from '../types';
 import { StatWidget } from '../components/StatWidget';
-import { BitAxeClient } from '../api/bitaxe';
 import { HashrateChart } from '../components/HashrateChart';
 import { TemperatureChart } from '../components/TemperatureChart';
 import { EfficiencyTrend } from '../components/EfficiencyTrend';
@@ -26,12 +22,9 @@ import { VoltageChart } from '../components/VoltageChart';
 import { FanChart } from '../components/FanChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
-import { fetchMinerNotes, addMinerNote, deleteMinerNote, recordPoolChange } from '../api/client';
-import { useAuthStore } from '../store/auth';
 import { NotificationPrefs } from '../components/NotificationPrefs';
 import { MinerSnapshotCard } from '../components/MinerSnapshotCard';
 import { PoolChangeHistory } from '../components/PoolChangeHistory';
-import { getAlertRules, setAlertRules, DEFAULT_RULES, AlertRule } from '../services/notifications';
 import {
   formatHashrate,
   formatTemperature,
@@ -46,13 +39,14 @@ import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius, buttonText } from '../utils/design';
 import { MarkdownText } from '../utils/markdown';
 import { MinerHealthScore } from '../components/MinerHealthScore';
-import { analyzeMinerHealth, HealthPrediction } from '../utils/healthPredictions';
 
 const LazyHealthPredictionCard = React.lazy(() =>
   import('../components/HealthPredictionCard').then((m) => ({ default: m.HealthPredictionCard })),
 );
 import { TimeAgo } from '../components/TimeAgo';
 import { useTranslation } from 'react-i18next';
+import { useMinerDetail } from '../hooks/useMinerDetail';
+import { AlertRuleSlider } from '../components/AlertRuleSlider';
 
 interface MinerDetailScreenProps {
   route: { params: { minerId: string } };
@@ -346,22 +340,35 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     [theme],
   );
   const { minerId } = route.params;
-  const miners = useMinerStore((s) => s.miners);
-  const refreshMiner = useMinerStore((s) => s.refreshMiner);
-  const removeMiner = useMinerStore((s) => s.removeMiner);
-  const getSnapshots = useMinerStore((s) => s.getSnapshots);
-  const setMinerWallet = useMinerStore((s) => s.setMinerWallet);
-  const setMinerIp = useMinerStore((s) => s.setMinerIp);
-  const setMinerIcon = useMinerStore((s) => s.setMinerIcon);
-  const setMinerLocation = useMinerStore((s) => s.setMinerLocation);
-  const setMinerTags = useMinerStore((s) => s.setMinerTags);
-  const setMinerNotes = useMinerStore((s) => s.setMinerNotes);
-  const setMinerMaintenance = useMinerStore((s) => s.setMinerMaintenance);
-  const [snapshots, setSnapshots] = useState<MinerSnapshot[]>([]);
+  const {
+    miner,
+    healthPrediction,
+    snapshots,
+    wallets,
+    alertRules,
+    notes,
+    refreshing,
+    refreshMiner,
+    setMinerWallet,
+    setMinerIp,
+    setMinerIcon,
+    setMinerLocation,
+    setMinerTags,
+    setMinerMaintenance,
+    refresh,
+    handleShare,
+    handleRestart,
+    savePool,
+    deleteMinerAction,
+    addNote,
+    deleteNote,
+    updateAlertRules,
+    resetAlertRules,
+    saveGroupTag,
+  } = useMinerDetail(minerId);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [editingIP, setEditingIP] = useState(false);
   const [editIPValue, setEditIPValue] = useState('');
@@ -369,73 +376,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [editPoolUrl, setEditPoolUrl] = useState('');
   const [editPoolPort, setEditPoolPort] = useState('');
   const [editPoolUser, setEditPoolUser] = useState('');
-  const [alertRules, setAlertRulesState] = useState<AlertRule | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [notes, setNotes] = useState<MinerNoteItem[]>([]);
   const [noteText, setNoteText] = useState('');
-  const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const statsRef = useRef<View>(null);
   const tagInputRef = useRef<TextInput>(null);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refreshMiner(minerId);
-    setRefreshing(false);
-  }, [minerId, refreshMiner]);
-
-  useEffect(() => {
-    let cancelled = false;
-    DB.loadWallets().then((w) => {
-      if (cancelled) return;
-      setWallets(w);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    getAlertRules(minerId).then(setAlertRulesState);
-  }, [minerId]);
-
-  const miner = miners.find((m) => m.id === minerId);
-
-  const healthPrediction = useMemo<HealthPrediction | null>(() => {
-    if (miner && snapshots.length > 0) {
-      return analyzeMinerHealth(miner, snapshots);
-    } else if (miner) {
-      return analyzeMinerHealth(miner, []);
-    }
-    return null;
-  }, [miner, snapshots]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (minerId) {
-      getSnapshots(minerId, 50).then((s) => {
-        if (cancelled) return;
-        setSnapshots(s);
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [minerId, miner?.lastSeen]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const token = useAuthStore.getState().token;
-    if (token && minerId) {
-      fetchMinerNotes(minerId).then((ns) => {
-        if (cancelled) return;
-        setNotes(ns);
-      });
-    } else if (miner?.noteItems) {
-      setNotes(miner.noteItems);
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [minerId]);
 
   if (!miner) {
     return (
@@ -474,27 +417,6 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
 
   const s = miner.status;
 
-  const handleShare = async () => {
-    const wallet = miner.walletId ? wallets.find((w) => w.id === miner.walletId) : null;
-    const msg = [
-      `⬡ ${miner.name}`,
-      `Hashrate: ${formatHashrate(s.hashRate, s.hashRateUnit)}`,
-      `Temp: ${formatTemperature(s.temperature)}`,
-      `Power: ${formatPower(s.power)}`,
-      `Uptime: ${formatUptime(s.uptimeSeconds)}`,
-      `Pool: ${s.pool}${s.poolPort ? `:${s.poolPort}` : ''}`,
-      `Efficiency: ${formatWTHs(s.power, s.hashRate, s.hashRateUnit)}`,
-      wallet ? `Wallet: ${wallet.name}` : '',
-      `IP: ${miner.ip}`,
-      '',
-      `Shared via HashWatch`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-    await Share.share({ message: msg }).catch((e) => console.warn('Share failed:', e));
-  };
-
-  const statsRef = useRef<View>(null);
   const handleShareAsImage = async () => {
     try {
       const { captureRef } = await import('react-native-view-shot');
@@ -508,23 +430,13 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     }
   };
 
-  const handleDelete = () => {
-    navigation.goBack();
-    useToastStore.getState().showUndo({
-      id: `delete-${minerId}`,
-      message: t('minerDetail.minerRemoved', { name: miner.name }),
-      onUndo: () => {},
-      onConfirm: () => removeMiner(minerId),
-    });
-  };
-
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.primary} />
       }
     >
       <View ref={statsRef} collapsable={false}>
@@ -751,14 +663,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           <TextInput
             style={styles.groupTagInput}
             value={miner.group || ''}
-            onChangeText={(text) => {
-              if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
-              groupDebounceRef.current = setTimeout(() => {
-                const updated = { ...miner, group: text || undefined };
-                DB.saveMiner(updated);
-                useMinerStore.getState().setMinerGroup(minerId, text || undefined);
-              }, 500);
-            }}
+            onChangeText={(text) => saveGroupTag(text)}
             placeholder={t('minerDetail.groupPlaceholder')}
             placeholderTextColor={theme.textMuted}
             accessibilityLabel="Group tag input"
@@ -893,19 +798,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     accessibilityRole="button"
                     accessibilityLabel="Delete note"
                     hitSlop={8}
-                    onPress={async () => {
-                      try {
-                        const token = useAuthStore.getState().token;
-                        if (token) {
-                          await deleteMinerNote(minerId, note.id);
-                        }
-                        const updated = notes.filter((n) => n.id !== note.id);
-                        setNotes(updated);
-                        setMinerNotes(minerId, updated.map((n) => n.text).join('\n'), updated);
-                      } catch {
-                        Alert.alert(t('minerDetail.error'), t('minerDetail.deleteNoteFailed'));
-                      }
-                    }}
+                    onPress={() => deleteNote(note.id)}
                   >
                     <Text
                       style={{ color: theme.danger, fontSize: fontSize.lg, marginLeft: spacing.xs }}
@@ -950,28 +843,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               ]}
               disabled={noteText.trim().length === 0}
               onPress={async () => {
-                const text = noteText.trim();
-                if (!text) return;
-                try {
-                  const token = useAuthStore.getState().token;
-                  if (token) {
-                    const newNote = await addMinerNote(minerId, text);
-                    setNotes((prev) => [newNote, ...prev]);
-                  } else {
-                    const newNote: MinerNoteItem = {
-                      id: Date.now(),
-                      minerid: minerId,
-                      text,
-                      createdat: new Date().toISOString(),
-                    };
-                    const updated = [newNote, ...notes];
-                    setNotes(updated);
-                    setMinerNotes(minerId, updated.map((n) => n.text).join('\n'), updated);
-                  }
-                  setNoteText('');
-                } catch {
-                  Alert.alert(t('minerDetail.error'), t('minerDetail.addNoteFailed'));
-                }
+                if (!noteText.trim()) return;
+                await addNote(noteText);
+                setNoteText('');
               }}
             >
               <Text style={[styles.actionBtnText, { color: theme.primary }]}>
@@ -1194,22 +1068,8 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     style={[styles.flashBtn, { flex: 1, backgroundColor: theme.success }]}
                     onPress={async () => {
                       if (!editPoolUrl.trim()) return;
-                      const port = parseInt(editPoolPort, 10) || 3333;
-                      const user = editPoolUser.trim();
-                      const client = new BitAxeClient(
-                        miner.ip,
-                        miner.port,
-                        miner.apiPath ?? undefined,
-                        miner.statusPath ?? undefined,
-                      );
-                      const ok = await client.setPool(editPoolUrl.trim(), port, user);
+                      const ok = await savePool(editPoolUrl, editPoolPort, editPoolUser);
                       if (ok) {
-                        const prevPool = s.pool ? `${s.pool}:${s.poolPort || 3333}` : '';
-                        const newPool = `${editPoolUrl.trim()}:${port}`;
-                        try {
-                          await recordPoolChange(miner.id, prevPool, newPool, Date.now());
-                        } catch {}
-                        await refreshMiner(miner.id);
                         Alert.alert(
                           t('common.success', 'Success'),
                           t('minerDetail.poolUpdated', 'Pool updated'),
@@ -1321,11 +1181,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 </Text>
                 <Switch
                   value={alertRules.enabled}
-                  onValueChange={(v) => {
-                    const next = { ...alertRules, enabled: v };
-                    setAlertRulesState(next);
-                    setAlertRules(minerId, next);
-                  }}
+                  onValueChange={(v) => updateAlertRules({ enabled: v })}
                   trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
                   thumbColor={alertRules.enabled ? theme.primary : theme.textMuted}
                   accessibilityLabel="Toggle alert rules"
@@ -1339,12 +1195,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     min={50}
                     max={100}
                     unit="°C"
-                    theme={theme}
-                    onChange={(v) => {
-                      const next = { ...alertRules, tempThreshold: v };
-                      setAlertRulesState(next);
-                      setAlertRules(minerId, next);
-                    }}
+                    onChange={(v) => updateAlertRules({ tempThreshold: v })}
                   />
                   <AlertRuleSlider
                     label={t('minerDetail.hashrateDrop', 'Hashrate Drop %')}
@@ -1352,12 +1203,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     min={10}
                     max={90}
                     unit="%"
-                    theme={theme}
-                    onChange={(v) => {
-                      const next = { ...alertRules, hashrateDropPercent: v };
-                      setAlertRulesState(next);
-                      setAlertRules(minerId, next);
-                    }}
+                    onChange={(v) => updateAlertRules({ hashrateDropPercent: v })}
                   />
                   <AlertRuleSlider
                     label={t('minerDetail.offlineReminder', 'Offline Reminder (min)')}
@@ -1365,12 +1211,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     min={1}
                     max={60}
                     unit="min"
-                    theme={theme}
-                    onChange={(v) => {
-                      const next = { ...alertRules, offlineReminderMinutes: v };
-                      setAlertRulesState(next);
-                      setAlertRules(minerId, next);
-                    }}
+                    onChange={(v) => updateAlertRules({ offlineReminderMinutes: v })}
                   />
                   <AlertRuleSlider
                     label={t('minerDetail.uptimeThreshold', 'Uptime Alert (hours)')}
@@ -1378,12 +1219,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     min={1}
                     max={168}
                     unit="h"
-                    theme={theme}
-                    onChange={(v) => {
-                      const next = { ...alertRules, uptimeThresholdHours: v };
-                      setAlertRulesState(next);
-                      setAlertRules(minerId, next);
-                    }}
+                    onChange={(v) => updateAlertRules({ uptimeThresholdHours: v })}
                   />
                   <AlertRuleSlider
                     label={t('minerDetail.shareRejection', 'Share Rejection %')}
@@ -1391,18 +1227,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                     min={1}
                     max={50}
                     unit="%"
-                    theme={theme}
-                    onChange={(v) => {
-                      const next = { ...alertRules, shareRejectionPercent: v };
-                      setAlertRulesState(next);
-                      setAlertRules(minerId, next);
-                    }}
+                    onChange={(v) => updateAlertRules({ shareRejectionPercent: v })}
                   />
                   <Pressable
-                    onPress={() => {
-                      setAlertRulesState(DEFAULT_RULES);
-                      setAlertRules(minerId, DEFAULT_RULES);
-                    }}
+                    onPress={resetAlertRules}
                     style={({ pressed }) => ({
                       paddingVertical: spacing.xs,
                       paddingHorizontal: spacing.md,
@@ -1550,21 +1378,11 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               },
             ]}
             onPress={async () => {
-              try {
-                const client = new BitAxeClient(
-                  miner.ip,
-                  miner.port,
-                  miner.apiPath ?? undefined,
-                  miner.statusPath ?? undefined,
-                );
-                const ok = await client.restart();
-                Alert.alert(
-                  ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
-                  ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
-                );
-              } catch {
-                Alert.alert(t('minerDetail.restartFailed'), t('minerDetail.restartFailedBody'));
-              }
+              const ok = await handleRestart();
+              Alert.alert(
+                ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
+                ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
+              );
             }}
           >
             <Text style={styles.actionBtnIcon}>🔄</Text>
@@ -1621,7 +1439,10 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 accessibilityRole="button"
                 accessibilityLabel="Yes, Remove"
                 style={styles.confirmBtn}
-                onPress={handleDelete}
+                onPress={() => {
+                  navigation.goBack();
+                  deleteMinerAction();
+                }}
               >
                 <Text style={styles.confirmBtnText}>{t('minerDetail.yesRemove')}</Text>
               </Pressable>
@@ -1630,90 +1451,5 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
         </View>
       </View>
     </ScrollView>
-  );
-}
-
-function AlertRuleSlider({
-  label,
-  value,
-  min,
-  max,
-  unit,
-  theme,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  unit: string;
-  theme: ReturnType<typeof import('../theme').useTheme>;
-  onChange: (v: number) => void;
-}) {
-  const step = unit === 'min' || unit === 'h' ? 1 : 5;
-  return (
-    <View style={{ paddingVertical: spacing.xs }}>
-      <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xxs }}
-      >
-        <Text style={{ color: theme.text, fontSize: fontSize.base }}>{label}</Text>
-        <Text
-          style={{ color: theme.primary, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
-        >
-          {value}
-          {unit}
-        </Text>
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
-        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>{min}</Text>
-        <View
-          style={{
-            flex: 1,
-            height: 6,
-            backgroundColor: theme.surfaceLight,
-            borderRadius: radius.xxs,
-            overflow: 'hidden',
-          }}
-        >
-          <View
-            style={{
-              width: `${((value - min) / (max - min)) * 100}%`,
-              height: 6,
-              backgroundColor: theme.primary,
-              borderRadius: radius.xxs,
-            }}
-          />
-        </View>
-        <Text style={{ color: theme.textMuted, fontSize: fontSize.sm }}>{max}</Text>
-      </View>
-      <View style={{ flexDirection: 'row', gap: spacing.xxs, marginTop: spacing.xxs }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Decrease ${label}`}
-          style={{
-            paddingHorizontal: spacing.sm,
-            paddingVertical: spacing.xxs,
-            backgroundColor: theme.surfaceLight,
-            borderRadius: radius.xxs,
-          }}
-          onPress={() => onChange(Math.max(min, value - step))}
-        >
-          <Text style={{ color: theme.text, fontSize: fontSize.base }}>−</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Increase ${label}`}
-          style={{
-            paddingHorizontal: spacing.sm,
-            paddingVertical: spacing.xxs,
-            backgroundColor: theme.surfaceLight,
-            borderRadius: radius.xxs,
-          }}
-          onPress={() => onChange(Math.min(max, value + step))}
-        >
-          <Text style={{ color: theme.text, fontSize: fontSize.base }}>+</Text>
-        </Pressable>
-      </View>
-    </View>
   );
 }

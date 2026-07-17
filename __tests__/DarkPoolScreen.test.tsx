@@ -77,44 +77,59 @@ import { DarkPoolScreen } from '../src/screens/DarkPoolScreen';
 
 afterEach(() => {
   jest.clearAllMocks();
+  jest.useRealTimers();
 });
 
 describe('DarkPoolScreen', () => {
   it('renders title and opt-in toggle', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     expect(tree.getByText('darkPool.title')).toBeTruthy();
     expect(tree.getByText('darkPool.description')).toBeTruthy();
   });
 
   it('shows opt-in switch', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     expect(tree.getByRole('switch')).toBeTruthy();
   });
 
   it('shows miners section when opted in', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     const toggle = tree.getByRole('switch');
     await act(async () => {
       fireEvent(toggle, 'valueChange', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(500);
     });
     expect(tree.getByText('darkPool.yourMiners')).toBeTruthy();
     expect(tree.getByText('darkPool.networkStats')).toBeTruthy();
   });
 
   it('shows contribute button when opted in', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     const toggle = tree.getByRole('switch');
     await act(async () => {
       fireEvent(toggle, 'valueChange', true);
     });
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(tree.getByText('darkPool.contributeNow')).toBeTruthy();
   });
 
   it('shows period selector when opted in', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     const toggle = tree.getByRole('switch');
     await act(async () => {
       fireEvent(toggle, 'valueChange', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(500);
     });
     expect(tree.getByText('1h')).toBeTruthy();
     expect(tree.getByText('24h')).toBeTruthy();
@@ -123,11 +138,13 @@ describe('DarkPoolScreen', () => {
   });
 
   it('hides miner section when opted out', async () => {
+    jest.useFakeTimers();
     const tree = await render(<DarkPoolScreen />);
     expect(tree.queryByText('darkPool.yourMiners')).toBeNull();
   });
 
   it('renders with empty miners', async () => {
+    jest.useFakeTimers();
     const { useMinerStore } = require('../src/store/miners');
     useMinerStore.mockImplementation((sel: (s: { miners: unknown[] }) => unknown) =>
       sel({ miners: [] }),

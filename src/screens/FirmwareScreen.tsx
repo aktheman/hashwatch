@@ -25,6 +25,8 @@ import { BitAxeClient } from '../api/bitaxe';
 import { Miner } from '../types';
 import { getSetting, setSetting } from '../db/database';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
+import * as haptic from '../utils/haptics';
+import { SkeletonCard } from '../components/SkeletonCard';
 
 const SKIP_KEY = 'firmware_skip_version';
 
@@ -41,6 +43,7 @@ export default function FirmwareScreen() {
   const miners = useMinerStore((s) => s.miners);
   const refreshAll = useMinerStore((s) => s.refreshAll);
 
+  const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [checking, setChecking] = useState(false);
   const [latest, setLatest] = useState<FirmwareVersion | null>(null);
@@ -57,6 +60,11 @@ export default function FirmwareScreen() {
   useEffect(() => {
     loadSkipVersion();
   }, [loadSkipVersion]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setInitialLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   const onlineMiners = useMemo(() => miners.filter((m) => m.isOnline), [miners]);
 
@@ -91,6 +99,7 @@ export default function FirmwareScreen() {
           );
         }
         setLatest(result);
+        haptic.success();
       } else {
         setLatest(null);
         Alert.alert(
@@ -106,6 +115,7 @@ export default function FirmwareScreen() {
         t('firmware.checkFailedTitle', 'Check Failed'),
         t('firmware.checkFailedBody', 'Could not check for firmware updates.'),
       );
+      haptic.error();
     } finally {
       setChecking(false);
     }
@@ -155,6 +165,11 @@ export default function FirmwareScreen() {
                   progress: ok ? 100 : 0,
                 },
               }));
+              if (ok) {
+                haptic.success();
+              } else {
+                haptic.error();
+              }
             },
           },
         ],
@@ -236,6 +251,11 @@ export default function FirmwareScreen() {
                   progress: ok ? 100 : 0,
                 },
               }));
+              if (ok) {
+                haptic.success();
+              } else {
+                haptic.error();
+              }
             }
 
             setBatchFlashing(false);
@@ -307,378 +327,432 @@ export default function FirmwareScreen() {
         />
       }
     >
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.textDim }]} accessibilityRole="header">
-          {t('firmware.currentVersion', 'Current Version')}
-        </Text>
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-            },
-          ]}
-        >
-          <View style={styles.cardRow}>
-            <View style={styles.cardLeft}>
-              <Text style={[styles.versionBig, { color: theme.text }]}>{LATEST_FIRMWARE}</Text>
-              <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
-                {t('firmware.builtIn', 'Built-in version')}
-              </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('firmware.checkForUpdates', 'Check for updates')}
-              style={[
-                styles.checkBtn,
-                { backgroundColor: theme.primary },
-                checking && { opacity: 0.6 },
-              ]}
-              disabled={checking}
-              onPress={handleCheckForUpdates}
+      {initialLoading ? (
+        <SkeletonCard rows={3} />
+      ) : (
+        <>
+          <View style={styles.section}>
+            <Text
+              style={[styles.sectionTitle, { color: theme.textDim }]}
+              accessibilityRole="header"
             >
-              {checking ? (
-                <ActivityIndicator size="small" color={buttonText} />
-              ) : (
-                <Text style={styles.checkBtnText}>
-                  {t('firmware.checkForUpdates', 'Check for Updates')}
-                </Text>
-              )}
-            </Pressable>
-          </View>
-        </View>
-      </View>
-
-      {latest && (
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textDim }]} accessibilityRole="header">
-            {t('firmware.latestRelease', 'Latest Release')}
-          </Text>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.surface,
-                borderColor: needsUpdate(LATEST_FIRMWARE, latest.version)
-                  ? theme.warning + '40'
-                  : theme.success + '40',
-              },
-            ]}
-          >
-            <View style={styles.cardRow}>
-              <View style={styles.cardLeft}>
-                <Text style={[styles.versionBig, { color: theme.primary }]}>{latest.version}</Text>
-                <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
-                  {t('firmware.releasedOn', {
-                    date: new Date(latest.releaseDate).toLocaleDateString(),
-                    defaultValue: `Released ${new Date(latest.releaseDate).toLocaleDateString()}`,
-                  })}
-                </Text>
-              </View>
-              {needsUpdate(LATEST_FIRMWARE, latest.version) && (
-                <View style={[styles.updateBadge, { backgroundColor: theme.warning + '20' }]}>
-                  <Text style={[styles.updateBadgeText, { color: theme.warning }]}>
-                    {t('firmware.updateAvailable', 'Update Available')}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {latest.changelog ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('firmware.viewChangelog', 'View changelog')}
-                style={styles.changelogBtn}
-                onPress={() => Linking.openURL(getFirmwareChangelogUrl(latest.version))}
-              >
-                <Text style={[styles.changelogText, { color: theme.primary }]}>
-                  {t('firmware.viewChangelog', 'View Changelog')} ›
-                </Text>
-              </Pressable>
-            ) : null}
-
-            {skipVersion === latest.version && (
-              <View
-                style={[
-                  styles.skipBadge,
-                  { backgroundColor: theme.surfaceLight, borderColor: theme.border },
-                ]}
-              >
-                <Text style={[styles.skipBadgeText, { color: theme.textDim }]}>
-                  {t('firmware.versionSkipped', 'This version is skipped')}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('firmware.undoSkip', 'Undo skip')}
-                  onPress={handleClearSkip}
-                >
-                  <Text style={[styles.undoSkipText, { color: theme.primary }]}>
-                    {t('firmware.undoSkip', 'Undo')}
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-
-            <View style={styles.cardActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('firmware.skipVersion', 'Skip this version')}
-                style={[styles.skipVersionBtn, { borderColor: theme.border }]}
-                onPress={handleSkipVersion}
-              >
-                <Text style={[styles.skipVersionText, { color: theme.textMuted }]}>
-                  {t('firmware.skipVersion', 'Skip Version')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      )}
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.textDim }]} accessibilityRole="header">
-            {t('firmware.minerVersions', 'Miner Firmware Versions')}
-          </Text>
-          {minersNeedingUpdate.length > 0 && (
-            <Text style={[styles.minerCount, { color: theme.primary }]}>
-              {t('firmware.needsUpdate', {
-                count: minersNeedingUpdate.length,
-                defaultValue: `${minersNeedingUpdate.length} need update`,
-              })}
+              {t('firmware.currentVersion', 'Current Version')}
             </Text>
-          )}
-        </View>
-
-        {onlineMiners.length === 0 ? (
-          <View
-            style={[
-              styles.emptyCard,
-              { backgroundColor: theme.surface, borderColor: theme.border },
-            ]}
-          >
-            <Text style={[styles.emptyText, { color: theme.textMuted }]}>
-              {t(
-                'firmware.noOnlineMiners',
-                'No online miners found. Connect miners to manage firmware.',
-              )}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.minerList}>
-            {onlineMiners.map((miner) => {
-              const currentVer = minerVersionMap[miner.id];
-              const needsFlash = latest
-                ? currentVer
-                  ? needsUpdate(currentVer, latest.version)
-                  : true
-                : false;
-              const flashState = minerStates[miner.id];
-              const isSelected = selectedIds.has(miner.id);
-
-              return (
-                <Pressable
-                  key={miner.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${miner.name}, ${currentVer ?? t('firmware.unknown', 'unknown')}`}
-                  style={[
-                    styles.minerRow,
-                    {
-                      backgroundColor: theme.surface,
-                      borderColor: isSelected ? theme.primary : theme.border,
-                    },
-                    flashState?.status === 'success' && {
-                      borderColor: theme.success,
-                    },
-                    flashState?.status === 'failed' && {
-                      borderColor: theme.danger,
-                    },
-                  ]}
-                  onPress={() => needsFlash && latest && handleFlashSingle(miner)}
-                >
-                  <View style={styles.minerRowTop}>
-                    {latest && needsFlash && (
-                      <Switch
-                        value={isSelected}
-                        onValueChange={() => handleToggleSelect(miner.id)}
-                        trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
-                        thumbColor={isSelected ? theme.primary : theme.surface}
-                        disabled={batchFlashing || hasActiveFlash}
-                      />
-                    )}
-                    <View style={styles.minerInfo}>
-                      <Text style={[styles.minerName, { color: theme.text }]} numberOfLines={1}>
-                        {miner.name}
-                      </Text>
-                      <Text style={[styles.minerIp, { color: theme.textDim }]}>{miner.ip}</Text>
-                    </View>
-                    <View style={styles.minerVersionInfo}>
-                      <Text
-                        style={[
-                          styles.minerCurrentVer,
-                          { color: currentVer ? theme.text : theme.textDim },
-                        ]}
-                      >
-                        {currentVer ?? t('firmware.unknown', 'unknown')}
-                      </Text>
-                      {latest && needsFlash && (
-                        <View style={styles.versionArrow}>
-                          <Text style={{ color: theme.textDim }}>→</Text>
-                          <Text style={[styles.minerTargetVer, { color: theme.primary }]}>
-                            {latest.version}
-                          </Text>
-                        </View>
-                      )}
-                      {latest && !needsFlash && currentVer && (
-                        <Text style={[styles.upToDateBadge, { color: theme.success }]}>
-                          ✓ {t('firmware.upToDate', 'Up to Date')}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-
-                  {flashState && (
-                    <View style={styles.flashStatusContainer}>
-                      {flashState.status === 'pending' && (
-                        <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
-                          {t('firmware.pending', 'Pending...')}
-                        </Text>
-                      )}
-                      {flashState.status === 'flashing' && (
-                        <View style={styles.flashProgressWrap}>
-                          <View
-                            style={[
-                              styles.flashProgressTrack,
-                              { backgroundColor: theme.surfaceLight },
-                            ]}
-                          >
-                            <View
-                              style={[
-                                styles.flashProgressFill,
-                                {
-                                  backgroundColor: theme.primary,
-                                  width: `${flashState.progress}%`,
-                                },
-                              ]}
-                            />
-                          </View>
-                          <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
-                            {t('firmware.flashing', 'Flashing...')}
-                          </Text>
-                        </View>
-                      )}
-                      {flashState.status === 'success' && (
-                        <Text style={[styles.flashStatusText, { color: theme.success }]}>
-                          ✓ {t('firmware.flashSuccess', 'Success — Miner rebooting')}
-                        </Text>
-                      )}
-                      {flashState.status === 'failed' && (
-                        <Text style={[styles.flashStatusText, { color: theme.danger }]}>
-                          ✗ {t('firmware.flashFailed', 'Flash failed')}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-        )}
-      </View>
-
-      {minersNeedingUpdate.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.batchActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                allSelected
-                  ? t('firmware.deselectAll', 'Deselect all')
-                  : t('firmware.selectAll', 'Select all')
-              }
-              style={[styles.batchBtn, { borderColor: theme.border }]}
-              onPress={handleSelectAll}
-            >
-              <Text style={[styles.batchBtnText, { color: theme.text }]}>
-                {allSelected
-                  ? t('firmware.deselectAll', 'Deselect All')
-                  : t('firmware.selectAll', 'Select All')}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('firmware.flashSelected', 'Flash selected miners')}
+            <View
               style={[
-                styles.batchBtn,
-                styles.flashAllBtn,
+                styles.card,
                 {
-                  backgroundColor: theme.primary,
-                  opacity: selectedIds.size === 0 || batchFlashing || hasActiveFlash ? 0.5 : 1,
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
                 },
               ]}
-              disabled={selectedIds.size === 0 || batchFlashing || hasActiveFlash}
-              onPress={handleBatchFlash}
             >
-              {batchFlashing ? (
-                <ActivityIndicator size="small" color={buttonText} />
-              ) : (
-                <Text style={styles.flashAllBtnText}>
-                  {t('firmware.flashSelected', {
-                    count: selectedIds.size,
-                    defaultValue: `Flash Selected (${selectedIds.size})`,
+              <View style={styles.cardRow}>
+                <View style={styles.cardLeft}>
+                  <Text style={[styles.versionBig, { color: theme.text }]}>{LATEST_FIRMWARE}</Text>
+                  <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
+                    {t('firmware.builtIn', 'Built-in version')}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('firmware.checkForUpdates', 'Check for updates')}
+                  style={[
+                    styles.checkBtn,
+                    { backgroundColor: theme.primary },
+                    checking && { opacity: 0.6 },
+                  ]}
+                  disabled={checking}
+                  onPress={() => {
+                    haptic.medium();
+                    handleCheckForUpdates();
+                  }}
+                >
+                  {checking ? (
+                    <ActivityIndicator size="small" color={buttonText} />
+                  ) : (
+                    <Text style={styles.checkBtnText}>
+                      {t('firmware.checkForUpdates', 'Check for Updates')}
+                    </Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          </View>
+
+          {latest && (
+            <View style={styles.section}>
+              <Text
+                style={[styles.sectionTitle, { color: theme.textDim }]}
+                accessibilityRole="header"
+              >
+                {t('firmware.latestRelease', 'Latest Release')}
+              </Text>
+              <View
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: needsUpdate(LATEST_FIRMWARE, latest.version)
+                      ? theme.warning + '40'
+                      : theme.success + '40',
+                  },
+                ]}
+              >
+                <View style={styles.cardRow}>
+                  <View style={styles.cardLeft}>
+                    <Text style={[styles.versionBig, { color: theme.primary }]}>
+                      {latest.version}
+                    </Text>
+                    <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
+                      {t('firmware.releasedOn', {
+                        date: new Date(latest.releaseDate).toLocaleDateString(),
+                        defaultValue: `Released ${new Date(latest.releaseDate).toLocaleDateString()}`,
+                      })}
+                    </Text>
+                  </View>
+                  {needsUpdate(LATEST_FIRMWARE, latest.version) && (
+                    <View style={[styles.updateBadge, { backgroundColor: theme.warning + '20' }]}>
+                      <Text style={[styles.updateBadgeText, { color: theme.warning }]}>
+                        {t('firmware.updateAvailable', 'Update Available')}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {latest.changelog ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('firmware.viewChangelog', 'View changelog')}
+                    style={styles.changelogBtn}
+                    onPress={() => {
+                      haptic.light();
+                      Linking.openURL(getFirmwareChangelogUrl(latest.version));
+                    }}
+                  >
+                    <Text style={[styles.changelogText, { color: theme.primary }]}>
+                      {t('firmware.viewChangelog', 'View Changelog')} ›
+                    </Text>
+                  </Pressable>
+                ) : null}
+
+                {skipVersion === latest.version && (
+                  <View
+                    style={[
+                      styles.skipBadge,
+                      { backgroundColor: theme.surfaceLight, borderColor: theme.border },
+                    ]}
+                  >
+                    <Text style={[styles.skipBadgeText, { color: theme.textDim }]}>
+                      {t('firmware.versionSkipped', 'This version is skipped')}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('firmware.undoSkip', 'Undo skip')}
+                      onPress={() => {
+                        haptic.light();
+                        handleClearSkip();
+                      }}
+                    >
+                      <Text style={[styles.undoSkipText, { color: theme.primary }]}>
+                        {t('firmware.undoSkip', 'Undo')}
+                      </Text>
+                    </Pressable>
+                  </View>
+                )}
+
+                <View style={styles.cardActions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('firmware.skipVersion', 'Skip this version')}
+                    style={[styles.skipVersionBtn, { borderColor: theme.border }]}
+                    onPress={() => {
+                      haptic.medium();
+                      handleSkipVersion();
+                    }}
+                  >
+                    <Text style={[styles.skipVersionText, { color: theme.textMuted }]}>
+                      {t('firmware.skipVersion', 'Skip Version')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text
+                style={[styles.sectionTitle, { color: theme.textDim }]}
+                accessibilityRole="header"
+              >
+                {t('firmware.minerVersions', 'Miner Firmware Versions')}
+              </Text>
+              {minersNeedingUpdate.length > 0 && (
+                <Text style={[styles.minerCount, { color: theme.primary }]}>
+                  {t('firmware.needsUpdate', {
+                    count: minersNeedingUpdate.length,
+                    defaultValue: `${minersNeedingUpdate.length} need update`,
                   })}
                 </Text>
               )}
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      {anyFlashed && (
-        <View style={styles.section}>
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-              },
-            ]}
-          >
-            <View style={styles.summaryRow}>
-              {Object.values(minerStates).filter((s) => s.status === 'success').length > 0 && (
-                <Text style={[styles.summaryItem, { color: theme.success }]}>
-                  ✓ {Object.values(minerStates).filter((s) => s.status === 'success').length}{' '}
-                  {t('firmware.succeeded', 'succeeded')}
-                </Text>
-              )}
-              {Object.values(minerStates).filter((s) => s.status === 'failed').length > 0 && (
-                <Text style={[styles.summaryItem, { color: theme.danger }]}>
-                  ✗ {Object.values(minerStates).filter((s) => s.status === 'failed').length}{' '}
-                  {t('firmware.failed', 'failed')}
-                </Text>
-              )}
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('firmware.clearResults', 'Clear results')}
-              style={[styles.clearBtn, { borderColor: theme.border }]}
-              onPress={() => setMinerStates({})}
-            >
-              <Text style={[styles.clearBtnText, { color: theme.textMuted }]}>
-                {t('firmware.clearResults', 'Clear Results')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
 
-      <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.textDim }]}>
-          {t('firmware.footer', 'Firmware is fetched from AXeOS GitHub releases.')}
-        </Text>
-      </View>
+            {miners.length === 0 ? (
+              <View
+                style={[
+                  styles.emptyCard,
+                  { backgroundColor: theme.surface, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.emptyText, { color: theme.textMuted }]}>
+                  {t('firmware.noMiners', 'No miners to update. Add miners first.')}
+                </Text>
+              </View>
+            ) : onlineMiners.length === 0 ? (
+              <View
+                style={[
+                  styles.emptyCard,
+                  { backgroundColor: theme.surface, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.emptyText, { color: theme.textMuted }]}>
+                  {t(
+                    'firmware.noOnlineMiners',
+                    'No online miners found. Connect miners to manage firmware.',
+                  )}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.minerList}>
+                {onlineMiners.map((miner) => {
+                  const currentVer = minerVersionMap[miner.id];
+                  const needsFlash = latest
+                    ? currentVer
+                      ? needsUpdate(currentVer, latest.version)
+                      : true
+                    : false;
+                  const flashState = minerStates[miner.id];
+                  const isSelected = selectedIds.has(miner.id);
+
+                  return (
+                    <Pressable
+                      key={miner.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${miner.name}, ${currentVer ?? t('firmware.unknown', 'unknown')}`}
+                      style={[
+                        styles.minerRow,
+                        {
+                          backgroundColor: theme.surface,
+                          borderColor: isSelected ? theme.primary : theme.border,
+                        },
+                        flashState?.status === 'success' && {
+                          borderColor: theme.success,
+                        },
+                        flashState?.status === 'failed' && {
+                          borderColor: theme.danger,
+                        },
+                      ]}
+                      onPress={() => {
+                        if (needsFlash && latest) {
+                          haptic.heavy();
+                          handleFlashSingle(miner);
+                        }
+                      }}
+                    >
+                      <View style={styles.minerRowTop}>
+                        {latest && needsFlash && (
+                          <Switch
+                            value={isSelected}
+                            onValueChange={() => handleToggleSelect(miner.id)}
+                            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+                            thumbColor={isSelected ? theme.primary : theme.surface}
+                            disabled={batchFlashing || hasActiveFlash}
+                          />
+                        )}
+                        <View style={styles.minerInfo}>
+                          <Text style={[styles.minerName, { color: theme.text }]} numberOfLines={1}>
+                            {miner.name}
+                          </Text>
+                          <Text style={[styles.minerIp, { color: theme.textDim }]}>{miner.ip}</Text>
+                        </View>
+                        <View style={styles.minerVersionInfo}>
+                          <Text
+                            style={[
+                              styles.minerCurrentVer,
+                              { color: currentVer ? theme.text : theme.textDim },
+                            ]}
+                          >
+                            {currentVer ?? t('firmware.unknown', 'unknown')}
+                          </Text>
+                          {latest && needsFlash && (
+                            <View style={styles.versionArrow}>
+                              <Text style={{ color: theme.textDim }}>→</Text>
+                              <Text style={[styles.minerTargetVer, { color: theme.primary }]}>
+                                {latest.version}
+                              </Text>
+                            </View>
+                          )}
+                          {latest && !needsFlash && currentVer && (
+                            <Text style={[styles.upToDateBadge, { color: theme.success }]}>
+                              ✓ {t('firmware.upToDate', 'Up to Date')}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+
+                      {flashState && (
+                        <View style={styles.flashStatusContainer}>
+                          {flashState.status === 'pending' && (
+                            <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
+                              {t('firmware.pending', 'Pending...')}
+                            </Text>
+                          )}
+                          {flashState.status === 'flashing' && (
+                            <View style={styles.flashProgressWrap}>
+                              <View
+                                style={[
+                                  styles.flashProgressTrack,
+                                  { backgroundColor: theme.surfaceLight },
+                                ]}
+                              >
+                                <View
+                                  style={[
+                                    styles.flashProgressFill,
+                                    {
+                                      backgroundColor: theme.primary,
+                                      width: `${flashState.progress}%`,
+                                    },
+                                  ]}
+                                />
+                              </View>
+                              <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
+                                {t('firmware.flashing', 'Flashing...')}
+                              </Text>
+                            </View>
+                          )}
+                          {flashState.status === 'success' && (
+                            <Text style={[styles.flashStatusText, { color: theme.success }]}>
+                              ✓ {t('firmware.flashSuccess', 'Success — Miner rebooting')}
+                            </Text>
+                          )}
+                          {flashState.status === 'failed' && (
+                            <Text style={[styles.flashStatusText, { color: theme.danger }]}>
+                              ✗ {t('firmware.flashFailed', 'Flash failed')}
+                            </Text>
+                          )}
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
+          {minersNeedingUpdate.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.batchActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    allSelected
+                      ? t('firmware.deselectAll', 'Deselect all')
+                      : t('firmware.selectAll', 'Select all')
+                  }
+                  style={[styles.batchBtn, { borderColor: theme.border }]}
+                  onPress={() => {
+                    haptic.selection();
+                    handleSelectAll();
+                  }}
+                >
+                  <Text style={[styles.batchBtnText, { color: theme.text }]}>
+                    {allSelected
+                      ? t('firmware.deselectAll', 'Deselect All')
+                      : t('firmware.selectAll', 'Select All')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('firmware.flashSelected', 'Flash selected miners')}
+                  style={[
+                    styles.batchBtn,
+                    styles.flashAllBtn,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity: selectedIds.size === 0 || batchFlashing || hasActiveFlash ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={selectedIds.size === 0 || batchFlashing || hasActiveFlash}
+                  onPress={() => {
+                    haptic.heavy();
+                    handleBatchFlash();
+                  }}
+                >
+                  {batchFlashing ? (
+                    <ActivityIndicator size="small" color={buttonText} />
+                  ) : (
+                    <Text style={styles.flashAllBtnText}>
+                      {t('firmware.flashSelected', {
+                        count: selectedIds.size,
+                        defaultValue: `Flash Selected (${selectedIds.size})`,
+                      })}
+                    </Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {anyFlashed && (
+            <View style={styles.section}>
+              <View
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <View style={styles.summaryRow}>
+                  {Object.values(minerStates).filter((s) => s.status === 'success').length > 0 && (
+                    <Text style={[styles.summaryItem, { color: theme.success }]}>
+                      ✓ {Object.values(minerStates).filter((s) => s.status === 'success').length}{' '}
+                      {t('firmware.succeeded', 'succeeded')}
+                    </Text>
+                  )}
+                  {Object.values(minerStates).filter((s) => s.status === 'failed').length > 0 && (
+                    <Text style={[styles.summaryItem, { color: theme.danger }]}>
+                      ✗ {Object.values(minerStates).filter((s) => s.status === 'failed').length}{' '}
+                      {t('firmware.failed', 'failed')}
+                    </Text>
+                  )}
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('firmware.clearResults', 'Clear results')}
+                  style={[styles.clearBtn, { borderColor: theme.border }]}
+                  onPress={() => {
+                    haptic.light();
+                    setMinerStates({});
+                  }}
+                >
+                  <Text style={[styles.clearBtnText, { color: theme.textMuted }]}>
+                    {t('firmware.clearResults', 'Clear Results')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.footer}>
+            <Text style={[styles.footerText, { color: theme.textDim }]}>
+              {t('firmware.footer', 'Firmware is fetched from AXeOS GitHub releases.')}
+            </Text>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
