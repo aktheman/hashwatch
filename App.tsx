@@ -15,6 +15,7 @@ import { initCrashReporting } from './src/utils/crash';
 import { initAnalytics } from './src/utils/analytics';
 import { initErrorTracking } from './src/services/errorTracking';
 import { startAutoTheme, stopAutoTheme } from './src/services/autoTheme';
+import { useSubscriptionStore } from './src/store/subscription';
 
 const OnboardingScreen = lazy(() =>
   import('./src/screens/OnboardingScreen').then((m) => ({ default: m.OnboardingScreen })),
@@ -61,6 +62,7 @@ export default function App() {
         setShowOnboarding(done !== 'true');
         await useAuthStore.getState().restoreSession();
         startAutoTheme();
+        useSubscriptionStore.getState().initialize();
       } catch {
         // init failed but we still show the app
       } finally {

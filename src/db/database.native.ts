@@ -230,6 +230,60 @@ export async function deleteWallet(id: string): Promise<void> {
   await d.runAsync('DELETE FROM wallets WHERE id = ?', [id]);
 }
 
+export async function downsampleSnapshots(): Promise<void> {
+  const d = await getDb();
+  const hourlyCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const archiveCutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+  const oldSnapshots: MinerSnapshot[] = await d.getAllAsync(
+    'SELECT * FROM miner_snapshots WHERE timestamp < ? AND timestamp >= ? ORDER BY minerId, timestamp',
+    [hourlyCutoff, archiveCutoff],
+  );
+
+  if (oldSnapshots.length === 0) return;
+
+  const buckets = new Map<string, typeof oldSnapshots>();
+  for (const s of oldSnapshots) {
+    const hourKey = `${s.minerId}_${Math.floor(s.timestamp / 3600000)}`;
+    const arr = buckets.get(hourKey) || [];
+    arr.push(s);
+    buckets.set(hourKey, arr);
+  }
+
+  await d.runAsync('DELETE FROM miner_snapshots WHERE timestamp < ? AND timestamp >= ?', [
+    hourlyCutoff,
+    archiveCutoff,
+  ]);
+
+  for (const [, snaps] of buckets) {
+    if (snaps.length === 0) continue;
+    const first = snaps[0];
+    const hourTs = Math.floor(first.timestamp / 3600000) * 3600000;
+    const avg = (key: keyof (typeof snaps)[0]) =>
+      snaps.reduce((s, n) => s + ((n[key] as number) || 0), 0) / snaps.length;
+    await d.runAsync(
+      `INSERT INTO miner_snapshots
+       (minerId, timestamp, hashRate, hashRateUnit, temperature, voltage, current, power,
+        sharesAccepted, sharesRejected, uptimeSeconds, frequency)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        first.minerId,
+        hourTs,
+        Math.round(avg('hashRate') * 100) / 100,
+        first.hashRateUnit || 'GH/s',
+        Math.round(avg('temperature') * 10) / 10,
+        Math.round(avg('voltage')),
+        Math.round(avg('current') * 10) / 10,
+        Math.round(avg('power')),
+        Math.round(avg('sharesAccepted')),
+        Math.round(avg('sharesRejected')),
+        Math.round(avg('uptimeSeconds')),
+        Math.round(avg('frequency')),
+      ],
+    );
+  }
+}
+
 export async function cleanupOldSnapshots(
   olderThan: number = 7 * 24 * 60 * 60 * 1000,
 ): Promise<void> {

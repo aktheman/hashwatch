@@ -316,16 +316,35 @@ export const useMinerStore = create<MinersState>((set, get) => ({
   startPolling: (intervalMs: number = 30000) => {
     let interval: ReturnType<typeof setInterval> | null = null;
     let paused = false;
+    let wsActive = false;
+
+    const getInterval = () => (wsActive ? 300000 : intervalMs);
 
     const tick = () => {
       if (!paused) get().refreshAll();
     };
 
     get().refreshAll();
-    interval = setInterval(tick, intervalMs);
+    interval = setInterval(tick, getInterval());
     if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
       (interval as { unref: () => void }).unref();
     }
+
+    import('../services/websocket').then((ws) => {
+      const unsub = ws.onWebSocketMessage?.((msg) => {
+        if (msg.type === 'miner_update') {
+          if (!wsActive) {
+            wsActive = true;
+            if (interval) clearInterval(interval);
+            interval = setInterval(tick, getInterval());
+            if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
+              (interval as { unref: () => void }).unref();
+            }
+          }
+        }
+      });
+      return unsub;
+    });
 
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
