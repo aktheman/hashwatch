@@ -924,5 +924,34 @@
     "deleteMyData": "Eliminar Mis Datos",
     "confirmDelete": "Eliminar Todos los Datos",
     "confirmDeleteBody": "Esto eliminará permanentemente todas tus contribuciones."
+  },
+  "marketplace": {
+    "title": "Mercado de Temas",
+    "browse": "Explorar",
+    "fromUrl": "Desde URL",
+    "importFromClipboard": "Importar del Portapapeles",
+    "importFromUrl": "Importar desde URL",
+    "urlHelp": "Pega una URL de un archivo JSON de tema para importarlo",
+    "importFromFile": "Importar desde Archivo",
+    "chooseFile": "Elegir Archivo JSON",
+    "import": "Importar",
+    "importFailed": "Error de Importación",
+    "invalidTheme": "No se pudo analizar el tema",
+    "networkError": "Error de red",
+    "noValidTheme": "Sin tema válido en el portapapeles",
+    "clipboardError": "No se pudo leer el portapapeles",
+    "fileError": "Error al leer archivo",
+    "installed": "¡Instalado!",
+    "addedToThemes": "añadido a tus temas",
+    "copied": "¡Copiado!",
+    "themeCopied": "JSON del tema copiado al portapapeles",
+    "preview": "Vista Previa",
+    "install": "Instalar",
+    "share": "Compartir"
+  },
+  "pwa": {
+    "installTitle": "Instalar HashWatch",
+    "installSubtitle": "Añadir a la pantalla de inicio",
+    "install": "Instalar"
   }
 }

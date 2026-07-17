@@ -914,5 +914,34 @@
     "deleteMyData": "データを削除",
     "confirmDelete": "全データを削除",
     "confirmDeleteBody": "すべての貢献が完全に削除されます。"
+  },
+  "marketplace": {
+    "title": "テーママーケット",
+    "browse": "閲覧",
+    "fromUrl": "URLから",
+    "importFromClipboard": "クリップボードから",
+    "importFromUrl": "URLからインポート",
+    "urlHelp": "テーマJSONファイルのURLを貼り付け",
+    "importFromFile": "ファイルから",
+    "chooseFile": "JSONファイルを選択",
+    "import": "インポート",
+    "importFailed": "インポート失敗",
+    "invalidTheme": "テーマデータを解析できません",
+    "networkError": "ネットワークエラー",
+    "noValidTheme": "クリップボードに有効なテーマがありません",
+    "clipboardError": "クリップボードを読み取れません",
+    "fileError": "ファイル読み取りエラー",
+    "installed": "インストール完了！",
+    "addedToThemes": "テーマに追加されました",
+    "copied": "コピー完了！",
+    "themeCopied": "テーマJSONをクリップボードにコピーしました",
+    "preview": "プレビュー",
+    "install": "インストール",
+    "share": "共有"
+  },
+  "pwa": {
+    "installTitle": "HashWatchをインストール",
+    "installSubtitle": "ホーム画面に追加",
+    "install": "インストール"
   }
 }

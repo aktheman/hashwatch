@@ -79,6 +79,12 @@ function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
           Custom Themes
         </Text>
         <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+          <Pressable
+            onPress={() => navigation.navigate('ThemeMarketplace')}
+            style={{ padding: spacing.xxs }}
+          >
+            <Text style={{ color: theme.accent, fontSize: fontSize.sm }}>Marketplace</Text>
+          </Pressable>
           <Pressable onPress={handleImport} style={{ padding: spacing.xxs }}>
             <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>Import</Text>
           </Pressable>

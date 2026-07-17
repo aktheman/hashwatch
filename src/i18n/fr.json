@@ -924,5 +924,34 @@
     "deleteMyData": "Supprimer Mes Données",
     "confirmDelete": "Supprimer Toutes les Données",
     "confirmDeleteBody": "Cela supprimera définitivement toutes vos contributions."
+  },
+  "marketplace": {
+    "title": "Boutique de Thèmes",
+    "browse": "Parcourir",
+    "fromUrl": "Depuis URL",
+    "importFromClipboard": "Importer du Presse-papiers",
+    "importFromUrl": "Importer depuis URL",
+    "urlHelp": "Collez une URL vers un fichier JSON de thème",
+    "importFromFile": "Importer depuis un Fichier",
+    "chooseFile": "Choisir Fichier JSON",
+    "import": "Importer",
+    "importFailed": "Échec de l'import",
+    "invalidTheme": "Impossible d'analyser le thème",
+    "networkError": "Erreur réseau",
+    "noValidTheme": "Aucun thème valide dans le presse-papiers",
+    "clipboardError": "Impossible de lire le presse-papiers",
+    "fileError": "Erreur de lecture du fichier",
+    "installed": "Installé !",
+    "addedToThemes": "ajouté à vos thèmes",
+    "copied": "Copié !",
+    "themeCopied": "JSON du thème copié dans le presse-papiers",
+    "preview": "Aperçu",
+    "install": "Installer",
+    "share": "Partager"
+  },
+  "pwa": {
+    "installTitle": "Installer HashWatch",
+    "installSubtitle": "Ajouter à l'écran d'accueil",
+    "install": "Installer"
   }
 }
