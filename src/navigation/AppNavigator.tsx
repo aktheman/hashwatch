@@ -88,6 +88,11 @@ const DarkPoolScreen = lazy(() =>
     default: m.DarkPoolScreen,
   })),
 );
+const ThemeMarketplaceScreen = lazy(() =>
+  import('../screens/ThemeMarketplaceScreen').then((m) => ({
+    default: m.ThemeMarketplaceScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -129,6 +134,7 @@ const WrappedSharedGroups = withScreenBoundary(SharedGroupsScreen);
 const WrappedCustomThemeEditor = withScreenBoundary(CustomThemeEditorScreen);
 const WrappedFirmware = withScreenBoundary(FirmwareScreen);
 const WrappedDarkPool = withScreenBoundary(DarkPoolScreen);
+const WrappedThemeMarketplace = withScreenBoundary(ThemeMarketplaceScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -320,6 +326,11 @@ export function AppNavigator() {
           name="DarkPool"
           component={WrappedDarkPool}
           options={{ title: t('darkPool.title', 'Dark Pool') }}
+        />
+        <Stack.Screen
+          name="ThemeMarketplace"
+          component={WrappedThemeMarketplace}
+          options={{ title: t('marketplace.title', 'Theme Marketplace') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1513,6 +1513,29 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               </Text>
             </Pressable>
           </View>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Export miner CSV"
+              style={[
+                styles.actionBtn,
+                {
+                  flex: 1,
+                  backgroundColor: theme.success + '15',
+                  borderColor: theme.success + '30',
+                },
+              ]}
+              onPress={async () => {
+                const { exportMinerCSV } = await import('../utils/export');
+                await exportMinerCSV(miner.id);
+              }}
+            >
+              <Text style={styles.actionBtnIcon}>📊</Text>
+              <Text style={[styles.actionBtnText, { color: theme.success }]}>
+                {t('minerDetail.exportCsv', 'Export CSV')}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.section}>

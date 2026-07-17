@@ -102,6 +102,7 @@ export type RootStackParamList = {
   CustomThemeEditor: { themeId?: number; cloneFrom?: string } | undefined;
   Firmware: undefined;
   DarkPool: undefined;
+  ThemeMarketplace: undefined;
 };
 
 export type TabParamList = {

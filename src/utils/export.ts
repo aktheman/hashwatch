@@ -154,6 +154,37 @@ export async function exportAllData(): Promise<void> {
   triggerDownload(csv, filename, 'text/csv');
 }
 
+export async function exportSnapshotsWithRange(startMs: number, endMs: number): Promise<void> {
+  const miners = await DB.loadMiners();
+  const allSnapshots: MinerSnapshot[] = [];
+  for (const m of miners) {
+    const snaps = await DB.getSnapshots(m.id, 10000);
+    allSnapshots.push(...snaps);
+  }
+  const filtered = allSnapshots.filter((s) => s.timestamp >= startMs && s.timestamp <= endMs);
+  filtered.sort((a, b) => a.timestamp - b.timestamp);
+
+  const csv = snapshotsToCSV(filtered, miners);
+  const start = new Date(startMs).toISOString().slice(0, 10);
+  const end = new Date(endMs).toISOString().slice(0, 10);
+  const filename = `hashwatch_export_${start}_to_${end}.csv`;
+  triggerDownload(csv, filename, 'text/csv');
+}
+
+export async function exportMinerCSV(minerId: string): Promise<void> {
+  const miners = await DB.loadMiners();
+  const miner = miners.find((m) => m.id === minerId);
+  if (!miner) return;
+
+  const snapshots = await DB.getSnapshots(minerId, 10000);
+  snapshots.sort((a, b) => a.timestamp - b.timestamp);
+
+  const csv = snapshotsToCSV(snapshots, [miner]);
+  const name = (miner.name || miner.ip).replace(/[^a-zA-Z0-9]/g, '_');
+  const filename = `hashwatch_${name}_${Date.now()}.csv`;
+  triggerDownload(csv, filename, 'text/csv');
+}
+
 export async function exportMinerStatusCSV(): Promise<void> {
   const miners = await DB.loadMiners();
   const powerCostRaw = await DB.getSetting('power_cost');

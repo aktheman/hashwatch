@@ -936,5 +936,34 @@
     "deleteMyData": "Delete My Data",
     "confirmDelete": "Delete All Data",
     "confirmDeleteBody": "This will remove all your contributions permanently."
+  },
+  "marketplace": {
+    "title": "Theme Marketplace",
+    "browse": "Browse",
+    "fromUrl": "From URL",
+    "importFromClipboard": "Import from Clipboard",
+    "importFromUrl": "Import from URL",
+    "urlHelp": "Paste a URL to a theme JSON file to import it",
+    "importFromFile": "Import from File",
+    "chooseFile": "Choose JSON File",
+    "import": "Import",
+    "importFailed": "Import Failed",
+    "invalidTheme": "Could not parse theme data",
+    "networkError": "Network error",
+    "noValidTheme": "No valid theme in clipboard",
+    "clipboardError": "Could not read clipboard",
+    "fileError": "Error reading file",
+    "installed": "Installed!",
+    "addedToThemes": "added to your themes",
+    "copied": "Copied!",
+    "themeCopied": "Theme JSON copied to clipboard",
+    "preview": "Preview",
+    "install": "Install",
+    "share": "Share"
+  },
+  "pwa": {
+    "installTitle": "Install HashWatch",
+    "installSubtitle": "Add to home screen for quick access",
+    "install": "Install"
   }
 }

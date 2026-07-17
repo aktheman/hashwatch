@@ -924,5 +924,34 @@
     "deleteMyData": "Meine Daten löschen",
     "confirmDelete": "Alle Daten löschen",
     "confirmDeleteBody": "Dies wird alle Ihre Beiträge dauerhaft löschen."
+  },
+  "marketplace": {
+    "title": "Themen-Marktplatz",
+    "browse": "Durchsuchen",
+    "fromUrl": "Von URL",
+    "importFromClipboard": "Aus Zwischenablage",
+    "importFromUrl": "Von URL importieren",
+    "urlHelp": "URL zu einer Theme-JSON-Datei einfügen",
+    "importFromFile": "Aus Datei",
+    "chooseFile": "JSON-Datei wählen",
+    "import": "Importieren",
+    "importFailed": "Import fehlgeschlagen",
+    "invalidTheme": "Theme konnte nicht analysiert werden",
+    "networkError": "Netzwerkfehler",
+    "noValidTheme": "Kein gültiges Theme in der Zwischenablage",
+    "clipboardError": "Zwischenablage konnte nicht gelesen werden",
+    "fileError": "Fehler beim Lesen der Datei",
+    "installed": "Installiert!",
+    "addedToThemes": "zu Ihren Themes hinzugefügt",
+    "copied": "Kopiert!",
+    "themeCopied": "Theme-JSON in die Zwischenablage kopiert",
+    "preview": "Vorschau",
+    "install": "Installieren",
+    "share": "Teilen"
+  },
+  "pwa": {
+    "installTitle": "HashWatch installieren",
+    "installSubtitle": "Zum Startbildschirm hinzufügen",
+    "install": "Installieren"
   }
 }

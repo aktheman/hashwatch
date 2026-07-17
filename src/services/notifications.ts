@@ -25,6 +25,10 @@ let notifiedShareRejection = new Set<string>();
 let prevHashrates = new Map<string, number>();
 let prevSharesAccepted = new Map<string, number>();
 let prevSharesRejected = new Map<string, number>();
+let pendingBatch: { title: string; body: string; data?: Record<string, string> }[] = [];
+let batchTimer: ReturnType<typeof setTimeout> | null = null;
+
+const BATCH_DELAY_MS = 2000;
 
 export interface AlertRule {
   enabled: boolean;
@@ -118,6 +122,11 @@ export function resetAlertState(): void {
   prevHashrates = new Map();
   prevSharesAccepted = new Map();
   prevSharesRejected = new Map();
+  pendingBatch = [];
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
 }
 
 export function cleanupAlertState(activeMinerIds: Set<string>): void {
@@ -286,15 +295,69 @@ export async function checkMinerAlerts(prevMiners: Miner[], currentMiners: Miner
 
     prevHashrates.set(current.id, hr);
   }
+
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
+  flushBatch();
 }
 
 async function send(title: string, body: string, data?: Record<string, string>) {
+  pendingBatch.push({ title, body, data });
+
+  if (batchTimer) {
+    clearTimeout(batchTimer);
+    batchTimer = null;
+  }
+
+  batchTimer = setTimeout(() => {
+    flushBatch();
+  }, BATCH_DELAY_MS);
+  if (batchTimer && typeof batchTimer === 'object' && 'unref' in batchTimer) {
+    batchTimer.unref();
+  }
+}
+
+function flushBatch(): void {
+  if (pendingBatch.length === 0) return;
+
+  const items = [...pendingBatch];
+  pendingBatch = [];
+
+  if (items.length === 1) {
+    const { title, body, data } = items[0];
+    if (window.electronAPI?.isElectron) {
+      window.electronAPI.sendNotification(title, body);
+    }
+    if (Platform.OS !== 'web') {
+      Notifications.scheduleNotificationAsync({
+        content: { title, body, data, categoryIdentifier: 'miner-alerts' },
+        trigger: null,
+      });
+    }
+    return;
+  }
+
+  const offlineCount = items.filter((i) => i.data?.type === 'offline').length;
+  const onlineCount = items.filter((i) => i.data?.type === 'online').length;
+  const otherCount = items.length - offlineCount - onlineCount;
+
+  const parts: string[] = [];
+  if (offlineCount > 0)
+    parts.push(`${offlineCount} miner${offlineCount > 1 ? 's' : ''} went offline`);
+  if (onlineCount > 0) parts.push(`${onlineCount} miner${onlineCount > 1 ? 's' : ''} reconnected`);
+  if (otherCount > 0) parts.push(`${otherCount} other alert${otherCount > 1 ? 's' : ''}`);
+
+  const title = 'HashWatch Alerts';
+  const body = parts.join(', ');
+
   if (window.electronAPI?.isElectron) {
     window.electronAPI.sendNotification(title, body);
   }
   if (Platform.OS !== 'web') {
-    await Notifications.scheduleNotificationAsync({
-      content: { title, body, data, categoryIdentifier: 'miner-alerts' },
+    Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { type: 'batch' }, categoryIdentifier: 'miner-alerts' },
       trigger: null,
     });
   }
