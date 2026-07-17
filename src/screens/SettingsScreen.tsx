@@ -41,6 +41,7 @@ import { registerPushToken, unregisterPushToken } from '../services/pushRegistra
 import i18n from '../i18n';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import { ThemePicker } from '../components/ThemePicker';
+import * as haptic from '../utils/haptics';
 import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes';
 
 function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
@@ -572,7 +573,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityRole="button"
             accessibilityLabel={t('settings.saveProxyUrl')}
             style={[styles.proxyBtn, { backgroundColor: theme.primary }]}
-            onPress={saveProxyUrl}
+            onPress={() => {
+              haptic.success();
+              saveProxyUrl();
+            }}
           >
             <Text style={styles.proxyBtnText}>{t('settings.saveProxyUrl')}</Text>
           </Pressable>
@@ -585,7 +589,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Wallets"
           style={styles.row}
-          onPress={() => navigation.navigate('Wallets')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Wallets');
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.wallets')}</Text>
           <View style={styles.rowRight}>
@@ -596,7 +603,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Plan"
           style={styles.row}
-          onPress={() => navigation.navigate('Subscription')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Subscription');
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.plan')}</Text>
           <View style={styles.rowRight}>
@@ -618,6 +628,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={showDebugPanel ? t('settings.hideDebug') : t('settings.debugMenu')}
           onPress={() => {
+            haptic.light();
             setShowDebugPanel(!showDebugPanel);
             if (!showDebugPanel) loadDebugInfo();
           }}
@@ -649,6 +660,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   alignItems: 'center',
                 }}
                 onPress={() => {
+                  haptic.medium();
                   useSubscriptionStore.getState().restore();
                   Alert.alert(t('settings.restoreTitle'), t('settings.restoreBody'));
                 }}
@@ -675,6 +687,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     alignItems: 'center',
                   }}
                   onPress={() => {
+                    haptic.medium();
                     useSubscriptionStore.getState().setPro();
                     Alert.alert(t('settings.debugProTitle'), t('settings.debugProBody'));
                   }}
@@ -700,6 +713,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                     alignItems: 'center',
                   }}
                   onPress={() => {
+                    haptic.medium();
                     useSubscriptionStore.getState().setFree();
                     Alert.alert(t('settings.debugProTitle'), t('settings.debugFreeBody'));
                   }}
@@ -753,7 +767,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Remote Sync"
           style={styles.row}
-          onPress={() => setShowAuth(!showAuth)}
+          onPress={() => {
+            haptic.light();
+            setShowAuth(!showAuth);
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.remoteSync')}</Text>
           <View style={styles.rowRight}>
@@ -772,7 +789,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   accessibilityRole="button"
                   accessibilityLabel="Disconnect"
                   style={styles.logoutBtn}
-                  onPress={logout}
+                  onPress={() => {
+                    haptic.heavy();
+                    logout();
+                  }}
                 >
                   <Text style={styles.logoutBtnText}>{t('settings.disconnect')}</Text>
                 </Pressable>
@@ -784,7 +804,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   }
                   accessibilityState={{ disabled: syncing }}
                   style={[styles.authBtn, { marginTop: spacing.xs }]}
-                  onPress={syncNow}
+                  onPress={() => {
+                    haptic.medium();
+                    syncNow();
+                  }}
                   disabled={syncing}
                 >
                   <Text style={styles.authBtnText}>
@@ -825,7 +848,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   accessibilityRole="button"
                   accessibilityLabel={isRegister ? 'Create Account' : 'Sign In'}
                   style={styles.authBtn}
-                  onPress={handleAuth}
+                  onPress={() => {
+                    haptic.medium();
+                    handleAuth();
+                  }}
                 >
                   <Text style={styles.authBtnText}>
                     {isRegister ? t('settings.createAccount') : t('settings.signIn')}
@@ -888,6 +914,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   borderColor: language === lang ? theme.primary : theme.border,
                 }}
                 onPress={() => {
+                  haptic.selection();
                   i18n.changeLanguage(lang);
                   setLanguage(lang);
                   setSetting('language', lang);
@@ -932,6 +959,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                 borderColor: autoDarkHour === null ? theme.primary : theme.border,
               }}
               onPress={() => {
+                haptic.selection();
                 setAutoDarkHour(null);
                 clearThemeSchedule();
                 setSetting('auto_dark_hour', '');
@@ -961,6 +989,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   borderColor: autoDarkHour === hour ? theme.primary : theme.border,
                 }}
                 onPress={() => {
+                  haptic.selection();
                   setAutoDarkHour(hour);
                   scheduleThemeSwitch(hour, 'dark');
                   scheduleThemeSwitch((hour + (hour >= 23 ? -17 : 1)) % 24, 'light');
@@ -1066,6 +1095,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   alignItems: 'center',
                 }}
                 onPress={async () => {
+                  haptic.success();
                   await setSetting('user_latitude', latitude);
                   await setSetting('user_longitude', longitude);
                   stopAutoTheme();
@@ -1161,7 +1191,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={t('settings.alertHistory')}
           style={[styles.row, { marginTop: spacing.xs }]}
-          onPress={() => navigation.navigate('AlertHistory')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('AlertHistory');
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.alertHistory')}</Text>
           <View style={styles.rowRight}>
@@ -1172,7 +1205,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={t('settings.notificationHistory')}
           style={[styles.row, { marginTop: spacing.xxs }]}
-          onPress={() => navigation.navigate('NotificationHistory')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('NotificationHistory');
+          }}
         >
           <Text style={styles.rowLabel}>
             {t('settings.notificationHistory', 'Notification History')}
@@ -1217,7 +1253,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
               paddingVertical: 10,
               marginLeft: 8,
             }}
-            onPress={saveWebhookUrl}
+            onPress={() => {
+              haptic.success();
+              saveWebhookUrl();
+            }}
           >
             <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>{t('common.save')}</Text>
           </Pressable>
@@ -1274,7 +1313,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={t('settings.refreshAll')}
           style={styles.row}
-          onPress={() => loadMiners()}
+          onPress={() => {
+            haptic.light();
+            loadMiners();
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.refreshAll')}</Text>
           <Text style={styles.actionText}>{t('settings.refresh')}</Text>
@@ -1285,7 +1327,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityState={{ disabled: scanning }}
           accessibilityHint="Scans local network for new miners"
           style={styles.row}
-          onPress={scanNetwork}
+          onPress={() => {
+            haptic.medium();
+            scanNetwork();
+          }}
           disabled={scanning}
         >
           <Text style={styles.rowLabel}>{t('settings.scanNetwork')}</Text>
@@ -1297,7 +1342,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Groups"
           style={styles.row}
-          onPress={() => navigation.navigate('Groups')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Groups');
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.groups')}</Text>
           <View style={styles.rowRight}>
@@ -1309,7 +1357,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={t('navigator.firmware', 'Firmware')}
           style={styles.row}
-          onPress={() => navigation.navigate('Firmware')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Firmware');
+          }}
         >
           <Text style={styles.rowLabel}>{t('navigator.firmware', 'Firmware')}</Text>
           <View style={styles.rowRight}>
@@ -1320,7 +1371,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel={t('navigator.darkPool', 'Dark Pool')}
           style={styles.row}
-          onPress={() => navigation.navigate('DarkPool')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('DarkPool');
+          }}
         >
           <Text style={styles.rowLabel}>{t('navigator.darkPool', 'Dark Pool')}</Text>
           <View style={styles.rowRight}>
@@ -1332,6 +1386,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityLabel="Export CSV"
           style={styles.row}
           onPress={() => {
+            haptic.medium();
             exportAllData().catch(() => {
               Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
             });
@@ -1345,6 +1400,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityLabel="Export Status CSV"
           style={styles.row}
           onPress={() => {
+            haptic.medium();
             exportMinerStatusCSV().catch(() => {
               Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
             });
@@ -1358,6 +1414,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityLabel="Export JSON backup"
           style={styles.row}
           onPress={() => {
+            haptic.medium();
             exportJSON().catch(() => {
               Alert.alert(t('settings.exportFailed'), t('settings.exportFailed'));
             });
@@ -1370,7 +1427,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Import data"
           style={styles.row}
-          onPress={() => navigation.navigate('ImportData')}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('ImportData');
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.importData')}</Text>
           <View style={styles.rowRight}>
@@ -1382,7 +1442,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityRole="button"
           accessibilityLabel="Import CSV"
           style={styles.row}
-          onPress={() => setShowCsvImport(!showCsvImport)}
+          onPress={() => {
+            haptic.light();
+            setShowCsvImport(!showCsvImport);
+          }}
         >
           <Text style={styles.rowLabel}>{t('settings.importCsv')}</Text>
           <Text style={styles.actionText}>
@@ -1431,6 +1494,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                       alignItems: 'center',
                     }}
                     onPress={async () => {
+                      haptic.success();
                       const result = await importFromCSV(csvInput);
                       Alert.alert(
                         t('settings.importComplete'),
@@ -1464,7 +1528,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                       padding: 12,
                       alignItems: 'center',
                     }}
-                    onPress={() => setCsvPreview(null)}
+                    onPress={() => {
+                      haptic.light();
+                      setCsvPreview(null);
+                    }}
                   >
                     <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
                       {t('settings.edit')}
@@ -1504,6 +1571,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                       alignItems: 'center',
                     }}
                     onPress={() => {
+                      haptic.medium();
                       const preview = previewCSV(csvInput);
                       if (preview.errors.length > 0) {
                         Alert.alert(t('settingsExtra.csvErrors'), preview.errors.join('\n'));
@@ -1537,7 +1605,10 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                       padding: 12,
                       alignItems: 'center',
                     }}
-                    onPress={() => setShowCsvImport(false)}
+                    onPress={() => {
+                      haptic.light();
+                      setShowCsvImport(false);
+                    }}
                   >
                     <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
                       {t('settings.cancel')}
@@ -1557,6 +1628,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityLabel="Export all data"
           style={styles.row}
           onPress={() => {
+            haptic.medium();
             exportBackup().catch((e) => {
               Alert.alert(
                 t('settings.exportFailed'),
@@ -1573,6 +1645,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           accessibilityLabel="Import data from file"
           style={styles.row}
           onPress={() => {
+            haptic.medium();
             if (window.electronAPI?.isElectron) {
               window.electronAPI
                 .showOpenDialog({ filters: [{ name: 'JSON', extensions: ['json'] }] })

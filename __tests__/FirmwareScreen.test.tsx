@@ -75,37 +75,54 @@ jest.mock('../src/db/database', () => ({
   setSetting: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { render } from '@testing-library/react-native';
+import { render, act } from '@testing-library/react-native';
 import FirmwareScreen from '../src/screens/FirmwareScreen';
 
 afterEach(() => {
   jest.clearAllMocks();
+  jest.useRealTimers();
 });
 
 describe('FirmwareScreen', () => {
   it('renders the screen', async () => {
+    jest.useFakeTimers();
     const tree = await render(<FirmwareScreen />);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('renders firmware list for miners', async () => {
+    jest.useFakeTimers();
     const tree = await render(<FirmwareScreen />);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(tree.getByText('Miner A')).toBeTruthy();
     expect(tree.getByText('Miner B')).toBeTruthy();
   });
 
   it('shows firmware version info', async () => {
+    jest.useFakeTimers();
     const tree = await render(<FirmwareScreen />);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(tree.toJSON()).toBeTruthy();
   });
 
   it('renders with empty miners list', async () => {
+    jest.useFakeTimers();
     const { useMinerStore } = require('../src/store/miners');
     useMinerStore.mockImplementation(
       (sel: (s: { miners: unknown[]; refreshAll: jest.Mock }) => unknown) =>
         sel({ miners: [], refreshAll: jest.fn() }),
     );
     const tree = await render(<FirmwareScreen />);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(tree.toJSON()).toBeTruthy();
   });
 });

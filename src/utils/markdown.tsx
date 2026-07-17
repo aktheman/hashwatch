@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Text, TextStyle, Linking } from 'react-native';
 
 function parseMarkdown(text: string, baseStyle: TextStyle): React.ReactNode[] {
+  if (!text) return [];
   const parts: React.ReactNode[] = [];
   const regex = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|_(.+?)_|`(.+?)`|\[(.+?)\]\((.+?)\))/g;
   let key = 0;
