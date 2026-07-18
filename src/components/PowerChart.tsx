@@ -5,6 +5,7 @@ import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
+import { getChartConfig, CHART_HEIGHT } from '../utils/chartConfig';
 
 interface PowerChartProps {
   snapshots: MinerSnapshot[];
@@ -89,7 +90,6 @@ export const PowerChart = React.memo(function PowerChart({ snapshots, title }: P
   const formatValue = (v: string) => `${parseFloat(v).toFixed(1)}${t('charts.watts')}`;
 
   const lineColor = () => theme.warning;
-  const dotColor = theme.warning;
 
   return (
     <View style={styles.container} accessibilityLabel={t('powerChart.title', 'Power History')}>
@@ -101,29 +101,16 @@ export const PowerChart = React.memo(function PowerChart({ snapshots, title }: P
             datasets: [{ data: values, color: lineColor }],
           }}
           width={screenWidth}
-          height={200}
+          height={CHART_HEIGHT}
           yAxisSuffix=""
           fromZero={false}
           chartConfig={{
-            backgroundColor: theme.surface,
-            backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: theme.surface,
-            decimalPlaces: 1,
-            color: () => theme.textMuted,
-            labelColor: () => theme.textMuted,
+            ...getChartConfig(theme, 1),
             propsForDots: {
               r: '3',
               strokeWidth: '2',
-              stroke: dotColor,
+              stroke: theme.warning,
               fill: theme.surface,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4',
-              stroke: theme.border,
-              strokeWidth: 1,
-            },
-            propsForLabels: {
-              fontSize: fontSize.xs,
             },
           }}
           bezier

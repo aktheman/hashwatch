@@ -5,6 +5,7 @@ import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
+import { getChartConfig, CHART_HEIGHT } from '../utils/chartConfig';
 
 interface FanChartProps {
   snapshots: MinerSnapshot[];
@@ -94,7 +95,6 @@ export const FanChart = React.memo(function FanChart({ snapshots, title }: FanCh
   const formatValue = (v: string) => `${parseFloat(v).toFixed(0)}rpm`;
 
   const lineColor = () => theme.success;
-  const dotColor = theme.success;
 
   return (
     <View style={styles.container} accessibilityLabel={t('fanChart.title', 'Fan Speed History')}>
@@ -106,29 +106,16 @@ export const FanChart = React.memo(function FanChart({ snapshots, title }: FanCh
             datasets: [{ data: rpmValues, color: lineColor }],
           }}
           width={screenWidth}
-          height={200}
+          height={CHART_HEIGHT}
           yAxisSuffix=""
           fromZero={false}
           chartConfig={{
-            backgroundColor: theme.surface,
-            backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: theme.surface,
-            decimalPlaces: 0,
-            color: () => theme.textMuted,
-            labelColor: () => theme.textMuted,
+            ...getChartConfig(theme, 0),
             propsForDots: {
               r: '3',
               strokeWidth: '2',
-              stroke: dotColor,
+              stroke: theme.success,
               fill: theme.surface,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4',
-              stroke: theme.border,
-              strokeWidth: 1,
-            },
-            propsForLabels: {
-              fontSize: fontSize.xs,
             },
           }}
           bezier

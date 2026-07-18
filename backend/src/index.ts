@@ -24,12 +24,15 @@ import { createWebSocketServer } from './ws';
 import { query } from './db';
 import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
 import { cacheMiddleware, invalidateCache } from './middleware/cache';
+import { authMiddleware } from './middleware/auth';
 import { Request, Response, NextFunction } from 'express';
 import { webhooksRouter } from './routes/webhooks';
 import { poolAnalyticsRouter } from './routes/poolAnalytics';
 import { groupSharesRouter } from './routes/groupShares';
 import { customThemesRouter } from './routes/customThemes';
 import { darkPoolRouter } from './routes/darkPool';
+import { errorsRouter } from './routes/errors';
+import { rateLimit as customRateLimit } from './middleware/rateLimit';
 
 const log = {
   info: (...args: unknown[]) => console.log('[INFO]', ...args),
@@ -96,6 +99,16 @@ app.use('/api/auth', authLimiter);
 
 app.use('/api/', cacheMiddleware());
 
+const loginLimiter = customRateLimit({ windowMs: 60_000, max: 5 });
+const registerLimiter = customRateLimit({ windowMs: 60_000, max: 3 });
+const pushRegisterLimiter = customRateLimit({ windowMs: 60_000, max: 5 });
+const darkPoolContributeLimiter = customRateLimit({ windowMs: 5 * 60_000, max: 1 });
+
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', registerLimiter);
+app.use('/api/push/register', pushRegisterLimiter);
+app.use('/api/darkpool/contribute', darkPoolContributeLimiter);
+
 app.use('/api/auth', authRouter);
 app.use('/api/miners', minersRouter);
 app.use('/api/stats', statsRouter);
@@ -113,6 +126,7 @@ app.use('/api/pool-analytics', poolAnalyticsRouter);
 app.use('/api/groups', groupSharesRouter);
 app.use('/api/custom-themes', customThemesRouter);
 app.use('/api/darkpool', darkPoolRouter);
+app.use('/api/errors', authMiddleware, errorsRouter);
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;
