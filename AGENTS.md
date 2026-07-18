@@ -55,7 +55,27 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-17 — Round 25)
+## Latest Round (Session 2026-07-17 — Round 26)
+
+### Changes (Round 26 — Subscription gating, error tracking, performance, accessibility, E2E, Lighthouse)
+
+- **FeatureGate component**: Wraps Pro features — Dark Pool, Firmware, Auto-pool-switch, Theme Marketplace locked behind subscription
+- **Error tracking**: `errorTracking.ts` batch queues errors/events with API flush, unhandled error capture on web, auto-capture for window errors/rejections
+- **Performance**: 6 chart components in MinerDetailScreen lazy-loaded (HashrateChart, TemperatureChart, EfficiencyTrend, PowerChart, VoltageChart, FanChart)
+- **i18n**: subscriptionGate feature names (firmware, darkPool, autoPoolSwitch, marketplace) in all 6 locales
+- **Accessibility**: DashboardScreen, WalletsScreen, GroupsScreen, SubscriptionScreen — headers + labels added
+- **E2E tests**: expanded from 4 to 19 Playwright tests (all tabs, settings, groups, wallets, onboarding, subscription)
+- **Lighthouse CI**: `lighthouserc.json` + ci.yml job (performance >= 0.8, accessibility >= 0.9, best-practices >= 0.8, seo >= 0.8)
+- **ARCHITECTURE.md**: project structure, data flow, key patterns, screen table, subscription tiers, build/deploy
+- **Tests**: 1565 frontend + 242 backend = 1807 total, all passing.
+
+### Test results
+
+- Frontend: 1565 tests passing (115 suites) — ESLint clean
+- Backend: 242 tests passing (26 suites)
+- Total: 1807 tests
+
+## Previous Round (Session 2026-07-17 — Round 25)
 
 ### Changes (Round 25 — WebSocket polling replacement, RevenueCat init, native downsampling, PWA background sync)
 
