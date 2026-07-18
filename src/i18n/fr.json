@@ -603,7 +603,11 @@
     "offline": "Vous êtes hors ligne — affichage des données en cache"
   },
   "subscriptionGate": {
-    "upgradeToUnlock": "Passez à Pro pour débloquer"
+    "upgradeToUnlock": "Passez à Pro pour débloquer",
+    "firmware": "Firmware OTA",
+    "darkPool": "Pool Sombre",
+    "autoPoolSwitch": "Changement Auto de Pool",
+    "marketplace": "Place de Thème"
   },
   "comparison": {
     "title": "Comparaison des mineurs",

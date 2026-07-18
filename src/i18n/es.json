@@ -646,7 +646,11 @@
     "offline": "Estás desconectado — mostrando datos en caché"
   },
   "subscriptionGate": {
-    "upgradeToUnlock": "Actualiza a Pro para desbloquear"
+    "upgradeToUnlock": "Actualiza a Pro para desbloquear",
+    "firmware": "Firmware OTA",
+    "darkPool": "Pool Oscuro",
+    "autoPoolSwitch": "Cambio Automático de Pool",
+    "marketplace": "Mercado de Temas"
   },
   "temperatureChart": {
     "notEnoughData": "Datos insuficientes para el gráfico de temperatura",

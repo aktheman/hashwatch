@@ -1915,7 +1915,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 <Text style={styles.settingsIcon}>⇄</Text>
               </Pressable>
               <View style={{ alignItems: 'center' }}>
-                <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
+                <Text
+                  style={[styles.headerTitle, { textAlign: 'center' }]}
+                  accessibilityRole="header"
+                  accessibilityLabel="HashWatch"
+                >
+                  HashWatch
+                </Text>
                 <Text style={styles.headerSub}>
                   <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
                 </Text>
@@ -1988,6 +1994,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
         <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
           <Text
+            accessibilityRole="text"
+            accessibilityLabel={t('dashboard.staleData') || 'Data may be stale'}
             style={{ color: theme.warning, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
           >
             {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
@@ -2339,6 +2347,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
               }}
               returnKeyType="done"
               testID="group-picker-input"
+              accessibilityLabel="New group name"
             />
           </View>
         </Pressable>

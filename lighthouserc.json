@@ -1,0 +1,18 @@
+{
+  "ci": {
+    "assertions": {
+      "performance": ["error", { "minScore": 0.8 }],
+      "accessibility": ["error", { "minScore": 0.9 }],
+      "best-practices": ["error", { "minScore": 0.8 }],
+      "seo": ["error", { "minScore": 0.8 }]
+    },
+    "collect": {
+      "url": ["http://localhost:4173"],
+      "numberOfRuns": 1,
+      "chromeFlags": "--no-sandbox"
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

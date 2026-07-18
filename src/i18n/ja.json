@@ -593,7 +593,11 @@
     "offline": "オフラインです — キャッシュデータを表示中"
   },
   "subscriptionGate": {
-    "upgradeToUnlock": "Pro にアップグレードしてアンロック"
+    "upgradeToUnlock": "Pro にアップグレードしてアンロック",
+    "firmware": "Firmware OTA",
+    "darkPool": "ダークプール",
+    "autoPoolSwitch": "自動プール切り替え",
+    "marketplace": "テーママーケットプレイス"
   },
   "temperatureChart": {
     "notEnoughData": "温度チャートに十分なデータがありません",

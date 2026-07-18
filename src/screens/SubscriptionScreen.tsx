@@ -159,13 +159,17 @@ export function SubscriptionScreen() {
     <View style={styles.container}>
       <View style={styles.hero}>
         <Text style={styles.heroIcon}>⭐</Text>
-        <Text style={styles.heroTitle}>{t('subscription.title')}</Text>
+        <Text style={styles.heroTitle} accessibilityRole="header">
+          {t('subscription.title')}
+        </Text>
         <Text style={styles.heroSub}>{t('subscription.subtitle')}</Text>
       </View>
 
       <View style={[styles.planCard, tier === 'free' && styles.planCardActive]}>
         <View style={styles.planHeader}>
-          <Text style={styles.planName}>{t('subscription.free')}</Text>
+          <Text style={styles.planName} accessibilityRole="header">
+            {t('subscription.free')}
+          </Text>
           <Text style={styles.planPrice}>{t('subscription.freePrice')}</Text>
         </View>
         <View style={styles.featureList}>
@@ -189,7 +193,9 @@ export function SubscriptionScreen() {
           <Text style={styles.proBadgeText}>{t('subscription.bestValue')}</Text>
         </View>
         <View style={styles.planHeader}>
-          <Text style={styles.planName}>{t('subscription.pro')}</Text>
+          <Text style={styles.planName} accessibilityRole="header">
+            {t('subscription.pro')}
+          </Text>
           <View style={styles.priceRow}>
             <Text style={styles.planPrice}>{t('subscription.proPrice')}</Text>
             <Text style={styles.planPeriod}>{t('subscription.perMonth')}</Text>
