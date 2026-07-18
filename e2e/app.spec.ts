@@ -156,3 +156,33 @@ test('dashboard shows miner online status', async ({ page }) => {
   const onlineIndicator = page.getByText(/online|offline/i).first();
   await expect(onlineIndicator).toBeVisible({ timeout: 15000 });
 });
+
+test('dashboard matches screenshot', async ({ page }) => {
+  await skipOnboarding(page);
+  await seedLocalStorage(page);
+  await expect(page.getByText('Miner Alpha').first()).toBeVisible({ timeout: 15000 });
+  await expect(page).toHaveScreenshot('dashboard.png');
+});
+
+test('settings matches screenshot', async ({ page }) => {
+  await skipOnboarding(page);
+  await page
+    .getByRole('button', { name: /settings/i })
+    .first()
+    .click({ force: true });
+  await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
+  await expect(page).toHaveScreenshot('settings.png');
+});
+
+test('dark mode matches screenshot', async ({ page }) => {
+  await skipOnboarding(page);
+  await page
+    .getByRole('button', { name: /settings/i })
+    .first()
+    .click({ force: true });
+  await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
+  const lightButton = page.getByRole('button', { name: /light/i }).first();
+  await expect(lightButton).toBeVisible({ timeout: 15000 });
+  await lightButton.click({ force: true });
+  await expect(page).toHaveScreenshot('dark-mode.png');
+});

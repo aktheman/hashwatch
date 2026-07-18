@@ -5,6 +5,7 @@ import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
+import { getChartConfig, CHART_HEIGHT } from '../utils/chartConfig';
 
 interface VoltageChartProps {
   snapshots: MinerSnapshot[];
@@ -92,7 +93,6 @@ export const VoltageChart = React.memo(function VoltageChart({
   const formatValue = (v: string) => `${parseFloat(v).toFixed(0)}${t('charts.millivolts')}`;
 
   const lineColor = () => theme.info;
-  const dotColor = theme.info;
 
   return (
     <View style={styles.container} accessibilityLabel={t('voltageChart.title', 'Voltage History')}>
@@ -104,29 +104,16 @@ export const VoltageChart = React.memo(function VoltageChart({
             datasets: [{ data: values, color: lineColor }],
           }}
           width={screenWidth}
-          height={200}
+          height={CHART_HEIGHT}
           yAxisSuffix=""
           fromZero={false}
           chartConfig={{
-            backgroundColor: theme.surface,
-            backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: theme.surface,
-            decimalPlaces: 0,
-            color: () => theme.textMuted,
-            labelColor: () => theme.textMuted,
+            ...getChartConfig(theme, 0),
             propsForDots: {
               r: '3',
               strokeWidth: '2',
-              stroke: dotColor,
+              stroke: theme.info,
               fill: theme.surface,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4',
-              stroke: theme.border,
-              strokeWidth: 1,
-            },
-            propsForLabels: {
-              fontSize: fontSize.xs,
             },
           }}
           bezier

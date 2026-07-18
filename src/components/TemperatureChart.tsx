@@ -5,6 +5,7 @@ import { LazyLineChart } from './LazyLineChart';
 import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
+import { getChartConfig, CHART_HEIGHT } from '../utils/chartConfig';
 
 interface TemperatureChartProps {
   snapshots: MinerSnapshot[];
@@ -101,7 +102,6 @@ export const TemperatureChart = React.memo(function TemperatureChart({
   const formatValue = (v: string) => `${parseFloat(v).toFixed(0)}°`;
 
   const lineColor = () => theme.danger;
-  const dotColor = theme.danger;
 
   return (
     <View
@@ -117,29 +117,16 @@ export const TemperatureChart = React.memo(function TemperatureChart({
             datasets: [{ data: values, color: lineColor }],
           }}
           width={screenWidth}
-          height={200}
+          height={CHART_HEIGHT}
           yAxisSuffix=""
           fromZero={false}
           chartConfig={{
-            backgroundColor: theme.surface,
-            backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: theme.surface,
-            decimalPlaces: 0,
-            color: () => theme.textMuted,
-            labelColor: () => theme.textMuted,
+            ...getChartConfig(theme, 0),
             propsForDots: {
               r: '3',
               strokeWidth: '2',
-              stroke: dotColor,
+              stroke: theme.danger,
               fill: theme.surface,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4',
-              stroke: theme.border,
-              strokeWidth: 1,
-            },
-            propsForLabels: {
-              fontSize: fontSize.xs,
             },
           }}
           bezier

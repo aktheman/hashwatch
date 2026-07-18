@@ -6,6 +6,7 @@ import { MinerSnapshot } from '../types';
 import { useTheme } from '../theme';
 import { spacing, fontSize, fontWeight, radius } from '../utils/design';
 import { toHashesPerSecond } from '../utils/hashrate';
+import { getChartConfig, CHART_HEIGHT } from '../utils/chartConfig';
 
 interface HashrateChartProps {
   snapshots: MinerSnapshot[];
@@ -108,31 +109,10 @@ export const HashrateChart = React.memo(function HashrateChart({
             datasets: [{ data: values, color: () => theme.primary }],
           }}
           width={screenWidth}
-          height={200}
+          height={CHART_HEIGHT}
           yAxisSuffix=""
           fromZero={false}
-          chartConfig={{
-            backgroundColor: theme.surface,
-            backgroundGradientFrom: theme.surface,
-            backgroundGradientTo: theme.surface,
-            decimalPlaces: 1,
-            color: () => theme.textMuted,
-            labelColor: () => theme.textMuted,
-            propsForDots: {
-              r: '3',
-              strokeWidth: '2',
-              stroke: theme.primary,
-              fill: theme.surface,
-            },
-            propsForBackgroundLines: {
-              strokeDasharray: '4',
-              stroke: theme.border,
-              strokeWidth: 1,
-            },
-            propsForLabels: {
-              fontSize: fontSize.xs,
-            },
-          }}
+          chartConfig={getChartConfig(theme, 1)}
           bezier
           style={styles.chart}
           formatYLabel={formatValue}
