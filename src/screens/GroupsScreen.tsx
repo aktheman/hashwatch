@@ -722,7 +722,9 @@ export function GroupsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('groups.title')}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {t('groups.title')}
+      </Text>
 
       <View style={styles.inputRow}>
         <TextInput
@@ -804,7 +806,11 @@ export function GroupsScreen() {
                   </Pressable>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.groupName}>
+                  <Text
+                    style={styles.groupName}
+                    accessibilityRole="header"
+                    accessibilityLabel={`Group: ${name}`}
+                  >
                     📁 {name === 'Ungrouped' ? t('groups.ungrouped') : name}
                   </Text>
                   <Text style={styles.groupCount}>
@@ -1185,6 +1191,7 @@ export function GroupsScreen() {
               placeholderTextColor={theme.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel="Rule pattern"
             />
             <TextInput
               style={styles.ruleInput}
@@ -1192,6 +1199,7 @@ export function GroupsScreen() {
               onChangeText={setRuleGroup}
               placeholder={t('groups.targetGroupPlaceholder')}
               placeholderTextColor={theme.textMuted}
+              accessibilityLabel="Target group name"
             />
             <View style={styles.modalActions}>
               <Pressable
@@ -1283,6 +1291,7 @@ export function GroupsScreen() {
               placeholder={t('groups.alertThreshold')}
               placeholderTextColor={theme.textMuted}
               keyboardType="numeric"
+              accessibilityLabel="Alert threshold value"
             />
             <Text style={{ color: theme.textDim, fontSize: fontSize.xs, marginTop: 8 }}>
               {t('groups.parentGroup')}
@@ -1369,6 +1378,7 @@ export function GroupsScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel="Email address to share with"
             />
             <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>
               {t('groupSharing.accessLevel')}

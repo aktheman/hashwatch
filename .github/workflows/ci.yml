@@ -75,6 +75,27 @@ jobs:
           name: web-dist
           path: dist/
 
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    needs: [web-build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+      - run: npm install
+      - name: Serve and run Lighthouse CI
+        run: |
+          npx serve dist -p 4173 &
+          sleep 3
+          npx lighthouse-ci autorun --config=lighthouserc.json
+
   e2e-playwright:
     name: E2E (Playwright)
     runs-on: ubuntu-latest

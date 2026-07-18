@@ -14,12 +14,6 @@ import {
 
 import { NavigationProp } from '../types';
 import { StatWidget } from '../components/StatWidget';
-import { HashrateChart } from '../components/HashrateChart';
-import { TemperatureChart } from '../components/TemperatureChart';
-import { EfficiencyTrend } from '../components/EfficiencyTrend';
-import { PowerChart } from '../components/PowerChart';
-import { VoltageChart } from '../components/VoltageChart';
-import { FanChart } from '../components/FanChart';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
 import { NotificationPrefs } from '../components/NotificationPrefs';
@@ -42,6 +36,24 @@ import { calculateHealthScore, HealthBreakdown } from '../utils/healthScore';
 
 const LazyHealthPredictionCard = React.lazy(() =>
   import('../components/HealthPredictionCard').then((m) => ({ default: m.HealthPredictionCard })),
+);
+const LazyHashrateChart = React.lazy(() =>
+  import('../components/HashrateChart').then((m) => ({ default: m.HashrateChart })),
+);
+const LazyTemperatureChart = React.lazy(() =>
+  import('../components/TemperatureChart').then((m) => ({ default: m.TemperatureChart })),
+);
+const LazyEfficiencyTrend = React.lazy(() =>
+  import('../components/EfficiencyTrend').then((m) => ({ default: m.EfficiencyTrend })),
+);
+const LazyPowerChart = React.lazy(() =>
+  import('../components/PowerChart').then((m) => ({ default: m.PowerChart })),
+);
+const LazyVoltageChart = React.lazy(() =>
+  import('../components/VoltageChart').then((m) => ({ default: m.VoltageChart })),
+);
+const LazyFanChart = React.lazy(() =>
+  import('../components/FanChart').then((m) => ({ default: m.FanChart })),
 );
 import { TimeAgo } from '../components/TimeAgo';
 import { useTranslation } from 'react-i18next';
@@ -1411,7 +1423,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
             <Text style={styles.sectionIcon}>📈</Text> {t('minerDetail.hashrateHistory')}
           </Text>
           <SubscriptionGate feature="30-day charts">
-            <HashrateChart snapshots={snapshots} />
+            <Suspense fallback={null}>
+              <LazyHashrateChart snapshots={snapshots} />
+            </Suspense>
           </SubscriptionGate>
         </View>
 
@@ -1421,7 +1435,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               <Text style={styles.sectionIcon}>📊</Text> {t('minerDetail.efficiencyTrend')}
             </Text>
             <SubscriptionGate feature="30-day charts">
-              <EfficiencyTrend snapshots={snapshots} />
+              <Suspense fallback={null}>
+                <LazyEfficiencyTrend snapshots={snapshots} />
+              </Suspense>
             </SubscriptionGate>
           </View>
         )}
@@ -1433,7 +1449,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               {t('minerDetail.temperatureHistory', 'Temperature History')}
             </Text>
             <SubscriptionGate feature="30-day charts">
-              <TemperatureChart snapshots={snapshots} />
+              <Suspense fallback={null}>
+                <LazyTemperatureChart snapshots={snapshots} />
+              </Suspense>
             </SubscriptionGate>
           </View>
         )}
@@ -1445,7 +1463,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               {t('minerDetail.powerHistory', 'Power History')}
             </Text>
             <SubscriptionGate feature="30-day charts">
-              <PowerChart snapshots={snapshots} />
+              <Suspense fallback={null}>
+                <LazyPowerChart snapshots={snapshots} />
+              </Suspense>
             </SubscriptionGate>
           </View>
         )}
@@ -1457,7 +1477,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               {t('minerDetail.voltageHistory', 'Voltage History')}
             </Text>
             <SubscriptionGate feature="30-day charts">
-              <VoltageChart snapshots={snapshots} />
+              <Suspense fallback={null}>
+                <LazyVoltageChart snapshots={snapshots} />
+              </Suspense>
             </SubscriptionGate>
           </View>
         )}
@@ -1469,7 +1491,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
               {t('minerDetail.fanHistory', 'Fan Speed History')}
             </Text>
             <SubscriptionGate feature="30-day charts">
-              <FanChart snapshots={snapshots} />
+              <Suspense fallback={null}>
+                <LazyFanChart snapshots={snapshots} />
+              </Suspense>
             </SubscriptionGate>
           </View>
         )}

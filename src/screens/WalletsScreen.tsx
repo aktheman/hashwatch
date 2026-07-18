@@ -288,7 +288,9 @@ export function WalletsScreen() {
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View>
-          <Text style={styles.headerTitle}>{t('wallets.title')}</Text>
+          <Text style={styles.headerTitle} accessibilityRole="header">
+            {t('wallets.title')}
+          </Text>
           <Text style={styles.headerSub}>
             {t('wallets.walletCount', { count: wallets.length })}
           </Text>
@@ -303,7 +305,9 @@ export function WalletsScreen() {
       ) : wallets.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>💼</Text>
-          <Text style={styles.emptyTitle}>{t('wallets.noWallets')}</Text>
+          <Text style={styles.emptyTitle} accessibilityRole="header">
+            {t('wallets.noWallets')}
+          </Text>
           <Text style={styles.emptyText}>{t('wallets.noWalletsBody')}</Text>
           <Pressable
             accessibilityRole="button"

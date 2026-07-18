@@ -23,6 +23,7 @@ import {
 } from '../theme';
 import { startAutoTheme, stopAutoTheme } from '../services/autoTheme';
 import { getSetting, setSetting } from '../db/database';
+import { FeatureGate } from '../components/FeatureGate';
 import {
   exportAllData,
   exportJSON,
@@ -45,6 +46,7 @@ import * as haptic from '../utils/haptics';
 import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes';
 
 function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { themes, load, create } = useCustomThemesStore();
 
@@ -79,12 +81,14 @@ function CustomThemesSection({ navigation }: { navigation: NavigationProp }) {
           Custom Themes
         </Text>
         <View style={{ flexDirection: 'row', gap: spacing.xs }}>
-          <Pressable
-            onPress={() => navigation.navigate('ThemeMarketplace')}
-            style={{ padding: spacing.xxs }}
-          >
-            <Text style={{ color: theme.accent, fontSize: fontSize.sm }}>Marketplace</Text>
-          </Pressable>
+          <FeatureGate feature={t('subscriptionGate.marketplace')}>
+            <Pressable
+              onPress={() => navigation.navigate('ThemeMarketplace')}
+              style={{ padding: spacing.xxs }}
+            >
+              <Text style={{ color: theme.accent, fontSize: fontSize.sm }}>Marketplace</Text>
+            </Pressable>
+          </FeatureGate>
           <Pressable onPress={handleImport} style={{ padding: spacing.xxs }}>
             <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>Import</Text>
           </Pressable>
@@ -1329,29 +1333,31 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             accessibilityLabel="Auto-scan network"
           />
         </View>
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>{t('settings.autoPoolSwitch')}</Text>
-          <Switch
-            value={autoPoolSwitch}
-            onValueChange={(v) => {
-              setAutoPoolSwitch(v);
-              const val = String(v);
-              setSetting('auto_pool_switch', val);
-              if (token) {
-                if (isOnline) {
-                  putRemoteSetting('auto_pool_switch', val).catch(() =>
-                    console.warn('Failed to sync auto_pool_switch'),
-                  );
-                } else {
-                  queueSetting('auto_pool_switch', val);
+        <FeatureGate feature={t('settings.autoPoolSwitch')}>
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>{t('settings.autoPoolSwitch')}</Text>
+            <Switch
+              value={autoPoolSwitch}
+              onValueChange={(v) => {
+                setAutoPoolSwitch(v);
+                const val = String(v);
+                setSetting('auto_pool_switch', val);
+                if (token) {
+                  if (isOnline) {
+                    putRemoteSetting('auto_pool_switch', val).catch(() =>
+                      console.warn('Failed to sync auto_pool_switch'),
+                    );
+                  } else {
+                    queueSetting('auto_pool_switch', val);
+                  }
                 }
-              }
-            }}
-            trackColor={{ false: theme.border, true: theme.primary + '60' }}
-            thumbColor={autoPoolSwitch ? theme.primary : theme.textMuted}
-            accessibilityLabel="Auto-switch pools"
-          />
-        </View>
+              }}
+              trackColor={{ false: theme.border, true: theme.primary + '60' }}
+              thumbColor={autoPoolSwitch ? theme.primary : theme.textMuted}
+              accessibilityLabel="Auto-switch pools"
+            />
+          </View>
+        </FeatureGate>
         {autoPoolSwitch && lastSwitchTimestamp && (
           <View style={styles.row}>
             <Text style={styles.rowLabel}>{t('settings.lastPoolSwitch')}</Text>
@@ -1402,34 +1408,38 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.chevron}>›</Text>
           </View>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('navigator.firmware', 'Firmware')}
-          style={styles.row}
-          onPress={() => {
-            haptic.light();
-            navigation.navigate('Firmware');
-          }}
-        >
-          <Text style={styles.rowLabel}>{t('navigator.firmware', 'Firmware')}</Text>
-          <View style={styles.rowRight}>
-            <Text style={styles.chevron}>›</Text>
-          </View>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('navigator.darkPool', 'Dark Pool')}
-          style={styles.row}
-          onPress={() => {
-            haptic.light();
-            navigation.navigate('DarkPool');
-          }}
-        >
-          <Text style={styles.rowLabel}>{t('navigator.darkPool', 'Dark Pool')}</Text>
-          <View style={styles.rowRight}>
-            <Text style={styles.chevron}>›</Text>
-          </View>
-        </Pressable>
+        <FeatureGate feature={t('navigator.firmware', 'Firmware')}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('navigator.firmware', 'Firmware')}
+            style={styles.row}
+            onPress={() => {
+              haptic.light();
+              navigation.navigate('Firmware');
+            }}
+          >
+            <Text style={styles.rowLabel}>{t('navigator.firmware', 'Firmware')}</Text>
+            <View style={styles.rowRight}>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Pressable>
+        </FeatureGate>
+        <FeatureGate feature={t('navigator.darkPool', 'Dark Pool')}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('navigator.darkPool', 'Dark Pool')}
+            style={styles.row}
+            onPress={() => {
+              haptic.light();
+              navigation.navigate('DarkPool');
+            }}
+          >
+            <Text style={styles.rowLabel}>{t('navigator.darkPool', 'Dark Pool')}</Text>
+            <View style={styles.rowRight}>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Pressable>
+        </FeatureGate>
       </View>
 
       <View style={styles.section}>

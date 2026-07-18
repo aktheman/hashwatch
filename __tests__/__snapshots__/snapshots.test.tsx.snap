@@ -90,6 +90,8 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
       }
     >
       <Text
+        accessibilityLabel="HashWatch"
+        accessibilityRole="header"
         style={
           [
             {
@@ -6539,45 +6541,126 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "children": [
                 {
                   "children": [
-                    "settings.autoPoolSwitch",
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "settings.autoPoolSwitch",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 15,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                        <RCTSwitch
+                          accessibilityLabel="Auto-switch pools"
+                          accessibilityRole="switch"
+                          onChange={[Function]}
+                          onResponderTerminationRequest={[Function]}
+                          onStartShouldSetResponder={[Function]}
+                          onTintColor="#6C63FF60"
+                          style={
+                            {
+                              "alignSelf": "flex-start",
+                            }
+                          }
+                          thumbTintColor="#5C5F7A"
+                          tintColor="#1E1E42"
+                          value={false}
+                        />,
+                      ],
+                      "props": {
+                        "style": {
+                          "alignItems": "center",
+                          "backgroundColor": "#13132B",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 16,
+                          "borderWidth": 1,
+                          "flexDirection": "row",
+                          "justifyContent": "space-between",
+                          "marginBottom": 2,
+                          "padding": 16,
+                        },
+                      },
+                      "type": "View",
+                    },
                   ],
                   "props": {
+                    "pointerEvents": "none",
+                  },
+                  "type": "View",
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        "🔒",
+                      ],
+                      "props": {
+                        "style": {
+                          "fontSize": 16,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "settings.autoPoolSwitch",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#FFFFFF",
+                          "fontSize": 13,
+                          "fontWeight": "600",
+                          "marginTop": 4,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "subscriptionGate.upgradeToUnlock",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#8B8FA3",
+                          "fontSize": 11,
+                          "marginTop": 4,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                  ],
+                  "props": {
+                    "accessibilityElementsHidden": true,
+                    "accessibilityLabel": "Premium content",
+                    "accessibilityRole": "none",
+                    "accessible": false,
+                    "pointerEvents": "auto",
                     "style": {
-                      "color": "#FFFFFF",
-                      "fontSize": 15,
-                      "fontWeight": "600",
+                      "alignItems": "center",
+                      "backgroundColor": "#0A0A1AA0",
+                      "borderRadius": 12,
+                      "bottom": 0,
+                      "justifyContent": "center",
+                      "left": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
                     },
                   },
-                  "type": "Text",
+                  "type": "View",
                 },
-                <RCTSwitch
-                  accessibilityLabel="Auto-switch pools"
-                  accessibilityRole="switch"
-                  onChange={[Function]}
-                  onResponderTerminationRequest={[Function]}
-                  onStartShouldSetResponder={[Function]}
-                  onTintColor="#6C63FF60"
-                  style={
-                    {
-                      "alignSelf": "flex-start",
-                    }
-                  }
-                  thumbTintColor="#5C5F7A"
-                  tintColor="#1E1E42"
-                  value={false}
-                />,
               ],
               "props": {
+                "pointerEvents": "box-none",
                 "style": {
-                  "alignItems": "center",
-                  "backgroundColor": "#13132B",
-                  "borderColor": "#1E1E42",
-                  "borderRadius": 16,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "marginBottom": 2,
-                  "padding": 16,
+                  "opacity": 0.5,
+                  "position": "relative",
                 },
               },
               "type": "View",
@@ -6825,81 +6908,162 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "children": [
                 {
                   "children": [
-                    "navigator.firmware",
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "navigator.firmware",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 15,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                        {
+                          "children": [
+                            {
+                              "children": [
+                                "›",
+                              ],
+                              "props": {
+                                "style": {
+                                  "color": "#5C5F7A",
+                                  "fontSize": 20,
+                                  "fontWeight": "300",
+                                },
+                              },
+                              "type": "Text",
+                            },
+                          ],
+                          "props": {
+                            "style": {
+                              "alignItems": "center",
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "navigator.firmware",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "alignItems": "center",
+                          "backgroundColor": "#13132B",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 16,
+                          "borderWidth": 1,
+                          "flexDirection": "row",
+                          "justifyContent": "space-between",
+                          "marginBottom": 2,
+                          "padding": 16,
+                        },
+                      },
+                      "type": "View",
+                    },
                   ],
                   "props": {
-                    "style": {
-                      "color": "#FFFFFF",
-                      "fontSize": 15,
-                      "fontWeight": "600",
-                    },
+                    "pointerEvents": "none",
                   },
-                  "type": "Text",
+                  "type": "View",
                 },
                 {
                   "children": [
                     {
                       "children": [
-                        "›",
+                        "🔒",
                       ],
                       "props": {
                         "style": {
-                          "color": "#5C5F7A",
-                          "fontSize": 20,
-                          "fontWeight": "300",
+                          "fontSize": 16,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "navigator.firmware",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#FFFFFF",
+                          "fontSize": 13,
+                          "fontWeight": "600",
+                          "marginTop": 4,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "subscriptionGate.upgradeToUnlock",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#8B8FA3",
+                          "fontSize": 11,
+                          "marginTop": 4,
                         },
                       },
                       "type": "Text",
                     },
                   ],
                   "props": {
+                    "accessibilityElementsHidden": true,
+                    "accessibilityLabel": "Premium content",
+                    "accessibilityRole": "none",
+                    "accessible": false,
+                    "pointerEvents": "auto",
                     "style": {
                       "alignItems": "center",
-                      "flexDirection": "row",
-                      "gap": 4,
+                      "backgroundColor": "#0A0A1AA0",
+                      "borderRadius": 12,
+                      "bottom": 0,
+                      "justifyContent": "center",
+                      "left": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
                     },
                   },
                   "type": "View",
                 },
               ],
               "props": {
-                "accessibilityLabel": "navigator.firmware",
-                "accessibilityRole": "button",
-                "accessibilityState": {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                },
-                "accessibilityValue": {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                },
-                "accessible": true,
-                "collapsable": false,
-                "focusable": true,
-                "onBlur": [Function],
-                "onClick": [Function],
-                "onFocus": [Function],
-                "onResponderGrant": [Function],
-                "onResponderMove": [Function],
-                "onResponderRelease": [Function],
-                "onResponderTerminate": [Function],
-                "onResponderTerminationRequest": [Function],
-                "onStartShouldSetResponder": [Function],
+                "pointerEvents": "box-none",
                 "style": {
-                  "alignItems": "center",
-                  "backgroundColor": "#13132B",
-                  "borderColor": "#1E1E42",
-                  "borderRadius": 16,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "marginBottom": 2,
-                  "padding": 16,
+                  "opacity": 0.5,
+                  "position": "relative",
                 },
               },
               "type": "View",
@@ -6908,81 +7072,162 @@ exports[`SettingsScreen matches snapshot 1`] = `
               "children": [
                 {
                   "children": [
-                    "navigator.darkPool",
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            "navigator.darkPool",
+                          ],
+                          "props": {
+                            "style": {
+                              "color": "#FFFFFF",
+                              "fontSize": 15,
+                              "fontWeight": "600",
+                            },
+                          },
+                          "type": "Text",
+                        },
+                        {
+                          "children": [
+                            {
+                              "children": [
+                                "›",
+                              ],
+                              "props": {
+                                "style": {
+                                  "color": "#5C5F7A",
+                                  "fontSize": 20,
+                                  "fontWeight": "300",
+                                },
+                              },
+                              "type": "Text",
+                            },
+                          ],
+                          "props": {
+                            "style": {
+                              "alignItems": "center",
+                              "flexDirection": "row",
+                              "gap": 4,
+                            },
+                          },
+                          "type": "View",
+                        },
+                      ],
+                      "props": {
+                        "accessibilityLabel": "navigator.darkPool",
+                        "accessibilityRole": "button",
+                        "accessibilityState": {
+                          "busy": undefined,
+                          "checked": undefined,
+                          "disabled": undefined,
+                          "expanded": undefined,
+                          "selected": undefined,
+                        },
+                        "accessibilityValue": {
+                          "max": undefined,
+                          "min": undefined,
+                          "now": undefined,
+                          "text": undefined,
+                        },
+                        "accessible": true,
+                        "collapsable": false,
+                        "focusable": true,
+                        "onBlur": [Function],
+                        "onClick": [Function],
+                        "onFocus": [Function],
+                        "onResponderGrant": [Function],
+                        "onResponderMove": [Function],
+                        "onResponderRelease": [Function],
+                        "onResponderTerminate": [Function],
+                        "onResponderTerminationRequest": [Function],
+                        "onStartShouldSetResponder": [Function],
+                        "style": {
+                          "alignItems": "center",
+                          "backgroundColor": "#13132B",
+                          "borderColor": "#1E1E42",
+                          "borderRadius": 16,
+                          "borderWidth": 1,
+                          "flexDirection": "row",
+                          "justifyContent": "space-between",
+                          "marginBottom": 2,
+                          "padding": 16,
+                        },
+                      },
+                      "type": "View",
+                    },
                   ],
                   "props": {
-                    "style": {
-                      "color": "#FFFFFF",
-                      "fontSize": 15,
-                      "fontWeight": "600",
-                    },
+                    "pointerEvents": "none",
                   },
-                  "type": "Text",
+                  "type": "View",
                 },
                 {
                   "children": [
                     {
                       "children": [
-                        "›",
+                        "🔒",
                       ],
                       "props": {
                         "style": {
-                          "color": "#5C5F7A",
-                          "fontSize": 20,
-                          "fontWeight": "300",
+                          "fontSize": 16,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "navigator.darkPool",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#FFFFFF",
+                          "fontSize": 13,
+                          "fontWeight": "600",
+                          "marginTop": 4,
+                        },
+                      },
+                      "type": "Text",
+                    },
+                    {
+                      "children": [
+                        "subscriptionGate.upgradeToUnlock",
+                      ],
+                      "props": {
+                        "style": {
+                          "color": "#8B8FA3",
+                          "fontSize": 11,
+                          "marginTop": 4,
                         },
                       },
                       "type": "Text",
                     },
                   ],
                   "props": {
+                    "accessibilityElementsHidden": true,
+                    "accessibilityLabel": "Premium content",
+                    "accessibilityRole": "none",
+                    "accessible": false,
+                    "pointerEvents": "auto",
                     "style": {
                       "alignItems": "center",
-                      "flexDirection": "row",
-                      "gap": 4,
+                      "backgroundColor": "#0A0A1AA0",
+                      "borderRadius": 12,
+                      "bottom": 0,
+                      "justifyContent": "center",
+                      "left": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
                     },
                   },
                   "type": "View",
                 },
               ],
               "props": {
-                "accessibilityLabel": "navigator.darkPool",
-                "accessibilityRole": "button",
-                "accessibilityState": {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                },
-                "accessibilityValue": {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                },
-                "accessible": true,
-                "collapsable": false,
-                "focusable": true,
-                "onBlur": [Function],
-                "onClick": [Function],
-                "onFocus": [Function],
-                "onResponderGrant": [Function],
-                "onResponderMove": [Function],
-                "onResponderRelease": [Function],
-                "onResponderTerminate": [Function],
-                "onResponderTerminationRequest": [Function],
-                "onStartShouldSetResponder": [Function],
+                "pointerEvents": "box-none",
                 "style": {
-                  "alignItems": "center",
-                  "backgroundColor": "#13132B",
-                  "borderColor": "#1E1E42",
-                  "borderRadius": 16,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "justifyContent": "space-between",
-                  "marginBottom": 2,
-                  "padding": 16,
+                  "opacity": 0.5,
+                  "position": "relative",
                 },
               },
               "type": "View",

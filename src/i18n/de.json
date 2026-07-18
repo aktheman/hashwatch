@@ -603,7 +603,11 @@
     "offline": "Du bist offline — zeige zwischengespeicherte Daten"
   },
   "subscriptionGate": {
-    "upgradeToUnlock": "Upgrade auf Pro, um freizuschalten"
+    "upgradeToUnlock": "Upgrade auf Pro, um freizuschalten",
+    "firmware": "Firmware OTA",
+    "darkPool": "Dunkler Pool",
+    "autoPoolSwitch": "Automatischer Pool-Wechsel",
+    "marketplace": "Theme-Marktplatz"
   },
   "comparison": {
     "title": "Miner-Vergleich",

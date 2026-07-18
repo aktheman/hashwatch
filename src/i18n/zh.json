@@ -593,7 +593,11 @@
     "offline": "您已离线 — 显示缓存数据"
   },
   "subscriptionGate": {
-    "upgradeToUnlock": "升级到 Pro 以解锁"
+    "upgradeToUnlock": "升级到 Pro 以解锁",
+    "firmware": "固件 OTA",
+    "darkPool": "暗池",
+    "autoPoolSwitch": "自动切换矿池",
+    "marketplace": "主题市场"
   },
   "temperatureChart": {
     "notEnoughData": "温度图表数据不足",

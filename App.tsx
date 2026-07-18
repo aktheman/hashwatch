@@ -43,7 +43,11 @@ export default function App() {
         requestNotificationPermissions();
         initCrashReporting({ enabled: true });
         initAnalytics({ enabled: true });
-        initErrorTracking({ dsn: '', enabled: __DEV__ === false });
+        initErrorTracking({
+          dsn: '',
+          enabled: true,
+          endpoint: __DEV__ ? '' : '/api/errors',
+        });
         await initProxyUrl();
         const saved = await getSetting('theme_mode');
         if (
