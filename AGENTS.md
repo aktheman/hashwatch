@@ -55,7 +55,26 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-17 — Round 26)
+## Latest Round (Session 2026-07-17 — Round 27)
+
+### Changes (Round 27 — Rate limiting, error tracking endpoint, chart optimization, visual E2E)
+
+- **Rate limiting**: Sliding window middleware — login 5/min, register 3/min, dark pool 1/5min, general API 60/min, error endpoint 10/min
+- **POST /api/errors**: Backend endpoint for client error/event batches with auth, validation, in-memory store (max 1000)
+- **Backend tests**: errors endpoint (5 tests), dark pool tests preserved
+- **Shared chartConfig**: `getChartConfig()`, `CHART_WIDTH`, `CHART_HEIGHT` — all 5 chart components refactored to use shared config
+- **FeatureGate test**: 5 tests (pro/free rendering, overlay, feature name, upgrade text)
+- **errorTracking test**: 8 tests (disabled/enabled queueing, flush, MAX_QUEUE_SIZE, console fallback)
+- **Visual regression E2E**: dashboard/settings/darkmode screenshot tests
+- **Tests**: 1578 frontend + 247 backend = 1825 total, all passing.
+
+### Test results
+
+- Frontend: 1578 tests passing (117 suites) — ESLint clean
+- Backend: 247 tests passing (27 suites)
+- Total: 1825 tests
+
+## Previous Round (Session 2026-07-17 — Round 26)
 
 ### Changes (Round 26 — Subscription gating, error tracking, performance, accessibility, E2E, Lighthouse)
 
