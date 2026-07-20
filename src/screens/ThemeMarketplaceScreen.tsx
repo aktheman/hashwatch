@@ -285,7 +285,7 @@ export function ThemeMarketplaceScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      <Text style={styles.title}>{t('marketplace.title', 'Theme Marketplace')}</Text>
+      <Text style={styles.title}>{t('marketplace.themeTitle', 'Theme Marketplace')}</Text>
 
       <View style={styles.tabs}>
         <Pressable

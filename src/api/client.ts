@@ -503,3 +503,85 @@ export async function deleteDarkPoolMyContributions(): Promise<{ ok: boolean; de
   );
   return res.data;
 }
+
+// ── Public Dashboards ──────────────────────────────────────────────────────
+
+export async function createPublicDashboard(
+  minerId: string,
+): Promise<{ token: string; createdAt: number }> {
+  const res = await client.post<{ token: string; createdAt: number }>('/api/public-dashboards', {
+    minerId,
+  });
+  return res.data;
+}
+
+export async function getPublicDashboard(token: string): Promise<{
+  minerName: string;
+  minerId: string;
+  snapshot: MinerSnapshot | null;
+  createdAt: number;
+}> {
+  const res = await client.get<{
+    minerName: string;
+    minerId: string;
+    snapshot: MinerSnapshot | null;
+    createdAt: number;
+  }>(`/api/public-dashboards/${token}`);
+  return res.data;
+}
+
+export async function revokePublicDashboard(token: string): Promise<{ deleted: boolean }> {
+  const res = await client.delete<{ deleted: boolean }>(`/api/public-dashboards/${token}`);
+  return res.data;
+}
+
+// ── Marketplace ────────────────────────────────────────────────────────────
+
+export interface MarketplaceListing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  model: string;
+  condition: string;
+  location: string;
+  sellerId: string;
+  createdAt: number;
+}
+
+export async function fetchMarketplaceListings(
+  page?: number,
+  limit?: number,
+): Promise<{ listings: MarketplaceListing[]; total: number; page: number; limit: number }> {
+  const res = await client.get<{
+    listings: MarketplaceListing[];
+    total: number;
+    page: number;
+    limit: number;
+  }>('/api/marketplace', { params: { page, limit } });
+  return res.data;
+}
+
+export async function fetchMyListings(): Promise<MarketplaceListing[]> {
+  const res = await client.get<MarketplaceListing[]>('/api/marketplace/mine');
+  return res.data;
+}
+
+export async function createMarketplaceListing(data: {
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  model: string;
+  condition: string;
+  location: string;
+}): Promise<MarketplaceListing> {
+  const res = await client.post<MarketplaceListing>('/api/marketplace', data);
+  return res.data;
+}
+
+export async function deleteMarketplaceListing(id: string): Promise<{ deleted: boolean }> {
+  const res = await client.delete<{ deleted: boolean }>(`/api/marketplace/${id}`);
+  return res.data;
+}

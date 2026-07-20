@@ -1559,6 +1559,71 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
                 {t('minerDetail.exportCsv', 'Export CSV')}
               </Text>
             </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('exportReport.title', 'Export Report')}
+              style={[
+                styles.actionBtn,
+                {
+                  flex: 1,
+                  backgroundColor: theme.info + '15',
+                  borderColor: theme.info + '30',
+                },
+              ]}
+              onPress={() => {
+                navigation.navigate('ExportReport');
+              }}
+            >
+              <Text style={styles.actionBtnIcon}>📄</Text>
+              <Text style={[styles.actionBtnText, { color: theme.info }]}>
+                {t('exportReport.title', 'Export Report')}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('publicDashboard.shareMiner', 'Share Live Status')}
+              style={[
+                styles.actionBtn,
+                {
+                  flex: 1,
+                  backgroundColor: theme.accent + '15',
+                  borderColor: theme.accent + '30',
+                },
+              ]}
+              onPress={async () => {
+                try {
+                  const { createPublicDashboard } = await import('../api/client');
+                  const { getBaseUrl } = await import('../api/client');
+                  const data = await createPublicDashboard(miner.remoteId || miner.id);
+                  const baseUrl = getBaseUrl().replace('/api', '');
+                  const url = `${baseUrl}/public-dashboard/${data.token}`;
+
+                  if (typeof Share !== 'undefined' && Share.share) {
+                    await Share.share({
+                      message: `${t('publicDashboard.shareUrl')}: ${url}`,
+                      url,
+                      title: miner.name,
+                    });
+                  } else {
+                    Alert.alert(t('publicDashboard.shareUrl'), url, [
+                      {
+                        text: 'OK',
+                        style: 'cancel',
+                      },
+                    ]);
+                  }
+                } catch {
+                  Alert.alert(t('common.error'), t('common.error'));
+                }
+              }}
+            >
+              <Text style={styles.actionBtnIcon}>🔗</Text>
+              <Text style={[styles.actionBtnText, { color: theme.accent }]}>
+                {t('publicDashboard.shareMiner')}
+              </Text>
+            </Pressable>
           </View>
         </View>
 

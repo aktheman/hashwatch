@@ -317,6 +317,9 @@ async function send(title: string, body: string, data?: Record<string, string>) 
   if (batchTimer && typeof batchTimer === 'object' && 'unref' in batchTimer) {
     batchTimer.unref();
   }
+
+  sendToAlertChannels(`${title}: ${body}`).catch(() => {});
+  sendToBotChannels(title, body).catch(() => {});
 }
 
 function flushBatch(): void {
@@ -487,4 +490,66 @@ async function isQuietHours(): Promise<boolean> {
     return currentMinutes >= startMinutes && currentMinutes < endMinutes;
   }
   return currentMinutes >= startMinutes || currentMinutes < endMinutes;
+}
+
+async function sendToAlertChannels(message: string): Promise<void> {
+  try {
+    const { useAuthStore: getAuth } = await import('../store/auth');
+    const token = getAuth.getState().token;
+    if (!token) return;
+
+    const { getBaseUrl } = await import('../api/client');
+    const base = getBaseUrl();
+    const res = await fetch(`${base}/api/alert-channels`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+
+    const data = (await res.json()) as {
+      channels: { id: string; type: string; config: Record<string, string> }[];
+    };
+    for (const channel of data.channels) {
+      fetch(`${base}/api/alert-channels/${channel.id}/test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message }),
+      }).catch(() => {});
+    }
+  } catch {
+    // silent — offline or not authenticated
+  }
+}
+
+async function sendToBotChannels(title: string, body: string): Promise<void> {
+  try {
+    const { useAuthStore: getAuth } = await import('../store/auth');
+    const token = getAuth.getState().token;
+    if (!token) return;
+
+    const { getBaseUrl } = await import('../api/client');
+    const base = getBaseUrl();
+    const res = await fetch(`${base}/api/bot-channels`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+
+    const data = (await res.json()) as {
+      channels: { id: string; type: string; webhookUrl: string; name: string }[];
+    };
+    for (const ch of data.channels) {
+      fetch(`${base}/api/bot-channels/${ch.id}/test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: `${title}: ${body}` }),
+      }).catch(() => {});
+    }
+  } catch {
+    // silent — offline or not authenticated
+  }
 }

@@ -8,13 +8,17 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Share,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useMinerStore } from '../store/miners';
 import { MinerSnapshot, NavigationProp } from '../types';
 import { reportCSV, reportJSON, downloadReport } from '../utils/reportExport';
+import { SubscriptionGate } from '../components/SubscriptionGate';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
+import { generateMinerReport } from '../utils/pdfExport';
 
 type DatePreset = '24h' | '7d' | '30d' | 'custom';
 
@@ -32,6 +36,10 @@ function getDateRange(preset: DatePreset): { from: number; to: number } {
   }
 }
 
+function formatDate(ms: number): string {
+  return new Date(ms).toLocaleDateString();
+}
+
 export function ExportReportScreen(_props: { navigation: NavigationProp }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -45,9 +53,22 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
   const [includeEarnings, setIncludeEarnings] = useState(false);
   const [includePoolStats, setIncludePoolStats] = useState(true);
   const [includeHealth, setIncludeHealth] = useState(false);
-  const [format, setFormat] = useState<'csv' | 'json'>('csv');
+  const [format, setFormat] = useState<'csv' | 'json' | 'pdf'>('csv');
   const [generating, setGenerating] = useState(false);
   const [allSnapshots, setAllSnapshots] = useState<MinerSnapshot[]>([]);
+  const [pdfResult, setPdfResult] = useState<{
+    uri?: string;
+    filePath?: string;
+    blob?: Blob;
+    html?: string;
+  } | null>(null);
+  const [previewStats, setPreviewStats] = useState<{
+    avgHashrate: number;
+    peakHashrate: number;
+    avgTemp: number;
+    totalUptime: number;
+    efficiency: number;
+  } | null>(null);
 
   const dateRange = useMemo(() => getDateRange(datePreset), [datePreset]);
 
@@ -82,8 +103,64 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
         setAllSnapshots(allSnaps);
       }
 
+      if (format === 'pdf') {
+        const targetMinerIds = selectAll ? miners.map((m) => m.id) : Array.from(selectedMinerIds);
+        const targetMiner = miners.find((m) => targetMinerIds.includes(m.id));
+        if (!targetMiner) {
+          Alert.alert(t('common.error'), t('exportReport.noData'));
+          setGenerating(false);
+          return;
+        }
+
+        const filteredSnaps = snapshots.filter(
+          (s) =>
+            s.minerId === targetMiner.id &&
+            s.timestamp >= dateRange.from &&
+            s.timestamp <= dateRange.to,
+        );
+
+        const poolBreakdown: Record<string, number> = {};
+        const latestSnap = filteredSnaps[filteredSnaps.length - 1];
+        if (latestSnap) {
+          poolBreakdown[targetMiner.name] = latestSnap.sharesAccepted;
+        }
+
+        const result = await generateMinerReport(
+          targetMiner,
+          filteredSnaps,
+          poolBreakdown,
+          formatDate(dateRange.from),
+          formatDate(dateRange.to),
+        );
+
+        setPdfResult(result);
+
+        const hashrates = filteredSnaps.map((s) => s.hashRate).filter((h) => h > 0);
+        const temps = filteredSnaps.map((s) => s.temperature).filter((t) => t > 0);
+        const powers = filteredSnaps.map((s) => s.power).filter((p) => p > 0);
+        const avgHr =
+          hashrates.length > 0 ? hashrates.reduce((a, b) => a + b, 0) / hashrates.length : 0;
+        const peakHr = hashrates.length > 0 ? Math.max(...hashrates) : 0;
+        const avgT = temps.length > 0 ? temps.reduce((a, b) => a + b, 0) / temps.length : 0;
+        const avgP = powers.length > 0 ? powers.reduce((a, b) => a + b, 0) / powers.length : 0;
+        const eff = avgP > 0 && avgHr > 0 ? avgP / (avgHr / 1e9) : 0;
+        const totalUp = filteredSnaps.reduce((a, s) => a + s.uptimeSeconds, 0);
+
+        setPreviewStats({
+          avgHashrate: avgHr,
+          peakHashrate: peakHr,
+          avgTemp: avgT,
+          totalUptime: totalUp,
+          efficiency: eff,
+        });
+
+        Alert.alert(t('exportReport.reportGenerated'), '');
+        setGenerating(false);
+        return;
+      }
+
       const options = {
-        format,
+        format: format as 'csv' | 'json',
         dateRange,
         minerIds: selectAll ? undefined : Array.from(selectedMinerIds),
         includeSnapshots,
@@ -120,6 +197,27 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
     includeHealth,
     t,
   ]);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!pdfResult) return;
+    if (pdfResult.blob) {
+      const url = URL.createObjectURL(pdfResult.blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = `HashWatch_Report_${Date.now()}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+    if (pdfResult.filePath || pdfResult.uri) {
+      const path = pdfResult.filePath || pdfResult.uri;
+      if (Platform.OS !== 'web' && typeof Share !== 'undefined') {
+        await Share.share({ message: path || 'HashWatch Report', title: 'HashWatch Report' });
+      } else {
+        Alert.alert(t('exportReport.download'), path || '');
+      }
+    }
+  }, [pdfResult, t]);
 
   const styles = useMemo(
     () =>
@@ -216,6 +314,30 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
           color: theme.text,
           fontSize: fontSize.sm,
         },
+        statRow: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingVertical: 6,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.border,
+        },
+        statLabel: {
+          color: theme.textDim,
+          fontSize: fontSize.sm,
+        },
+        statValue: {
+          color: theme.text,
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
+        },
+        downloadBtn: {
+          backgroundColor: theme.success,
+          borderRadius: radius.lg,
+          padding: spacing.md,
+          alignItems: 'center',
+          marginTop: spacing.sm,
+        },
       }),
     [theme],
   );
@@ -227,187 +349,252 @@ export function ExportReportScreen(_props: { navigation: NavigationProp }) {
   ];
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{t('exportReport.title')}</Text>
+    <SubscriptionGate feature={t('exportReport.title')}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>{t('exportReport.title')}</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('exportReport.dateRange')}</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {presetOptions.map((p) => (
-            <Pressable
-              key={p.key}
-              accessibilityRole="button"
-              accessibilityLabel={p.label}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: datePreset === p.key ? theme.primary : theme.surface,
-                  borderColor: datePreset === p.key ? theme.primary : theme.border,
-                },
-              ]}
-              onPress={() => setDatePreset(p.key)}
-            >
-              <Text
-                style={[styles.chipText, { color: datePreset === p.key ? '#FFF' : theme.text }]}
-              >
-                {p.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: spacing.xs,
-          }}
-        >
-          <Text style={styles.sectionTitle}>{t('exportReport.miners')}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>{t('exportReport.allMiners')}</Text>
-          <Switch
-            value={selectAll}
-            onValueChange={(val) => {
-              setSelectAll(val);
-              if (val) setSelectedMinerIds(new Set());
-            }}
-            trackColor={{ false: theme.border, true: theme.primary + '60' }}
-            thumbColor={selectAll ? theme.primary : theme.textMuted}
-            accessibilityLabel="Select all miners"
-          />
-        </View>
-        {!selectAll && (
-          <View style={{ marginTop: spacing.xs }}>
-            {miners.map((m) => (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('exportReport.dateRange')}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {presetOptions.map((p) => (
               <Pressable
-                key={m.id}
+                key={p.key}
                 accessibilityRole="button"
-                accessibilityLabel={`${m.name} ${selectedMinerIds.has(m.id) ? 'selected' : 'not selected'}`}
-                style={styles.minerToggle}
-                onPress={() => toggleMiner(m.id)}
+                accessibilityLabel={p.label}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: datePreset === p.key ? theme.primary : theme.surface,
+                    borderColor: datePreset === p.key ? theme.primary : theme.border,
+                  },
+                ]}
+                onPress={() => setDatePreset(p.key)}
               >
-                <Text style={styles.minerToggleText}>{m.name}</Text>
-                <Switch
-                  value={selectedMinerIds.has(m.id)}
-                  onValueChange={() => toggleMiner(m.id)}
-                  trackColor={{ false: theme.border, true: theme.primary + '60' }}
-                  thumbColor={selectedMinerIds.has(m.id) ? theme.primary : theme.textMuted}
-                />
+                <Text
+                  style={[styles.chipText, { color: datePreset === p.key ? '#FFF' : theme.text }]}
+                >
+                  {p.label}
+                </Text>
               </Pressable>
             ))}
           </View>
-        )}
-      </View>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('exportReport.sections')}</Text>
-        {[
-          {
-            key: 'snapshots',
-            value: includeSnapshots,
-            setter: setIncludeSnapshots,
-            label: t('exportReport.snapshots'),
-          },
-          {
-            key: 'earnings',
-            value: includeEarnings,
-            setter: setIncludeEarnings,
-            label: t('exportReport.earnings'),
-          },
-          {
-            key: 'poolStats',
-            value: includePoolStats,
-            setter: setIncludePoolStats,
-            label: t('exportReport.poolStats'),
-          },
-          {
-            key: 'health',
-            value: includeHealth,
-            setter: setIncludeHealth,
-            label: t('exportReport.health'),
-          },
-        ].map((item) => (
-          <View key={item.key} style={styles.row}>
-            <Text style={styles.rowLabel}>{item.label}</Text>
+        <View style={styles.section}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: spacing.xs,
+            }}
+          >
+            <Text style={styles.sectionTitle}>{t('exportReport.miners')}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>{t('exportReport.allMiners')}</Text>
             <Switch
-              value={item.value}
-              onValueChange={item.setter}
+              value={selectAll}
+              onValueChange={(val) => {
+                setSelectAll(val);
+                if (val) setSelectedMinerIds(new Set());
+              }}
               trackColor={{ false: theme.border, true: theme.primary + '60' }}
-              thumbColor={item.value ? theme.primary : theme.textMuted}
-              accessibilityLabel={`Toggle ${item.key}`}
+              thumbColor={selectAll ? theme.primary : theme.textMuted}
+              accessibilityLabel="Select all miners"
             />
           </View>
-        ))}
-      </View>
+          {!selectAll && (
+            <View style={{ marginTop: spacing.xs }}>
+              {miners.map((m) => (
+                <Pressable
+                  key={m.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${m.name} ${selectedMinerIds.has(m.id) ? 'selected' : 'not selected'}`}
+                  style={styles.minerToggle}
+                  onPress={() => toggleMiner(m.id)}
+                >
+                  <Text style={styles.minerToggleText}>{m.name}</Text>
+                  <Switch
+                    value={selectedMinerIds.has(m.id)}
+                    onValueChange={() => toggleMiner(m.id)}
+                    trackColor={{ false: theme.border, true: theme.primary + '60' }}
+                    thumbColor={selectedMinerIds.has(m.id) ? theme.primary : theme.textMuted}
+                  />
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('exportReport.format')}</Text>
-        <View style={{ flexDirection: 'row' }}>
-          {(['csv', 'json'] as const).map((f) => (
-            <Pressable
-              key={f}
-              accessibilityRole="button"
-              accessibilityLabel={f.toUpperCase()}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: format === f ? theme.primary : theme.surface,
-                  borderColor: format === f ? theme.primary : theme.border,
-                  marginRight: spacing.xs,
-                },
-              ]}
-              onPress={() => setFormat(f)}
-            >
-              <Text style={[styles.chipText, { color: format === f ? '#FFF' : theme.text }]}>
-                {f.toUpperCase()}
-              </Text>
-            </Pressable>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('exportReport.sections')}</Text>
+          {[
+            {
+              key: 'snapshots',
+              value: includeSnapshots,
+              setter: setIncludeSnapshots,
+              label: t('exportReport.snapshots'),
+            },
+            {
+              key: 'earnings',
+              value: includeEarnings,
+              setter: setIncludeEarnings,
+              label: t('exportReport.earnings'),
+            },
+            {
+              key: 'poolStats',
+              value: includePoolStats,
+              setter: setIncludePoolStats,
+              label: t('exportReport.poolStats'),
+            },
+            {
+              key: 'health',
+              value: includeHealth,
+              setter: setIncludeHealth,
+              label: t('exportReport.health'),
+            },
+          ].map((item) => (
+            <View key={item.key} style={styles.row}>
+              <Text style={styles.rowLabel}>{item.label}</Text>
+              <Switch
+                value={item.value}
+                onValueChange={item.setter}
+                trackColor={{ false: theme.border, true: theme.primary + '60' }}
+                thumbColor={item.value ? theme.primary : theme.textMuted}
+                accessibilityLabel={`Toggle ${item.key}`}
+              />
+            </View>
           ))}
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('exportReport.preview')}</Text>
-        <View style={styles.previewCard}>
-          {previewMiners.length === 0 ? (
-            <Text style={styles.previewText}>{t('exportReport.noData')}</Text>
-          ) : (
-            previewMiners.map((m) => (
-              <View key={m.id} style={styles.previewRow}>
-                <Text style={styles.previewText}>
-                  {m.name} · {m.ip} · {m.isOnline ? t('common.online') : t('common.offline')}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('exportReport.format')}</Text>
+          <View style={{ flexDirection: 'row' }}>
+            {(['csv', 'json', 'pdf'] as const).map((f) => (
+              <Pressable
+                key={f}
+                accessibilityRole="button"
+                accessibilityLabel={f.toUpperCase()}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: format === f ? theme.primary : theme.surface,
+                    borderColor: format === f ? theme.primary : theme.border,
+                    marginRight: spacing.xs,
+                  },
+                ]}
+                onPress={() => setFormat(f)}
+              >
+                <Text style={[styles.chipText, { color: format === f ? '#FFF' : theme.text }]}>
+                  {f.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('exportReport.preview')}</Text>
+          <View style={styles.previewCard}>
+            {previewMiners.length === 0 ? (
+              <Text style={styles.previewText}>{t('exportReport.noData')}</Text>
+            ) : (
+              previewMiners.map((m) => (
+                <View key={m.id} style={styles.previewRow}>
+                  <Text style={styles.previewText}>
+                    {m.name} · {m.ip} · {m.isOnline ? t('common.online') : t('common.offline')}
+                  </Text>
+                </View>
+              ))
+            )}
+            {miners.length > 10 && (
+              <Text style={[styles.previewText, { color: theme.textMuted, marginTop: 4 }]}>
+                ...and {miners.length - 10} more
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {format === 'pdf' && previewStats && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('exportReport.preview')}</Text>
+            <View style={styles.previewCard}>
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>{t('exportReport.avgHashrate')}</Text>
+                <Text style={styles.statValue}>
+                  {previewStats.avgHashrate >= 1e9
+                    ? (previewStats.avgHashrate / 1e9).toFixed(2) + ' GH/s'
+                    : previewStats.avgHashrate >= 1e6
+                      ? (previewStats.avgHashrate / 1e6).toFixed(2) + ' MH/s'
+                      : previewStats.avgHashrate >= 1e3
+                        ? (previewStats.avgHashrate / 1e3).toFixed(2) + ' KH/s'
+                        : previewStats.avgHashrate.toFixed(1) + ' H/s'}
                 </Text>
               </View>
-            ))
-          )}
-          {miners.length > 10 && (
-            <Text style={[styles.previewText, { color: theme.textMuted, marginTop: 4 }]}>
-              ...and {miners.length - 10} more
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>{t('exportReport.peakHashrate')}</Text>
+                <Text style={styles.statValue}>
+                  {previewStats.peakHashrate >= 1e9
+                    ? (previewStats.peakHashrate / 1e9).toFixed(2) + ' GH/s'
+                    : previewStats.peakHashrate >= 1e6
+                      ? (previewStats.peakHashrate / 1e6).toFixed(2) + ' MH/s'
+                      : previewStats.peakHashrate >= 1e3
+                        ? (previewStats.peakHashrate / 1e3).toFixed(2) + ' KH/s'
+                        : previewStats.peakHashrate.toFixed(1) + ' H/s'}
+                </Text>
+              </View>
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>{t('exportReport.avgTemp')}</Text>
+                <Text style={styles.statValue}>{previewStats.avgTemp.toFixed(1)}°C</Text>
+              </View>
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>{t('exportReport.totalUptime')}</Text>
+                <Text style={styles.statValue}>{Math.round(previewStats.totalUptime / 3600)}h</Text>
+              </View>
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>{t('exportReport.efficiency')}</Text>
+                <Text style={styles.statValue}>
+                  {previewStats.efficiency > 0
+                    ? previewStats.efficiency.toFixed(2) + ' J/TH'
+                    : 'N/A'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            format === 'pdf' ? t('exportReport.generate') : t('exportReport.exportButton')
+          }
+          style={[styles.exportBtn, generating && { opacity: 0.6 }]}
+          onPress={handleExport}
+          disabled={generating}
+        >
+          {generating ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.exportBtnText}>
+              {format === 'pdf' ? t('exportReport.generate') : t('exportReport.exportButton')}
             </Text>
           )}
-        </View>
-      </View>
+        </Pressable>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('exportReport.exportButton')}
-        style={[styles.exportBtn, generating && { opacity: 0.6 }]}
-        onPress={handleExport}
-        disabled={generating}
-      >
-        {generating ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.exportBtnText}>{t('exportReport.exportButton')}</Text>
+        {format === 'pdf' && pdfResult && !generating && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('exportReport.download')}
+            style={styles.downloadBtn}
+            onPress={handleDownloadPdf}
+          >
+            <Text style={styles.exportBtnText}>{t('exportReport.download')}</Text>
+          </Pressable>
         )}
-      </Pressable>
 
-      <View style={{ height: spacing.xl }} />
-    </ScrollView>
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
+    </SubscriptionGate>
   );
 }

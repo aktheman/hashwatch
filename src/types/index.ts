@@ -103,6 +103,16 @@ export type RootStackParamList = {
   Firmware: undefined;
   DarkPool: undefined;
   ThemeMarketplace: undefined;
+  PublicDashboard: { token: string };
+  MinerMarketplace: undefined;
+  Teams: undefined;
+  AlertChannels: undefined;
+  BotChannels: undefined;
+  PoolCompare: undefined;
+  Contributors: undefined;
+  AnomalyDetection: undefined;
+  Energy: undefined;
+  ProfitabilitySwitch: undefined;
 };
 
 export type TabParamList = {

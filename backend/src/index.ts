@@ -33,6 +33,11 @@ import { customThemesRouter } from './routes/customThemes';
 import { darkPoolRouter } from './routes/darkPool';
 import { errorsRouter } from './routes/errors';
 import { rateLimit as customRateLimit } from './middleware/rateLimit';
+import { publicDashboardRouter } from './routes/publicDashboards';
+import { marketplaceRouter } from './routes/marketplace';
+import { teamRouter } from './routes/teams';
+import { alertChannelsRouter } from './routes/alertChannels';
+import { botChannelsRouter } from './routes/botChannels';
 
 const log = {
   info: (...args: unknown[]) => console.log('[INFO]', ...args),
@@ -127,6 +132,11 @@ app.use('/api/groups', groupSharesRouter);
 app.use('/api/custom-themes', customThemesRouter);
 app.use('/api/darkpool', darkPoolRouter);
 app.use('/api/errors', authMiddleware, errorsRouter);
+app.use('/api/public-dashboards', publicDashboardRouter);
+app.use('/api/marketplace', marketplaceRouter);
+app.use('/api/teams', authMiddleware, teamRouter);
+app.use('/api/alert-channels', authMiddleware, alertChannelsRouter);
+app.use('/api/bot-channels', authMiddleware, botChannelsRouter);
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;

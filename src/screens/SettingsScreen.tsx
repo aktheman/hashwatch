@@ -1241,6 +1241,34 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             <Text style={styles.chevron}>›</Text>
           </View>
         </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('alertChannels.title', 'Alert Channels')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('AlertChannels');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('alertChannels.title', 'Alert Channels')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('botChannels.title', 'Bot Channels')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('BotChannels');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('botChannels.title', 'Bot Channels')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
       </View>
 
       <NotificationHistorySection />
@@ -1366,6 +1394,50 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         )}
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('profitabilitySwitch.title', 'Profitability Switching')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('ProfitabilitySwitch');
+          }}
+        >
+          <Text style={styles.rowLabel}>
+            {t('profitabilitySwitch.title', 'Profitability Switching')}
+          </Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('anomalyDetection.title', 'Anomaly Detection')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('AnomalyDetection');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('anomalyDetection.title', 'Anomaly Detection')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('energy.title', 'Energy Tracking')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Energy');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('energy.title', 'Energy Tracking')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t('settings.refreshAll')}
           style={styles.row}
           onPress={() => {
@@ -1440,6 +1512,52 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             </View>
           </Pressable>
         </FeatureGate>
+        <FeatureGate feature={t('minerMarketplace.featureName', 'Miner Marketplace')}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('marketplace.title', 'Miner Marketplace')}
+            style={styles.row}
+            onPress={() => {
+              haptic.light();
+              navigation.navigate('MinerMarketplace');
+            }}
+          >
+            <Text style={styles.rowLabel}>{t('marketplace.title', 'Miner Marketplace')}</Text>
+            <View style={styles.rowRight}>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Pressable>
+        </FeatureGate>
+        <FeatureGate feature={t('teams.title', 'Teams')}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('teams.title', 'Teams')}
+            style={styles.row}
+            onPress={() => {
+              haptic.light();
+              navigation.navigate('Teams');
+            }}
+          >
+            <Text style={styles.rowLabel}>{t('teams.title', 'Teams')}</Text>
+            <View style={styles.rowRight}>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Pressable>
+        </FeatureGate>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('poolCompare.title', 'Pool Comparison')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('PoolCompare');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('poolCompare.title', 'Pool Comparison')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
       </View>
 
       <View style={styles.section}>
@@ -1854,6 +1972,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={styles.rowLabel}>{t('settings.madeFor')}</Text>
           <Text style={styles.rowValue}>{t('settings.bitaxeMiners')}</Text>
         </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('contributors.title', 'Contributors')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Contributors');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('contributors.title', 'Contributors')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
       </View>
     </ScrollView>
   );
