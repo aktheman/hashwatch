@@ -7,6 +7,12 @@ jest.mock('react-native', () => {
   return RN;
 });
 
+jest.mock('../src/store/subscription', () => {
+  const store = { isPro: true, tier: 'pro', maxMiners: 999, loading: false, initialized: true };
+  const useStore = (sel?: (s: typeof store) => unknown) => (sel ? sel(store) : store);
+  return { useSubscriptionStore: useStore };
+});
+
 const mockNavigate = jest.fn();
 const mockGoBack = jest.fn();
 
@@ -66,6 +72,10 @@ jest.mock('../src/utils/reportExport', () => ({
   reportCSV: jest.fn(() => 'mock,csv'),
   reportJSON: jest.fn(() => ({ mock: true })),
   downloadReport: jest.fn(),
+}));
+
+jest.mock('../src/utils/pdfExport', () => ({
+  generateMinerReport: jest.fn().mockResolvedValue({ uri: 'test.pdf' }),
 }));
 
 import { ExportReportScreen } from '../src/screens/ExportReportScreen';

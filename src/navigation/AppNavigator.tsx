@@ -93,6 +93,56 @@ const ThemeMarketplaceScreen = lazy(() =>
     default: m.ThemeMarketplaceScreen,
   })),
 );
+const PublicDashboardScreen = lazy(() =>
+  import('../screens/PublicDashboardScreen').then((m) => ({
+    default: m.PublicDashboardScreen,
+  })),
+);
+const MinerMarketplaceScreen = lazy(() =>
+  import('../screens/MarketplaceScreen').then((m) => ({
+    default: m.MarketplaceScreen,
+  })),
+);
+const TeamsScreen = lazy(() =>
+  import('../screens/TeamsScreen').then((m) => ({
+    default: m.TeamsScreen,
+  })),
+);
+const AlertChannelsScreen = lazy(() =>
+  import('../screens/AlertChannelsScreen').then((m) => ({
+    default: m.AlertChannelsScreen,
+  })),
+);
+const BotChannelsScreen = lazy(() =>
+  import('../screens/BotChannelsScreen').then((m) => ({
+    default: m.BotChannelsScreen,
+  })),
+);
+const PoolCompareScreen = lazy(() =>
+  import('../screens/PoolCompareScreen').then((m) => ({
+    default: m.PoolCompareScreen,
+  })),
+);
+const ContributorScreen = lazy(() =>
+  import('../screens/ContributorScreen').then((m) => ({
+    default: m.ContributorScreen,
+  })),
+);
+const AnomalyScreen = lazy(() =>
+  import('../screens/AnomalyScreen').then((m) => ({
+    default: m.AnomalyScreen,
+  })),
+);
+const EnergyScreen = lazy(() =>
+  import('../screens/EnergyScreen').then((m) => ({
+    default: m.EnergyScreen,
+  })),
+);
+const ProfitabilitySwitchScreen = lazy(() =>
+  import('../screens/ProfitabilitySwitchScreen').then((m) => ({
+    default: m.ProfitabilitySwitchScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -135,6 +185,16 @@ const WrappedCustomThemeEditor = withScreenBoundary(CustomThemeEditorScreen);
 const WrappedFirmware = withScreenBoundary(FirmwareScreen);
 const WrappedDarkPool = withScreenBoundary(DarkPoolScreen);
 const WrappedThemeMarketplace = withScreenBoundary(ThemeMarketplaceScreen);
+const WrappedPublicDashboard = withScreenBoundary(PublicDashboardScreen);
+const WrappedMinerMarketplace = withScreenBoundary(MinerMarketplaceScreen);
+const WrappedTeams = withScreenBoundary(TeamsScreen);
+const WrappedAlertChannels = withScreenBoundary(AlertChannelsScreen);
+const WrappedBotChannels = withScreenBoundary(BotChannelsScreen);
+const WrappedPoolCompare = withScreenBoundary(PoolCompareScreen);
+const WrappedContributors = withScreenBoundary(ContributorScreen);
+const WrappedAnomaly = withScreenBoundary(AnomalyScreen);
+const WrappedEnergy = withScreenBoundary(EnergyScreen);
+const WrappedProfitabilitySwitch = withScreenBoundary(ProfitabilitySwitchScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -330,7 +390,60 @@ export function AppNavigator() {
         <Stack.Screen
           name="ThemeMarketplace"
           component={WrappedThemeMarketplace}
-          options={{ title: t('marketplace.title', 'Theme Marketplace') }}
+          options={{ title: t('marketplace.themeTitle', 'Theme Marketplace') }}
+        />
+        <Stack.Screen
+          name="PublicDashboard"
+          component={WrappedPublicDashboard}
+          options={{
+            title: t('publicDashboard.shareMiner', 'Share Live Status'),
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="MinerMarketplace"
+          component={WrappedMinerMarketplace}
+          options={{ title: t('marketplace.title', 'Miner Marketplace') }}
+        />
+        <Stack.Screen
+          name="Teams"
+          component={WrappedTeams}
+          options={{ title: t('teams.title', 'Teams') }}
+        />
+        <Stack.Screen
+          name="AlertChannels"
+          component={WrappedAlertChannels}
+          options={{ title: t('alertChannels.title', 'Alert Channels') }}
+        />
+        <Stack.Screen
+          name="BotChannels"
+          component={WrappedBotChannels}
+          options={{ title: t('botChannels.title', 'Bot Channels') }}
+        />
+        <Stack.Screen
+          name="PoolCompare"
+          component={WrappedPoolCompare}
+          options={{ title: t('poolCompare.title', 'Pool Comparison') }}
+        />
+        <Stack.Screen
+          name="Contributors"
+          component={WrappedContributors}
+          options={{ title: t('contributors.title', 'Contributors') }}
+        />
+        <Stack.Screen
+          name="AnomalyDetection"
+          component={WrappedAnomaly}
+          options={{ title: t('anomalyDetection.title', 'Anomaly Detection') }}
+        />
+        <Stack.Screen
+          name="Energy"
+          component={WrappedEnergy}
+          options={{ title: t('energy.title', 'Energy Tracking') }}
+        />
+        <Stack.Screen
+          name="ProfitabilitySwitch"
+          component={WrappedProfitabilitySwitch}
+          options={{ title: t('profitabilitySwitch.title', 'Profitability Switching') }}
         />
       </Stack.Navigator>
     </NavigationContainer>
