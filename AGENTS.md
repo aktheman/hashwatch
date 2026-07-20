@@ -55,7 +55,29 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-17 — Round 27)
+## Latest Round (Session 2026-07-17 — Rounds 28-31)
+
+### Changes (Rounds 28-31 — 11 product features)
+
+- **Public Dashboard Sharing**: Shareable read-only URL per miner, auto-refresh 30s, branded header
+- **Miner Marketplace**: Buy/sell used Bitaxes, listing CRUD, detail modal, Pro-gated
+- **Team/Org Plan**: Create team, invite members by email, role-based access (owner/admin/viewer), multi-location monitoring
+- **Alert SMS/Telegram Integration**: Register SMS/Telegram channels, test notifications, auto-forward from push alerts
+- **Historical Data PDF Export**: HTML reports with SVG charts, date range picker, Pro-gated
+- **Discord/Telegram Bot Mirroring**: Webhook-based alert forwarding, SSRF protection, test message
+- **Mining Profitability Comparison**: Pool A vs B side-by-side scoring, earnings estimates, winner badges
+- **Contributor Leaderboard**: GitHub API integration, avatars, rank badges, repo stats
+- **AI Anomaly Detection**: Hashrate decline, temp spikes, voltage issues, failure probability, health trends
+- **Solar/Renewable Energy Tracking**: Energy sources, readings, carbon savings, cost estimates
+- **Multi-Pool Profitability Switching**: Composite scoring (fee/luck/payout), threshold, auto-switch toggle
+
+### Test results
+
+- Frontend: 1578 tests passing (117 suites) — ESLint clean
+- Backend: 247 tests passing (27 suites)
+- Total: 1825 tests
+
+## Previous Round (Session 2026-07-17 — Round 27)
 
 ### Changes (Round 27 — Rate limiting, error tracking endpoint, chart optimization, visual E2E)
 
