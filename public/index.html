@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HashWatch — Real-Time BitAxe Miner Monitoring</title>
+  <meta name="description" content="Monitor your BitAxe miners in real-time. Track hashrate, temperature, power draw, and pool performance from a single dashboard. Free & open source.">
+  <meta property="og:title" content="HashWatch — Real-Time BitAxe Miner Monitoring">
+  <meta property="og:description" content="Monitor your BitAxe miners in real-time. Track hashrate, temperature, power, and pool performance.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hashwatch.vercel.app">
+  <meta property="og:image" content="https://hashwatch.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HashWatch — Real-Time BitAxe Miner Monitoring">
+  <meta name="twitter:description" content="Monitor your BitAxe miners in real-time. Track hashrate, temperature, power, and pool performance.">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <h1>Monitor Your BitAxe Miners<br>In Real-Time</h1>
+      <p>Track hashrate, temperature, power draw, and pool performance across multiple miners from a single beautiful dashboard.</p>
+      <div class="buttons">
+        <a href="/app" class="primary">Launch Dashboard →</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank" class="secondary">⭐ Star on GitHub</a>
+      </div>
+    </section>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="number">14</div>
+        <div class="label">Themes</div>
+      </div>
+      <div class="stat">
+        <div class="number">6</div>
+        <div class="label">Languages</div>
+      </div>
+      <div class="stat">
+        <div class="number">1800+</div>
+        <div class="label">Tests</div>
+      </div>
+      <div class="stat">
+        <div class="number">100%</div>
+        <div class="label">Open Source</div>
+      </div>
+    </div>
+
+    <section id="features">
+      <h2>Everything You Need</h2>
+      <p class="subtitle">From real-time monitoring to predictive maintenance, HashWatch has you covered.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h3>Live Dashboard</h3>
+          <p>Real-time hashrate, temperature, power, and efficiency metrics with skeleton loading and auto-refresh.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📈</div>
+          <h3>Analytics</h3>
+          <p>Historical charts with 1h/24h/7d/30d range selectors. Hashrate, temperature, power, voltage, and fan speed trends.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔔</div>
+          <h3>Smart Alerts</h3>
+          <p>Configurable thresholds for temperature, hashrate drop, share rejection, and offline reminders per miner.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎨</div>
+          <h3>14 Themes</h3>
+          <p>Dark, light, neon, matrix, Nord, Dracula, Catppuccin, Rose Pine, and custom theme editor with hex input.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">👥</div>
+          <h3>Groups & Teams</h3>
+          <p>Organize miners into groups with auto-assign rules. Share with team members with role-based access.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔄</div>
+          <h3>Firmware OTA</h3>
+          <p>Batch firmware flashing with per-miner progress tracking and version checking against latest releases.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌙</div>
+          <h3>Dark Pool</h3>
+          <p>Anonymous hashrate contribution with aggregate network stats, pool/region breakdown, and contribution history.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">💰</div>
+          <h3>Pool Analytics</h3>
+          <p>Braiins and Luxor API integration for real earnings, luck, payout tracking, and break-even analysis.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🤖</div>
+          <h3>AI Anomaly Detection</h3>
+          <p>Hashrate decline, temperature spikes, voltage issues, failure probability, and health trend analysis.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📱</div>
+          <h3>Cross-Platform</h3>
+          <p>iOS, Android, Web (PWA), and Desktop (Electron). One codebase, everywhere.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌍</div>
+          <h3>i18n</h3>
+          <p>Full localization in English, Spanish, French, German, Japanese, and Chinese.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <h3>Security First</h3>
+          <p>JWT auth, SSRF protection, rate limiting, input validation, and encrypted local storage.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <h2>Simple Pricing</h2>
+      <p class="subtitle">Start free, upgrade when you need more.</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <div class="period">forever</div>
+          <ul>
+            <li>Up to 4 miners</li>
+            <li>Live dashboard</li>
+            <li>Basic statistics</li>
+            <li>Push alerts</li>
+            <li>14 themes</li>
+          </ul>
+          <a href="/app" class="cta secondary">Get Started</a>
+        </div>
+        <div class="price-card popular">
+          <div class="badge">Best Value</div>
+          <h3>Pro</h3>
+          <div class="price">$4.99</div>
+          <div class="period">per month</div>
+          <ul>
+            <li>Unlimited miners</li>
+            <li>30-day historical charts</li>
+            <li>Push notifications</li>
+            <li>Multi-wallet tracking</li>
+            <li>Dark pool access</li>
+            <li>Firmware OTA updates</li>
+            <li>AI anomaly detection</li>
+            <li>Team collaboration</li>
+          </ul>
+          <a href="/app" class="cta primary">Start Free Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Open Source</h2>
+      <p class="subtitle">Built in the open. Contributions welcome.</p>
+      <div style="text-align:center">
+        <a href="https://github.com/aktheman/hashwatch" target="_blank" class="hero buttons primary" style="display:inline-flex;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;background:var(--gradient);color:#fff;">View on GitHub →</a>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-content">
+        <div class="copyright">© 2026 HashWatch. MIT License.</div>
+        <div class="footer-links">
+          <a href="/pricing">Pricing</a>
+          <a href="/support">Support</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
