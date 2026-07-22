@@ -52,8 +52,14 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
   platform TEXT NOT NULL,
   productId TEXT NOT NULL,
   expiresAt TIMESTAMP NOT NULL,
-  createdAt TIMESTAMP DEFAULT NOW()
+  createdAt TIMESTAMP DEFAULT NOW(),
+  "stripeSubscriptionId" TEXT,
+  "stripeCustomerId" TEXT,
+  "priceId" TEXT
 );
+ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" TEXT;
+ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS "stripeCustomerId" TEXT;
+ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS "priceId" TEXT;
 
 CREATE TABLE IF NOT EXISTS notification_prefs (
   userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

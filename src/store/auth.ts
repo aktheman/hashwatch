@@ -5,6 +5,7 @@ import { configureClient } from '../api/client';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import { setTokenGetter, notifyAuthLogin } from './authToken';
+import { identifyUser, resetUser } from '../services/posthog';
 
 const SYNCED_SETTINGS = [
   'theme_mode',
@@ -147,6 +148,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       notifyAuthLogin();
       syncSettingsFromBackend();
       pushSettingsToBackend();
+      identifyUser(res.userId, { email });
       return true;
     } catch {
       return false;
@@ -164,6 +166,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       notifyAuthLogin();
       syncSettingsFromBackend();
       pushSettingsToBackend();
+      identifyUser(res.userId, { email });
       return true;
     } catch {
       return false;
@@ -174,6 +177,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token = useAuthStore.getState().token;
     unregisterPushToken(token);
     disconnectWebSocket();
+    resetUser();
     set({ token: null, userId: null, email: null, synced: false });
     await DB.setSetting('auth_token', '');
     await DB.setSetting('auth_email', '');

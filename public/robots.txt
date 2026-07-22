@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /app/
 
-Sitemap: https://hashwatch.vercel.app/sitemap.xml
+Sitemap: https://hashwatch2.vercel.app/sitemap.xml

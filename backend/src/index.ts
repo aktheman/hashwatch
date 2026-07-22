@@ -38,7 +38,7 @@ import { marketplaceRouter } from './routes/marketplace';
 import { teamRouter } from './routes/teams';
 import { alertChannelsRouter } from './routes/alertChannels';
 import { botChannelsRouter } from './routes/botChannels';
-import { stripeRouter } from './routes/stripe';
+import { stripeRouter, stripeWebhookRouter } from './routes/stripe';
 import { log } from './logger';
 
 const app = express();
@@ -82,6 +82,7 @@ app.use(
     credentials: allowedOrigins.length > 0,
   }),
 );
+app.use('/api/stripe', stripeWebhookRouter);
 app.use(express.json({ limit: '1mb' }));
 
 const limiter = rateLimit({

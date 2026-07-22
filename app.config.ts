@@ -94,6 +94,8 @@ export default {
         'http://localhost:4000',
       revenuecatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '',
       revenuecatAndroidKey: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '',
+      posthogKey: process.env.EXPO_PUBLIC_POSTHOG_KEY || '',
+      posthogHost: process.env.EXPO_PUBLIC_POSTHOG_HOST || '',
     },
     runtimeVersion: {
       policy: 'appVersion',
