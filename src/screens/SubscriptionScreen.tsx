@@ -1,14 +1,34 @@
-import { useMemo } from 'react';
-import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useSubscriptionStore } from '../store/subscription';
 import { useTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
+import { createCheckoutSession, redirectToCheckout } from '../services/stripeWeb';
+
+const STRIPE_PRICE_ID = Platform.OS === 'web' ? 'price_pro_monthly' : undefined;
 
 export function SubscriptionScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { isPro, tier, loading, purchase, restore } = useSubscriptionStore();
+  const [stripeLoading, setStripeLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (Platform.OS === 'web' && STRIPE_PRICE_ID) {
+      setStripeLoading(true);
+      try {
+        const url = await createCheckoutSession(STRIPE_PRICE_ID);
+        redirectToCheckout(url);
+      } catch {
+        setStripeLoading(false);
+      }
+    } else {
+      purchase();
+    }
+  };
+
+  const isBusy = loading || stripeLoading;
 
   const styles = useMemo(
     () =>
@@ -218,11 +238,11 @@ export function SubscriptionScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Upgrade to Pro"
-            style={[styles.upgradeBtn, loading && styles.btnDisabled]}
-            onPress={purchase}
-            disabled={loading}
+            style={[styles.upgradeBtn, isBusy && styles.btnDisabled]}
+            onPress={handleUpgrade}
+            disabled={isBusy}
           >
-            {loading ? (
+            {isBusy ? (
               <ActivityIndicator size="small" color="#FFF" />
             ) : (
               <Text style={styles.upgradeBtnText}>{t('subscription.upgradeToPro')}</Text>
@@ -234,9 +254,9 @@ export function SubscriptionScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Restore Purchases"
-        style={[styles.restoreBtn, loading && styles.btnDisabled]}
+        style={[styles.restoreBtn, isBusy && styles.btnDisabled]}
         onPress={restore}
-        disabled={loading}
+        disabled={isBusy}
       >
         <Text style={styles.restoreBtnText}>{t('subscription.restorePurchases')}</Text>
       </Pressable>
