@@ -1,12 +1,8 @@
 import { Router } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { sendChannelNotification } from '../services/notifyChannels';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
+import { generateId } from '../utils/tokens';
 
 export const alertChannelsRouter = Router();
 
@@ -20,10 +16,6 @@ interface AlertChannel {
 
 const channels: Map<string, AlertChannel[]> = new Map();
 const MAX_CHANNELS_PER_USER = 100;
-
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 alertChannelsRouter.use(authMiddleware);
 

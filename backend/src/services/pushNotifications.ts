@@ -1,11 +1,6 @@
 import { query } from '../db';
 import { sendWebhook } from './webhook';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
 
 interface NotificationAction {
   action: string;

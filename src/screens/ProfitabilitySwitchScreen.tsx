@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Switch, Alert } from 'react-native';
 import { useTheme } from '../theme';
 import { useTranslation } from 'react-i18next';
@@ -6,8 +6,9 @@ import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { rankPoolsByProfitability } from '../utils/profitabilitySwitch';
 import type { PoolCandidate } from '../utils/profitabilitySwitch';
 import * as haptic from '../utils/haptics';
+import { fetchPoolAnalytics } from '../api/client';
 
-const MOCK_CANDIDATES: PoolCandidate[] = [
+const DEFAULT_CANDIDATES: PoolCandidate[] = [
   {
     name: 'Braiins Pool',
     url: 'stratum+tcp://stratum.braiins.com:3333',
@@ -56,21 +57,36 @@ interface SwitchRecord {
 export function ProfitabilitySwitchScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const [currentPool, setCurrentPool] = useState<string>(MOCK_CANDIDATES[0].name);
+  const [currentPool, setCurrentPool] = useState<string>(DEFAULT_CANDIDATES[0].name);
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [threshold, setThreshold] = useState(10);
   const [switchHistory, setSwitchHistory] = useState<SwitchRecord[]>([]);
   const [minerHashrate] = useState(0.5);
   const [btcPrice] = useState(65000);
+  const [candidates, setCandidates] = useState<PoolCandidate[]>(DEFAULT_CANDIDATES);
+
+  useEffect(() => {
+    fetchPoolAnalytics()
+      .then(({ stats }) => {
+        if (stats.length > 0) {
+          const merged = DEFAULT_CANDIDATES.map((c) => {
+            const live = stats.find((s) => s.provider.toLowerCase() === c.name.toLowerCase());
+            return live ? { ...c, luck: live.luck, hashrate: live.hashrate } : c;
+          });
+          setCandidates(merged);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const rankedPools = useMemo(
-    () => rankPoolsByProfitability(MOCK_CANDIDATES, minerHashrate, btcPrice),
-    [minerHashrate, btcPrice],
+    () => rankPoolsByProfitability(candidates, minerHashrate, btcPrice),
+    [candidates, minerHashrate, btcPrice],
   );
 
   const handleSwitch = useCallback(
     (targetName: string) => {
-      const target = MOCK_CANDIDATES.find((c) => c.name === targetName);
+      const target = candidates.find((c) => c.name === targetName);
       if (!target) return;
       Alert.alert(t('profitabilitySwitch.switchTo'), `Switch to ${target.name}?`, [
         { text: t('common.cancel'), style: 'cancel' },

@@ -38,12 +38,7 @@ import { marketplaceRouter } from './routes/marketplace';
 import { teamRouter } from './routes/teams';
 import { alertChannelsRouter } from './routes/alertChannels';
 import { botChannelsRouter } from './routes/botChannels';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from './logger';
 
 const app = express();
 const server = createServer(app);
@@ -51,7 +46,11 @@ createWebSocketServer(server, '/ws');
 
 const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
-  : undefined;
+  : [];
+
+if (allowedOrigins.length === 0) {
+  log.warn('CORS_ORIGINS not set — rejecting all cross-origin credentialed requests');
+}
 
 app.use(
   helmet({
@@ -78,8 +77,8 @@ app.use(
 );
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+    credentials: allowedOrigins.length > 0,
   }),
 );
 app.use(express.json({ limit: '1mb' }));

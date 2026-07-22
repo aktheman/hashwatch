@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { captureException } from './sentry';
-
-const log = {
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
+import { isAllowedUrl } from '../utils/ssrf';
 
 export interface BotChannel {
   id: string;
@@ -14,31 +12,12 @@ export interface BotChannel {
   createdAt: number;
 }
 
-function isPrivateHost(urlStr: string): boolean {
-  try {
-    const parsed = new URL(urlStr);
-    const host = parsed.hostname.toLowerCase();
-    if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0')
-      return true;
-    if (host.startsWith('10.') || host.startsWith('192.168.') || host.startsWith('172.')) {
-      const second = parseInt(host.split('.')[1] || '0', 10);
-      if (host.startsWith('172.') && (second < 16 || second > 31)) return false;
-      return true;
-    }
-    if (host === '169.254.169.254') return true;
-    if (host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.lan')) return true;
-    return false;
-  } catch {
-    return true;
-  }
-}
-
 export async function sendDiscordAlert(
   webhookUrl: string,
   title: string,
   message: string,
 ): Promise<void> {
-  if (isPrivateHost(webhookUrl)) return;
+  if (!(await isAllowedUrl(webhookUrl))) return;
   await axios.post(
     webhookUrl,
     {
@@ -60,7 +39,7 @@ export async function sendDiscordAlert(
 }
 
 export async function sendTelegramBotAlert(webhookUrl: string, message: string): Promise<void> {
-  if (isPrivateHost(webhookUrl)) return;
+  if (!(await isAllowedUrl(webhookUrl))) return;
   await axios.post(
     webhookUrl,
     {

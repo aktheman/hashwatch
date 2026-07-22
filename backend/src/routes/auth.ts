@@ -27,7 +27,7 @@ authRouter.post('/register', async (req, res) => {
       [email, password_hash],
     );
     const userId = result.rows[0].id;
-    const token = generateToken(userId);
+    const token = generateToken(userId, email);
     res.status(201).json({ token, userId });
   } catch (e: unknown) {
     if (e instanceof z.ZodError) {
@@ -50,7 +50,7 @@ authRouter.post('/login', async (req, res) => {
     if (!valid) {
       return res.status(401).json({ error: 'invalid credentials' });
     }
-    const token = generateToken(userId);
+    const token = generateToken(userId, email);
     res.json({ token, userId });
   } catch (e: unknown) {
     if (e instanceof z.ZodError) {
