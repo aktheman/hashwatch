@@ -3,10 +3,10 @@
   "outputDirectory": "dist",
   "framework": null,
   "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
-    { "source": "/app/(.*)", "destination": "/index.html" },
     { "source": "/app", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/app/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
