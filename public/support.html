@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support — HashWatch</title>
+  <meta name="description" content="Get help with HashWatch. FAQ, contact form, and community resources.">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <section class="hero" style="padding:60px 0 40px">
+      <h1>Support</h1>
+      <p>Need help? We're here for you.</p>
+    </section>
+
+    <section style="padding:0 0 60px">
+      <h2>Quick Links</h2>
+      <div class="features-grid" style="margin-top:40px">
+        <a href="https://github.com/aktheman/hashwatch/issues" target="_blank" class="feature-card" style="text-decoration:none;color:inherit">
+          <div class="icon">🐛</div>
+          <h3>Report a Bug</h3>
+          <p>Found a bug? Open an issue on GitHub and we'll look into it.</p>
+        </a>
+        <a href="https://github.com/aktheman/hashwatch/discussions" target="_blank" class="feature-card" style="text-decoration:none;color:inherit">
+          <div class="icon">💬</div>
+          <h3>Community</h3>
+          <p>Join discussions, share setups, and get help from other miners.</p>
+        </a>
+        <a href="https://github.com/aktheman/hashwatch#readme" target="_blank" class="feature-card" style="text-decoration:none;color:inherit">
+          <div class="icon">📖</div>
+          <h3>Documentation</h3>
+          <p>Setup guides, API docs, and architecture overview.</p>
+        </a>
+      </div>
+    </section>
+
+    <section style="padding:0 0 60px">
+      <h2>Frequently Asked Questions</h2>
+      <div style="max-width:700px;margin:40px auto 0">
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">How do I add my first miner?</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Open the app, tap the + button, and enter your miner's IP address. HashWatch will auto-discover it on your local network.</p>
+        </details>
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">My miner shows as offline</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Check that your miner is powered on and connected to the same network. Try pinging the IP address. If it's a new miner, it may take a few minutes to appear.</p>
+        </details>
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">How do push notifications work?</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">On mobile, HashWatch uses Expo push notifications. On web, it uses VAPID push. Enable notifications in Settings → Notifications.</p>
+        </details>
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">Can I self-host the backend?</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Yes! See the README for Docker setup instructions. You'll need PostgreSQL and Node.js 22+.</p>
+        </details>
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">How do I cancel my Pro subscription?</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">On iOS: Settings → Apple ID → Subscriptions. On Android: Play Store → Subscriptions. On web: Contact us.</p>
+        </details>
+      </div>
+    </section>
+
+    <section style="padding:0 0 80px">
+      <h2>Contact Us</h2>
+      <p class="subtitle">Have a question not covered above?</p>
+      <div style="max-width:500px;margin:0 auto;text-align:center">
+        <p style="color:var(--text-muted);margin-bottom:24px">Email us at <a href="mailto:support@hashwatch.app" style="color:var(--primary)">support@hashwatch.app</a></p>
+        <p style="color:var(--text-muted);font-size:14px">We typically respond within 24 hours on business days.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-content">
+        <div class="copyright">© 2026 HashWatch. MIT License.</div>
+        <div class="footer-links">
+          <a href="/">Home</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
