@@ -1,12 +1,20 @@
 import { Router } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { query } from '../db';
+import { log } from '../logger';
+import { generateToken } from '../utils/tokens';
 
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+const PUBLIC_RATE_LIMIT = 10;
+const PUBLIC_RATE_WINDOW_MS = 60_000;
+const publicRateBuckets = new Map<string, number[]>();
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamps] of publicRateBuckets) {
+    const valid = timestamps.filter((t) => now - t < PUBLIC_RATE_WINDOW_MS);
+    if (valid.length === 0) publicRateBuckets.delete(key);
+    else publicRateBuckets.set(key, valid);
+  }
+}).unref();
 
 interface PublicDashboardEntry {
   token: string;
@@ -16,18 +24,8 @@ interface PublicDashboardEntry {
 }
 
 const MAX_ENTRIES = 500;
-const TOKEN_LENGTH = 8;
-const TOKEN_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 const store = new Map<string, PublicDashboardEntry>();
-
-function generateToken(): string {
-  let token = '';
-  for (let i = 0; i < TOKEN_LENGTH; i++) {
-    token += TOKEN_CHARS.charAt(Math.floor(Math.random() * TOKEN_CHARS.length));
-  }
-  return token;
-}
 
 export const publicDashboardRouter = Router();
 
@@ -54,7 +52,7 @@ publicDashboardRouter.post('/', authMiddleware, async (req: AuthRequest, res) =>
         .json({ error: 'Share limit reached. Revoke an existing share first.' });
     }
 
-    const token = generateToken();
+    const token = generateToken(24);
     const entry: PublicDashboardEntry = {
       token,
       minerId,
@@ -71,10 +69,20 @@ publicDashboardRouter.post('/', authMiddleware, async (req: AuthRequest, res) =>
   }
 });
 
-// GET /api/public-dashboards/:token — get miner snapshot (no auth)
+// GET /api/public-dashboards/:token — get miner snapshot (no auth, rate-limited)
 publicDashboardRouter.get('/:token', async (req, res) => {
   try {
     const token = String(req.params.token);
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const timestamps = publicRateBuckets.get(ip) || [];
+    const recent = timestamps.filter((t) => now - t < PUBLIC_RATE_WINDOW_MS);
+    if (recent.length >= PUBLIC_RATE_LIMIT) {
+      return res.status(429).json({ error: 'too many requests' });
+    }
+    recent.push(now);
+    publicRateBuckets.set(ip, recent);
+
     const entry = store.get(token);
     if (!entry) {
       return res.status(404).json({ error: 'Share not found' });

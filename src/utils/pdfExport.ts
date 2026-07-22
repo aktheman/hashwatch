@@ -14,6 +14,15 @@ function formatNumber(n: number): string {
   return n.toFixed(1) + ' H/s';
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildHashrateChartSVG(data: number[]): string {
   if (data.length === 0) return '';
   const max = Math.max(...data, 1);
@@ -112,8 +121,8 @@ function generateHTML(data: ReportData, startDate: string, endDate: string): str
 <body>
   <div class="header">
     <div class="logo">HashWatch</div>
-    <h1>${miner.name}</h1>
-    <div class="subtitle">${miner.ip} · ${startDate} to ${endDate} · Generated ${new Date().toLocaleDateString()}</div>
+    <h1>${escapeHtml(miner.name)}</h1>
+    <div class="subtitle">${escapeHtml(miner.ip)} · ${startDate} to ${endDate} · Generated ${new Date().toLocaleDateString()}</div>
   </div>
 
   <h2>Statistics Summary</h2>

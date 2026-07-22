@@ -514,6 +514,13 @@ export function scheduleThemeSwitch(hour: number, mode: 'dark' | 'light') {
     scheduledMode = null;
     scheduleThemeSwitch(hour, mode);
   }, msUntil);
+  if (
+    typeof scheduleTimerId === 'object' &&
+    scheduleTimerId !== null &&
+    'unref' in scheduleTimerId
+  ) {
+    scheduleTimerId.unref();
+  }
 }
 
 export function clearThemeSchedule() {

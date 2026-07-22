@@ -4,12 +4,7 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { broadcast } from '../ws';
 import { checkMinerStatus } from '../services/minerMonitor';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
 
 export const statsRouter = Router();
 statsRouter.use(authMiddleware);

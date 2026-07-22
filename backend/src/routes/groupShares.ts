@@ -2,12 +2,7 @@ import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { invalidateCache } from '../middleware/cache';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
 
 export const groupSharesRouter = Router();
 groupSharesRouter.use(authMiddleware);

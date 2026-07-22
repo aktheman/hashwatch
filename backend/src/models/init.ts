@@ -1,12 +1,7 @@
 import { query } from '../db';
 import fs from 'fs';
 import path from 'path';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
 
 async function init() {
   const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');

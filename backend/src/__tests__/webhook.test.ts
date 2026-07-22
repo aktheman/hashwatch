@@ -1,6 +1,7 @@
 const mockQuery = jest.fn();
 jest.mock('../db', () => ({ query: mockQuery }));
 jest.mock('../services/sentry', () => ({ captureException: jest.fn() }));
+jest.mock('../utils/ssrf', () => ({ isAllowedUrl: jest.fn().mockResolvedValue(true) }));
 
 const mockPost = jest.fn();
 jest.mock('axios', () => ({
@@ -86,10 +87,13 @@ describe('sendWebhook', () => {
       timeout: 10_000,
       headers: { 'Content-Type': 'application/json' },
     });
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO webhook_logs'),
-      ['user-1', 'offline', 'https://hooks.example.com/alert', 'delivered', 200],
-    );
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO webhook_logs'), [
+      'user-1',
+      'offline',
+      'https://hooks.example.com/alert',
+      'delivered',
+      200,
+    ]);
   });
 
   it('logs failure when POST throws', async () => {
@@ -120,9 +124,8 @@ describe('deleteWebhookLogsForUser', () => {
 
     await deleteWebhookLogsForUser('user-1');
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      'DELETE FROM webhook_logs WHERE userId = $1',
-      ['user-1'],
-    );
+    expect(mockQuery).toHaveBeenCalledWith('DELETE FROM webhook_logs WHERE userId = $1', [
+      'user-1',
+    ]);
   });
 });

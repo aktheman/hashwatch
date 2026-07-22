@@ -1,20 +1,13 @@
 import { Router } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { sendBotAlert, BotChannel } from '../services/botNotifier';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
+import { generateId } from '../utils/tokens';
 
 export const botChannelsRouter = Router();
 
 const channels: Map<string, BotChannel[]> = new Map();
 const MAX_BOTS_PER_USER = 50;
-
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 botChannelsRouter.use(authMiddleware);
 

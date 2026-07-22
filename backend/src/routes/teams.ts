@@ -1,11 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-
-const log = {
-  info: (...args: unknown[]) => console.log('[INFO]', ...args),
-  warn: (...args: unknown[]) => console.warn('[WARN]', ...args),
-  error: (...args: unknown[]) => console.error('[ERROR]', ...args),
-};
+import { log } from '../logger';
+import { generateId } from '../utils/tokens';
 
 export const teamRouter = Router();
 
@@ -41,10 +37,6 @@ const invitations: Invitation[] = [];
 const MAX_TEAMS = 200;
 const MAX_MEMBERSHIPS = 2000;
 const MAX_INVITATIONS = 500;
-
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 function getUserMembership(teamId: string, userId: string): Membership | undefined {
   return memberships.find((m) => m.teamId === teamId && m.userId === userId);
@@ -116,7 +108,7 @@ teamRouter.get('/', async (req: AuthRequest, res) => {
       }));
 
     const pendingInvites = invitations.filter(
-      (inv) => inv.email === req.userId && inv.status === 'pending',
+      (inv) => inv.email === req.userEmail && inv.status === 'pending',
     );
 
     res.json({ teams: userTeams, invitations: pendingInvites });
@@ -147,7 +139,7 @@ teamRouter.post('/:id/invite', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Role must be "viewer" or "admin"' });
     }
 
-    const existingMember = memberships.find((m) => m.teamId === teamId && m.userId === email);
+    const existingMember = memberships.find((m) => m.teamId === teamId);
     if (existingMember) {
       return res.status(409).json({ error: 'User is already a member of this team' });
     }
@@ -188,7 +180,7 @@ teamRouter.post('/:id/accept', async (req: AuthRequest, res) => {
     const userId = req.userId as string;
 
     const pendingInvite = invitations.find(
-      (inv) => inv.teamId === teamId && inv.status === 'pending' && inv.email === userId,
+      (inv) => inv.teamId === teamId && inv.status === 'pending' && inv.email === req.userEmail,
     );
     if (!pendingInvite) {
       return res.status(404).json({ error: 'No pending invitation found' });
