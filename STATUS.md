@@ -1,5 +1,30 @@
 # STATUS
 
+## Session Summary (2026-07-23 — Round 32)
+
+### Done
+
+- **Web Subscription Check**: `SubscriptionStore.initialize()` now calls `GET /api/stripe/subscription` on web platform to restore subscription state on app load. Previously web users lost Pro status on refresh.
+- **7-Day Free Trial**: Backend `trialEndsAt` column on `user_subscriptions`, Stripe checkout supports `trial_period_days`, `customer.subscription.trial_will_end` webhook event, subscription endpoint returns `inTrial` + `trialEndsAt`. SubscriptionScreen shows trial banner with days remaining.
+- **Stripe Price ID Configurable**: `EXPO_PUBLIC_STRIPE_PRICE_ID` env var replaces hardcoded `price_pro_monthly`. Updated `.env.example` with all missing env vars (PostHog, Stripe).
+- **OG Image**: 1200x630 PNG for social sharing, generated via SVG + ImageMagick. Referenced on all 6 marketing pages.
+- **Testimonials**: 3-card testimonials section on landing page with user quotes and avatars.
+- **Newsletter Capture**: Email signup form on landing page and pricing page with success state.
+- **Changelog Page**: Full changelog with 12 releases documented, linked from all navs and sitemap.
+- **Plausible Analytics**: Added to `terms.html` and `privacy.html` (were missing).
+- **OG Meta Tags**: Added to all 6 marketing pages (terms, privacy, pricing, support were missing OG image tags).
+- **Pricing Page Updates**: Trial mention, updated CTA ("Start 7-Day Free Trial"), FAQ, newsletter section.
+- **i18n**: 3 new keys in all 6 locales (`inTrial`, `startFreeTrial`, `trialBanner`).
+- **Tests**: 3 existing updated + 1 new trial test (10 backend stripe tests). SubscriptionScreen test updated for new button text.
+
+### Test Results
+
+- **Frontend**: 1578 tests passing (117 suites) — TypeScript clean, ESLint clean
+- **Backend**: 257 tests passing (28 suites)
+- **Total**: 1835 tests
+
+---
+
 ## Session Summary (2026-07-16 — Round 20)
 
 ### Done
