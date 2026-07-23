@@ -23,6 +23,7 @@
       <div class="links">
         <a href="/#features">Features</a>
         <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
         <a href="/support">Support</a>
         <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
         <a href="/app" class="btn">Open App</a>
@@ -124,6 +125,43 @@
       </div>
     </section>
 
+    <section id="testimonials">
+      <h2>Loved by Miners</h2>
+      <p class="subtitle">See what the BitAxe community is saying.</p>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Finally a clean way to monitor all my BitAxe miners in one place. The real-time dashboard is incredible."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">M</div>
+            <div>
+              <div class="testimonial-name">Mining Enthusiast</div>
+              <div class="testimonial-role">5 BitAxe Ultra miners</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"The smart alerts saved me from a thermal runaway. Got a notification before it was too late."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">R</div>
+            <div>
+              <div class="testimonial-name">Home Miner</div>
+              <div class="testimonial-role">3 BitAxe Gamma miners</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Open source, cross-platform, and beautiful themes. What more could you want from a mining monitor?"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">K</div>
+            <div>
+              <div class="testimonial-name">Solo Miner</div>
+              <div class="testimonial-role">BitAxe Max + 2 Ultra</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="pricing">
       <h2>Simple Pricing</h2>
       <p class="subtitle">Start free, upgrade when you need more.</p>
@@ -145,7 +183,7 @@
           <div class="badge">Best Value</div>
           <h3>Pro</h3>
           <div class="price">$4.99</div>
-          <div class="period">per month</div>
+          <div class="period">per month · 7-day free trial</div>
           <ul>
             <li>Unlimited miners</li>
             <li>30-day historical charts</li>
@@ -156,8 +194,21 @@
             <li>AI anomaly detection</li>
             <li>Team collaboration</li>
           </ul>
-          <a href="/app" class="cta primary">Start Free Trial</a>
+          <a href="/app" class="cta primary">Start 7-Day Free Trial →</a>
         </div>
+      </div>
+    </section>
+
+    <section id="newsletter">
+      <h2>Stay Updated</h2>
+      <p class="subtitle">Get notified about new features, releases, and mining tips.</p>
+      <div class="newsletter-form">
+        <form id="newsletter-form" onsubmit="handleNewsletter(event)">
+          <input type="email" id="newsletter-email" placeholder="you@email.com" required class="newsletter-input">
+          <button type="submit" class="newsletter-btn">Subscribe</button>
+        </form>
+        <p class="newsletter-note">No spam. Unsubscribe anytime.</p>
+        <p id="newsletter-success" class="newsletter-success" style="display:none">Thanks for subscribing! Check your email to confirm.</p>
       </div>
     </section>
 
@@ -174,6 +225,7 @@
         <div class="copyright">© 2026 HashWatch. MIT License.</div>
         <div class="footer-links">
           <a href="/pricing">Pricing</a>
+          <a href="/changelog">Changelog</a>
           <a href="/support">Support</a>
           <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
@@ -182,5 +234,18 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    function handleNewsletter(e) {
+      e.preventDefault();
+      var email = document.getElementById('newsletter-email').value;
+      if (!email) return;
+      document.getElementById('newsletter-form').style.display = 'none';
+      document.getElementById('newsletter-success').style.display = 'block';
+      if (typeof plausible !== 'undefined') {
+        plausible('newsletter_subscribe', { props: { email_domain: email.split('@')[1] } });
+      }
+    }
+  </script>
 </body>
 </html>

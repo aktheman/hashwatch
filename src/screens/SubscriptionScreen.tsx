@@ -6,19 +6,20 @@ import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import { createCheckoutSession, redirectToCheckout } from '../services/stripeWeb';
 
-const STRIPE_PRICE_ID = Platform.OS === 'web' ? 'price_pro_monthly' : undefined;
+const STRIPE_PRICE_ID = process.env.EXPO_PUBLIC_STRIPE_PRICE_ID || 'price_pro_monthly';
+const TRIAL_PERIOD_DAYS = 7;
 
 export function SubscriptionScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { isPro, tier, loading, purchase, restore } = useSubscriptionStore();
+  const { isPro, tier, loading, purchase, restore, inTrial, trialEndsAt } = useSubscriptionStore();
   const [stripeLoading, setStripeLoading] = useState(false);
 
   const handleUpgrade = async () => {
     if (Platform.OS === 'web' && STRIPE_PRICE_ID) {
       setStripeLoading(true);
       try {
-        const url = await createCheckoutSession(STRIPE_PRICE_ID);
+        const url = await createCheckoutSession(STRIPE_PRICE_ID, TRIAL_PERIOD_DAYS);
         redirectToCheckout(url);
       } catch {
         setStripeLoading(false);
@@ -29,6 +30,17 @@ export function SubscriptionScreen() {
   };
 
   const isBusy = loading || stripeLoading;
+
+  const trialInfo = useMemo(() => {
+    if (!inTrial || !trialEndsAt) return null;
+    const end = new Date(trialEndsAt);
+    const now = new Date();
+    const daysLeft = Math.max(
+      0,
+      Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+    );
+    return { end, daysLeft };
+  }, [inTrial, trialEndsAt]);
 
   const styles = useMemo(
     () =>
@@ -57,6 +69,21 @@ export function SubscriptionScreen() {
           color: theme.textDim,
           fontSize: fontSize.base,
           marginTop: spacing.xs,
+          textAlign: 'center',
+        },
+        trialBanner: {
+          backgroundColor: theme.primary + '22',
+          borderRadius: radius.md,
+          padding: spacing.md,
+          marginBottom: spacing.md,
+          borderWidth: 1,
+          borderColor: theme.primary + '44',
+          alignItems: 'center',
+        },
+        trialText: {
+          color: theme.primary,
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
           textAlign: 'center',
         },
         planCard: {
@@ -185,7 +212,15 @@ export function SubscriptionScreen() {
         <Text style={styles.heroSub}>{t('subscription.subtitle')}</Text>
       </View>
 
-      <View style={[styles.planCard, tier === 'free' && styles.planCardActive]}>
+      {trialInfo && (
+        <View style={styles.trialBanner}>
+          <Text style={styles.trialText}>
+            {t('subscription.trialBanner', { days: trialInfo.daysLeft })}
+          </Text>
+        </View>
+      )}
+
+      <View style={[styles.planCard, tier === 'free' && !inTrial && styles.planCardActive]}>
         <View style={styles.planHeader}>
           <Text style={styles.planName} accessibilityRole="header">
             {t('subscription.free')}
@@ -201,7 +236,7 @@ export function SubscriptionScreen() {
             ),
           )}
         </View>
-        {tier === 'free' && (
+        {tier === 'free' && !inTrial && (
           <View style={styles.currentBadge}>
             <Text style={styles.currentBadgeText}>{t('subscription.current')}</Text>
           </View>
@@ -231,7 +266,7 @@ export function SubscriptionScreen() {
         {isPro ? (
           <View style={[styles.currentBadge, styles.activeBadge]}>
             <Text style={[styles.currentBadgeText, { color: theme.success }]}>
-              {t('subscription.active')}
+              {inTrial ? t('subscription.inTrial') : t('subscription.active')}
             </Text>
           </View>
         ) : (
@@ -245,7 +280,7 @@ export function SubscriptionScreen() {
             {isBusy ? (
               <ActivityIndicator size="small" color="#FFF" />
             ) : (
-              <Text style={styles.upgradeBtnText}>{t('subscription.upgradeToPro')}</Text>
+              <Text style={styles.upgradeBtnText}>{t('subscription.startFreeTrial')}</Text>
             )}
           </Pressable>
         )}

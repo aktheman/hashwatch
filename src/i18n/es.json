@@ -426,6 +426,9 @@
     "current": "Actual",
     "bestValue": "MEJOR VALOR",
     "active": "Activo",
+    "inTrial": "Prueba gratuita",
+    "startFreeTrial": "Iniciar prueba gratuita de 7 días",
+    "trialBanner": "{{days}} días restantes en tu prueba gratuita",
     "upgradeToPro": "Actualizar a Pro",
     "restorePurchases": "Restaurar Compras",
     "freeFeatures": [

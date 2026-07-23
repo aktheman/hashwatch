@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx expo export --platform web; cp -f public/*.html public/*.css public/robots.txt public/sitemap.xml dist/",
+  "buildCommand": "npx expo export --platform web; cp -f public/*.html public/*.css public/robots.txt public/sitemap.xml public/og-image.png dist/",
   "outputDirectory": "dist",
   "framework": null,
   "cleanUrls": true,

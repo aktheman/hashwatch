@@ -83,13 +83,15 @@ describe('stripeRouter', () => {
         .get('/api/stripe/subscription')
         .set('Authorization', authHeader());
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ active: false });
+      expect(res.body).toEqual({ active: false, inTrial: false });
     });
 
     it('returns active: true for valid subscription', async () => {
       const futureDate = new Date(Date.now() + 86400000).toISOString();
       mockQuery.mockResolvedValueOnce({
-        rows: [{ platform: 'stripe', productId: 'sub_123', expiresAt: futureDate }],
+        rows: [
+          { platform: 'stripe', productId: 'sub_123', expiresAt: futureDate, trialEndsAt: null },
+        ],
       });
       const res = await request(createStripeApp())
         .get('/api/stripe/subscription')
@@ -97,6 +99,8 @@ describe('stripeRouter', () => {
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
         active: true,
+        inTrial: false,
+        trialEndsAt: null,
         platform: 'stripe',
         productId: 'sub_123',
         expiresAt: futureDate,
@@ -106,7 +110,9 @@ describe('stripeRouter', () => {
     it('returns active: false for expired subscription', async () => {
       const pastDate = new Date(Date.now() - 86400000).toISOString();
       mockQuery.mockResolvedValueOnce({
-        rows: [{ platform: 'stripe', productId: 'sub_123', expiresAt: pastDate }],
+        rows: [
+          { platform: 'stripe', productId: 'sub_123', expiresAt: pastDate, trialEndsAt: null },
+        ],
       });
       const res = await request(createStripeApp())
         .get('/api/stripe/subscription')
@@ -114,10 +120,33 @@ describe('stripeRouter', () => {
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
         active: false,
+        inTrial: false,
+        trialEndsAt: null,
         platform: 'stripe',
         productId: 'sub_123',
         expiresAt: pastDate,
       });
+    });
+
+    it('returns inTrial: true when trial is active', async () => {
+      const futureDate = new Date(Date.now() + 86400000 * 30).toISOString();
+      const trialEnd = new Date(Date.now() + 86400000 * 5).toISOString();
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            platform: 'stripe',
+            productId: 'sub_123',
+            expiresAt: futureDate,
+            trialEndsAt: trialEnd,
+          },
+        ],
+      });
+      const res = await request(createStripeApp())
+        .get('/api/stripe/subscription')
+        .set('Authorization', authHeader());
+      expect(res.status).toBe(200);
+      expect(res.body.inTrial).toBe(true);
+      expect(res.body.trialEndsAt).toBe(trialEnd);
     });
   });
 });

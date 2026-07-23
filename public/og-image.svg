@@ -1,0 +1,20 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#12122a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="590" width="1200" height="4" fill="url(#accent)"/>
+  <text x="600" y="220" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="800" fill="url(#accent)" text-anchor="middle">HashWatch</text>
+  <text x="600" y="310" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="32" font-weight="400" fill="#a1a1aa" text-anchor="middle">Real-Time BitAxe Miner Monitoring</text>
+  <text x="600" y="380" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="400" fill="#71717a" text-anchor="middle">Track hashrate, temperature, power draw, and pool performance</text>
+  <rect x="420" y="420" width="360" height="56" rx="12" fill="url(#accent)" opacity="0.9"/>
+  <text x="600" y="456" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">hashwatch2.vercel.app</text>
+  <text x="600" y="560" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="400" fill="#52525b" text-anchor="middle">14 Themes  ·  6 Languages  ·  1800+ Tests  ·  100% Open Source</text>
+</svg>

@@ -9,6 +9,8 @@
   <meta property="og:description" content="Free for up to 4 miners, Pro at $4.99/mo for unlimited miners and premium features.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hashwatch2.vercel.app/pricing">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/styles.css">
   <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
 </head>
@@ -19,6 +21,7 @@
       <div class="links">
         <a href="/#features">Features</a>
         <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
         <a href="/support">Support</a>
         <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
         <a href="/app" class="btn">Open App</a>
@@ -52,7 +55,7 @@
           <div class="badge">Most Popular</div>
           <h3>Pro</h3>
           <div class="price">$4.99</div>
-          <div class="period">per month</div>
+          <div class="period">per month · 7-day free trial</div>
           <ul>
             <li><strong>Unlimited</strong> miners</li>
             <li>30-day historical charts</li>
@@ -66,7 +69,7 @@
             <li>Solar/renewable tracking</li>
             <li>Priority support</li>
           </ul>
-          <a href="/app" class="cta primary">Start 7-Day Free Trial</a>
+          <a href="/app" class="cta primary">Start 7-Day Free Trial →</a>
         </div>
       </div>
 
@@ -81,7 +84,7 @@
       <div style="max-width:700px;margin:40px auto 0">
         <details style="border-bottom:1px solid var(--border);padding:16px 0">
           <summary style="cursor:pointer;font-weight:600;font-size:16px">Can I try Pro before buying?</summary>
-          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Yes! Pro comes with a 7-day free trial. No charge until the trial ends, and you can cancel anytime.</p>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Yes! Pro comes with a 7-day free trial. No charge until the trial ends, and you can cancel anytime during the trial.</p>
         </details>
         <details style="border-bottom:1px solid var(--border);padding:16px 0">
           <summary style="cursor:pointer;font-weight:600;font-size:16px">What happens to my data if I downgrade?</summary>
@@ -99,6 +102,23 @@
           <summary style="cursor:pointer;font-weight:600;font-size:16px">How do I pay?</summary>
           <p style="margin-top:12px;color:var(--text-muted);font-size:14px">On mobile, pay via App Store / Google Play (in-app purchase). On web, pay via Stripe. Same subscription, synced across platforms.</p>
         </details>
+        <details style="border-bottom:1px solid var(--border);padding:16px 0">
+          <summary style="cursor:pointer;font-weight:600;font-size:16px">Can I switch between plans?</summary>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:14px">Absolutely. Upgrade from Free to Pro anytime. Downgrade from Pro to Free and keep your data — just with the 4-miner limit.</p>
+        </details>
+      </div>
+    </section>
+
+    <section id="newsletter" style="padding:0 0 80px">
+      <h2>Stay Updated</h2>
+      <p class="subtitle">Get notified about new features, releases, and mining tips.</p>
+      <div class="newsletter-form">
+        <form id="newsletter-form" onsubmit="handleNewsletter(event)">
+          <input type="email" id="newsletter-email" placeholder="you@email.com" required class="newsletter-input">
+          <button type="submit" class="newsletter-btn">Subscribe</button>
+        </form>
+        <p class="newsletter-note">No spam. Unsubscribe anytime.</p>
+        <p id="newsletter-success" class="newsletter-success" style="display:none">Thanks for subscribing! Check your email to confirm.</p>
       </div>
     </section>
 
@@ -107,6 +127,7 @@
         <div class="copyright">© 2026 HashWatch. MIT License.</div>
         <div class="footer-links">
           <a href="/">Home</a>
+          <a href="/changelog">Changelog</a>
           <a href="/support">Support</a>
           <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
@@ -114,5 +135,18 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    function handleNewsletter(e) {
+      e.preventDefault();
+      var email = document.getElementById('newsletter-email').value;
+      if (!email) return;
+      document.getElementById('newsletter-form').style.display = 'none';
+      document.getElementById('newsletter-success').style.display = 'block';
+      if (typeof plausible !== 'undefined') {
+        plausible('newsletter_subscribe', { props: { email_domain: email.split('@')[1] } });
+      }
+    }
+  </script>
 </body>
 </html>
