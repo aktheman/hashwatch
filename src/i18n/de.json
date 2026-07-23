@@ -426,6 +426,9 @@
     "current": "Aktuell",
     "bestValue": "BESTES PREIS-LEISTUNGS-VERHÄLTNIS",
     "active": "Aktiv",
+    "inTrial": "Kostenlose Testversion",
+    "startFreeTrial": "7-tägige kostenlose Testversion starten",
+    "trialBanner": "{{days}} Tage in Ihrer kostenlosen Testversion verbleibend",
     "upgradeToPro": "Auf Pro upgraden",
     "restorePurchases": "Käufe wiederherstellen",
     "freeFeatures": [

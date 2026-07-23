@@ -15,6 +15,7 @@ const WEBHOOK_EVENTS_HANDLED = [
   'checkout.session.completed',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'customer.subscription.trial_will_end',
 ] as const;
 
 const stripeWebhookRouter = Router();
@@ -88,18 +89,29 @@ stripeWebhookRouter.post(
         const customerId = data.customer;
         const priceId = data.line_items?.data?.[0]?.price?.id || null;
         const expiresAt = new Date(data.expires_at * 1000).toISOString();
+        const trialEnd = data.subscription_details?.trial_end;
+        const trialEndsAt = trialEnd ? new Date(trialEnd * 1000).toISOString() : null;
 
         await query(
-          `INSERT INTO user_subscriptions (userId, platform, productId, expiresAt, "stripeSubscriptionId", "stripeCustomerId", "priceId")
-         VALUES ($1, 'stripe', $2, $3, $4, $5, $6)
+          `INSERT INTO user_subscriptions (userId, platform, productId, expiresAt, "stripeSubscriptionId", "stripeCustomerId", "priceId", "trialEndsAt")
+         VALUES ($1, 'stripe', $2, $3, $4, $5, $6, $7)
          ON CONFLICT (userId) DO UPDATE SET
            platform = 'stripe',
            productId = EXCLUDED.productId,
            expiresAt = EXCLUDED.expiresAt,
            "stripeSubscriptionId" = EXCLUDED."stripeSubscriptionId",
            "stripeCustomerId" = EXCLUDED."stripeCustomerId",
-           "priceId" = EXCLUDED."priceId"`,
-          [userId, subscriptionId || 'stripe_pro', expiresAt, subscriptionId, customerId, priceId],
+           "priceId" = EXCLUDED."priceId",
+           "trialEndsAt" = EXCLUDED."trialEndsAt"`,
+          [
+            userId,
+            subscriptionId || 'stripe_pro',
+            expiresAt,
+            subscriptionId,
+            customerId,
+            priceId,
+            trialEndsAt,
+          ],
         );
 
         log.info('Stripe checkout completed', { userId, subscriptionId });
@@ -109,10 +121,19 @@ stripeWebhookRouter.post(
         const currentPeriodEnd = new Date(data.current_period_end * 1000).toISOString();
 
         if (status === 'active') {
-          await query(
-            `UPDATE user_subscriptions SET expiresAt = $1 WHERE "stripeSubscriptionId" = $2`,
-            [currentPeriodEnd, subscriptionId],
-          );
+          const trialEnd = data.trial_end;
+          const trialEndsAt = trialEnd ? new Date(trialEnd * 1000).toISOString() : null;
+          if (trialEndsAt) {
+            await query(
+              `UPDATE user_subscriptions SET expiresAt = $1, "trialEndsAt" = $2 WHERE "stripeSubscriptionId" = $3`,
+              [currentPeriodEnd, trialEndsAt, subscriptionId],
+            );
+          } else {
+            await query(
+              `UPDATE user_subscriptions SET expiresAt = $1, "trialEndsAt" = NULL WHERE "stripeSubscriptionId" = $2`,
+              [currentPeriodEnd, subscriptionId],
+            );
+          }
           log.info('Stripe subscription updated (active)', { subscriptionId });
         } else if (status === 'past_due' || status === 'canceled' || status === 'unpaid') {
           await query(
@@ -121,6 +142,9 @@ stripeWebhookRouter.post(
           );
           log.info('Stripe subscription updated (expired)', { subscriptionId, status });
         }
+      } else if (eventType === 'customer.subscription.trial_will_end') {
+        const subscriptionId = data.id;
+        log.info('Stripe trial will end soon', { subscriptionId });
       } else if (eventType === 'customer.subscription.deleted') {
         const subscriptionId = data.id;
         await query(
@@ -155,21 +179,27 @@ stripeRouter.post('/create-checkout-session', async (req: AuthRequest, res) => {
     }
 
     const origin = req.headers.origin || 'https://hashwatch2.vercel.app';
+    const trialPeriodDays = req.body.trialPeriodDays;
+    const params: Record<string, string> = {
+      mode: 'subscription',
+      'line_items[0][price]': priceId,
+      'line_items[0][quantity]': '1',
+      success_url: `${origin}/app?upgraded=true`,
+      cancel_url: `${origin}/app`,
+      'metadata[userId]': userId,
+      'subscription_data[metadata][userId]': userId,
+    };
+    if (trialPeriodDays && typeof trialPeriodDays === 'number' && trialPeriodDays > 0) {
+      params['subscription_data[trial_period_days]'] = String(trialPeriodDays);
+    }
+
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${getStripeKey()}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        mode: 'subscription',
-        'line_items[0][price]': priceId,
-        'line_items[0][quantity]': '1',
-        success_url: `${origin}/app?upgraded=true`,
-        cancel_url: `${origin}/app`,
-        'metadata[userId]': userId,
-        'subscription_data[metadata][userId]': userId,
-      }).toString(),
+      body: new URLSearchParams(params).toString(),
     });
 
     const session = await response.json();
@@ -194,12 +224,19 @@ stripeRouter.get('/subscription', async (req: AuthRequest, res) => {
 
     const sub = result.rows?.[0];
     if (!sub) {
-      return res.json({ active: false });
+      return res.json({ active: false, inTrial: false });
     }
 
-    const isExpired = new Date(sub.expiresAt) < new Date();
+    const now = new Date();
+    const expiresAt = new Date(sub.expiresAt);
+    const isExpired = expiresAt < now;
+    const trialEndsAt = sub.trialEndsAt ? new Date(sub.trialEndsAt) : null;
+    const inTrial = trialEndsAt !== null && trialEndsAt > now;
+
     res.json({
       active: !isExpired,
+      inTrial,
+      trialEndsAt: sub.trialEndsAt || null,
       platform: sub.platform,
       productId: sub.productId,
       expiresAt: sub.expiresAt,

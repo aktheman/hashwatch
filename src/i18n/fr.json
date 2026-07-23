@@ -426,6 +426,9 @@
     "current": "Actuel",
     "bestValue": "MEILLEUR RAPPORT QUALITÉ-PRIX",
     "active": "Actif",
+    "inTrial": "Essai gratuit",
+    "startFreeTrial": "Commencer l'essai gratuit de 7 jours",
+    "trialBanner": "{{days}} jours restants dans votre essai gratuit",
     "upgradeToPro": "Passer à Pro",
     "restorePurchases": "Restaurer les achats",
     "freeFeatures": [

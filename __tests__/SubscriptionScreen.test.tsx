@@ -32,7 +32,7 @@ it('renders free and pro plans', async () => {
 
 it('shows upgrade button for free users', async () => {
   await render(<SubscriptionScreen />);
-  expect(screen.getByText('subscription.upgradeToPro')).toBeTruthy();
+  expect(screen.getByText('subscription.startFreeTrial')).toBeTruthy();
 });
 
 it('shows restore purchases button', async () => {
@@ -45,7 +45,7 @@ it('shows Active badge for pro users', async () => {
 
   await render(<SubscriptionScreen />);
   expect(screen.getByText('subscription.active')).toBeTruthy();
-  expect(screen.queryByText('subscription.upgradeToPro')).toBeNull();
+  expect(screen.queryByText('subscription.startFreeTrial')).toBeNull();
 });
 
 it('displays feature list', async () => {

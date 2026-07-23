@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import { SubscriptionTier } from '../types';
 import {
   configureRevenueCat,
@@ -7,11 +8,20 @@ import {
   checkProStatus,
   listenForProChanges,
 } from '../services/revenuecat';
-import { validateReceipt } from '../api/client';
+import { validateReceipt, apiClient } from '../api/client';
 import { getAuthToken } from './authToken';
 
 const FREE_MAX_MINERS = 4;
 const PRO_MAX_MINERS = 999;
+
+interface StripeSubscriptionResponse {
+  active: boolean;
+  inTrial: boolean;
+  trialEndsAt: string | null;
+  platform?: string;
+  productId?: string;
+  expiresAt?: string;
+}
 
 interface SubscriptionStore {
   tier: SubscriptionTier;
@@ -19,6 +29,8 @@ interface SubscriptionStore {
   maxMiners: number;
   initialized: boolean;
   loading: boolean;
+  inTrial: boolean;
+  trialEndsAt: string | null;
 
   initialize: () => Promise<void>;
   purchase: () => Promise<boolean>;
@@ -28,15 +40,43 @@ interface SubscriptionStore {
   canAddMiner: (currentCount: number) => boolean;
 }
 
+async function checkStripeSubscription(): Promise<StripeSubscriptionResponse | null> {
+  try {
+    if (!getAuthToken()) return null;
+    const res = await apiClient.get<StripeSubscriptionResponse>('/api/stripe/subscription');
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
 export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
   tier: 'free',
   isPro: false,
   maxMiners: FREE_MAX_MINERS,
   initialized: false,
   loading: false,
+  inTrial: false,
+  trialEndsAt: null,
 
   initialize: async () => {
     try {
+      if (Platform.OS === 'web') {
+        const stripeSub = await checkStripeSubscription();
+        if (stripeSub) {
+          const isProStatus = stripeSub.active || stripeSub.inTrial;
+          set({
+            isPro: isProStatus,
+            tier: isProStatus ? 'pro' : 'free',
+            maxMiners: isProStatus ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+            inTrial: stripeSub.inTrial,
+            trialEndsAt: stripeSub.trialEndsAt,
+            initialized: true,
+          });
+          return;
+        }
+      }
+
       await configureRevenueCat();
       const pro = await checkProStatus();
       set({
@@ -89,6 +129,22 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
   restore: async () => {
     set({ loading: true });
     try {
+      if (Platform.OS === 'web') {
+        const stripeSub = await checkStripeSubscription();
+        if (stripeSub) {
+          const isProStatus = stripeSub.active || stripeSub.inTrial;
+          set({
+            isPro: isProStatus,
+            tier: isProStatus ? 'pro' : 'free',
+            maxMiners: isProStatus ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+            inTrial: stripeSub.inTrial,
+            trialEndsAt: stripeSub.trialEndsAt,
+            loading: false,
+          });
+          return isProStatus;
+        }
+      }
+
       const customerInfo = await restorePurchases();
       if (!customerInfo) {
         set({ loading: false });

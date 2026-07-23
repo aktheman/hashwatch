@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — HashWatch</title>
+  <meta name="description" content="HashWatch changelog. See what's new in each release.">
+  <meta property="og:title" content="Changelog — HashWatch">
+  <meta property="og:description" content="See what's new in each HashWatch release.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hashwatch2.vercel.app/changelog">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <section class="hero" style="padding:60px 0 40px">
+      <h1>Changelog</h1>
+      <p>See what's new in each HashWatch release.</p>
+    </section>
+
+    <section style="padding:0 0 80px;max-width:800px;margin:0 auto">
+      <div class="changelog-entry">
+        <div class="changelog-date">July 22, 2026</div>
+        <h3 class="changelog-version">v1.0.1 — Stripe Web Payments</h3>
+        <ul class="changelog-list">
+          <li>Stripe web checkout — subscribe directly from the browser</li>
+          <li>7-day free trial for new Pro subscribers</li>
+          <li>PostHog analytics for user behavior insights</li>
+          <li>Landing page with features, pricing, and testimonials</li>
+          <li>SEO: sitemap, robots.txt, Open Graph tags</li>
+          <li>Privacy Policy and Terms of Service pages</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 21, 2026</div>
+        <h3 class="changelog-version">v1.0.0 — AI & Teams</h3>
+        <ul class="changelog-list">
+          <li>AI Anomaly Detection — predict hashrate decline, temp spikes, and failures</li>
+          <li>Team/Org Plans — create teams, invite members, role-based access</li>
+          <li>Miner Marketplace — buy/sell used BitAxe miners</li>
+          <li>Discord & Telegram Bot mirroring for alerts</li>
+          <li>Multi-Pool Profitability Switching with composite scoring</li>
+          <li>Solar/Renewable Energy Tracking for green miners</li>
+          <li>Contributor Leaderboard with GitHub integration</li>
+          <li>Public Dashboard Sharing — share read-only miner stats</li>
+          <li>Alert SMS/Telegram Integration</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 20, 2026</div>
+        <h3 class="changelog-version">v0.27 — Rate Limiting & Performance</h3>
+        <ul class="changelog-list">
+          <li>Sliding window rate limiting (login, register, dark pool, general API)</li>
+          <li>Backend error tracking endpoint for client errors</li>
+          <li>Shared chart configuration — 5 chart components refactored</li>
+          <li>Visual regression E2E tests with Playwright screenshots</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 19, 2026</div>
+        <h3 class="changelog-version">v0.26 — Subscription Gating & E2E</h3>
+        <ul class="changelog-list">
+          <li>FeatureGate component — Pro features behind subscription</li>
+          <li>Error tracking with batch queue and API flush</li>
+          <li>6 chart components lazy-loaded for faster initial render</li>
+          <li>E2E tests expanded to 19 Playwright tests</li>
+          <li>Lighthouse CI — performance, accessibility, best practices, SEO</li>
+          <li>ARCHITECTURE.md — project structure and data flow docs</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 18, 2026</div>
+        <h3 class="changelog-version">v0.25 — WebSocket & PWA</h3>
+        <ul class="changelog-list">
+          <li>WebSocket auto-connect — polling extends to 5min when WS active</li>
+          <li>RevenueCat initialization on app restore</li>
+          <li>Native data downsampling — 7-30 day snapshots aggregated hourly</li>
+          <li>PWA background sync — service worker reconnect on tag fire</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 17, 2026</div>
+        <h3 class="changelog-version">v0.24 — Notifications & PWA Polish</h3>
+        <ul class="changelog-list">
+          <li>Notification batching — alerts within 2s grouped into summary</li>
+          <li>Per-miner CSV export from MinerDetailScreen</li>
+          <li>PWA install prompt — bottom banner with dismissible per-session</li>
+          <li>Theme marketplace — browse, import, and share community themes</li>
+          <li>Service worker v3 — stale-while-revalidate caching</li>
+          <li>Data retention UI — 1-90 day picker for snapshot cleanup</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 16, 2026</div>
+        <h3 class="changelog-version">v0.22 — Health Scores & Auto-Switching</h3>
+        <ul class="changelog-list">
+          <li>Health Score UI — grade badge + factor breakdown per miner</li>
+          <li>Pool Recommendations — collapsible section in DashboardScreen</li>
+          <li>Auto-pool-switching — opt-in in SettingsScreen</li>
+          <li>Sentry + Analytics integration (no-op until DSN configured)</li>
+          <li>Full documentation: README.md, CONTRIBUTING.md, API.md</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 16, 2026</div>
+        <h3 class="changelog-version">v0.20 — Firmware OTA & Dark Pool</h3>
+        <ul class="changelog-list">
+          <li>Firmware OTA Screen — batch flash, per-miner progress, version checking</li>
+          <li>Dark Pool — anonymous hashrate contribution with network stats</li>
+          <li>Smart Alerts — share rejection slider, reset to defaults</li>
+          <li>Profitability Dashboard — pool earnings comparison, break-even analysis</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 15, 2026</div>
+        <h3 class="changelog-version">v0.17 — Custom Themes</h3>
+        <ul class="changelog-list">
+          <li>Theme Picker Redesign — 2-column grid with color swatches</li>
+          <li>Theme Preview Modal — full preview before applying</li>
+          <li>Custom Themes Backend — CRUD API, max 20 per user</li>
+          <li>Custom Theme Editor — tabbed color editor with hex input</li>
+          <li>Theme Sharing — export/import custom themes as JSON</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 15, 2026</div>
+        <h3 class="changelog-version">v0.16 — 4 New Themes</h3>
+        <ul class="changelog-list">
+          <li>Nord, Dracula, Catppuccin, and Rose Pine themes added (14 total)</li>
+          <li>All themes validated for contrast and readability</li>
+          <li>Theme names translated in all 6 locales</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 14, 2026</div>
+        <h3 class="changelog-version">v0.14 — Security & Performance</h3>
+        <ul class="changelog-list">
+          <li>Crash bug fixes — malformed DB data, network errors handled gracefully</li>
+          <li>Timer .unref() compliance — prevent Jest worker leaks</li>
+          <li>Backend input validation on all 8 route files</li>
+          <li>React.memo on 13 chart/display components</li>
+          <li>Accessibility labels on 12 components</li>
+          <li>CI pipeline optimization — npm caching, security fixes</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 14, 2026</div>
+        <h3 class="changelog-version">v0.13 — Pool Analytics & Teams</h3>
+        <ul class="changelog-list">
+          <li>Pool Analytics — Braiins/Luxor API integration for real earnings</li>
+          <li>Multi-user/Team Sharing — share miner groups with other users</li>
+          <li>Custom Dashboards — user-configurable widget layout</li>
+          <li>Firmware OTA Updates — push BitAxe firmware from the app</li>
+          <li>Dark/Light Auto-Scheduling — auto-switch theme by time of day</li>
+          <li>Export Reports — PDF/CSV export of miner performance</li>
+          <li>Health Scoring — predictive maintenance with 5 prediction types</li>
+          <li>Mobile Polish — haptics, live activities, dynamic island</li>
+        </ul>
+      </div>
+
+      <div class="changelog-entry">
+        <div class="changelog-date">July 10, 2026</div>
+        <h3 class="changelog-version">v0.10 — Groups, Webhooks, Docker</h3>
+        <ul class="changelog-list">
+          <li>Auto-assign rules — regex-based miner-to-group assignment</li>
+          <li>Backend webhooks — HTTP delivery on miner alerts</li>
+          <li>Backend caching — in-memory cache with TTL + prefix invalidation</li>
+          <li>Docker support — multi-stage Dockerfile + docker-compose.yml</li>
+          <li>i18n completion — all hardcoded strings replaced with translation keys</li>
+          <li>Markdown notes — rich-text rendering in miner notes</li>
+          <li>Web push registration — VAPID-based browser push</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-content">
+        <div class="copyright">© 2026 HashWatch. MIT License.</div>
+        <div class="footer-links">
+          <a href="/">Home</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/support">Support</a>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
