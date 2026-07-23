@@ -216,7 +216,7 @@ it('navigates to Pools tab', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.pools'));
+  await fireEvent.press(screen.getByText('tabs.pools'));
   expect(await screen.findByText('pools.noPools', {}, { timeout: 15000 })).toBeTruthy();
 });
 
@@ -227,7 +227,7 @@ it('navigates to Analytics tab', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.analytics'));
+  await fireEvent.press(screen.getByText('tabs.analytics'));
   expect(await screen.findByText('analytics.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
@@ -238,7 +238,7 @@ it('navigates to Settings tab', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.settings'));
+  await fireEvent.press(screen.getByText('tabs.settings'));
   expect(await screen.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
@@ -249,9 +249,9 @@ it('navigates to Subscription screen from Settings', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.settings'));
+  await fireEvent.press(screen.getByText('tabs.settings'));
   await screen.findByText('settings.title', {}, { timeout: 15000 });
-  fireEvent.press(screen.getByText('settings.plan'));
+  await fireEvent.press(screen.getByText('settings.plan'));
   expect(await screen.findByText('subscription.title', {}, { timeout: 15000 })).toBeTruthy();
 });
 
@@ -262,8 +262,8 @@ it('navigates to AddMiner screen', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('dashboard.addMiner'));
-  expect(await screen.findByText(/addMiner/i)).toBeTruthy();
+  await fireEvent.press(screen.getByText('dashboard.addMiner'));
+  expect(await screen.findByText('addMiner.addByIp', {}, { timeout: 15000 })).toBeTruthy();
 });
 
 it('navigates to Wallets screen from Settings', async () => {
@@ -286,31 +286,10 @@ it('navigates to Groups screen from Settings', async () => {
   });
   await render(<AppNavigator />);
   expect(await screen.findByText('HashWatch')).toBeTruthy();
-  fireEvent.press(screen.getByText('tabs.settings'));
+  await fireEvent.press(screen.getByText('tabs.settings'));
   await screen.findByText('settings.title');
-  fireEvent.press(screen.getByText('settings.groups'));
+  await fireEvent.press(screen.getByText('settings.groups'));
   expect(await screen.findByText(/groups.title/)).toBeTruthy();
-});
-
-it('handles notification tap to navigate to MinerDetail', async () => {
-  (DB.getSetting as jest.Mock).mockImplementation(async (key: string) => {
-    if (key === 'onboarding_complete') return 'true';
-    return null;
-  });
-  await render(<AppNavigator />);
-  expect(await screen.findByText('HashWatch')).toBeTruthy();
-
-  const notifs = require('expo-notifications');
-  const listenerFn = notifs.addNotificationResponseReceivedListener.mock.calls[0][0];
-  listenerFn({
-    notification: {
-      request: {
-        content: {
-          data: { minerId: 'm1' },
-        },
-      },
-    },
-  });
 });
 
 it('handles notification tap to navigate to MinerDetail', async () => {
