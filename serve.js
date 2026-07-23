@@ -65,13 +65,13 @@ const server = http.createServer((req, res) => {
 
   // /app or /app/* → Expo SPA
   if (url === '/app' || url === '/app/') {
-    return htmlFallback(res, path.join(DIST, 'index.html'));
+    return htmlFallback(res, path.join(DIST, 'app.html'));
   }
   if (url.startsWith('/app/')) {
     const subPath = url.slice(5);
     const filePath = path.join(DIST, subPath);
     if (filePath.startsWith(DIST) && tryFile(res, filePath)) return;
-    return htmlFallback(res, path.join(DIST, 'index.html'));
+    return htmlFallback(res, path.join(DIST, 'app.html'));
   }
 
   // Try public/ directory first (marketing pages, assets)
@@ -89,7 +89,7 @@ const server = http.createServer((req, res) => {
   if (tryCleanUrl(res, DIST, url)) return;
 
   // SPA fallback
-  htmlFallback(res, path.join(DIST, 'index.html'));
+  htmlFallback(res, path.join(DIST, 'app.html'));
 });
 
 server.listen(PORT, () => console.log(`HashWatch serving on http://localhost:${PORT}`));
