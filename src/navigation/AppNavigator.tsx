@@ -143,6 +143,11 @@ const ProfitabilitySwitchScreen = lazy(() =>
     default: m.ProfitabilitySwitchScreen,
   })),
 );
+const FleetHealthScreen = lazy(() =>
+  import('../screens/FleetHealthScreen').then((m) => ({
+    default: m.FleetHealthScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -195,6 +200,7 @@ const WrappedContributors = withScreenBoundary(ContributorScreen);
 const WrappedAnomaly = withScreenBoundary(AnomalyScreen);
 const WrappedEnergy = withScreenBoundary(EnergyScreen);
 const WrappedProfitabilitySwitch = withScreenBoundary(ProfitabilitySwitchScreen);
+const WrappedFleetHealth = withScreenBoundary(FleetHealthScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -444,6 +450,11 @@ export function AppNavigator() {
           name="ProfitabilitySwitch"
           component={WrappedProfitabilitySwitch}
           options={{ title: t('profitabilitySwitch.title', 'Profitability Switching') }}
+        />
+        <Stack.Screen
+          name="FleetHealth"
+          component={WrappedFleetHealth}
+          options={{ title: t('fleetHealth.title', 'Fleet Health') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

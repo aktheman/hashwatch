@@ -834,29 +834,22 @@
     "poolUserPlaceholder": "Ingresa el usuario del pool"
   },
   "exportReport": {
-    "title": "Exportar Reporte",
+    "title": "Exportar Informe",
+    "selectMiner": "Seleccionar Minero",
     "dateRange": "Rango de Fechas",
-    "last24h": "Últimas 24h",
-    "last7d": "Últimos 7d",
-    "last30d": "Últimos 30d",
-    "custom": "Personalizado",
-    "miners": "Mineros",
-    "allMiners": "Todos los Mineros",
-    "selectMiners": "Seleccionar Mineros",
-    "sections": "Secciones",
-    "snapshots": "Instantáneas",
-    "earnings": "Ganancias",
-    "poolStats": "Estadísticas del Pool",
-    "health": "Salud",
-    "format": "Formato",
-    "csv": "CSV",
-    "json": "JSON",
-    "preview": "Vista Previa",
-    "exportButton": "Exportar Reporte",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "generate": "Generar Informe",
     "generating": "Generando...",
-    "exportSuccess": "Reporte exportado exitosamente",
-    "exportError": "Error al exportar reporte",
-    "noData": "Sin datos"
+    "download": "Descargar PDF",
+    "share": "Compartir Informe",
+    "preview": "Vista Previa del Informe",
+    "avgHashrate": "Hashrate Promedio",
+    "peakHashrate": "Hashrate Pico",
+    "avgTemp": "Temperatura Promedio",
+    "totalUptime": "Tiempo Activo Total",
+    "efficiency": "Eficiencia",
+    "reportGenerated": "¡Informe listo!"
   },
   "liveActivity": {
     "title": "Actividad en Vivo",
@@ -1026,24 +1019,6 @@
     "noChannels": "No hay canales de alerta configurados",
     "testSent": "Notificación de prueba enviada"
   },
-  "exportReport": {
-    "title": "Exportar Informe",
-    "selectMiner": "Seleccionar Minero",
-    "dateRange": "Rango de Fechas",
-    "startDate": "Fecha de Inicio",
-    "endDate": "Fecha de Fin",
-    "generate": "Generar Informe",
-    "generating": "Generando...",
-    "download": "Descargar PDF",
-    "share": "Compartir Informe",
-    "preview": "Vista Previa del Informe",
-    "avgHashrate": "Hashrate Promedio",
-    "peakHashrate": "Hashrate Pico",
-    "avgTemp": "Temperatura Promedio",
-    "totalUptime": "Tiempo Activo Total",
-    "efficiency": "Eficiencia",
-    "reportGenerated": "¡Informe listo!"
-  },
   "botChannels": {
     "title": "Canales de Bot",
     "addBot": "Agregar Canal de Bot",
@@ -1134,5 +1109,18 @@
     "reasons": "¿Por qué este pool?",
     "switchedAt": "Cambiado en",
     "betterProfitability": "Mayor rentabilidad detectada"
+  },
+  "fleetHealth": {
+    "title": "Salud de la Flota",
+    "noMiners": "Agregue mineros para ver el resumen de salud.",
+    "online": "En línea",
+    "offline": "Sin conexión",
+    "criticalAlerts": "Crítico",
+    "avgTemp": "Temp Prom",
+    "totalHashrate": "Total GH/s",
+    "totalMiners": "Mineros",
+    "gradeDistribution": "Distribución de Notas",
+    "minerList": "Mineros por Salud",
+    "score": "Puntuación"
   }
 }

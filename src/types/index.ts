@@ -113,6 +113,7 @@ export type RootStackParamList = {
   AnomalyDetection: undefined;
   Energy: undefined;
   ProfitabilitySwitch: undefined;
+  FleetHealth: undefined;
 };
 
 export type TabParamList = {

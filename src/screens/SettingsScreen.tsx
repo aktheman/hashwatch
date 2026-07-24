@@ -1410,6 +1410,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('fleetHealth.title', 'Fleet Health')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('FleetHealth');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('fleetHealth.title', 'Fleet Health')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t('anomalyDetection.title', 'Anomaly Detection')}
           style={styles.row}
           onPress={() => {
