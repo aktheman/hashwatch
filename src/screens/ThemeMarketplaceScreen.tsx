@@ -284,7 +284,12 @@ export function ThemeMarketplaceScreen() {
   });
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: spacing.xl }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: spacing.xl }}
+      accessibilityRole="list"
+      accessibilityLabel={t('marketplace.themeTitle', 'Theme Marketplace')}
+    >
       <Text style={styles.title}>{t('marketplace.themeTitle', 'Theme Marketplace')}</Text>
 
       <View style={styles.tabs}>

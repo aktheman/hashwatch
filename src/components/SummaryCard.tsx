@@ -48,7 +48,7 @@ export function SummaryCard({ icon, value, label, color, accent }: SummaryCardPr
   );
 
   return (
-    <View style={styles.card}>
+    <View style={styles.card} accessibilityRole="text" accessibilityLabel={`${label}: ${value}`}>
       {accent && (
         <View
           style={{
