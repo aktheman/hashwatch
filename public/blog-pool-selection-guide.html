@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Choose a Mining Pool — HashWatch Blog</title>
+  <meta name="description" content="Comparing pool fees, payout schemes, and reliability to maximize your Bitcoin mining revenue. Complete guide for BitAxe miners.">
+  <meta property="og:title" content="How to Choose a Mining Pool">
+  <meta property="og:description" content="Comparing pool fees, payout schemes, and reliability to maximize your mining revenue.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hashwatch2.vercel.app/blog/pool-selection-guide">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <div class="blog-content">
+      <a href="/blog" class="back-link">&larr; Back to Blog</a>
+
+      <article>
+        <span class="blog-tag">Strategy</span>
+        <h1 style="font-size:28px;margin:12px 0 8px;color:var(--text)">How to Choose a Mining Pool</h1>
+        <p class="blog-meta" style="margin-bottom:32px">July 2026 · 7 min read</p>
+
+        <h2>Why Join a Pool?</h2>
+        <p>Solo mining with a BitAxe is exciting — you have a chance (however small) of finding a block and earning 3.125 BTC. But for most miners, the math favors pool mining. A pool aggregates hashrate from many miners, providing steady, predictable payouts instead of the lottery-like odds of solo mining.</p>
+        <p>With a BitAxe at ~1.2 TH/s and network difficulty at ~100T, solo mining odds are roughly 1 in 8.3 billion per block. Pool mining turns that into a reliable stream of satoshis.</p>
+
+        <h2>Payout Schemes</h2>
+        <h3>PPS (Pay Per Share)</h3>
+        <p>The pool pays you a fixed amount for every valid share you submit, regardless of whether the pool finds a block. This provides the most predictable income but typically carries higher fees (2-4%).</p>
+        <h3>PPLNS (Pay Per Last N Shares)</h3>
+        <p>You're paid based on your contribution during a window of shares around when a block is found. Lower fees (0.5-2%) but more variance. Best for miners who stay connected consistently.</p>
+        <h3>PPS+ (Pay Per Share Plus)</h3>
+        <p>Combines PPS for block rewards with PPLNS for transaction fees. Offers PPS-like stability while also capturing tx fee income. A good middle ground.</p>
+        <h3>Solo Mining Pools</h3>
+        <p>Pools like Solo Satoshi take a small fee (1-2%) but give you the full block reward when you find one. The hashrate threshold for reasonable solo mining odds is around 1 TH/s — right in BitAxe territory.</p>
+
+        <h2>Top Pools for BitAxe Miners</h2>
+        <ul>
+          <li><strong>Braiins Pool</strong> — PPLNS, 2% fee. Excellent monitoring tools, supports Stratum V2. Great for educational miners.</li>
+          <li><strong>Solo Satoshi</strong> — Solo mining pool, 1% fee. If you want a shot at finding a block with your BitAxe, this is it.</li>
+          <li><strong>OCEAN</strong> — PPLNS, 2% fee. Transparent mining with full node visibility. Growing community.</li>
+          <li><strong>Foundry USA</strong> — PPLNS, 2% fee. Large pool with high uptime. Professional-grade infrastructure.</li>
+          <li><strong>Luxor</strong> — PPLNS, varies. Offers advanced features like difficulty adjustment and hashrate-based payouts.</li>
+        </ul>
+
+        <h2>Key Factors to Consider</h2>
+        <h3>1. Server Location</h3>
+        <p>Choose a pool with servers geographically close to you. Lower latency means fewer stale shares, which directly impacts your earnings. HashWatch tracks share rejection rates — if they're above 2%, try a closer server.</p>
+        <h3>2. Pool Size</h3>
+        <p>Larger pools find blocks more frequently but share rewards among more miners. Smaller pools find blocks less often but your share of each block is larger. For PPLNS, the expected return is theoretically the same — but variance is higher with smaller pools.</p>
+        <h3>3. Minimum Payout</h3>
+        <p>Some pools have minimum payout thresholds. For a BitAxe at ~1.2 TH/s, you might earn 500-2000 sats per day. Make sure the pool's minimum payout is achievable within a reasonable timeframe.</p>
+        <h3>4. Transparency</h3>
+        <p>Look for pools that publish their block finding statistics, fee structures, and payout calculations. Open-source pools are even better — you can verify the math yourself.</p>
+
+        <h2>Tracking Pool Performance with HashWatch</h2>
+        <p>HashWatch integrates with pool APIs to show you real-time earnings, luck, and payout tracking. You can:</p>
+        <ul>
+          <li>Compare actual vs expected earnings across different pools</li>
+          <li>Track pool luck over time to spot favorable or unfavorable streaks</li>
+          <li>Monitor share acceptance rates to catch latency issues early</li>
+          <li>Use the pool comparison tool to make data-driven decisions about which pool to use</li>
+        </ul>
+
+        <h2>Switching Pools</h2>
+        <p>Switching pools is easy — just update the Stratum URL in your BitAxe configuration. HashWatch recommends keeping a record of your earnings at each pool for at least 2 weeks before making a switch, as short-term variance can be misleading.</p>
+
+        <h2>Getting Started</h2>
+        <p>Not sure which pool is right for you? Start with one from the list above, mine for 2 weeks, and use HashWatch to track your earnings. Then try another and compare. <a href="/app" style="color:var(--primary)">Open HashWatch</a> to set up pool analytics.</p>
+      </article>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="copyright">&copy; 2026 HashWatch. MIT License.</div>
+      <div class="footer-links">
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

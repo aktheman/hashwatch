@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — HashWatch</title>
+  <meta name="description" content="HashWatch blog. Guides on Bitcoin ASIC mining, BitAxe optimization, and miner monitoring best practices.">
+  <meta property="og:title" content="Blog — HashWatch">
+  <meta property="og:description" content="Guides on Bitcoin ASIC mining, BitAxe optimization, and miner monitoring best practices.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hashwatch2.vercel.app/blog">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+  <script>
+    window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
+  </script>
+  <style>
+    .blog-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 32px; }
+    .blog-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: transform 0.2s, box-shadow 0.2s; }
+    .blog-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .blog-tag { display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 99px; background: rgba(108,99,255,0.15); color: var(--primary); margin-bottom: 12px; font-weight: 600; }
+    .blog-card h3 { margin: 0 0 8px; font-size: 18px; color: var(--text); }
+    .blog-card p { margin: 0 0 16px; color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+    .blog-meta { font-size: 12px; color: var(--text-muted); }
+    .blog-content { max-width: 720px; margin: 0 auto; }
+    .blog-content h2 { color: var(--text); font-size: 22px; margin: 48px 0 16px; }
+    .blog-content h3 { color: var(--text); font-size: 18px; margin: 32px 0 12px; }
+    .blog-content p { color: var(--text-dim); font-size: 15px; line-height: 1.8; margin-bottom: 16px; }
+    .blog-content ul { color: var(--text-dim); font-size: 15px; line-height: 1.8; margin-bottom: 16px; padding-left: 20px; }
+    .blog-content li { margin-bottom: 8px; }
+    .blog-content code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .blog-content a { color: var(--primary); }
+    .back-link { display: inline-block; margin-bottom: 24px; color: var(--primary); text-decoration: none; font-size: 14px; }
+    .back-link:hover { text-decoration: underline; }
+    @media (min-width: 640px) { .blog-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <!-- Blog index -->
+    <section id="blog-index">
+      <h1>Blog</h1>
+      <p class="subtitle">Guides on Bitcoin mining, BitAxe optimization, and miner monitoring.</p>
+      <div class="blog-grid">
+        <a href="/blog/getting-started-bitaxe" class="blog-card" style="text-decoration:none">
+          <span class="blog-tag">Beginner</span>
+          <h3>Getting Started with Your BitAxe Miner</h3>
+          <p>Everything you need to know to set up, configure, and optimize your BitAxe ASIC miner for maximum efficiency.</p>
+          <div class="blog-meta">July 2026 · 8 min read</div>
+        </a>
+        <a href="/blog/monitoring-best-practices" class="blog-card" style="text-decoration:none">
+          <span class="blog-tag">Guide</span>
+          <h3>Miner Monitoring Best Practices</h3>
+          <p>How to set up alerts, track performance, and catch issues before they become costly failures.</p>
+          <div class="blog-meta">July 2026 · 6 min read</div>
+        </a>
+        <a href="/blog/bitcoin-mining-efficiency" class="blog-card" style="text-decoration:none">
+          <span class="blog-tag">Technical</span>
+          <h3>Understanding Bitcoin Mining Efficiency</h3>
+          <p>Deep dive into J/TH efficiency, power optimization, and how to get the most from your hardware.</p>
+          <div class="blog-meta">July 2026 · 10 min read</div>
+        </a>
+        <a href="/blog/pool-selection-guide" class="blog-card" style="text-decoration:none">
+          <span class="blog-tag">Strategy</span>
+          <h3>How to Choose a Mining Pool</h3>
+          <p>Comparing pool fees, payout schemes, and reliability to maximize your mining revenue.</p>
+          <div class="blog-meta">July 2026 · 7 min read</div>
+        </a>
+      </div>
+    </section>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="copyright">&copy; 2026 HashWatch. MIT License.</div>
+      <div class="footer-links">
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

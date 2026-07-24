@@ -7,6 +7,8 @@
     { "src": "^/app(?:/(.*))?$", "dest": "/app.html" },
     { "src": "^/pricing$", "dest": "/pricing.html" },
     { "src": "^/changelog$", "dest": "/changelog.html" },
+    { "src": "^/blog$", "dest": "/blog.html" },
+    { "src": "^/blog/(.*)$", "dest": "/blog-$1.html" },
     { "src": "^/support$", "dest": "/support.html" },
     { "src": "^/terms$", "dest": "/terms.html" },
     { "src": "^/privacy$", "dest": "/privacy.html" },

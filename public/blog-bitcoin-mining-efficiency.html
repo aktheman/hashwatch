@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Bitcoin Mining Efficiency — HashWatch Blog</title>
+  <meta name="description" content="Deep dive into J/TH efficiency, power optimization, and how to get the most from your Bitcoin mining hardware.">
+  <meta property="og:title" content="Understanding Bitcoin Mining Efficiency">
+  <meta property="og:description" content="Deep dive into J/TH efficiency and power optimization for Bitcoin miners.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hashwatch2.vercel.app/blog/bitcoin-mining-efficiency">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <div class="blog-content">
+      <a href="/blog" class="back-link">&larr; Back to Blog</a>
+
+      <article>
+        <span class="blog-tag">Technical</span>
+        <h1 style="font-size:28px;margin:12px 0 8px;color:var(--text)">Understanding Bitcoin Mining Efficiency</h1>
+        <p class="blog-meta" style="margin-bottom:32px">July 2026 · 10 min read</p>
+
+        <h2>What is J/TH?</h2>
+        <p>Joules per Terahash (J/TH) is the standard measure of Bitcoin mining efficiency. It tells you how much energy is required to produce one terahash of computing power. Lower J/TH means better efficiency — you get more hashing for every watt of electricity.</p>
+        <p>For context, a modern Antminer S21 operates at around 15-17 J/TH, while the BitAxe with its BM1397 chip typically achieves 50-80 J/TH. The BitAxe isn't designed to compete with industrial miners on raw efficiency, but its compact size, low noise, and open-source nature make it ideal for home mining.</p>
+
+        <h2>The Efficiency Equation</h2>
+        <p>Mining efficiency is calculated as:</p>
+        <p style="background:var(--surface);padding:12px 16px;border-radius:8px;font-family:monospace;font-size:14px;color:var(--text)"><code>Efficiency = Power (W) / Hashrate (TH/s)</code></p>
+        <p>A BitAxe consuming 15W at 1.2 TH/s has an efficiency of 12.5 W/TH (or 12.5 J/TH). If you overclock to 1.5 TH/s but power draw increases to 20W, efficiency drops to 13.3 J/TH — more hashrate but less efficient.</p>
+
+        <h2>Factors Affecting Efficiency</h2>
+        <h3>1. Temperature</h3>
+        <p>The BM1397 becomes less efficient as temperature increases. Every degree above 65°C adds measurable overhead. This is why proper cooling isn't just about preventing damage — it directly impacts your mining revenue.</p>
+        <h3>2. Voltage and Frequency</h3>
+        <p>Each chip has an optimal voltage/frequency curve. Running at higher voltage increases hashrate but disproportionately increases power draw. The sweet spot varies per chip — this is why factory-tuned miners test each unit individually.</p>
+        <h3>3. Power Supply Quality</h3>
+        <p>A PSU operating at 85% efficiency means 15% of your electricity is wasted as heat before it even reaches the miner. Using a high-quality 80+ Gold or Platinum PSU can save you 5-10% on electricity costs.</p>
+        <h3>4. Ambient Temperature</h3>
+        <p>For every 10°C increase in ambient temperature, the miner's cooling system works harder (fan speed increases, consuming more power). Mining in a cool basement is more efficient than a hot attic.</p>
+
+        <h2>Measuring Efficiency Over Time</h2>
+        <p>Efficiency isn't static — it changes with temperature, voltage stability, and chip aging. This is why long-term monitoring matters. HashWatch tracks efficiency trends so you can see:</p>
+        <ul>
+          <li>Gradual efficiency decline that may indicate chip degradation</li>
+          <li>Efficiency improvements after cleaning dust or improving airflow</li>
+          <li>Impact of ambient temperature changes across seasons</li>
+          <li>Comparison of efficiency across multiple miners to identify underperforming units</li>
+        </ul>
+
+        <h2>Maximizing Your Efficiency</h2>
+        <ul>
+          <li><strong>Cool the environment:</strong> Keep ambient temperature below 25°C. A $20 desk fan can improve efficiency by 5-10%.</li>
+          <li><strong>Use a quality PSU:</strong> 80+ Gold or better. The efficiency gain pays for itself in months.</li>
+          <li><strong>Don't overvolt:</strong> The default voltage is factory-tuned for a reason. Only experiment if you understand the risks.</li>
+          <li><strong>Clean regularly:</strong> Dust buildup on heatsinks can reduce cooling efficiency by 20-30% over 6 months.</li>
+          <li><strong>Monitor and adjust:</strong> Use HashWatch's efficiency trend charts to identify the optimal operating point for your specific hardware and environment.</li>
+        </ul>
+
+        <h2>The Economics of Efficiency</h2>
+        <p>At $0.12/kWh, a BitAxe at 15W costs approximately $1.30/month to run. At 1.2 TH/s, the expected Bitcoin revenue is roughly $2-4/month (depending on difficulty and pool luck). This means efficiency directly impacts whether your miner is profitable.</p>
+        <p>A 10% improvement in efficiency (from 12.5 to 11.3 J/TH) saves about $0.13/month in electricity while maintaining the same hashrate. Over a year, that's $1.56 — small per miner, but significant if you run a fleet.</p>
+
+        <h2>Getting Started with Efficiency Tracking</h2>
+        <p>HashWatch automatically calculates J/TH for every snapshot and provides efficiency trend charts. <a href="/app" style="color:var(--primary)">Open HashWatch</a> to see your current efficiency and start tracking improvements over time.</p>
+      </article>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="copyright">&copy; 2026 HashWatch. MIT License.</div>
+      <div class="footer-links">
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
