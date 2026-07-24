@@ -824,29 +824,22 @@
     "poolUserPlaceholder": "プールユーザー名を入力"
   },
   "exportReport": {
-    "title": "レポートをエクスポート",
+    "title": "レポート出力",
+    "selectMiner": "マイナーを選択",
     "dateRange": "日付範囲",
-    "last24h": "過去24時間",
-    "last7d": "過去7日",
-    "last30d": "過去30日",
-    "custom": "カスタム",
-    "miners": "マイナー",
-    "allMiners": "全マイナー",
-    "selectMiners": "マイナーを選択",
-    "sections": "セクション",
-    "snapshots": "スナップショット",
-    "earnings": "収益",
-    "poolStats": "プール統計",
-    "health": "ヘルス",
-    "format": "フォーマット",
-    "csv": "CSV",
-    "json": "JSON",
-    "preview": "プレビュー",
-    "exportButton": "レポートをエクスポート",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "generate": "レポート生成",
     "generating": "生成中...",
-    "exportSuccess": "レポートのエクスポートに成功しました",
-    "exportError": "レポートのエクスポートに失敗しました",
-    "noData": "データなし"
+    "download": "PDFダウンロード",
+    "share": "レポート共有",
+    "preview": "レポートプレビュー",
+    "avgHashrate": "平均ハッシュレート",
+    "peakHashrate": "ピークハッシュレート",
+    "avgTemp": "平均温度",
+    "totalUptime": "合計稼働時間",
+    "efficiency": "効率",
+    "reportGenerated": "レポート完成！"
   },
   "liveActivity": {
     "title": "ライブアクティビティ",
@@ -1016,24 +1009,6 @@
     "noChannels": "アラートチャネルが設定されていません",
     "testSent": "テスト通知を送信しました"
   },
-  "exportReport": {
-    "title": "レポート出力",
-    "selectMiner": "マイナーを選択",
-    "dateRange": "日付範囲",
-    "startDate": "開始日",
-    "endDate": "終了日",
-    "generate": "レポート生成",
-    "generating": "生成中...",
-    "download": "PDFダウンロード",
-    "share": "レポート共有",
-    "preview": "レポートプレビュー",
-    "avgHashrate": "平均ハッシュレート",
-    "peakHashrate": "ピークハッシュレート",
-    "avgTemp": "平均温度",
-    "totalUptime": "合計稼働時間",
-    "efficiency": "効率",
-    "reportGenerated": "レポート完成！"
-  },
   "botChannels": {
     "title": "ボットチャネル",
     "addBot": "ボットチャネル追加",
@@ -1124,5 +1099,18 @@
     "reasons": "なぜこのプール？",
     "switchedAt": "切り替え時刻",
     "betterProfitability": "より高い収益性を検出"
+  },
+  "fleetHealth": {
+    "title": "フリートヘルス",
+    "noMiners": "マイナーを追加してフリートの状態を確認。",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "criticalAlerts": "重大",
+    "avgTemp": "平均温度",
+    "totalHashrate": "合計 GH/s",
+    "totalMiners": "マイナー",
+    "gradeDistribution": "グレード分布",
+    "minerList": "ヘルス順マイナー",
+    "score": "スコア"
   }
 }
