@@ -63,6 +63,13 @@ const server = http.createServer((req, res) => {
     return htmlFallback(res, path.join(PUBLIC, 'landing.html'));
   }
 
+  // /blog/xxx → blog-xxx.html (blog post slug mapping)
+  if (url.startsWith('/blog/')) {
+    const slug = url.slice(6);
+    const filePath = path.join(PUBLIC, `blog-${slug}.html`);
+    if (filePath.startsWith(PUBLIC) && tryFile(res, filePath)) return;
+  }
+
   // /app or /app/* → Expo SPA
   if (url === '/app' || url === '/app/') {
     return htmlFallback(res, path.join(DIST, 'app.html'));

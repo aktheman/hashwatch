@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started with Your BitAxe Miner — HashWatch Blog</title>
+  <meta name="description" content="Everything you need to know to set up, configure, and optimize your BitAxe ASIC miner for maximum efficiency. Step-by-step guide for beginners.">
+  <meta property="og:title" content="Getting Started with Your BitAxe Miner">
+  <meta property="og:description" content="Step-by-step guide to setting up and optimizing your BitAxe ASIC miner.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hashwatch2.vercel.app/blog/getting-started-bitaxe">
+  <meta property="og:image" content="https://hashwatch2.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+
+    <div class="blog-content">
+      <a href="/blog" class="back-link">&larr; Back to Blog</a>
+
+      <article>
+        <span class="blog-tag">Beginner</span>
+        <h1 style="font-size:28px;margin:12px 0 8px;color:var(--text)">Getting Started with Your BitAxe Miner</h1>
+        <p class="blog-meta" style="margin-bottom:32px">July 2026 · 8 min read</p>
+
+        <h2>What is a BitAxe?</h2>
+        <p>The BitAxe is an open-source Bitcoin ASIC miner designed for solo mining and educational purposes. Built around the BM1397 chip (the same used in Antminer S9), it offers a compact, energy-efficient way to participate in Bitcoin mining at home.</p>
+        <p>Unlike industrial miners, the BitAxe is designed to be quiet, energy-efficient, and accessible. It connects to your home WiFi and can be managed entirely through a web interface — no special software required.</p>
+
+        <h2>Unboxing and First Boot</h2>
+        <p>When you receive your BitAxe, you'll find:</p>
+        <ul>
+          <li>The BitAxe board with heatsink and fan</li>
+          <li>A USB-C power cable</li>
+          <li>A quick-start card with the default IP address</li>
+        </ul>
+        <p>Connect the power supply and plug it in. The fan will spin up, and within 30 seconds, the LED should indicate the miner is ready. Connect your phone or computer to the same WiFi network and navigate to the miner's IP address in a browser.</p>
+
+        <h2>Initial Configuration</h2>
+        <p>Once connected to the web interface, you'll want to configure these settings immediately:</p>
+        <ul>
+          <li><strong>WiFi credentials</strong> — Enter your home WiFi SSID and password</li>
+          <li><strong>Pool URL</strong> — Connect to a mining pool (we recommend starting with Braiins Pool or Solo Satoshi)</li>
+          <li><strong>Miner name</strong> — Give your miner a memorable name like "Living Room BitAxe"</li>
+        </ul>
+        <p>After saving, the miner will reboot and begin hashing. You should see the hashrate stabilize around 1.0–1.5 TH/s within a few minutes.</p>
+
+        <h2>Monitoring with HashWatch</h2>
+        <p>While the BitAxe web interface shows basic stats, HashWatch provides comprehensive monitoring across all your miners:</p>
+        <ul>
+          <li><strong>Real-time dashboard</strong> — See hashrate, temperature, power draw, and efficiency at a glance</li>
+          <li><strong>Smart alerts</strong> — Get notified if temperature spikes, hashrate drops, or the miner goes offline</li>
+          <li><strong>Historical charts</strong> — Track performance over hours, days, and weeks to spot trends</li>
+          <li><strong>Health scoring</strong> — Each miner gets an A+ to F grade based on temperature, hashrate, uptime, and share acceptance</li>
+        </ul>
+        <p>HashWatch is free for up to 4 miners — perfect for most home miners. Need more? Pro is just $4.99/month with unlimited miners and advanced analytics.</p>
+
+        <h2>Optimizing Performance</h2>
+        <p>Once your miner is running, here are tips to get the most out of it:</p>
+        <h3>Temperature Management</h3>
+        <p>The ideal operating temperature for the BM1397 is between 55°C and 75°C. Above 80°C, the chip throttles. Ensure good airflow around the heatsink and consider adding a small desk fan if ambient temperatures are high.</p>
+        <h3>Frequency Tuning</h3>
+        <p>The default frequency works well for most setups, but you can experiment with slight adjustments. Higher frequency = more hashrate but also more heat and power draw. Find the sweet spot where efficiency (J/TH) is minimized.</p>
+        <h3>Network Stability</h3>
+        <p>A stable WiFi connection is critical. If your miner drops shares or disconnects frequently, consider:</p>
+        <ul>
+          <li>Moving the miner closer to your router</li>
+          <li>Using a 2.4GHz network (better range than 5GHz)</li>
+          <li>Connecting via Ethernet if possible</li>
+        </ul>
+
+        <h2>Common Issues and Fixes</h2>
+        <ul>
+          <li><strong>Low hashrate:</strong> Check temperature and ensure the fan is spinning. Clean dust from the heatsink.</li>
+          <li><strong>High share rejection:</strong> Usually indicates network latency. Try a pool server closer to your location.</li>
+          <li><strong>Miner offline:</strong> Power cycle the miner. If it persists, check WiFi credentials and signal strength.</li>
+          <li><strong>Fan noise:</strong> Normal under load, but if excessively loud, the bearing may need replacement.</li>
+        </ul>
+
+        <h2>What's Next?</h2>
+        <p>Once you have one BitAxe running smoothly, you might want to expand your setup. HashWatch makes it easy to monitor multiple miners from a single dashboard, organize them into groups, and track profitability across your entire fleet.</p>
+        <p>Ready to get started? <a href="/app" style="color:var(--primary)">Open HashWatch</a> and add your first miner.</p>
+      </article>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-content">
+      <div class="copyright">&copy; 2026 HashWatch. MIT License.</div>
+      <div class="footer-links">
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/support">Support</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
