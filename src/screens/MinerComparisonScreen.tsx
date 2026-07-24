@@ -260,7 +260,12 @@ export function MinerComparisonScreen({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scroll}
+      accessibilityRole="summary"
+      accessibilityLabel={t('comparison.title')}
+    >
       <Text style={styles.header}>{t('comparison.title')}</Text>
       <View style={styles.table}>
         <View style={[styles.row, styles.rowLast]}>

@@ -174,6 +174,8 @@ export function PublicDashboardScreen({ route }: PublicDashboardScreenProps) {
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      accessibilityRole="summary"
+      accessibilityLabel={minerName || t('publicDashboard.sharedBy')}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
       }
