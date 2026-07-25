@@ -1122,5 +1122,31 @@
     "gradeDistribution": "Notenverteilung",
     "minerList": "Miner nach Zustand",
     "score": "Punktzahl"
+  },
+  "profile": {
+    "title": "Profil",
+    "stats": "Statistiken",
+    "totalMiners": "Gesamt",
+    "online": "Online",
+    "offline": "Offline",
+    "changePassword": "Passwort Ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "updatePassword": "Passwort Aktualisieren",
+    "saving": "Speichern...",
+    "passwordChanged": "Passwort aktualisiert",
+    "passwordTooShort": "Mindestens 8 Zeichen",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "changePasswordFailed": "Passwort-Änderung fehlgeschlagen",
+    "dangerZone": "Konto",
+    "signOut": "Abmelden",
+    "signOutConfirm": "Abmelden?",
+    "deleteAccount": "Konto Löschen",
+    "deleteAccountConfirm": "Konto und Daten werden dauerhaft gelöscht.",
+    "deleteAccountFailed": "Löschen fehlgeschlagen",
+    "notSignedIn": "Nicht angemeldet",
+    "error": "Fehler",
+    "success": "Erfolg"
   }
 }

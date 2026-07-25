@@ -1122,5 +1122,31 @@
     "gradeDistribution": "Distribution des Notes",
     "minerList": "Mineurs par Santé",
     "score": "Score"
+  },
+  "profile": {
+    "title": "Profil",
+    "stats": "Statistiques",
+    "totalMiners": "Total",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "changePassword": "Changer le Mot de Passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "updatePassword": "Mettre à Jour",
+    "saving": "Enregistrement...",
+    "passwordChanged": "Mot de passe mis à jour",
+    "passwordTooShort": "Minimum 8 caractères",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "changePasswordFailed": "Échec du changement de mot de passe",
+    "dangerZone": "Compte",
+    "signOut": "Déconnexion",
+    "signOutConfirm": "Se déconnecter ?",
+    "deleteAccount": "Supprimer le Compte",
+    "deleteAccountConfirm": "Supprimera définitivement votre compte et vos données.",
+    "deleteAccountFailed": "Échec de la suppression",
+    "notSignedIn": "Non connecté",
+    "error": "Erreur",
+    "success": "Succès"
   }
 }

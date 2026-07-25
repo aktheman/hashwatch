@@ -1136,5 +1136,31 @@
     "gradeDistribution": "Grade Distribution",
     "minerList": "Miners by Health",
     "score": "Score"
+  },
+  "profile": {
+    "title": "Profile",
+    "stats": "Miner Stats",
+    "totalMiners": "Total",
+    "online": "Online",
+    "offline": "Offline",
+    "changePassword": "Change Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "updatePassword": "Update Password",
+    "saving": "Saving...",
+    "passwordChanged": "Password updated successfully",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordMismatch": "New passwords do not match",
+    "changePasswordFailed": "Failed to change password. Check your current password.",
+    "dangerZone": "Account",
+    "signOut": "Sign Out",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "deleteAccount": "Delete Account",
+    "deleteAccountConfirm": "This will permanently delete your account and all data. This cannot be undone.",
+    "deleteAccountFailed": "Failed to delete account",
+    "notSignedIn": "Not signed in",
+    "error": "Error",
+    "success": "Success"
   }
 }

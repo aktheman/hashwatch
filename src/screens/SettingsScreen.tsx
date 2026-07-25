@@ -611,6 +611,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel="Profile"
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Profile');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('profile.title')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel="Wallets"
           style={styles.row}
           onPress={() => {

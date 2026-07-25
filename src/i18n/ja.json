@@ -1112,5 +1112,31 @@
     "gradeDistribution": "グレード分布",
     "minerList": "ヘルス順マイナー",
     "score": "スコア"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "stats": "マイナー統計",
+    "totalMiners": "合計",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "changePassword": "パスワード変更",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "confirmPassword": "パスワード確認",
+    "updatePassword": "パスワード更新",
+    "saving": "保存中...",
+    "passwordChanged": "パスワードを更新しました",
+    "passwordTooShort": "8文字以上必要です",
+    "passwordMismatch": "パスワードが一致しません",
+    "changePasswordFailed": "パスワード変更に失敗しました",
+    "dangerZone": "アカウント",
+    "signOut": "サインアウト",
+    "signOutConfirm": "サインアウトしますか？",
+    "deleteAccount": "アカウント削除",
+    "deleteAccountConfirm": "アカウントとデータが完全に削除されます。",
+    "deleteAccountFailed": "削除に失敗しました",
+    "notSignedIn": "未サインイン",
+    "error": "エラー",
+    "success": "成功"
   }
 }

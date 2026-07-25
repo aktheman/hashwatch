@@ -1112,5 +1112,31 @@
     "gradeDistribution": "评级分布",
     "minerList": "按健康排序",
     "score": "评分"
+  },
+  "profile": {
+    "title": "个人资料",
+    "stats": "矿机统计",
+    "totalMiners": "总计",
+    "online": "在线",
+    "offline": "离线",
+    "changePassword": "修改密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认新密码",
+    "updatePassword": "更新密码",
+    "saving": "保存中...",
+    "passwordChanged": "密码已更新",
+    "passwordTooShort": "至少8个字符",
+    "passwordMismatch": "密码不一致",
+    "changePasswordFailed": "修改密码失败",
+    "dangerZone": "账户",
+    "signOut": "退出登录",
+    "signOutConfirm": "确定退出？",
+    "deleteAccount": "删除账户",
+    "deleteAccountConfirm": "将永久删除账户和所有数据。",
+    "deleteAccountFailed": "删除失败",
+    "notSignedIn": "未登录",
+    "error": "错误",
+    "success": "成功"
   }
 }

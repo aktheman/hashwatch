@@ -1122,5 +1122,31 @@
     "gradeDistribution": "Distribución de Notas",
     "minerList": "Mineros por Salud",
     "score": "Puntuación"
+  },
+  "profile": {
+    "title": "Perfil",
+    "stats": "Estadísticas",
+    "totalMiners": "Total",
+    "online": "En línea",
+    "offline": "Fuera de línea",
+    "changePassword": "Cambiar Contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "updatePassword": "Actualizar Contraseña",
+    "saving": "Guardando...",
+    "passwordChanged": "Contraseña actualizada",
+    "passwordTooShort": "Mínimo 8 caracteres",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "changePasswordFailed": "Error al cambiar contraseña",
+    "dangerZone": "Cuenta",
+    "signOut": "Cerrar Sesión",
+    "signOutConfirm": "¿Cerrar sesión?",
+    "deleteAccount": "Eliminar Cuenta",
+    "deleteAccountConfirm": "Esto eliminará permanentemente tu cuenta y datos.",
+    "deleteAccountFailed": "Error al eliminar cuenta",
+    "notSignedIn": "No has iniciado sesión",
+    "error": "Error",
+    "success": "Éxito"
   }
 }

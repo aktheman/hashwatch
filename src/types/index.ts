@@ -114,6 +114,7 @@ export type RootStackParamList = {
   Energy: undefined;
   ProfitabilitySwitch: undefined;
   FleetHealth: undefined;
+  Profile: undefined;
 };
 
 export type TabParamList = {
