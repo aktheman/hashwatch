@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Alert,
-  StyleSheet,
-  Switch,
-  Platform,
-} from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/auth';
 import { useTheme } from '../theme';
 import { useMinerStore } from '../store/miners';
@@ -18,22 +8,18 @@ import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as haptic from '../utils/haptics';
 import { useNavigation } from '@react-navigation/native';
-import { putSetting as putRemoteSetting } from '../api/client';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigation = useNavigation();
-  const { token, userId, email, logout } = useAuthStore();
+  const { token, email, logout } = useAuthStore();
   const { miners } = useMinerStore();
   const { isPro } = useSubscriptionStore();
 
-  const [editMode, setEditMode] = useState(false);
-  const [displayName, setDisplayName] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -75,9 +61,12 @@ export default function ProfileScreen() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       haptic.error();
-      Alert.alert(t('profile.error'), err.message || t('profile.changePasswordFailed'));
+      Alert.alert(
+        t('profile.error'),
+        (err instanceof Error ? err.message : null) || t('profile.changePasswordFailed'),
+      );
     } finally {
       setSaving(false);
     }
@@ -109,7 +98,7 @@ export default function ProfileScreen() {
     ]);
   }, [token, logout, t]);
 
-  const onlineMiners = miners.filter((m) => m.status !== 'offline').length;
+  const onlineMiners = miners.filter((m) => m.isOnline).length;
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.bg }]} testID="profile-screen">
@@ -277,7 +266,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   avatarText: { fontSize: 28, fontWeight: fontWeight.bold },
-  email: { fontSize: fontSize.base, fontWeight: fontWeight.medium },
+  email: { fontSize: fontSize.base, fontWeight: fontWeight.regular },
   badgeRow: { flexDirection: 'row', marginTop: spacing.xs },
   badge: {
     paddingHorizontal: spacing.md,

@@ -13,6 +13,7 @@ import { UndoToast } from '../components/UndoToast';
 import { UpdateBanner } from '../components/UpdateBanner';
 import { useTheme } from '../theme';
 import { useAlertHistoryStore } from '../store/alertHistory';
+import { WebSidebar } from '../components/WebSidebar';
 import type { RootStackParamList, TabParamList } from '../types';
 
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -234,51 +235,53 @@ function MainTabs() {
   const { t } = useTranslation();
   const unreadCount = useAlertHistoryStore((s) => s.events.filter((e) => !e.read).length);
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: {
-          backgroundColor: theme.surface,
-          borderTopColor: theme.border,
-          borderTopWidth: 1,
-          paddingBottom: 12,
-          paddingTop: 10,
-          height: 64,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '700',
-          letterSpacing: 0.5,
-        },
-      })}
-    >
-      <Tab.Screen
-        name="Dashboard"
-        component={WrappedDashboard}
-        options={{ headerShown: false, tabBarLabel: t('tabs.dashboard') }}
-      />
-      <Tab.Screen
-        name="Pools"
-        component={WrappedPools}
-        options={{ headerShown: false, tabBarLabel: t('tabs.pools') }}
-      />
-      <Tab.Screen
-        name="Analytics"
-        component={WrappedAnalytics}
-        options={{ headerShown: false, tabBarLabel: t('tabs.analytics') }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={WrappedSettings}
-        options={{
-          headerShown: false,
-          tabBarLabel: t('tabs.settings'),
-          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-        }}
-      />
-    </Tab.Navigator>
+    <WebSidebar>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
+          tabBarActiveTintColor: theme.primary,
+          tabBarInactiveTintColor: theme.textMuted,
+          tabBarStyle: {
+            backgroundColor: theme.surface,
+            borderTopColor: theme.border,
+            borderTopWidth: 1,
+            paddingBottom: 12,
+            paddingTop: 10,
+            height: 64,
+          },
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '700',
+            letterSpacing: 0.5,
+          },
+        })}
+      >
+        <Tab.Screen
+          name="Dashboard"
+          component={WrappedDashboard}
+          options={{ headerShown: false, tabBarLabel: t('tabs.dashboard') }}
+        />
+        <Tab.Screen
+          name="Pools"
+          component={WrappedPools}
+          options={{ headerShown: false, tabBarLabel: t('tabs.pools') }}
+        />
+        <Tab.Screen
+          name="Analytics"
+          component={WrappedAnalytics}
+          options={{ headerShown: false, tabBarLabel: t('tabs.analytics') }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={WrappedSettings}
+          options={{
+            headerShown: false,
+            tabBarLabel: t('tabs.settings'),
+            tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          }}
+        />
+      </Tab.Navigator>
+    </WebSidebar>
   );
 }
 

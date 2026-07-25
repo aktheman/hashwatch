@@ -35,9 +35,9 @@ jest.mock('../src/store/miners', () => ({
   useMinerStore: (selector?: (state: any) => any) => {
     const state = {
       miners: [
-        { id: '1', name: 'Miner 1', ip: '192.168.1.10', status: 'online' },
-        { id: '2', name: 'Miner 2', ip: '192.168.1.11', status: 'offline' },
-        { id: '3', name: 'Miner 3', ip: '192.168.1.12', status: 'online' },
+        { id: '1', name: 'Miner 1', ip: '192.168.1.10', isOnline: true },
+        { id: '2', name: 'Miner 2', ip: '192.168.1.11', isOnline: false },
+        { id: '3', name: 'Miner 3', ip: '192.168.1.12', isOnline: true },
       ],
     };
     return selector ? selector(state) : state;
