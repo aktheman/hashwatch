@@ -55,7 +55,28 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-17 — Rounds 28-31)
+## Latest Round (Session 2026-07-25 — Rounds 34-35)
+
+### Changes (Rounds 34-35 — 8 new screens, 3 components, store metadata, bundle optimization)
+
+- **WebSidebar**: Collapsible sidebar navigation for desktop web with nav tabs and quick links
+- **PredictiveMaintenanceScreen**: Uptime forecasting, maintenance scheduling, weather alerts simulation
+- **ActivityFeedScreen**: Event timeline with filters, grouped by day, mark read
+- **WorldMapScreen**: Geographic miner view with health dots, drill-down, location list
+- **DashboardBuilderScreen**: Widget library with layout controls and live preview
+- **LiveActivityBadge**: Pulsing notification dot component
+- **AiInsightsCard**: AI insights display with typed categories
+- **QuickStatsWidget**: Compact horizontal stats widget
+- **App Store metadata**: Full iOS/Android store assets and review notes
+- **Bundle optimization**: 3-pass minifier, platform stubs, 2.6MB → 2.4MB
+
+### Test results
+
+- Frontend: 1677 tests passing (128 suites) — TypeScript clean, ESLint clean
+- Backend: 257 tests passing (28 suites)
+- Total: 1934 tests
+
+## Previous Round (Session 2026-07-17 — Rounds 28-31)
 
 ### Changes (Rounds 28-31 — 11 product features)
 

@@ -1,5 +1,22 @@
 # STATUS
 
+## Session Summary (2026-07-25 — Round 35)
+
+### Done
+
+- **App Store Metadata**: Full iOS and Android store metadata — name, subtitle, descriptions, keywords, URLs, categories, release notes. Review notes with test account credentials, feature walkthrough, and privacy guidance.
+- **Bundle Optimization**: `metro.config.js` upgraded to 3-pass minifier with aggressive tree-shaking (`dead_code`, `unused`, `reduce_vars`, `collapse_vars`, `hoist_funs`, `evaluate`). Platform-specific module resolution stubs web-only packages (react-dom, react-native-web) on native and native-only packages (react-native-view-shot) on web via `src/__stubs__/empty.ts`. Bundle reduced from 2.6MB → 2.4MB.
+- **New Components**: `LiveActivityBadge` (pulsing notification dot with count), `AiInsightsCard` (AI insights with typed categories and impact badges), `QuickStatsWidget` (compact horizontal 4-tile stats row with color-coded temperature). All wrapped in React.memo. 14 new tests.
+- **Bundle Report Script**: `scripts/bundle-report.js` reads Metro stats JSON and outputs top-20 modules report.
+
+### Test Results
+
+- **Frontend**: 1677 tests passing (128 suites) — TypeScript clean, ESLint clean
+- **Backend**: 257 tests passing (28 suites)
+- **Total**: 1934 tests
+
+---
+
 ## Session Summary (2026-07-25 — Round 34)
 
 ### Done
