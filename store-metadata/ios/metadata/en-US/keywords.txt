@@ -1,0 +1,1 @@
+bitcoin,mining,bitaxe,miner,monitor,hashrate,crypto,pool,fleet,hardware

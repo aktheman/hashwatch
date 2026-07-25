@@ -1,0 +1,10 @@
+Initial release of HashWatch — BitAxe miner monitoring.
+
+• Real-time hashrate, temperature, and power monitoring
+• Fleet health dashboard with predictive maintenance
+• Pool analytics and earnings tracking
+• Custom themes (14 built-in + custom editor)
+• Team collaboration with shared miner groups
+• Firmware OTA updates
+• Push notifications and web alerts
+• Data export (CSV, JSON, PDF)

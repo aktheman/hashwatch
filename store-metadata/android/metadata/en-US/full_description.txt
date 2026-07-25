@@ -1,0 +1,30 @@
+HashWatch is the ultimate monitoring companion for BitAxe Bitcoin miners. Track real-time hashrate, temperature, power consumption, and pool statistics across all your miners from one beautiful dashboard.
+
+FEATURES:
+• Real-time miner monitoring with live hashrate, temperature, and power data
+• Fleet health scoring with predictive maintenance alerts
+• Pool analytics with earnings tracking and efficiency comparison
+• Custom dashboards with configurable widget layouts
+• Multi-miner support with group organization and auto-assignment
+• Dark pool network stats — contribute anonymously to collective intelligence
+• Firmware OTA updates — flash BitAxe firmware directly from the app
+• Team collaboration — share miners with team members via email
+• Push notifications for offline alerts, temperature warnings, and more
+• Beautiful dark theme with 14 built-in themes and custom theme editor
+• CSV/JSON data export and PDF report generation
+• Web push notifications and PWA support
+• Activity feed tracking all miner events
+• World map view with geographic miner locations
+• AI-powered anomaly detection and uptime forecasting
+
+SUPPORTS:
+• All BitAxe hardware models (Gamma, Ultra, Max, etc.)
+• Braiins, Luxor, and custom mining pools
+• iOS 16.4+ and Android 14+
+• Web browsers (PWA)
+
+PRICING:
+• Free: Monitor up to 5 miners with basic features
+• Pro: Unlimited miners, firmware updates, dark pool, AI anomaly detection, priority support
+
+HashWatch does not mine cryptocurrency. It is a monitoring and management tool for existing BitAxe mining hardware.
