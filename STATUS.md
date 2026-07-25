@@ -1,27 +1,21 @@
 # STATUS
 
-## Session Summary (2026-07-23 — Round 32)
+## Session Summary (2026-07-23 — Round 33)
 
 ### Done
 
-- **Web Subscription Check**: `SubscriptionStore.initialize()` now calls `GET /api/stripe/subscription` on web platform to restore subscription state on app load. Previously web users lost Pro status on refresh.
-- **7-Day Free Trial**: Backend `trialEndsAt` column on `user_subscriptions`, Stripe checkout supports `trial_period_days`, `customer.subscription.trial_will_end` webhook event, subscription endpoint returns `inTrial` + `trialEndsAt`. SubscriptionScreen shows trial banner with days remaining.
-- **Stripe Price ID Configurable**: `EXPO_PUBLIC_STRIPE_PRICE_ID` env var replaces hardcoded `price_pro_monthly`. Updated `.env.example` with all missing env vars (PostHog, Stripe).
-- **OG Image**: 1200x630 PNG for social sharing, generated via SVG + ImageMagick. Referenced on all 6 marketing pages.
-- **Testimonials**: 3-card testimonials section on landing page with user quotes and avatars.
-- **Newsletter Capture**: Email signup form on landing page and pricing page with success state.
-- **Changelog Page**: Full changelog with 12 releases documented, linked from all navs and sitemap.
-- **Plausible Analytics**: Added to `terms.html` and `privacy.html` (were missing).
-- **OG Meta Tags**: Added to all 6 marketing pages (terms, privacy, pricing, support were missing OG image tags).
-- **Pricing Page Updates**: Trial mention, updated CTA ("Start 7-Day Free Trial"), FAQ, newsletter section.
-- **i18n**: 3 new keys in all 6 locales (`inTrial`, `startFreeTrial`, `trialBanner`).
-- **Tests**: 3 existing updated + 1 new trial test (10 backend stripe tests). SubscriptionScreen test updated for new button text.
+- **Vercel Routing Fixed**: `public/index.html` renamed to `landing.html` to avoid Expo SPA collision (expo export copies public/index.html into dist/). Expo SPA entry renamed to `dist/app.html`. Vercel config switched from `cleanUrls` + `rewrites` to explicit `routes` array — `cleanUrls` was resolving `/` to `index.html` before rewrites could fire. All 14 routes verified live.
+- **Flaky AppNavigator Test Fixed**: Added `await` to all `fireEvent.press` calls (7 instances), removed duplicate notification test, fixed AddMiner test regex (`/addMiner/i` matched multiple elements — changed to `addMiner.addByIp`).
+- **Accessibility Audit (Partial)**: Added `accessibilityRole`/`accessibilityLabel` to 4 components missing them: MinerComparisonScreen, PublicDashboardScreen, ThemeMarketplaceScreen, SummaryCard. 277 buttons and 48 text inputs still need labels (deferred).
+- **Fleet Health Dashboard**: New `FleetHealthScreen` — fleet-wide health score with letter grade (A+ to F), online/offline/critical alert counts, average temperature, total hashrate, grade distribution bar chart, and per-miner health cards sorted by score with critical alert badges. Navigable from Settings. i18n in all 6 locales.
+- **E2E Test Coverage**: 3 new Playwright test files — `fleet-health.spec.ts` (3 tests), `marketing.spec.ts` (6 tests for all marketing pages), `settings-screens.spec.ts` (5 tests for dark pool, firmware, teams, anomaly, energy).
+- **Blog Section**: Blog index page + 4 SEO-optimized articles: "Getting Started with BitAxe" (beginner), "Miner Monitoring Best Practices" (guide), "Understanding Bitcoin Mining Efficiency" (technical J/TH deep dive), "How to Choose a Mining Pool" (strategy). Added blog link to all marketing page navs. Updated sitemap with 5 new blog URLs. Vercel routes for `/blog` and `/blog/*` slugs.
 
 ### Test Results
 
-- **Frontend**: 1578 tests passing (117 suites) — TypeScript clean, ESLint clean
+- **Frontend**: 1577 tests passing (117 suites) — TypeScript clean, ESLint clean
 - **Backend**: 257 tests passing (28 suites)
-- **Total**: 1835 tests
+- **Total**: 1834 tests
 
 ---
 
