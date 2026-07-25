@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HashWatch API Documentation</title>
+  <meta name="description" content="REST API documentation for HashWatch — monitor and manage cryptocurrency miners programmatically.">
+  <meta property="og:title" content="HashWatch API Documentation">
+  <meta property="og:description" content="REST API for monitoring cryptocurrency miners.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer data-domain="hashwatch2.vercel.app" src="https://plausible.io/js/script.js"></script>
+  <style>
+    body { margin: 0; padding: 0; background: #0a0a0f; }
+    .swagger-ui .topbar { display: none; }
+    .swagger-ui .info .title { color: #e2e0ff !important; }
+    .swagger-ui .scheme-container { background: #12121a !important; box-shadow: none !important; }
+    .swagger-ui .wrapper { max-width: 1200px; }
+    .api-header { padding: 40px 20px 20px; text-align: center; background: #0a0a0f; }
+    .api-header h1 { color: #e2e0ff; font-size: 28px; margin: 0 0 8px; }
+    .api-header p { color: #9694b0; font-size: 15px; margin: 0 0 16px; }
+    .api-header .base-url { display: inline-block; padding: 8px 16px; background: #12121a; border: 1px solid #2a2940; border-radius: 8px; font-family: monospace; font-size: 13px; color: #6c63ff; }
+    .api-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0 20px 20px; background: #0a0a0f; }
+    .api-nav a { padding: 6px 14px; border-radius: 6px; font-size: 12px; color: #9694b0; background: #12121a; border: 1px solid #2a2940; text-decoration: none; transition: all 0.2s; }
+    .api-nav a:hover { color: #e2e0ff; border-color: #6c63ff; background: rgba(108,99,255,0.1); }
+    .api-try { padding: 16px 20px; text-align: center; background: #0a0a0f; }
+    .api-try p { color: #666; font-size: 13px; margin: 0; }
+    .api-try code { color: #6c63ff; }
+    footer { padding: 24px 20px; text-align: center; border-top: 1px solid #1a1a24; }
+    footer .links { margin-top: 8px; }
+    footer a { color: #6c63ff; text-decoration: none; margin: 0 10px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="api-header">
+    <h1>HashWatch API</h1>
+    <p>REST API for monitoring and managing cryptocurrency miners</p>
+    <div class="base-url">https://api.hashwatch.app/api</div>
+  </div>
+  <nav class="api-nav">
+    <a href="#tag/Authentication">Auth</a>
+    <a href="#tag/Miners">Miners</a>
+    <a href="#tag/Stats">Stats</a>
+    <a href="#tag/Proxy">Proxy</a>
+    <a href="#tag/Push-Notifications">Push</a>
+    <a href="#tag/Settings">Settings</a>
+    <a href="#tag/Alert-Rules">Alerts</a>
+    <a href="#tag/Notification-History">Notifications</a>
+    <a href="#tag/Pool-Analytics">Pools</a>
+    <a href="#tag/Webhooks">Webhooks</a>
+    <a href="#tag/Group-Sharing">Groups</a>
+    <a href="#tag/Custom-Themes">Themes</a>
+    <a href="#tag/Dark-Pool">Dark Pool</a>
+  </nav>
+  <div class="api-try">
+    <p>Base URL: <code>http://localhost:4000/api</code> (local) or <code>https://api.hashwatch.app/api</code> (production)</p>
+  </div>
+
+  <div id="swagger-ui"></div>
+
+  <footer>
+    <div class="copyright">&copy; 2026 HashWatch. MIT License.</div>
+    <div class="links">
+      <a href="/">Home</a>
+      <a href="/app">Dashboard</a>
+      <a href="/blog">Blog</a>
+      <a href="/calculator">Calculator</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/support">Support</a>
+      <a href="https://github.com/aktheman/hashwatch" target="_blank">GitHub</a>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function() {
+      SwaggerUIBundle({
+        url: '/openapi.json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: 'BaseLayout',
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 1,
+        docExpansion: 'list',
+        filter: true,
+        tryItOutEnabled: false,
+      });
+    };
+  </script>
+</body>
+</html>

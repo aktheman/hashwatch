@@ -11,6 +11,8 @@
     { "src": "^/blog/(.*)$", "dest": "/blog-$1.html" },
     { "src": "^/calculator$", "dest": "/calculator.html" },
     { "src": "^/bitaxe-comparison$", "dest": "/bitaxe-comparison.html" },
+    { "src": "^/api-docs$", "dest": "/api-docs.html" },
+    { "src": "^/openapi\\.json$", "dest": "/openapi.json" },
     { "src": "^/support$", "dest": "/support.html" },
     { "src": "^/terms$", "dest": "/terms.html" },
     { "src": "^/privacy$", "dest": "/privacy.html" },
