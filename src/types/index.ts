@@ -115,6 +115,10 @@ export type RootStackParamList = {
   ProfitabilitySwitch: undefined;
   FleetHealth: undefined;
   Profile: undefined;
+  PredictiveMaintenance: undefined;
+  ActivityFeed: undefined;
+  WorldMap: undefined;
+  DashboardBuilder: undefined;
 };
 
 export type TabParamList = {

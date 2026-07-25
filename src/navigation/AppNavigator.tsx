@@ -154,6 +154,26 @@ const ProfileScreen = lazy(() =>
     default: m.default,
   })),
 );
+const PredictiveMaintenanceScreen = lazy(() =>
+  import('../screens/PredictiveMaintenanceScreen').then((m) => ({
+    default: m.PredictiveMaintenanceScreen,
+  })),
+);
+const ActivityFeedScreen = lazy(() =>
+  import('../screens/ActivityFeedScreen').then((m) => ({
+    default: m.ActivityFeedScreen,
+  })),
+);
+const WorldMapScreen = lazy(() =>
+  import('../screens/WorldMapScreen').then((m) => ({
+    default: m.WorldMapScreen,
+  })),
+);
+const DashboardBuilderScreen = lazy(() =>
+  import('../screens/DashboardBuilderScreen').then((m) => ({
+    default: m.DashboardBuilderScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -208,6 +228,10 @@ const WrappedEnergy = withScreenBoundary(EnergyScreen);
 const WrappedProfitabilitySwitch = withScreenBoundary(ProfitabilitySwitchScreen);
 const WrappedFleetHealth = withScreenBoundary(FleetHealthScreen);
 const WrappedProfile = withScreenBoundary(ProfileScreen);
+const WrappedPredictiveMaintenance = withScreenBoundary(PredictiveMaintenanceScreen);
+const WrappedActivityFeed = withScreenBoundary(ActivityFeedScreen);
+const WrappedWorldMap = withScreenBoundary(WorldMapScreen);
+const WrappedDashboardBuilder = withScreenBoundary(DashboardBuilderScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -469,6 +493,26 @@ export function AppNavigator() {
           name="Profile"
           component={WrappedProfile}
           options={{ title: t('profile.title', 'Profile') }}
+        />
+        <Stack.Screen
+          name="PredictiveMaintenance"
+          component={WrappedPredictiveMaintenance}
+          options={{ title: t('predictiveMaintenance.title', 'Predictive Maintenance') }}
+        />
+        <Stack.Screen
+          name="ActivityFeed"
+          component={WrappedActivityFeed}
+          options={{ title: t('activityFeed.title', 'Activity Feed') }}
+        />
+        <Stack.Screen
+          name="WorldMap"
+          component={WrappedWorldMap}
+          options={{ title: t('worldMap.title', 'World Map') }}
+        />
+        <Stack.Screen
+          name="DashboardBuilder"
+          component={WrappedDashboardBuilder}
+          options={{ title: t('dashboardBuilder.title', 'Dashboard Builder') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

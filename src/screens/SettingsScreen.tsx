@@ -1438,6 +1438,66 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('navigator.predictiveMaintenance', 'Predictive Maintenance')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('PredictiveMaintenance');
+          }}
+        >
+          <Text style={styles.rowLabel}>
+            {t('navigator.predictiveMaintenance', 'Predictive Maintenance')}
+          </Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('navigator.worldMap', 'World Map')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('WorldMap');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('navigator.worldMap', 'World Map')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('navigator.activityFeed', 'Activity Feed')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('ActivityFeed');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('navigator.activityFeed', 'Activity Feed')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('navigator.dashboardBuilder', 'Dashboard Builder')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('DashboardBuilder');
+          }}
+        >
+          <Text style={styles.rowLabel}>
+            {t('navigator.dashboardBuilder', 'Dashboard Builder')}
+          </Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t('anomalyDetection.title', 'Anomaly Detection')}
           style={styles.row}
           onPress={() => {

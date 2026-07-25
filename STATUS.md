@@ -1,21 +1,23 @@
 # STATUS
 
-## Session Summary (2026-07-23 — Round 33)
+## Session Summary (2026-07-25 — Round 34)
 
 ### Done
 
-- **Vercel Routing Fixed**: `public/index.html` renamed to `landing.html` to avoid Expo SPA collision (expo export copies public/index.html into dist/). Expo SPA entry renamed to `dist/app.html`. Vercel config switched from `cleanUrls` + `rewrites` to explicit `routes` array — `cleanUrls` was resolving `/` to `index.html` before rewrites could fire. All 14 routes verified live.
-- **Flaky AppNavigator Test Fixed**: Added `await` to all `fireEvent.press` calls (7 instances), removed duplicate notification test, fixed AddMiner test regex (`/addMiner/i` matched multiple elements — changed to `addMiner.addByIp`).
-- **Accessibility Audit (Partial)**: Added `accessibilityRole`/`accessibilityLabel` to 4 components missing them: MinerComparisonScreen, PublicDashboardScreen, ThemeMarketplaceScreen, SummaryCard. 277 buttons and 48 text inputs still need labels (deferred).
-- **Fleet Health Dashboard**: New `FleetHealthScreen` — fleet-wide health score with letter grade (A+ to F), online/offline/critical alert counts, average temperature, total hashrate, grade distribution bar chart, and per-miner health cards sorted by score with critical alert badges. Navigable from Settings. i18n in all 6 locales.
-- **E2E Test Coverage**: 3 new Playwright test files — `fleet-health.spec.ts` (3 tests), `marketing.spec.ts` (6 tests for all marketing pages), `settings-screens.spec.ts` (5 tests for dark pool, firmware, teams, anomaly, energy).
-- **Blog Section**: Blog index page + 4 SEO-optimized articles: "Getting Started with BitAxe" (beginner), "Miner Monitoring Best Practices" (guide), "Understanding Bitcoin Mining Efficiency" (technical J/TH deep dive), "How to Choose a Mining Pool" (strategy). Added blog link to all marketing page navs. Updated sitemap with 5 new blog URLs. Vercel routes for `/blog` and `/blog/*` slugs.
+- **WebSidebar**: Collapsible sidebar navigation for desktop web. Shows brand logo, user email, online/miner counts, Pro badge, main nav tabs (Dashboard/Pools/Analytics/Settings), and quick links (FleetHealth, PredictiveMaintenance, WorldMap, ActivityFeed, AlertChannels, Wallets, Groups, Teams, Profile). Collapses to 56px icon-only mode. Hidden on mobile (<768px) and non-web platforms. Wrapped around MainTabs in AppNavigator.
+- **Predictive Maintenance**: New `PredictiveMaintenanceScreen` — uptime forecasting (30d predicted uptime with confidence level), maintenance schedule generation (fan cleaning, thermal paste, PSU check, cable check, dust cleaning) with priority排序 and due dates, weather alerts simulation (heatwave, cold snap, high humidity, power grid stress) with adjustable ambient conditions. `predictiveMaintenance.ts` utility with `forecastUptime`, `generateMaintenanceSchedule`, `checkWeatherAlerts` functions.
+- **Activity Feed**: New `ActivityFeedScreen` — timeline of all events grouped by day (Today/Yesterday/Earlier), filter chips by type (Miners/Alerts/Firmware/Maintenance/Teams/Settings), unread indicators with mark-as-read on tap, summary stats (total/unread/today), mark all read and clear all buttons. `activityFeed.ts` Zustand store with 14 activity types, 500 event limit.
+- **World Map View**: New `WorldMapScreen` — world map area with miner dots (green/yellow/red by health), deterministic dot positioning via hash, map filter controls (Show All/Online Only/Critical Only), location list grouped by miner location with stats, drill-down modal with miner details and View Details navigation. Color legend for health status.
+- **Dashboard Builder**: New `DashboardBuilderScreen` — layout controls (1-2 columns, compact mode), widget library with 10 widget types (hashrate, temp, power, earnings, fleet health, hashrate trend, alerts, pool distribution, map, miner list), live preview grid with enable/disable toggles, save/reset buttons. `DashboardLayoutConfig` and `DashboardWidgetConfig` interfaces.
+- **Navigation Wiring**: All 4 new screens registered in `RootStackParamList`, `AppNavigator` (lazy-loaded + wrapped), `SettingsScreen` (navigation rows), `WebSidebar` (quick links).
+- **i18n**: New keys for all 4 screens: `predictiveMaintenance`, `activityFeed`, `worldMap`, `dashboardBuilder` namespaces with full en locale.
+- **Tests**: 74 new tests across 6 new test files — `predictiveMaintenance.test.ts` (27 tests), `activityFeed.test.ts` (16 tests), `PredictiveMaintenanceScreen.test.tsx` (8), `ActivityFeedScreen.test.tsx` (8), `WorldMapScreen.test.tsx` (8), `DashboardBuilderScreen.test.tsx` (7).
 
 ### Test Results
 
-- **Frontend**: 1577 tests passing (117 suites) — TypeScript clean, ESLint clean
+- **Frontend**: 1663 tests passing (125 suites) — TypeScript clean, ESLint clean
 - **Backend**: 257 tests passing (28 suites)
-- **Total**: 1834 tests
+- **Total**: 1920 tests
 
 ---
 

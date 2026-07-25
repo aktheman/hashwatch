@@ -1162,5 +1162,131 @@
     "notSignedIn": "Not signed in",
     "error": "Error",
     "success": "Success"
+  },
+  "predictiveMaintenance": {
+    "title": "Predictive Maintenance",
+    "weatherAlerts": "Weather Alerts",
+    "noAlerts": "No active weather alerts",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "uptimeForecasts": "Uptime Forecasts",
+    "predictedUptime": "Predicted Uptime",
+    "downtimeHours": "downtime hours",
+    "confidence": "Confidence",
+    "riskFactors": "Risk Factors",
+    "noRiskFactors": "No risk factors detected",
+    "maintenanceSchedule": "Maintenance Schedule",
+    "noTasks": "No maintenance tasks scheduled",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "skipped": "Skipped",
+    "dueIn": "Due in {{days}} days",
+    "overdueBy": "Overdue by {{days}} days",
+    "dueToday": "Due today",
+    "duration": "{{minutes}} min",
+    "cost": "${{amount}}",
+    "complete": "Complete",
+    "skip": "Skip",
+    "summary": {
+      "pendingTasks": "Pending",
+      "overdue": "Overdue",
+      "avgUptime": "Avg Uptime",
+      "activeAlerts": "Active Alerts"
+    },
+    "weather": {
+      "title": "Environment Monitor",
+      "adjust": "Adjust ambient conditions"
+    }
+  },
+  "activityFeed": {
+    "title": "Activity Feed",
+    "noEvents": "No activity events yet",
+    "markAllRead": "Mark All Read",
+    "clearAll": "Clear All",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "filters": {
+      "all": "All",
+      "miners": "Miners",
+      "alerts": "Alerts",
+      "firmware": "Firmware",
+      "maintenance": "Maintenance",
+      "teams": "Teams",
+      "settings": "Settings"
+    },
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "today": "Today"
+    }
+  },
+  "worldMap": {
+    "title": "World Map",
+    "showAll": "Show All",
+    "onlineOnly": "Online Only",
+    "criticalOnly": "Critical Only",
+    "locations": "Locations",
+    "legend": "Legend",
+    "healthy": "Healthy",
+    "warning": "Warning",
+    "critical": "Critical",
+    "viewDetails": "View Details",
+    "noMiners": "No miners to display on map",
+    "stats": {
+      "total": "Total",
+      "online": "Online",
+      "critical": "Critical",
+      "locations": "Locations"
+    },
+    "locationCard": {
+      "miners": "{{count}} miners",
+      "onlineCount": "{{online}}/{{total}} online",
+      "avgTemp": "Avg {{temp}}°C",
+      "hashrate": "{{hashrate}} TH/s"
+    }
+  },
+  "dashboardBuilder": {
+    "title": "Dashboard Builder",
+    "layout": "Layout",
+    "columns": "Columns",
+    "compact": "Compact Mode",
+    "widgetLibrary": "Widget Library",
+    "preview": "Preview",
+    "save": "Save Layout",
+    "reset": "Reset to Defaults",
+    "saved": "Dashboard layout saved",
+    "resetConfirm": "Reset dashboard to default layout?",
+    "noWidgets": "Enable widgets to see them here",
+    "remove": "Remove",
+    "widgets": {
+      "hashrate": "Total Hashrate",
+      "hashrateDesc": "Combined hashrate of all miners",
+      "temperature": "Temperature Overview",
+      "temperatureDesc": "Average and max temperatures",
+      "power": "Power Usage",
+      "powerDesc": "Total power draw and cost",
+      "earnings": "Earnings Estimate",
+      "earningsDesc": "Daily and weekly BTC/USD estimates",
+      "fleetHealth": "Fleet Health",
+      "fleetHealthDesc": "Overall health score",
+      "hashrateTrend": "Hashrate Trend",
+      "hashrateTrendDesc": "Mini chart of hashrate over time",
+      "alertSummary": "Alert Summary",
+      "alertSummaryDesc": "Count of active alerts",
+      "poolDistribution": "Pool Distribution",
+      "poolDistributionDesc": "Miners per pool breakdown",
+      "mapWidget": "Map Widget",
+      "mapWidgetDesc": "Mini map of miner locations",
+      "minerList": "Miner List",
+      "minerListDesc": "Compact list of all miners"
+    }
+  },
+  "navigator": {
+    "predictiveMaintenance": "Predictive Maintenance",
+    "activityFeed": "Activity Feed",
+    "worldMap": "World Map",
+    "dashboardBuilder": "Dashboard Builder"
   }
 }

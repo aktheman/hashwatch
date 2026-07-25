@@ -19,6 +19,17 @@ const NAV_ITEMS = [
 const QUICK_LINKS = [
   { screen: 'FleetHealth' as keyof RootStackParamList, icon: '💓', labelKey: 'fleetHealth.title' },
   {
+    screen: 'PredictiveMaintenance' as keyof RootStackParamList,
+    icon: '🔮',
+    labelKey: 'navigator.predictiveMaintenance',
+  },
+  { screen: 'WorldMap' as keyof RootStackParamList, icon: '🗺', labelKey: 'navigator.worldMap' },
+  {
+    screen: 'ActivityFeed' as keyof RootStackParamList,
+    icon: '📋',
+    labelKey: 'navigator.activityFeed',
+  },
+  {
     screen: 'AlertChannels' as keyof RootStackParamList,
     icon: '🔔',
     labelKey: 'alertChannels.title',
