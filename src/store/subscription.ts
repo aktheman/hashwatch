@@ -11,7 +11,7 @@ import {
 import { validateReceipt, apiClient } from '../api/client';
 import { getAuthToken } from './authToken';
 
-const FREE_MAX_MINERS = 4;
+const FREE_MAX_MINERS = 999;
 const PRO_MAX_MINERS = 999;
 
 interface StripeSubscriptionResponse {

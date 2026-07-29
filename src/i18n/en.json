@@ -453,7 +453,7 @@
     "trialBanner": "{{days}} days left in your free trial",
     "upgradeToPro": "Upgrade to Pro",
     "restorePurchases": "Restore Purchases",
-    "freeFeatures": ["Up to 4 miners", "Live dashboard", "Basic stats", "Push alerts"],
+    "freeFeatures": ["Unlimited miners", "Live dashboard", "Basic stats", "Push alerts"],
     "proFeatures": ["Unlimited miners", "30-day charts", "Push notifications", "Multi-wallet"]
   },
   "import": {
