@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { Miner } from '../types';
 import * as DB from '../db/database';
 import { useAlertHistoryStore } from '../store/alertHistory';
+import { sendTeamWebhook, getTeamWebhooks } from './teamWebhooks';
 
 const OFFLINE_REMINDER_TEXT = 'offline for over 5 minutes';
 
@@ -29,6 +30,109 @@ let pendingBatch: { title: string; body: string; data?: Record<string, string> }
 let batchTimer: ReturnType<typeof setTimeout> | null = null;
 
 const BATCH_DELAY_MS = 2000;
+
+export interface NotificationThresholds {
+  tempWarning: number;
+  tempCritical: number;
+  hashrateDropPercent: number;
+  offlineTimeoutMin: number;
+}
+
+export const DEFAULT_THRESHOLDS: NotificationThresholds = {
+  tempWarning: 70,
+  tempCritical: 85,
+  hashrateDropPercent: 50,
+  offlineTimeoutMin: 5,
+};
+
+export type MinerAlertType = 'offline' | 'overheating' | 'hashrate_drop' | 'power_loss';
+
+const ALERT_TITLES: Record<MinerAlertType, string> = {
+  offline: 'Miner Offline',
+  overheating: 'High Temperature',
+  hashrate_drop: 'Hashrate Drop',
+  power_loss: 'Power Loss',
+};
+
+const ALERT_CHANNEL_MAP: Record<MinerAlertType, 'critical' | 'warning' | 'info'> = {
+  offline: 'critical',
+  overheating: 'warning',
+  hashrate_drop: 'warning',
+  power_loss: 'critical',
+};
+
+export async function setupNotificationChannels(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync('critical', {
+    name: 'Critical Alerts',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 200],
+    sound: 'default',
+  });
+  await Notifications.setNotificationChannelAsync('warning', {
+    name: 'Warnings',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    vibrationPattern: [0, 100],
+  });
+  await Notifications.setNotificationChannelAsync('info', {
+    name: 'Info',
+    importance: Notifications.AndroidImportance.LOW,
+  });
+}
+
+export async function requestNotificationPermission(): Promise<boolean> {
+  try {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') return false;
+    await setupNotificationChannels();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendMinerAlert(
+  miner: Miner,
+  alertType: MinerAlertType,
+  thresholds: NotificationThresholds = DEFAULT_THRESHOLDS,
+): Promise<void> {
+  let body: string;
+  const category = ALERT_CHANNEL_MAP[alertType];
+
+  switch (alertType) {
+    case 'offline':
+      body = `${miner.name} (${miner.ip}) is offline`;
+      break;
+    case 'overheating':
+      body = `${miner.name} is ${(miner.status?.temperature ?? 0).toFixed(0)}°C — exceeds ${thresholds.tempCritical}°C critical`;
+      break;
+    case 'hashrate_drop':
+      body = `${miner.name} hashrate dropped below threshold`;
+      break;
+    case 'power_loss':
+      body = `${miner.name} lost power`;
+      break;
+  }
+
+  if (Platform.OS !== 'web') {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: ALERT_TITLES[alertType],
+        body,
+        data: { minerId: miner.id, type: alertType },
+        categoryIdentifier: category,
+      },
+      trigger: null,
+    });
+  }
+
+  useAlertHistoryStore.getState().addEvent({
+    minerId: miner.id,
+    minerName: miner.name,
+    type: alertType,
+    title: `${miner.name}: ${ALERT_TITLES[alertType]}`,
+  });
+}
 
 export interface AlertRule {
   enabled: boolean;
@@ -95,21 +199,7 @@ export async function setDefaultAlertRules(rules: AlertRule): Promise<void> {
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {
-  try {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') return false;
-
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('miner-alerts', {
-        name: 'Miner Alerts',
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 100],
-      });
-    }
-    return true;
-  } catch {
-    return false;
-  }
+  return requestNotificationPermission();
 }
 
 export function resetAlertState(): void {
@@ -317,9 +407,6 @@ async function send(title: string, body: string, data?: Record<string, string>) 
   if (batchTimer && typeof batchTimer === 'object' && 'unref' in batchTimer) {
     batchTimer.unref();
   }
-
-  sendToAlertChannels(`${title}: ${body}`).catch(() => {});
-  sendToBotChannels(title, body).catch(() => {});
 }
 
 function flushBatch(): void {
@@ -327,6 +414,12 @@ function flushBatch(): void {
 
   const items = [...pendingBatch];
   pendingBatch = [];
+
+  const allTitles = items.map((i) => i.title);
+  const allBodies = items.map((i) => `${i.title}: ${i.body}`);
+
+  sendToAlertChannels(allBodies.join('\n')).catch(() => {});
+  sendToBotChannels(allTitles.join(', '), allBodies.join(', ')).catch(() => {});
 
   if (items.length === 1) {
     const { title, body, data } = items[0];
@@ -367,7 +460,9 @@ function flushBatch(): void {
 }
 
 async function sendOfflineAlert(miner: Miner) {
-  await send('Miner Offline', `${miner.name} (${miner.ip}) has gone offline`, {
+  const notificationBody = `${miner.name} (${miner.ip}) has gone offline`;
+  const eventType = 'offline';
+  await send('Miner Offline', notificationBody, {
     minerId: miner.id,
     type: 'offline',
   });
@@ -377,6 +472,22 @@ async function sendOfflineAlert(miner: Miner) {
     type: 'offline',
     title: `${miner.name} went offline`,
   });
+  try {
+    const webhooks = await getTeamWebhooks();
+    const matching = webhooks.filter(
+      (w) => w.enabled && (w.events.includes(eventType) || w.events.includes('*')),
+    );
+    for (const webhook of matching) {
+      await sendTeamWebhook(webhook, {
+        event: eventType,
+        minerName: miner.name,
+        minerIp: miner.ip,
+        message: notificationBody,
+        severity: eventType.includes('offline') ? 'critical' : 'warning',
+        timestamp: Date.now(),
+      });
+    }
+  } catch {}
 }
 
 async function sendOfflineReminder(miner: Miner) {
@@ -393,7 +504,9 @@ async function sendOfflineReminder(miner: Miner) {
 }
 
 async function sendOnlineAlert(miner: Miner) {
-  await send('Miner Reconnected', `${miner.name} (${miner.ip}) is back online`, {
+  const notificationBody = `${miner.name} (${miner.ip}) is back online`;
+  const eventType = 'online';
+  await send('Miner Reconnected', notificationBody, {
     minerId: miner.id,
     type: 'online',
   });
@@ -403,10 +516,28 @@ async function sendOnlineAlert(miner: Miner) {
     type: 'online',
     title: `${miner.name} reconnected`,
   });
+  try {
+    const webhooks = await getTeamWebhooks();
+    const matching = webhooks.filter(
+      (w) => w.enabled && (w.events.includes(eventType) || w.events.includes('*')),
+    );
+    for (const webhook of matching) {
+      await sendTeamWebhook(webhook, {
+        event: eventType,
+        minerName: miner.name,
+        minerIp: miner.ip,
+        message: notificationBody,
+        severity: eventType.includes('offline') ? 'critical' : 'warning',
+        timestamp: Date.now(),
+      });
+    }
+  } catch {}
 }
 
 async function sendHotAlert(miner: Miner, temp: number) {
-  await send('High Temperature', `${miner.name} is ${temp.toFixed(0)}°C — check cooling`, {
+  const notificationBody = `${miner.name} is ${temp.toFixed(0)}°C — check cooling`;
+  const eventType = 'hot';
+  await send('High Temperature', notificationBody, {
     minerId: miner.id,
     type: 'hot',
   });
@@ -416,11 +547,29 @@ async function sendHotAlert(miner: Miner, temp: number) {
     type: 'hot',
     title: `${miner.name} temperature ${temp.toFixed(0)}°C`,
   });
+  try {
+    const webhooks = await getTeamWebhooks();
+    const matching = webhooks.filter(
+      (w) => w.enabled && (w.events.includes(eventType) || w.events.includes('*')),
+    );
+    for (const webhook of matching) {
+      await sendTeamWebhook(webhook, {
+        event: eventType,
+        minerName: miner.name,
+        minerIp: miner.ip,
+        message: notificationBody,
+        severity: eventType.includes('offline') ? 'critical' : 'warning',
+        timestamp: Date.now(),
+      });
+    }
+  } catch {}
 }
 
 async function sendHashrateDropAlert(miner: Miner, currentHr: number, prevHr: number) {
   const pct = Math.round((1 - currentHr / prevHr) * 100);
-  await send('Hashrate Drop', `${miner.name} hashrate dropped ${pct}%`, {
+  const notificationBody = `${miner.name} hashrate dropped ${pct}%`;
+  const eventType = 'hashrate_drop';
+  await send('Hashrate Drop', notificationBody, {
     minerId: miner.id,
     type: 'hashrate_drop',
   });
@@ -430,6 +579,22 @@ async function sendHashrateDropAlert(miner: Miner, currentHr: number, prevHr: nu
     type: 'hashrate_drop',
     title: `${miner.name} hashrate dropped ${pct}%`,
   });
+  try {
+    const webhooks = await getTeamWebhooks();
+    const matching = webhooks.filter(
+      (w) => w.enabled && (w.events.includes(eventType) || w.events.includes('*')),
+    );
+    for (const webhook of matching) {
+      await sendTeamWebhook(webhook, {
+        event: eventType,
+        minerName: miner.name,
+        minerIp: miner.ip,
+        message: notificationBody,
+        severity: eventType.includes('offline') ? 'critical' : 'warning',
+        timestamp: Date.now(),
+      });
+    }
+  } catch {}
 }
 
 async function sendPoolLostAlert(miner: Miner, pool: string) {
@@ -461,7 +626,9 @@ async function sendLongUptimeAlert(miner: Miner, seconds: number) {
 
 async function sendShareRejectionAlert(miner: Miner, rejectionRate: number) {
   const pct = Math.round(rejectionRate);
-  await send('Share Rejection', `${miner.name} rejecting ${pct}% of shares`, {
+  const notificationBody = `${miner.name} rejecting ${pct}% of shares`;
+  const eventType = 'share_rejection';
+  await send('Share Rejection', notificationBody, {
     minerId: miner.id,
     type: 'share_rejection',
   });
@@ -471,6 +638,22 @@ async function sendShareRejectionAlert(miner: Miner, rejectionRate: number) {
     type: 'share_rejection',
     title: `${miner.name} rejecting ${pct}% shares`,
   });
+  try {
+    const webhooks = await getTeamWebhooks();
+    const matching = webhooks.filter(
+      (w) => w.enabled && (w.events.includes(eventType) || w.events.includes('*')),
+    );
+    for (const webhook of matching) {
+      await sendTeamWebhook(webhook, {
+        event: eventType,
+        minerName: miner.name,
+        minerIp: miner.ip,
+        message: notificationBody,
+        severity: eventType.includes('offline') ? 'critical' : 'warning',
+        timestamp: Date.now(),
+      });
+    }
+  } catch {}
 }
 
 async function isQuietHours(): Promise<boolean> {

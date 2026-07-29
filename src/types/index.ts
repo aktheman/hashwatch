@@ -119,6 +119,12 @@ export type RootStackParamList = {
   ActivityFeed: undefined;
   WorldMap: undefined;
   DashboardBuilder: undefined;
+  Realtime: undefined;
+  NotificationSettings: undefined;
+  WidgetConfig: undefined;
+  AutomatedActions: undefined;
+  PoolProviders: undefined;
+  NotificationChannels: undefined;
 };
 
 export type TabParamList = {

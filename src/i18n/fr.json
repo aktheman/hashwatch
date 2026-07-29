@@ -532,7 +532,19 @@
     "importData": "Importer des données",
     "minerComparison": "Comparaison de mineurs",
     "firmware": "Firmware",
-    "darkPool": "Pool Noir"
+    "darkPool": "Pool Noir",
+    "realtime": "Moniteur en Temps Réel"
+  },
+  "realtime": {
+    "title": "Moniteur en Temps Réel",
+    "connected": "Connecté",
+    "simulated": "Simulé",
+    "noMiners": "Aucun mineur en ligne",
+    "allMiners": "Tous les Mineurs",
+    "hashrate": "Taux de Hachage",
+    "temperature": "Température",
+    "power": "Puissance",
+    "dangerZone": "Zone de Danger (>80°C)"
   },
   "minerCard": {
     "hashrate": "Taux de hachage",
@@ -604,6 +616,12 @@
   },
   "offlineBanner": {
     "offline": "Vous êtes hors ligne — affichage des données en cache"
+  },
+  "offline": {
+    "banner": "Hors ligne — modifications enregistrées localement",
+    "syncing": "Synchronisation...",
+    "synced": "Tout synchronisé",
+    "syncError": "Échec de la synchronisation — nouvelle tentative"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Passez à Pro pour débloquer",

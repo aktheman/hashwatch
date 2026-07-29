@@ -325,6 +325,8 @@ export function BotChannelsScreen(_props: { navigation: NavigationProp }) {
                   },
                 ]}
                 onPress={() => setNewType('discord')}
+                accessibilityRole="button"
+                accessibilityLabel={t('botChannels.discord')}
               >
                 <Text
                   style={{
@@ -345,6 +347,8 @@ export function BotChannelsScreen(_props: { navigation: NavigationProp }) {
                   },
                 ]}
                 onPress={() => setNewType('telegram')}
+                accessibilityRole="button"
+                accessibilityLabel={t('botChannels.telegram')}
               >
                 <Text
                   style={{
@@ -364,6 +368,7 @@ export function BotChannelsScreen(_props: { navigation: NavigationProp }) {
               placeholder={t('botChannels.botName')}
               placeholderTextColor={theme.textMuted}
               autoCapitalize="none"
+              accessibilityLabel={t('botChannels.botName')}
             />
             <TextInput
               style={styles.input}
@@ -374,6 +379,7 @@ export function BotChannelsScreen(_props: { navigation: NavigationProp }) {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
+              accessibilityLabel={t('botChannels.webhookUrl')}
             />
 
             <View style={{ flexDirection: 'row', gap: spacing.xs }}>

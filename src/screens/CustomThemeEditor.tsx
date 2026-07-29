@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme, darkTheme, THEME_MAP, buildThemeFromColors } from '../theme';
 import { useCustomThemesStore, customThemeToTheme } from '../store/customThemes';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
@@ -18,15 +19,15 @@ import { NavigationProp } from '../types';
 
 const COLOR_GROUPS = [
   {
-    label: 'Background',
+    labelKey: 'customThemeEditor.background',
     keys: ['bg', 'surface', 'surfaceLight', 'border'] as const,
   },
   {
-    label: 'Primary',
+    labelKey: 'customThemeEditor.primary',
     keys: ['primary', 'primaryLight', 'primaryDark', 'accent'] as const,
   },
   {
-    label: 'Status',
+    labelKey: 'customThemeEditor.status',
     keys: [
       'success',
       'successLight',
@@ -38,38 +39,38 @@ const COLOR_GROUPS = [
     ] as const,
   },
   {
-    label: 'Text',
+    labelKey: 'customThemeEditor.text',
     keys: ['text', 'textDim', 'textMuted'] as const,
   },
   {
-    label: 'Glow',
+    labelKey: 'customThemeEditor.glow',
     keys: ['glow', 'glowSuccess', 'glowDanger', 'glowWarning'] as const,
   },
 ];
 
-const COLOR_LABELS: Record<string, string> = {
-  bg: 'Background',
-  surface: 'Surface',
-  surfaceLight: 'Surface Light',
-  border: 'Border',
-  primary: 'Primary',
-  primaryLight: 'Primary Light',
-  primaryDark: 'Primary Dark',
-  accent: 'Accent',
-  success: 'Success',
-  successLight: 'Success Light',
-  danger: 'Danger',
-  dangerLight: 'Danger Light',
-  warning: 'Warning',
-  warningLight: 'Warning Light',
-  info: 'Info',
-  text: 'Text',
-  textDim: 'Text Dim',
-  textMuted: 'Text Muted',
-  glow: 'Glow',
-  glowSuccess: 'Glow Success',
-  glowDanger: 'Glow Danger',
-  glowWarning: 'Glow Warning',
+const COLOR_I18N_KEYS: Record<string, string> = {
+  bg: 'customThemeEditor.colors.bg',
+  surface: 'customThemeEditor.colors.surface',
+  surfaceLight: 'customThemeEditor.colors.surfaceLight',
+  border: 'customThemeEditor.colors.border',
+  primary: 'customThemeEditor.colors.primary',
+  primaryLight: 'customThemeEditor.colors.primaryLight',
+  primaryDark: 'customThemeEditor.colors.primaryDark',
+  accent: 'customThemeEditor.colors.accent',
+  success: 'customThemeEditor.colors.success',
+  successLight: 'customThemeEditor.colors.successLight',
+  danger: 'customThemeEditor.colors.danger',
+  dangerLight: 'customThemeEditor.colors.dangerLight',
+  warning: 'customThemeEditor.colors.warning',
+  warningLight: 'customThemeEditor.colors.warningLight',
+  info: 'customThemeEditor.colors.info',
+  text: 'customThemeEditor.colors.text',
+  textDim: 'customThemeEditor.colors.textDim',
+  textMuted: 'customThemeEditor.colors.textMuted',
+  glow: 'customThemeEditor.colors.glow',
+  glowSuccess: 'customThemeEditor.colors.glowSuccess',
+  glowDanger: 'customThemeEditor.colors.glowDanger',
+  glowWarning: 'customThemeEditor.colors.glowWarning',
 };
 
 interface Props {
@@ -78,6 +79,7 @@ interface Props {
 }
 
 export default function CustomThemeEditor({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { create, update, remove, themes } = useCustomThemesStore();
 
@@ -110,14 +112,17 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Theme name is required');
+      Alert.alert(t('common.error'), t('customThemeEditor.nameRequired'));
       return;
     }
     const invalidKeys = Object.entries(colors)
       .filter(([, v]) => typeof v === 'string' && !isValidHex(v))
-      .map(([key]) => COLOR_LABELS[key] || key);
+      .map(([key]) => t(COLOR_I18N_KEYS[key] || key));
     if (invalidKeys.length > 0) {
-      Alert.alert('Invalid Colors', `Fix invalid hex values: ${invalidKeys.join(', ')}`);
+      Alert.alert(
+        t('customThemeEditor.invalidColors'),
+        t('themes.invalidColors', { keys: invalidKeys.join(', ') }),
+      );
       return;
     }
     if (existingTheme) {
@@ -126,14 +131,14 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
       await create(name.trim(), colors);
     }
     navigation.goBack();
-  }, [name, colors, existingTheme, create, update, navigation]);
+  }, [name, colors, existingTheme, create, update, navigation, t]);
 
   const handleDelete = useCallback(() => {
     if (!existingTheme) return;
-    Alert.alert('Delete Theme', `Delete "${existingTheme.name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('themes.deleteTheme'), t('themes.deleteConfirm', { name: existingTheme.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await remove(existingTheme.id);
@@ -141,7 +146,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
         },
       },
     ]);
-  }, [existingTheme, remove, navigation]);
+  }, [existingTheme, remove, navigation, t]);
 
   const handleReset = useCallback(() => {
     setColors({ ...baseTheme });
@@ -152,14 +157,14 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
     if (Platform.OS === 'web') {
       try {
         await navigator.clipboard.writeText(json);
-        Alert.alert('Copied', 'Theme JSON copied to clipboard');
+        Alert.alert(t('common.success'), t('customThemeEditor.copied'));
       } catch {
-        Alert.alert('Export', json);
+        Alert.alert(t('customThemeEditor.export'), json);
       }
     } else {
-      Alert.alert('Export Theme', json);
+      Alert.alert(t('customThemeEditor.exportTitle'), json);
     }
-  }, [name, colors]);
+  }, [name, colors, t]);
 
   return (
     <ScrollView
@@ -168,7 +173,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>
-          {existingTheme ? 'Edit Theme' : 'New Theme'}
+          {existingTheme ? t('themes.editTheme') : t('themes.newTheme')}
         </Text>
         <View style={styles.headerActions}>
           <Pressable
@@ -178,9 +183,9 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
             ]}
             onPress={handleExport}
             accessibilityRole="button"
-            accessibilityLabel="Export theme as JSON"
+            accessibilityLabel={t('themes.export')}
           >
-            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Export</Text>
+            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>{t('themes.export')}</Text>
           </Pressable>
           <Pressable
             style={[
@@ -189,9 +194,9 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
             ]}
             onPress={() => setPreviewVisible(true)}
             accessibilityRole="button"
-            accessibilityLabel="Preview theme"
+            accessibilityLabel={t('themes.preview')}
           >
-            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Preview</Text>
+            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>{t('themes.preview')}</Text>
           </Pressable>
           <Pressable
             style={[
@@ -200,15 +205,15 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
             ]}
             onPress={handleReset}
             accessibilityRole="button"
-            accessibilityLabel="Reset colors to base theme"
+            accessibilityLabel={t('themes.resetColors')}
           >
-            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>Reset</Text>
+            <Text style={{ color: theme.text, fontSize: fontSize.sm }}>{t('themes.reset')}</Text>
           </Pressable>
         </View>
       </View>
 
       <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-        <Text style={[styles.label, { color: theme.textDim }]}>Theme Name</Text>
+        <Text style={[styles.label, { color: theme.textDim }]}>{t('themes.themeName')}</Text>
         <TextInput
           style={[
             styles.input,
@@ -216,15 +221,16 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
           ]}
           value={name}
           onChangeText={setName}
-          placeholder="My Custom Theme"
+          placeholder={t('themes.themeNamePlaceholder')}
           placeholderTextColor={theme.textMuted}
+          accessibilityLabel={t('themes.themeName')}
         />
       </View>
 
       <View style={styles.groupTabs}>
         {COLOR_GROUPS.map((group, i) => (
           <Pressable
-            key={group.label}
+            key={group.labelKey}
             style={[
               styles.groupTab,
               {
@@ -233,6 +239,8 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
               },
             ]}
             onPress={() => setActiveGroup(i)}
+            accessibilityRole="button"
+            accessibilityLabel={t(group.labelKey)}
           >
             <Text
               style={{
@@ -241,7 +249,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
                 fontWeight: fontWeight.semibold,
               }}
             >
-              {group.label}
+              {t(group.labelKey)}
             </Text>
           </Pressable>
         ))}
@@ -263,7 +271,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
                 ]}
               />
               <Text style={{ color: theme.text, fontSize: fontSize.base }}>
-                {COLOR_LABELS[key] || key}
+                {t(COLOR_I18N_KEYS[key] || key)}
               </Text>
             </View>
             <TextInput
@@ -279,7 +287,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
               onChangeText={(v) => updateColor(key, v)}
               autoCapitalize="none"
               autoCorrect={false}
-              accessibilityLabel={`${COLOR_LABELS[key] || key} color hex value`}
+              accessibilityLabel={`${t(COLOR_I18N_KEYS[key] || key)} color hex value`}
             />
           </View>
         );
@@ -290,10 +298,10 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
           style={[styles.primaryBtn, { backgroundColor: theme.primary }]}
           onPress={handleSave}
           accessibilityRole="button"
-          accessibilityLabel={existingTheme ? 'Save theme changes' : 'Create new theme'}
+          accessibilityLabel={existingTheme ? t('themes.saveChanges') : t('themes.createTheme')}
         >
           <Text style={{ color: '#FFF', fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
-            {existingTheme ? 'Save Changes' : 'Create Theme'}
+            {existingTheme ? t('themes.saveChanges') : t('themes.createTheme')}
           </Text>
         </Pressable>
 
@@ -302,12 +310,12 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
             style={[styles.dangerBtn, { borderColor: theme.danger }]}
             onPress={handleDelete}
             accessibilityRole="button"
-            accessibilityLabel="Delete this custom theme"
+            accessibilityLabel={t('themes.deleteTheme')}
           >
             <Text
               style={{ color: theme.danger, fontSize: fontSize.base, fontWeight: fontWeight.bold }}
             >
-              Delete Theme
+              {t('themes.deleteTheme')}
             </Text>
           </Pressable>
         )}
@@ -316,7 +324,7 @@ export default function CustomThemeEditor({ navigation, route }: Props) {
       <ThemePreviewModal
         visible={previewVisible}
         theme={previewTheme}
-        themeName={name || 'Preview'}
+        themeName={name || t('themes.preview')}
         emoji="🎨"
         isActive={false}
         onApply={() => {

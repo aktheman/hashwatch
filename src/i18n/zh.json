@@ -522,7 +522,19 @@
     "importData": "导入数据",
     "minerComparison": "矿机比较",
     "firmware": "固件",
-    "darkPool": "暗池"
+    "darkPool": "暗池",
+    "realtime": "实时监控"
+  },
+  "realtime": {
+    "title": "实时监控",
+    "connected": "已连接",
+    "simulated": "模拟数据",
+    "noMiners": "无在线矿机",
+    "allMiners": "所有矿机",
+    "hashrate": "算力",
+    "temperature": "温度",
+    "power": "功率",
+    "dangerZone": "危险区域 (>80°C)"
   },
   "minerCard": {
     "hashrate": "算力",
@@ -594,6 +606,12 @@
   },
   "offlineBanner": {
     "offline": "您已离线 — 显示缓存数据"
+  },
+  "offline": {
+    "banner": "离线 — 更改已本地保存",
+    "syncing": "同步中...",
+    "synced": "全部同步完成",
+    "syncError": "同步失败 — 将重试"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "升级到 Pro 以解锁",

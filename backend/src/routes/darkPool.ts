@@ -31,8 +31,6 @@ import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { log } from '../logger';
 
-const CONTRIBUTION_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
-
 const PERIOD_INTERVALS: Record<string, string> = {
   '1h': '1 hour',
   '24h': '24 hours',

@@ -96,3 +96,16 @@ jest.mock('expo-constants', () => ({
     },
   },
 }));
+
+jest.mock('expo-network', () => ({
+  getNetworkStateAsync: jest.fn(),
+  getIpAddressAsync: jest.fn(),
+}));
+
+jest.mock('@react-navigation/native', () => {
+  const actual = jest.requireActual('@react-navigation/native');
+  return {
+    ...actual,
+    useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn(), setOptions: jest.fn() }),
+  };
+});

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — HashWatch</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .error-code {
+      font-size: 120px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .error-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .error-message {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 32px;
+      max-width: 400px;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .error-actions a {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .error-actions .primary {
+      background: var(--gradient);
+      color: #fff;
+    }
+    .error-actions .primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .error-actions .secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .error-actions .secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="/" class="logo">HashWatch</a>
+      <div class="links">
+        <a href="/#features">Features</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/app" class="btn">Open App</a>
+      </div>
+    </nav>
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Page Not Found</h1>
+      <p class="error-message">The page you're looking for doesn't exist or has been moved.</p>
+      <div class="error-actions">
+        <a href="/" class="primary">Back to Home</a>
+        <a href="/app" class="secondary">Launch Dashboard</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

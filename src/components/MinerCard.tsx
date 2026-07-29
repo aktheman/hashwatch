@@ -289,6 +289,7 @@ export const MinerCard = memo(
                       setEditNameValue(miner.name);
                       setEditingName(true);
                     }}
+                    accessibilityRole="button"
                     accessibilityLabel="Edit miner name"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >

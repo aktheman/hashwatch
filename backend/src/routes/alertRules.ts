@@ -23,15 +23,6 @@ export interface MinerAlertRule {
   sharerejectionpercent: number;
 }
 
-const DEFAULT_RULE: MinerAlertRule = {
-  enabled: true,
-  tempthreshold: 70,
-  hashratedroppercent: 50,
-  offlinereminderminutes: 5,
-  uptimethresholdhours: 24,
-  sharerejectionpercent: 10,
-};
-
 alertRulesRouter.get('/:minerId', async (req: AuthRequest, res) => {
   const minerId = req.params.minerId as string;
   if (!(await verifyMinerOwnership(minerId, req.userId as string))) {

@@ -79,7 +79,7 @@ async function migrate(): Promise<void> {
 }
 
 // Run migration at module load
-migrate();
+void migrate();
 
 export async function getSetting(key: string): Promise<string | null> {
   const settings = loadJSON<Record<string, string>>(STORAGE_KEY_SETTINGS, {});

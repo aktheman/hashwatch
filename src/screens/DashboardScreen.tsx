@@ -43,6 +43,7 @@ import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents
 import { MinerDrillDownModal } from '../components/MinerDrillDownModal';
 import { TimeAgo } from '../components/TimeAgo';
 import { recommendPools } from '../utils/poolRecommendation';
+import { getAutomatedActionsSettings, getLastActionLog } from '../services/automatedActions';
 
 const LazyWorldMap = lazy(() =>
   import('../components/WorldMap').then((m) => ({ default: m.WorldMap })),
@@ -115,6 +116,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     metricType: 'hashrate' | 'power' | 'uptime' | 'temp';
     title: string;
   } | null>(null);
+  const [aaEnabled, setAaEnabled] = useState(false);
+  const [aaTodayCount, setAaTodayCount] = useState(0);
   const TIME_RANGE_OPTIONS: { key: TimeRange; label: string }[] = [
     { key: '1h', label: '1H' },
     { key: '6h', label: '6H' },
@@ -203,6 +206,25 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     loadLayout().then((layout) => {
       setDashboardLayout(layout);
     });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAutomatedActionsSettings().then((s) => {
+      if (cancelled) return;
+      setAaEnabled(s.autoRestartEnabled || s.autoPoolSwitchEnabled);
+    });
+    getLastActionLog().then((log) => {
+      if (cancelled) return;
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const ts = todayStart.getTime();
+      const todayActions = log.filter((a) => a.timestamp >= ts);
+      setAaTodayCount(todayActions.length);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredMiners = useMemo(
@@ -632,6 +654,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, [miners]);
 
   const poolRecommendations = useMemo(() => recommendPools(miners), [miners]);
+
+  const aaStatusText = useMemo(
+    () =>
+      aaTodayCount > 0
+        ? `${aaTodayCount} restart${aaTodayCount !== 1 ? 's' : ''} today`
+        : 'No actions today',
+    [aaTodayCount],
+  );
 
   const [sortBy, setSortBy] = useState<'name' | 'hashrate' | 'temp'>('name');
   const sortedMiners = useMemo(() => {
@@ -2044,6 +2074,42 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             })}
           </Text>
         </View>
+      )}
+
+      {aaEnabled && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Automated actions"
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginHorizontal: spacing.md,
+            marginBottom: spacing.xs,
+            backgroundColor: theme.surface,
+            borderRadius: radius.md,
+            paddingHorizontal: spacing.sm,
+            paddingVertical: spacing.xs,
+            borderWidth: 1,
+            borderColor: theme.border,
+            gap: spacing.sm,
+          }}
+          onPress={() => navigation.navigate('AutomatedActions')}
+        >
+          <Text style={{ fontSize: fontSize.md }}>⚡</Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: fontSize.sm,
+                fontWeight: fontWeight.bold,
+              }}
+            >
+              Automated Actions
+            </Text>
+            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{aaStatusText}</Text>
+          </View>
+          <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>{'>'}</Text>
+        </Pressable>
       )}
 
       {!kioskMode && miners.length > 0 && (

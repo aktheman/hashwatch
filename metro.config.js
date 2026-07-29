@@ -24,6 +24,8 @@ const NATIVE_ONLY_PACKAGES = new Set([
   'react-native-view-shot',
 ]);
 
+config.resolver.unstable_enablePackageExports = true;
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   // Web stubs for RevenueCat (not available on web)
   if (platform === 'web' && moduleName === 'react-native-purchases') {
@@ -82,6 +84,35 @@ config.transformer = {
       // Simplify boolean returns
       booleans: true,
     },
+  },
+};
+
+// Serializer: group vendor modules with higher IDs so they land in a contiguous
+// block of the bundle. When only app code changes the vendor chunk hash stays
+// stable, improving downstream caching (CDN, OTA, hermes bytecode).
+const vendorIds = new Map();
+let nextVendorId = 1_000_000;
+
+config.serializer = {
+  ...config.serializer,
+  createModuleIdFactory:
+    config.serializer?.createModuleIdFactory ??
+    (() => {
+      const appIds = new Map();
+      let nextAppId = 0;
+      return (modulePath) => {
+        if (modulePath.includes('node_modules')) {
+          if (!vendorIds.has(modulePath)) vendorIds.set(modulePath, nextVendorId++);
+          return vendorIds.get(modulePath);
+        }
+        if (!appIds.has(modulePath)) appIds.set(modulePath, nextAppId++);
+        return appIds.get(modulePath);
+      };
+    })(),
+  processModuleFilter: (module) => {
+    // Keep all modules; the ID factory above groups them.
+    // This hook is a convenient place for future per-module exclusions.
+    return true;
   },
 };
 

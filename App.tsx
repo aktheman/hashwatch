@@ -6,6 +6,7 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { ThemeTransitionOverlay } from './src/components/ThemeTransitionOverlay';
 import { PWAInstallBanner } from './src/components/PWAInstallBanner';
+import { OfflineIndicator } from './src/components/OfflineIndicator';
 import { getSetting } from './src/db/database';
 import { requestNotificationPermissions } from './src/services/notifications';
 import { useAuthStore } from './src/store/auth';
@@ -113,6 +114,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <StatusBar style={theme.bg === darkTheme.bg ? 'light' : 'dark'} />
+      <OfflineIndicator />
       <Suspense fallback={null}>
         <WhatsNewModal />
       </Suspense>

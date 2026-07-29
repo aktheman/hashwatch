@@ -41,7 +41,16 @@ function tryFile(res, filePath) {
 
 function htmlFallback(res, filePath) {
   fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404); return res.end('Not found'); }
+    if (err) {
+      // Serve custom 404 page if available, otherwise plain text
+      const notFoundPath = path.join(PUBLIC, '404.html');
+      fs.readFile(notFoundPath, (err404, data404) => {
+        if (err404) { res.writeHead(404); return res.end('Not found'); }
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end(data404);
+      });
+      return;
+    }
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(data);
   });
@@ -72,13 +81,15 @@ const server = http.createServer((req, res) => {
 
   // /app or /app/* → Expo SPA
   if (url === '/app' || url === '/app/') {
-    return htmlFallback(res, path.join(DIST, 'app.html'));
+    if (tryFile(res, path.join(DIST, 'app.html'))) return;
+    return htmlFallback(res, path.join(DIST, 'index.html'));
   }
   if (url.startsWith('/app/')) {
     const subPath = url.slice(5);
     const filePath = path.join(DIST, subPath);
     if (filePath.startsWith(DIST) && tryFile(res, filePath)) return;
-    return htmlFallback(res, path.join(DIST, 'app.html'));
+    if (tryFile(res, path.join(DIST, 'app.html'))) return;
+    return htmlFallback(res, path.join(DIST, 'index.html'));
   }
 
   // Try public/ directory first (marketing pages, assets)
@@ -96,7 +107,8 @@ const server = http.createServer((req, res) => {
   if (tryCleanUrl(res, DIST, url)) return;
 
   // SPA fallback
-  htmlFallback(res, path.join(DIST, 'app.html'));
+  if (tryFile(res, path.join(DIST, 'app.html'))) return;
+  htmlFallback(res, path.join(DIST, 'index.html'));
 });
 
 server.listen(PORT, () => console.log(`HashWatch serving on http://localhost:${PORT}`));

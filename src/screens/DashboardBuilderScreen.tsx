@@ -131,24 +131,31 @@ export function DashboardBuilderScreen() {
   const handleSave = useCallback(() => {
     haptics.success();
     setHasChanges(false);
-    Alert.alert('Saved', 'Dashboard layout has been saved.');
-  }, []);
+    Alert.alert(
+      t('dashboardBuilder.saved', 'Dashboard layout saved'),
+      t('dashboardBuilder.saved', 'Dashboard layout saved'),
+    );
+  }, [t]);
 
   const handleReset = useCallback(() => {
     haptics.warning();
-    Alert.alert('Reset Layout', 'Reset dashboard to default layout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Reset',
-        style: 'destructive',
-        onPress: () => {
-          haptics.destructiveActionHaptic();
-          setConfig(DEFAULT_CONFIG);
-          setHasChanges(false);
+    Alert.alert(
+      t('dashboardBuilder.resetConfirm', 'Reset dashboard to default layout?'),
+      t('dashboardBuilder.resetConfirm', 'Reset dashboard to default layout?'),
+      [
+        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('dashboardBuilder.reset', 'Reset'),
+          style: 'destructive',
+          onPress: () => {
+            haptics.destructiveActionHaptic();
+            setConfig(DEFAULT_CONFIG);
+            setHasChanges(false);
+          },
         },
-      },
-    ]);
-  }, []);
+      ],
+    );
+  }, [t]);
 
   const s = StyleSheet.create({
     container: {

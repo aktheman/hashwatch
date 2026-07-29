@@ -354,7 +354,11 @@ export function DashboardCustomizer({
             <Text style={{ color: theme.text, fontSize: fontSize.xl, fontWeight: fontWeight.bold }}>
               {t('dashboardCustomizer.title')}
             </Text>
-            <Pressable accessibilityRole="button" onPress={onClose}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('dashboardCustomizer.done')}
+              onPress={onClose}
+            >
               <Text style={{ color: theme.primary, fontSize: fontSize.lg }}>
                 {t('dashboardCustomizer.done')}
               </Text>

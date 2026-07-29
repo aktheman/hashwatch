@@ -575,7 +575,19 @@
     "importData": "Importar Datos",
     "minerComparison": "Comparación de mineros",
     "firmware": "Firmware",
-    "darkPool": "Pool Oscuro"
+    "darkPool": "Pool Oscuro",
+    "realtime": "Monitor en Tiempo Real"
+  },
+  "realtime": {
+    "title": "Monitor en Tiempo Real",
+    "connected": "Conectado",
+    "simulated": "Simulado",
+    "noMiners": "Sin mineros en línea",
+    "allMiners": "Todos los Mineros",
+    "hashrate": "Tasa de Hash",
+    "temperature": "Temperatura",
+    "power": "Energía",
+    "dangerZone": "Zona de Peligro (>80°C)"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -647,6 +659,12 @@
   },
   "offlineBanner": {
     "offline": "Estás desconectado — mostrando datos en caché"
+  },
+  "offline": {
+    "banner": "Sin conexión — cambios guardados localmente",
+    "syncing": "Sincronizando...",
+    "synced": "Todo sincronizado",
+    "syncError": "Error de sincronización — se reintentará"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Actualiza a Pro para desbloquear",

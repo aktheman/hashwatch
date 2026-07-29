@@ -335,6 +335,7 @@ export function PoolAnalyticsScreen() {
             placeholderTextColor={theme.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
+            accessibilityLabel={t('poolAnalytics.apiKey')}
           />
 
           <Text style={styles.inputLabel}>{t('poolAnalytics.poolUser')}</Text>
@@ -346,6 +347,7 @@ export function PoolAnalyticsScreen() {
             placeholderTextColor={theme.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
+            accessibilityLabel={t('poolAnalytics.poolUser')}
           />
 
           {saved && <Text style={styles.successText}>{t('poolAnalytics.configSaved')}</Text>}

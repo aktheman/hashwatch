@@ -57,3 +57,8 @@ backend/.jwt-env
 
 # Electron
 electron-dist/
+.aider*
+.env
+*.txt
+full_project.txt
+analyse.txt

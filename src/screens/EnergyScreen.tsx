@@ -44,7 +44,10 @@ export function EnergyScreen() {
   const handleAddSource = useCallback(() => {
     const maxW = parseInt(newMaxWatts, 10);
     if (!newName.trim() || !maxW || maxW <= 0) {
-      Alert.alert('Error', 'Name and valid max watts required');
+      Alert.alert(
+        t('common.error', 'Error'),
+        t('energy.sourceValidation', 'Name and valid max watts required'),
+      );
       return;
     }
     const colors: Record<string, string> = {
@@ -72,7 +75,10 @@ export function EnergyScreen() {
   const handleAddReading = useCallback(() => {
     const watts = parseInt(readingWatts, 10);
     if (!readingSourceId || !watts || watts < 0) {
-      Alert.alert('Error', 'Select source and enter valid watts');
+      Alert.alert(
+        t('common.error', 'Error'),
+        t('energy.readingValidation', 'Select source and enter valid watts'),
+      );
       return;
     }
     const source = sources.find((s) => s.id === readingSourceId);
@@ -91,14 +97,18 @@ export function EnergyScreen() {
 
   const removeSource = useCallback(
     (id: string) => {
-      Alert.alert('Remove', 'Remove this energy source?', [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => setSources((prev) => prev.filter((s) => s.id !== id)),
-        },
-      ]);
+      Alert.alert(
+        t('energy.removeSource', 'Remove'),
+        t('energy.removeConfirm', 'Remove this energy source?'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('common.delete'),
+            style: 'destructive',
+            onPress: () => setSources((prev) => prev.filter((s) => s.id !== id)),
+          },
+        ],
+      );
     },
     [t],
   );
@@ -430,6 +440,7 @@ export function EnergyScreen() {
               onChangeText={setNewName}
               placeholder={t('energy.sourceName')}
               placeholderTextColor={theme.textMuted}
+              accessibilityLabel={t('energy.sourceName')}
             />
             <ScrollView
               horizontal
@@ -452,6 +463,8 @@ export function EnergyScreen() {
                       haptic.selection();
                       setNewType(type);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(`energy.${type}`)}
                   >
                     <Text
                       style={{
@@ -479,6 +492,7 @@ export function EnergyScreen() {
               placeholder={t('energy.maxWatts')}
               placeholderTextColor={theme.textMuted}
               keyboardType="numeric"
+              accessibilityLabel={t('energy.maxWatts')}
             />
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Pressable
@@ -577,6 +591,7 @@ export function EnergyScreen() {
               placeholder={t('energy.watts')}
               placeholderTextColor={theme.textMuted}
               keyboardType="numeric"
+              accessibilityLabel={t('energy.watts')}
             />
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Pressable

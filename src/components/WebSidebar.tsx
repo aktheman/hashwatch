@@ -30,6 +30,16 @@ const QUICK_LINKS = [
     labelKey: 'navigator.activityFeed',
   },
   {
+    screen: 'AutomatedActions' as keyof RootStackParamList,
+    icon: '⚡',
+    labelKey: 'automatedActions.title',
+  },
+  {
+    screen: 'PoolProviders' as keyof RootStackParamList,
+    icon: '⛏',
+    labelKey: 'poolProviders.title',
+  },
+  {
     screen: 'AlertChannels' as keyof RootStackParamList,
     icon: '🔔',
     labelKey: 'alertChannels.title',

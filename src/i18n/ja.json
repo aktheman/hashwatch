@@ -522,7 +522,19 @@
     "importData": "データをインポート",
     "minerComparison": "マイナー比較",
     "firmware": "ファームウェア",
-    "darkPool": "ダークプール"
+    "darkPool": "ダークプール",
+    "realtime": "リアルタイムモニター"
+  },
+  "realtime": {
+    "title": "リアルタイムモニター",
+    "connected": "接続済み",
+    "simulated": "シミュレーション",
+    "noMiners": "オンラインのマイナーなし",
+    "allMiners": "全マイナー",
+    "hashrate": "ハッシュレート",
+    "temperature": "温度",
+    "power": "電力",
+    "dangerZone": "危険ゾーン (>80°C)"
   },
   "minerCard": {
     "hashrate": "ハッシュレート",
@@ -594,6 +606,12 @@
   },
   "offlineBanner": {
     "offline": "オフラインです — キャッシュデータを表示中"
+  },
+  "offline": {
+    "banner": "オフライン — 変更はローカルに保存",
+    "syncing": "同期中...",
+    "synced": "すべて同期完了",
+    "syncError": "同期失敗 — 再試行します"
   },
   "subscriptionGate": {
     "upgradeToUnlock": "Pro にアップグレードしてアンロック",

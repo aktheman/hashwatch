@@ -101,21 +101,31 @@ export function PredictiveMaintenanceScreen() {
     );
   }, []);
 
-  const handleSkipTask = useCallback((taskId: string) => {
-    haptics.selection();
-    Alert.alert('Skip Task', 'Are you sure you want to skip this maintenance task?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Skip',
-        style: 'destructive',
-        onPress: () => {
-          setMaintenanceTasks((prev) =>
-            prev.map((t) => (t.id === taskId ? { ...t, status: 'skipped' } : t)),
-          );
-        },
-      },
-    ]);
-  }, []);
+  const handleSkipTask = useCallback(
+    (taskId: string) => {
+      haptics.selection();
+      Alert.alert(
+        t('predictiveMaintenance.skipTitle', 'Skip Task'),
+        t(
+          'predictiveMaintenance.skipConfirm',
+          'Are you sure you want to skip this maintenance task?',
+        ),
+        [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('predictiveMaintenance.skip', 'Skip'),
+            style: 'destructive',
+            onPress: () => {
+              setMaintenanceTasks((prev) =>
+                prev.map((t) => (t.id === taskId ? { ...t, status: 'skipped' } : t)),
+              );
+            },
+          },
+        ],
+      );
+    },
+    [t],
+  );
 
   const getSeverityColor = (severity: string) => {
     if (severity === 'info') return theme.info;

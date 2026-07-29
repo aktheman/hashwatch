@@ -96,6 +96,7 @@ export async function startAutoTheme(): Promise<void> {
       _appStateSub = AppState.addEventListener('change', handleAppState);
       return;
     }
+    // missing lat/lng — fall back to manual hour range instead of silently ignoring
   }
 
   const raw = await getSetting('auto_dark_hour');

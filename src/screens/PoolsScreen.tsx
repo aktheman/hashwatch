@@ -13,6 +13,7 @@ import {
 } from '../utils/hashrate';
 import { useTranslation } from 'react-i18next';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
+import * as haptics from '../utils/haptics';
 
 interface PoolGroup {
   pool: string;
@@ -341,6 +342,26 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
             <Text style={styles.headerTitle}>{t('pools.title')}</Text>
             <Text style={styles.headerSub}>{t('pools.subtitle')}</Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('poolAnalytics.title', 'Pool Analytics')}
+            style={{
+              backgroundColor: theme.primary + '20',
+              borderRadius: radius.sm,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+            }}
+            onPress={() => {
+              haptics.light();
+              navigation.navigate('PoolAnalytics');
+            }}
+          >
+            <Text
+              style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}
+            >
+              {t('poolAnalytics.title', 'Pool Analytics')}
+            </Text>
+          </Pressable>
         </View>
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>{'\uD83C\uDF0A'}</Text>
@@ -377,6 +398,26 @@ export function PoolsScreen({ navigation }: PoolsScreenProps) {
             {t('pools.poolCount', { pools: poolGroups.length, miners: miners.length })}
           </Text>
         </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('poolAnalytics.title', 'Pool Analytics')}
+          style={{
+            backgroundColor: theme.primary + '20',
+            borderRadius: radius.sm,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.xs,
+          }}
+          onPress={() => {
+            haptics.light();
+            navigation.navigate('PoolAnalytics');
+          }}
+        >
+          <Text
+            style={{ color: theme.primary, fontSize: fontSize.sm, fontWeight: fontWeight.bold }}
+          >
+            {t('poolAnalytics.title', 'Pool Analytics')}
+          </Text>
+        </Pressable>
       </View>
       {poolComparison && (
         <View style={styles.comparisonTable}>

@@ -55,7 +55,30 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - `backend/src/__tests__/cache.test.ts`: 8 tests (pass-through non-GET, cache hit/miss, TTL, auth differentiation, different URLs, invalidateAll, invalidatePrefix)
 - `backend/src/__tests__/webhooks.test.ts`: 3 tests (GET logs, empty logs, DELETE logs)
 
-## Latest Round (Session 2026-07-25 — Rounds 34-35)
+## Latest Round (Session 2026-07-28 — Round 36)
+
+### Changes (Round 36 — 2 screens, 4 services, team webhooks, multi-channel notifications, E2E, tests)
+
+- **FleetHealthScreen Enhanced**: Fleet trends (hashrate/temp arrows), estimated daily BTC+USD earnings with live CoinGecko price, health timeline bars, smart recommendations
+- **AutomatedActionsScreen**: Auto-restart offline miners (configurable delay), auto-pool-switch (profitability threshold), action log with timestamps
+- **PoolProvidersScreen**: Connect/disconnect pool providers, view stats, multi-pool overview
+- **automatedActions.ts**: Re-entrancy guard, per-miner rate limiting, action log persistence
+- **bitcoinPrice.ts**: CoinGecko API, 60s cache, useBitcoinPrice() hook, satoshi/BTC formatting
+- **poolProviders.ts**: Braiins, Luxor, ViaBTC, F2Pool, Poolin providers, parallel fetch
+- **teamWebhooks.ts**: Slack Block Kit + Discord embeds, CRUD, test, integrated into notification system
+- **notificationChannels.ts**: Push, Email, SMS (Twilio), Telegram, Slack, Discord multi-channel delivery
+- **E2E tests**: 20 new tests (predictive-maintenance, activity-feed, world-map, dashboard-builder)
+- **Unit tests**: 43 new tests (automatedActions: 19, bitcoinPrice: 6, poolProviders: 5, teamWebhooks: 13)
+- **Bug fix**: Launch Dashboard 404 — app.html missing from dist, fixed build script + serve.js fallback + 404.html
+- **Bundle**: metro.config.js unstable_enablePackageExports, platform stubs
+
+### Test results
+
+- Frontend: 1871 tests passing (149 suites) — TypeScript clean, ESLint clean
+- Backend: 257 tests passing (28 suites)
+- Total: 2128 tests
+
+## Previous Round (Session 2026-07-25 — Rounds 34-35)
 
 ### Changes (Rounds 34-35 — 8 new screens, 3 components, store metadata, bundle optimization)
 
@@ -331,7 +354,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## Current State
 
-- Tests: 1565 frontend (115 suites) + 242 backend (26 suites) = 1807 total, all passing.
+- Tests: 1871 frontend (149 suites) + 257 backend (28 suites) = 2128 total, all passing.
 - TypeScript: clean (0 errors) — frontend + backend
 - ESLint: clean (0 warnings) — frontend + backend
 - Themes: 14 total (dark, light, neon, matrix, 5tratum, crimson, ocean, lavender, midnight, nord, dracula, catppuccin, rosepine, system)

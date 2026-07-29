@@ -1,5 +1,29 @@
 # STATUS
 
+## Session Summary (2026-07-28 — Round 36)
+
+### Done
+
+- **Fleet Health Dashboard Enhancement**: Added fleet trends (hashrate/temperature arrows), estimated daily/monthly BTC+USD earnings with real-time CoinGecko price, health timeline bars per miner, smart fleet recommendations (temp warning, power optimization, pool change).
+- **Automated Actions**: New `AutomatedActionsScreen` + `automatedActions.ts` service — auto-restart offline miners with configurable delay, auto-pool-switch by profitability threshold, action log with timestamps and success/failure tracking.
+- **Slack/Discord Team Webhooks**: `teamWebhooks.ts` — Slack Block Kit + Discord embed formatting, CRUD for team webhooks, test connectivity. Integrated into notification system (offline/online/hot/hashrate_drop/share_rejection alerts also send to matching team webhooks).
+- **Multi-Channel Notifications**: `notificationChannels.ts` — Push, Email, SMS (Twilio), Telegram, Slack, Discord channels. CRUD, test, parallel delivery to all enabled channels matching event type.
+- **Pool Provider Integrations**: `poolProviders.ts` — Braiins, Luxor, ViaBTC, F2Pool, Poolin API support. Parallel multi-provider stats fetching, connection testing.
+- **Bitcoin Real-Time Price**: `bitcoinPrice.ts` — CoinGecko API with 60s cache, `useBitcoinPrice()` React hook, satoshi/BTC/mBTC/μBTC formatting, USD conversion.
+- **Pool Providers Screen**: New `PoolProvidersScreen` — connect/disconnect providers, view stats, multi-pool overview.
+- **E2E Tests**: 20 new Playwright tests across 4 files (predictive-maintenance, activity-feed, world-map, dashboard-builder).
+- **Unit Tests**: 43 new tests across 4 files (automatedActions, bitcoinPrice, poolProviders, teamWebhooks).
+- **Bundle Optimization**: `metro.config.js` unstable_enablePackageExports, platform stubs module.
+- **Bug Fix**: "Launch Dashboard" page not found — `app.html` missing from dist, fixed build script, added SPA fallback in serve.js, custom 404.html page.
+
+### Test Results
+
+- **Frontend**: 1871 tests passing (149 suites) — TypeScript clean, ESLint clean
+- **Backend**: 257 tests passing (28 suites)
+- **Total**: 2128 tests
+
+---
+
 ## Session Summary (2026-07-25 — Round 35)
 
 ### Done

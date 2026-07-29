@@ -22,6 +22,11 @@ Real-time BitAxe miner monitoring app built with Expo and React Native. Track ha
 - **i18n** -- Full localization in English, Spanish, French, German, Japanese, and Chinese
 - **Desktop** -- Electron wrapper with single-instance lock, window state persistence, and keyboard shortcuts
 - **Offline Queue** -- Settings sync queued and retried on network reconnect
+- **Automated Actions** -- Auto-restart offline miners, auto-pool-switch by profitability threshold, action logging
+- **Team Webhooks** -- Slack/Discord webhook notifications with Block Kit and embed formatting
+- **Multi-Channel Notifications** -- Push, Email, SMS, Telegram, Slack, Discord delivery channels
+- **Pool Providers** -- ViaBTC, F2Pool, Poolin API integrations alongside Braiins and Luxor
+- **Real-Time BTC Price** -- Live Bitcoin price for accurate earnings calculations
 
 ## Tech Stack
 

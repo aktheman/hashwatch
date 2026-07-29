@@ -9,6 +9,12 @@ const mockSaveSnapshot = jest.fn();
 const mockProbe = jest.fn();
 const mockDeleteMiner = jest.fn();
 
+jest.mock('expo-network', () => ({
+  getNetworkStateAsync: jest.fn().mockResolvedValue({ isConnected: true, type: 'wifi' }),
+  getIpAddressAsync: jest.fn().mockResolvedValue('192.168.1.1'),
+  NetworkStateType: { WIFI: 'wifi', CELLULAR: 'cellular', NONE: 'none' },
+}));
+
 jest.mock('../src/db/database', () => ({
   loadMiners: () => mockLoadMiners(),
   saveMiner: (m: unknown) => mockSaveMiner(m),

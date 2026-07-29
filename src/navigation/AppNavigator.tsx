@@ -18,26 +18,19 @@ import type { RootStackParamList, TabParamList } from '../types';
 
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-const DashboardScreen = lazy(() =>
-  import('../screens/DashboardScreen').then((m) => ({ default: m.DashboardScreen })),
-);
+import { DashboardScreen } from '../screens/DashboardScreen';
+import { PoolsScreen } from '../screens/PoolsScreen';
+import { AnalyticsScreen } from '../screens/AnalyticsScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
+
 const MinerDetailScreen = lazy(() =>
   import('../screens/MinerDetailScreen').then((m) => ({ default: m.MinerDetailScreen })),
 );
 const AddMinerScreen = lazy(() =>
   import('../screens/AddMinerScreen').then((m) => ({ default: m.AddMinerScreen })),
 );
-const SettingsScreen = lazy(() =>
-  import('../screens/SettingsScreen').then((m) => ({ default: m.SettingsScreen })),
-);
 const SubscriptionScreen = lazy(() =>
   import('../screens/SubscriptionScreen').then((m) => ({ default: m.SubscriptionScreen })),
-);
-const PoolsScreen = lazy(() =>
-  import('../screens/PoolsScreen').then((m) => ({ default: m.PoolsScreen })),
-);
-const AnalyticsScreen = lazy(() =>
-  import('../screens/AnalyticsScreen').then((m) => ({ default: m.AnalyticsScreen })),
 );
 const WalletsScreen = lazy(() =>
   import('../screens/WalletsScreen').then((m) => ({ default: m.WalletsScreen })),
@@ -174,6 +167,38 @@ const DashboardBuilderScreen = lazy(() =>
     default: m.DashboardBuilderScreen,
   })),
 );
+const WidgetConfigScreen = lazy(() =>
+  import('../screens/WidgetConfigScreen').then((m) => ({
+    default: m.WidgetConfigScreen,
+  })),
+);
+const RealtimeScreen = lazy(() =>
+  import('../screens/RealtimeScreen').then((m) => ({
+    default: m.RealtimeScreen,
+  })),
+);
+const NotificationSettingsScreen = lazy(() =>
+  import('../screens/NotificationSettingsScreen').then((m) => ({
+    default: m.NotificationSettingsScreen,
+  })),
+);
+const AutomatedActionsScreen = lazy(() =>
+  import('../screens/AutomatedActionsScreen').then((m) => ({
+    default: m.AutomatedActionsScreen,
+  })),
+);
+
+const PoolProvidersScreen = lazy(() =>
+  import('../screens/PoolProvidersScreen').then((m) => ({
+    default: m.PoolProvidersScreen,
+  })),
+);
+
+const NotificationChannelsScreen = lazy(() =>
+  import('../screens/NotificationChannelsScreen').then((m) => ({
+    default: m.NotificationChannelsScreen,
+  })),
+);
 
 function LoadingFallback() {
   const theme = useTheme();
@@ -232,6 +257,12 @@ const WrappedPredictiveMaintenance = withScreenBoundary(PredictiveMaintenanceScr
 const WrappedActivityFeed = withScreenBoundary(ActivityFeedScreen);
 const WrappedWorldMap = withScreenBoundary(WorldMapScreen);
 const WrappedDashboardBuilder = withScreenBoundary(DashboardBuilderScreen);
+const WrappedWidgetConfig = withScreenBoundary(WidgetConfigScreen);
+const WrappedRealtime = withScreenBoundary(RealtimeScreen);
+const WrappedNotificationSettings = withScreenBoundary(NotificationSettingsScreen);
+const WrappedAutomatedActions = withScreenBoundary(AutomatedActionsScreen);
+const WrappedPoolProviders = withScreenBoundary(PoolProvidersScreen);
+const WrappedNotificationChannels = withScreenBoundary(NotificationChannelsScreen);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -513,6 +544,36 @@ export function AppNavigator() {
           name="DashboardBuilder"
           component={WrappedDashboardBuilder}
           options={{ title: t('dashboardBuilder.title', 'Dashboard Builder') }}
+        />
+        <Stack.Screen
+          name="WidgetConfig"
+          component={WrappedWidgetConfig}
+          options={{ title: t('widgetConfig.title', 'Widget Configuration') }}
+        />
+        <Stack.Screen
+          name="Realtime"
+          component={WrappedRealtime}
+          options={{ title: t('realtime.title', 'Real-Time Monitor') }}
+        />
+        <Stack.Screen
+          name="NotificationSettings"
+          component={WrappedNotificationSettings}
+          options={{ title: t('notificationSettings.title', 'Notification Settings') }}
+        />
+        <Stack.Screen
+          name="AutomatedActions"
+          component={WrappedAutomatedActions}
+          options={{ title: t('automatedActions.title', 'Automated Actions') }}
+        />
+        <Stack.Screen
+          name="PoolProviders"
+          component={WrappedPoolProviders}
+          options={{ title: t('poolProviders.title', 'Pool Providers') }}
+        />
+        <Stack.Screen
+          name="NotificationChannels"
+          component={WrappedNotificationChannels}
+          options={{ title: t('notificationChannels.title', 'Notification Channels') }}
         />
       </Stack.Navigator>
     </NavigationContainer>

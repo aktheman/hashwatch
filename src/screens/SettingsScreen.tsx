@@ -1105,6 +1105,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   placeholderTextColor={theme.textMuted}
                   keyboardType="decimal-pad"
                   autoCapitalize="none"
+                  accessibilityLabel="Latitude"
                 />
                 <TextInput
                   style={{
@@ -1123,6 +1124,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   placeholderTextColor={theme.textMuted}
                   keyboardType="decimal-pad"
                   autoCapitalize="none"
+                  accessibilityLabel="Longitude"
                 />
               </View>
               <Pressable
@@ -1271,6 +1273,50 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t('notificationChannels.title', 'Notification Channels')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('NotificationChannels');
+          }}
+        >
+          <Text style={styles.rowLabel}>
+            {t('notificationChannels.title', 'Notification Channels')}
+          </Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('automatedActions.title', 'Automated Actions')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('AutomatedActions');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('automatedActions.title', 'Automated Actions')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('poolProviders.title', 'Pool Providers')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('PoolProviders');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('poolProviders.title', 'Pool Providers')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t('botChannels.title', 'Bot Channels')}
           style={[styles.row, { marginTop: spacing.xxs }]}
           onPress={() => {
@@ -1279,6 +1325,22 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           }}
         >
           <Text style={styles.rowLabel}>{t('botChannels.title', 'Bot Channels')}</Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('notificationSettings.title', 'Notification Settings')}
+          style={[styles.row, { marginTop: spacing.xxs }]}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('NotificationSettings');
+          }}
+        >
+          <Text style={styles.rowLabel}>
+            {t('notificationSettings.title', 'Notification Settings')}
+          </Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
@@ -1308,6 +1370,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
+            accessibilityLabel="Webhook URL"
           />
           <Pressable
             accessibilityRole="button"
@@ -1418,6 +1481,20 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
           <Text style={styles.rowLabel}>
             {t('profitabilitySwitch.title', 'Profitability Switching')}
           </Text>
+          <View style={styles.rowRight}>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('navigator.realtime', 'Real-Time Monitor')}
+          style={styles.row}
+          onPress={() => {
+            haptic.light();
+            navigation.navigate('Realtime');
+          }}
+        >
+          <Text style={styles.rowLabel}>{t('navigator.realtime', 'Real-Time Monitor')}</Text>
           <View style={styles.rowRight}>
             <Text style={styles.chevron}>›</Text>
           </View>
@@ -1880,6 +1957,7 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
                   multiline
                   placeholder={t('settings.csvPlaceholder')}
                   placeholderTextColor={theme.textMuted}
+                  accessibilityLabel="CSV data input"
                 />
                 <View style={{ flexDirection: 'row', gap: spacing.xxs }}>
                   <Pressable

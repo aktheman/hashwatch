@@ -8,7 +8,6 @@ import {
   sendMinerHotNotification,
   sendHashrateDropNotification,
   sendPoolChangeNotification,
-  sendRichNotification,
 } from '../services/pushNotifications';
 
 const mockSendPushNotificationsAsync = jest.fn().mockResolvedValue([{ status: 'ok' }]);

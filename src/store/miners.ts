@@ -24,6 +24,9 @@ import {
   estimateBTCPerDay,
   formatBTC,
 } from '../utils/hashrate';
+import { syncMiddleware, getPendingChangesForStore } from './syncMiddleware';
+import { getNetworkStatus, queueChange, clearSyncedChange } from '../services/syncService';
+import { onNetworkReconnect } from '../services/networkStatus';
 
 let refreshing = false;
 
@@ -99,619 +102,695 @@ interface MinersState {
   loadGroupAlerts: () => Promise<GroupAlertConfig[]>;
   saveGroupAlerts: (alerts: GroupAlertConfig[]) => Promise<void>;
   evaluateGroupAlerts: () => Promise<GroupAlertConfig[]>;
+  syncPendingMinerChanges: () => Promise<void>;
+  getPendingSyncCount: () => number;
 }
 
-export const useMinerStore = create<MinersState>((set, get) => ({
-  miners: [],
-  loading: false,
-  initialized: false,
-  scanning: false,
-  scanProgress: null,
-  error: null,
-  minerErrors: {},
-  lastRefreshTimestamp: 0,
+export const useMinerStore = create<MinersState>()(
+  syncMiddleware(
+    (set, get) => ({
+      miners: [],
+      loading: false,
+      initialized: false,
+      scanning: false,
+      scanProgress: null,
+      error: null,
+      minerErrors: {},
+      lastRefreshTimestamp: 0,
 
-  loadMiners: async () => {
-    set({ loading: true, error: null });
-    try {
-      const miners = await DB.loadMiners();
-      set({ miners, loading: false, initialized: true });
-      DB.cleanupOldSnapshots();
-      get().refreshAll();
-      if (getAuthToken()) {
-        get().syncWithBackend();
-      }
-    } catch (e: unknown) {
-      set({ error: e instanceof Error ? e.message : String(e), loading: false, initialized: true });
-    }
-  },
+      loadMiners: async () => {
+        set({ loading: true, error: null });
+        try {
+          const miners = await DB.loadMiners();
+          set({ miners, loading: false, initialized: true });
+          DB.cleanupOldSnapshots();
+          get().refreshAll();
+          if (getAuthToken()) {
+            get().syncWithBackend();
+          }
+        } catch (e: unknown) {
+          set({
+            error: e instanceof Error ? e.message : String(e),
+            loading: false,
+            initialized: true,
+          });
+        }
+      },
 
-  syncWithBackend: async () => {
-    if (!getAuthToken()) return;
-    try {
-      const synced = await syncMinersWithBackend(get().miners);
-      set({ miners: synced });
-    } catch {
-      // sync is best-effort
-      console.warn('syncWithBackend failed');
-    }
-  },
+      syncWithBackend: async () => {
+        if (!getAuthToken()) return;
+        try {
+          const synced = await syncMinersWithBackend(get().miners);
+          set({ miners: synced });
+        } catch {
+          // sync is best-effort
+          console.warn('syncWithBackend failed');
+        }
+      },
 
-  addMiner: async (ip: string, port: number = 80, name?: string) => {
-    set({ error: null });
-    const existing = get().miners.find((m) => m.ip === ip && m.port === port);
-    if (existing) {
-      const msg = `Miner at ${ip} is already added`;
-      set({ error: msg });
-      throw new Error(msg);
-    }
-    try {
-      const found = await BitAxeClient.probe(ip, port);
-      if (!found) {
-        set({ error: `No BitAxe miner found at ${ip}` });
-        throw new Error(`No BitAxe miner found at ${ip}`);
-      }
-      const { infoPath: apiPath, statusPath } = found;
-      const client = new BitAxeClient(ip, port, apiPath!, statusPath || undefined);
-      const info = await client.getSystemInfo();
-      const status = await client.getMinerStatus();
-      const miner: Miner = {
-        id: generateId(),
-        name: name || info.hostname || `BitAxe (${ip})`,
-        ip,
-        port,
-        apiPath: apiPath || undefined,
-        statusPath: statusPath || undefined,
-        info,
-        status,
-        lastSeen: Date.now(),
-        addedAt: Date.now(),
-        isOnline: true,
-      };
+      addMiner: async (ip: string, port: number = 80, name?: string) => {
+        set({ error: null });
+        const existing = get().miners.find((m) => m.ip === ip && m.port === port);
+        if (existing) {
+          const msg = `Miner at ${ip} is already added`;
+          set({ error: msg });
+          throw new Error(msg);
+        }
+        try {
+          const found = await BitAxeClient.probe(ip, port);
+          if (!found) {
+            set({ error: `No BitAxe miner found at ${ip}` });
+            throw new Error(`No BitAxe miner found at ${ip}`);
+          }
+          const { infoPath: apiPath, statusPath } = found;
+          const client = new BitAxeClient(ip, port, apiPath!, statusPath || undefined);
+          const info = await client.getSystemInfo();
+          const status = await client.getMinerStatus();
+          const miner: Miner = {
+            id: generateId(),
+            name: name || info.hostname || `BitAxe (${ip})`,
+            ip,
+            port,
+            apiPath: apiPath || undefined,
+            statusPath: statusPath || undefined,
+            info,
+            status,
+            lastSeen: Date.now(),
+            addedAt: Date.now(),
+            isOnline: true,
+          };
 
-      if (getAuthToken()) {
-        miner.remoteId = await createRemoteMiner(miner);
-      }
+          if (getAuthToken() && getNetworkStatus()) {
+            miner.remoteId = await createRemoteMiner(miner);
+          } else if (getAuthToken() && !getNetworkStatus()) {
+            queueChange({
+              store: 'miners',
+              action: 'miner_added',
+              payload: { miner },
+            });
+          }
 
-      await DB.saveMiner(miner);
-      await DB.saveSnapshot(buildSnapshot(miner.id, status));
-      set((s) => ({ miners: [...s.miners, miner] }));
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      set({ error: `Failed to connect to ${ip}: ${msg}` });
-      throw e;
-    }
-  },
+          await DB.saveMiner(miner);
+          await DB.saveSnapshot(buildSnapshot(miner.id, status));
+          set((s) => ({ miners: [...s.miners, miner] }));
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e);
+          set({ error: `Failed to connect to ${ip}: ${msg}` });
+          throw e;
+        }
+      },
 
-  removeMiner: async (id: string) => {
-    const miner = get().miners.find((m) => m.id === id);
-    if (miner?.remoteId && getAuthToken()) {
-      await deleteRemoteMiner(miner.remoteId);
-    }
-    await DB.deleteMiner(id);
-    set((s) => ({ miners: s.miners.filter((m) => m.id !== id) }));
-  },
+      removeMiner: async (id: string) => {
+        const miner = get().miners.find((m) => m.id === id);
+        if (miner?.remoteId && getAuthToken() && getNetworkStatus()) {
+          await deleteRemoteMiner(miner.remoteId);
+        } else if (miner?.remoteId && getAuthToken() && !getNetworkStatus()) {
+          queueChange({
+            store: 'miners',
+            action: 'miner_removed',
+            payload: { minerId: id, remoteId: miner.remoteId },
+          });
+        }
+        await DB.deleteMiner(id);
+        set((s) => ({ miners: s.miners.filter((m) => m.id !== id) }));
+      },
 
-  refreshMiner: async (id: string) => {
-    const miner = get().miners.find((m) => m.id === id);
-    if (!miner) return;
-    if (miner.maintenanceMode) return;
+      refreshMiner: async (id: string) => {
+        const miner = get().miners.find((m) => m.id === id);
+        if (!miner) return;
+        if (miner.maintenanceMode) return;
 
-    const attempt = async (retryMs = 0): Promise<void> => {
-      if (retryMs > 0) await new Promise((resolve) => setTimeout(resolve, retryMs));
+        const attempt = async (retryMs = 0): Promise<void> => {
+          if (retryMs > 0) await new Promise((resolve) => setTimeout(resolve, retryMs));
 
-      try {
-        const client = new BitAxeClient(
-          miner.ip,
-          miner.port,
-          miner.apiPath ?? undefined,
-          miner.statusPath ?? undefined,
-        );
-        const { info, status } = await client.fetchAll();
+          try {
+            const client = new BitAxeClient(
+              miner.ip,
+              miner.port,
+              miner.apiPath ?? undefined,
+              miner.statusPath ?? undefined,
+            );
+            const { info, status } = await client.fetchAll();
+            const updated: Miner = {
+              ...miner,
+              info,
+              status,
+              lastSeen: Date.now(),
+              isOnline: true,
+            };
+            await DB.saveMiner(updated);
+            const snapshot = buildSnapshot(id, status);
+            await DB.saveSnapshot(snapshot);
+            const token = getAuthToken();
+            if (token && miner.remoteId) {
+              pushStats(miner.remoteId, snapshot).catch((e) =>
+                console.warn('pushStats failed:', e),
+              );
+            }
+            set((s) => ({
+              miners: s.miners.map((m) => (m.id === id ? updated : m)),
+            }));
+          } catch (e) {
+            const current = get().miners.find((m) => m.id === id);
+            if (!current) return;
+            if (!current.apiPath) {
+              const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
+              if (found?.infoPath) {
+                await DB.saveMiner({
+                  ...current,
+                  apiPath: found.infoPath || undefined,
+                  statusPath: found.statusPath || undefined,
+                });
+                set((s) => ({
+                  miners: s.miners.map((m) =>
+                    m.id === id
+                      ? {
+                          ...m,
+                          apiPath: found.infoPath || undefined,
+                          statusPath: found.statusPath || undefined,
+                        }
+                      : m,
+                  ),
+                }));
+              }
+            }
+            const msg = e instanceof Error ? e.message : String(e);
+            set((s) => ({
+              miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
+              minerErrors: { ...s.minerErrors, [id]: msg },
+            }));
+
+            const nav = navigator as Navigator & { onLine?: boolean };
+            if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+              setTimeout(() => attempt(2000), 0);
+            }
+          }
+        };
+
+        await attempt(0);
+      },
+
+      refreshAll: async () => {
+        if (refreshing) return;
+        refreshing = true;
+        try {
+          const prev = get().miners;
+          const now = Date.now();
+          const nav = navigator as Navigator & { onLine?: boolean };
+          if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+            const current = get().miners;
+            const totalHash = current.reduce(
+              (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+              0,
+            );
+            const online = current.filter((m) => m.isOnline).length;
+            const btc = estimateBTCPerDay(totalHash);
+            updateWidget(
+              totalHash > 0 ? formatHashrateValue(totalHash) : '---',
+              online,
+              current.length,
+              btc > 0 ? formatBTC(btc) : '---',
+            );
+            set({ lastRefreshTimestamp: now });
+            return;
+          }
+          const limit = pLimit(20);
+          await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
+          const current = get().miners;
+          if (current.length > 0) {
+            checkMinerAlerts(prev, current);
+          }
+          const totalHash = current.reduce(
+            (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
+            0,
+          );
+          const online = current.filter((m) => m.isOnline).length;
+          const btc = estimateBTCPerDay(totalHash);
+          updateWidget(
+            totalHash > 0 ? formatHashrateValue(totalHash) : '---',
+            online,
+            current.length,
+            btc > 0 ? formatBTC(btc) : '---',
+          );
+          set({ lastRefreshTimestamp: now });
+        } finally {
+          refreshing = false;
+        }
+      },
+
+      startPolling: (intervalMs: number = 30000) => {
+        let interval: ReturnType<typeof setInterval> | null = null;
+        let paused = false;
+        let wsActive = false;
+
+        const getInterval = () => (wsActive ? 300000 : intervalMs);
+
+        const tick = () => {
+          if (!paused) get().refreshAll();
+        };
+
+        get().refreshAll();
+        interval = setInterval(tick, getInterval());
+        if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
+          (interval as { unref: () => void }).unref();
+        }
+
+        import('../services/websocket').then((ws) => {
+          const unsub = ws.onWebSocketMessage?.((msg) => {
+            if (msg.type === 'miner_update') {
+              if (!wsActive) {
+                wsActive = true;
+                if (interval) clearInterval(interval);
+                interval = setInterval(tick, getInterval());
+                if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
+                  (interval as { unref: () => void }).unref();
+                }
+              }
+            }
+          });
+          return unsub;
+        });
+
+        const sub = AppState.addEventListener('change', (state) => {
+          if (state === 'active') {
+            paused = false;
+            get().refreshAll();
+          } else {
+            paused = true;
+          }
+        });
+
+        const bgTimer = setInterval(() => {
+          if (paused && get().miners.length > 0) {
+            get().refreshAll();
+          }
+        }, 120000);
+        if (typeof bgTimer === 'object' && bgTimer !== null && 'unref' in bgTimer) {
+          (bgTimer as { unref: () => void }).unref();
+        }
+
+        return () => {
+          if (interval) clearInterval(interval);
+          clearInterval(bgTimer);
+          sub.remove();
+        };
+      },
+
+      scanNetwork: async () => {
+        set({ scanning: true, scanProgress: { found: 0, scanned: 0, total: 254 }, error: null });
+        try {
+          const { scanNetwork } = await import('../discovery/localNetwork');
+          const found = await scanNetwork((found, scanned, total) => {
+            set({ scanProgress: { found, scanned, total } });
+          });
+          const existingIPs = new Set(get().miners.map((m) => m.ip));
+          for (const d of found) {
+            if (!existingIPs.has(d.ip)) {
+              try {
+                await get().addMiner(d.ip, d.port);
+              } catch {
+                // skip miners that fail to add
+              }
+            }
+          }
+          set({ scanning: false, scanProgress: null });
+        } catch (e: unknown) {
+          set({
+            scanning: false,
+            scanProgress: null,
+            error: e instanceof Error ? e.message : String(e),
+          });
+        }
+      },
+
+      setMinerWallet: async (minerId: string, walletId: string | undefined) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, walletId: walletId || undefined };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerGroup: async (minerId: string, group: string | undefined) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, group: group || undefined };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerIp: async (minerId: string, ip: string, port?: number) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, ip, port: port ?? miner.port };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerName: async (minerId: string, name: string) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, name };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      cloneMiner: async (minerId: string) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const clone: Miner = {
+          ...miner,
+          id: generateId(),
+          name: `${miner.name} (copy)`,
+          addedAt: Date.now(),
+          lastSeen: undefined,
+          status: undefined,
+          info: undefined,
+          remoteId: undefined,
+        };
+        await DB.saveMiner(clone);
+        set((s) => ({ miners: [...s.miners, clone] }));
+      },
+
+      setMinerIcon: async (minerId: string, icon: string | undefined) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, icon: icon || undefined };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerMaintenance: async (minerId: string, enabled: boolean) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, maintenanceMode: enabled };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerLocation: async (minerId: string, location: string | undefined) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, location: location || undefined };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerTags: async (minerId: string, tags: string[]) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = { ...miner, tags };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      setMinerNotes: async (minerId: string, notes: string, noteItems?: MinerNoteItem[]) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const updated = {
+          ...miner,
+          notes: notes || undefined,
+          noteItems: noteItems || miner.noteItems,
+        };
+        await DB.saveMiner(updated);
+        set((s) => ({
+          miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
+        }));
+      },
+
+      applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
+        const miner = get().miners.find((m) => m.id === localId);
+        if (!miner) return;
+
+        const localSnapshot: MinerSnapshot = { ...snapshot, minerId: localId };
+        await DB.saveSnapshot(localSnapshot);
+
+        if (!miner.status) return;
         const updated: Miner = {
           ...miner,
-          info,
-          status,
-          lastSeen: Date.now(),
+          status: {
+            ...miner.status,
+            hashRate: snapshot.hashRate,
+            temperature: snapshot.temperature,
+            voltage: snapshot.voltage,
+            current: snapshot.current,
+            power: snapshot.power,
+            sharesAccepted: snapshot.sharesAccepted,
+            sharesRejected: snapshot.sharesRejected,
+            uptimeSeconds: snapshot.uptimeSeconds,
+            frequency: snapshot.frequency,
+          },
+          lastSeen: snapshot.timestamp,
           isOnline: true,
         };
         await DB.saveMiner(updated);
-        const snapshot = buildSnapshot(id, status);
-        await DB.saveSnapshot(snapshot);
-        const token = getAuthToken();
-        if (token && miner.remoteId) {
-          pushStats(miner.remoteId, snapshot).catch((e) => console.warn('pushStats failed:', e));
-        }
         set((s) => ({
-          miners: s.miners.map((m) => (m.id === id ? updated : m)),
+          miners: s.miners.map((m) => (m.id === localId ? updated : m)),
         }));
-      } catch (e) {
-        const current = get().miners.find((m) => m.id === id);
-        if (!current) return;
-        if (!current.apiPath) {
-          const found = await BitAxeClient.probe(current.ip, current.port).catch(() => null);
-          if (found?.infoPath) {
-            await DB.saveMiner({
-              ...current,
-              apiPath: found.infoPath || undefined,
-              statusPath: found.statusPath || undefined,
-            });
-            set((s) => ({
-              miners: s.miners.map((m) =>
-                m.id === id
-                  ? {
-                      ...m,
-                      apiPath: found.infoPath || undefined,
-                      statusPath: found.statusPath || undefined,
-                    }
-                  : m,
-              ),
-            }));
-          }
-        }
-        const msg = e instanceof Error ? e.message : String(e);
-        set((s) => ({
-          miners: s.miners.map((m) => (m.id === id ? { ...m, isOnline: false } : m)),
-          minerErrors: { ...s.minerErrors, [id]: msg },
-        }));
-
-        const nav = navigator as Navigator & { onLine?: boolean };
-        if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
-          setTimeout(() => attempt(2000), 0);
-        }
-      }
-    };
-
-    await attempt(0);
-  },
-
-  refreshAll: async () => {
-    if (refreshing) return;
-    refreshing = true;
-    try {
-      const prev = get().miners;
-      const now = Date.now();
-      const nav = navigator as Navigator & { onLine?: boolean };
-      if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
-        const current = get().miners;
-        const totalHash = current.reduce(
-          (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-          0,
-        );
-        const online = current.filter((m) => m.isOnline).length;
-        const btc = estimateBTCPerDay(totalHash);
-        updateWidget(
-          totalHash > 0 ? formatHashrateValue(totalHash) : '---',
-          online,
-          current.length,
-          btc > 0 ? formatBTC(btc) : '---',
-        );
-        set({ lastRefreshTimestamp: now });
-        return;
-      }
-      const limit = pLimit(20);
-      await Promise.allSettled(prev.map((m) => limit(() => get().refreshMiner(m.id))));
-      const current = get().miners;
-      if (current.length > 0) {
-        checkMinerAlerts(prev, current);
-      }
-      const totalHash = current.reduce(
-        (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
-        0,
-      );
-      const online = current.filter((m) => m.isOnline).length;
-      const btc = estimateBTCPerDay(totalHash);
-      updateWidget(
-        totalHash > 0 ? formatHashrateValue(totalHash) : '---',
-        online,
-        current.length,
-        btc > 0 ? formatBTC(btc) : '---',
-      );
-      set({ lastRefreshTimestamp: now });
-    } finally {
-      refreshing = false;
-    }
-  },
-
-  startPolling: (intervalMs: number = 30000) => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    let paused = false;
-    let wsActive = false;
-
-    const getInterval = () => (wsActive ? 300000 : intervalMs);
-
-    const tick = () => {
-      if (!paused) get().refreshAll();
-    };
-
-    get().refreshAll();
-    interval = setInterval(tick, getInterval());
-    if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
-      (interval as { unref: () => void }).unref();
-    }
-
-    import('../services/websocket').then((ws) => {
-      const unsub = ws.onWebSocketMessage?.((msg) => {
-        if (msg.type === 'miner_update') {
-          if (!wsActive) {
-            wsActive = true;
-            if (interval) clearInterval(interval);
-            interval = setInterval(tick, getInterval());
-            if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
-              (interval as { unref: () => void }).unref();
-            }
-          }
-        }
-      });
-      return unsub;
-    });
-
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        paused = false;
-        get().refreshAll();
-      } else {
-        paused = true;
-      }
-    });
-
-    const bgTimer = setInterval(() => {
-      if (paused && get().miners.length > 0) {
-        get().refreshAll();
-      }
-    }, 120000);
-    if (typeof bgTimer === 'object' && bgTimer !== null && 'unref' in bgTimer) {
-      (bgTimer as { unref: () => void }).unref();
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-      clearInterval(bgTimer);
-      sub.remove();
-    };
-  },
-
-  scanNetwork: async () => {
-    set({ scanning: true, scanProgress: { found: 0, scanned: 0, total: 254 }, error: null });
-    try {
-      const { scanNetwork } = await import('../discovery/localNetwork');
-      const found = await scanNetwork((found, scanned, total) => {
-        set({ scanProgress: { found, scanned, total } });
-      });
-      const existingIPs = new Set(get().miners.map((m) => m.ip));
-      for (const d of found) {
-        if (!existingIPs.has(d.ip)) {
-          try {
-            await get().addMiner(d.ip, d.port);
-          } catch {
-            // skip miners that fail to add
-          }
-        }
-      }
-      set({ scanning: false, scanProgress: null });
-    } catch (e: unknown) {
-      set({
-        scanning: false,
-        scanProgress: null,
-        error: e instanceof Error ? e.message : String(e),
-      });
-    }
-  },
-
-  setMinerWallet: async (minerId: string, walletId: string | undefined) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, walletId: walletId || undefined };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerGroup: async (minerId: string, group: string | undefined) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, group: group || undefined };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerIp: async (minerId: string, ip: string, port?: number) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, ip, port: port ?? miner.port };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerName: async (minerId: string, name: string) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, name };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  cloneMiner: async (minerId: string) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const clone: Miner = {
-      ...miner,
-      id: generateId(),
-      name: `${miner.name} (copy)`,
-      addedAt: Date.now(),
-      lastSeen: undefined,
-      status: undefined,
-      info: undefined,
-      remoteId: undefined,
-    };
-    await DB.saveMiner(clone);
-    set((s) => ({ miners: [...s.miners, clone] }));
-  },
-
-  setMinerIcon: async (minerId: string, icon: string | undefined) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, icon: icon || undefined };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerMaintenance: async (minerId: string, enabled: boolean) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, maintenanceMode: enabled };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerLocation: async (minerId: string, location: string | undefined) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, location: location || undefined };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerTags: async (minerId: string, tags: string[]) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = { ...miner, tags };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  setMinerNotes: async (minerId: string, notes: string, noteItems?: MinerNoteItem[]) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const updated = {
-      ...miner,
-      notes: notes || undefined,
-      noteItems: noteItems || miner.noteItems,
-    };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === minerId ? updated : m)),
-    }));
-  },
-
-  applyRemoteSnapshot: async (localId: string, snapshot: MinerSnapshot) => {
-    const miner = get().miners.find((m) => m.id === localId);
-    if (!miner) return;
-
-    const localSnapshot: MinerSnapshot = { ...snapshot, minerId: localId };
-    await DB.saveSnapshot(localSnapshot);
-
-    if (!miner.status) return;
-    const updated: Miner = {
-      ...miner,
-      status: {
-        ...miner.status,
-        hashRate: snapshot.hashRate,
-        temperature: snapshot.temperature,
-        voltage: snapshot.voltage,
-        current: snapshot.current,
-        power: snapshot.power,
-        sharesAccepted: snapshot.sharesAccepted,
-        sharesRejected: snapshot.sharesRejected,
-        uptimeSeconds: snapshot.uptimeSeconds,
-        frequency: snapshot.frequency,
       },
-      lastSeen: snapshot.timestamp,
-      isOnline: true,
-    };
-    await DB.saveMiner(updated);
-    set((s) => ({
-      miners: s.miners.map((m) => (m.id === localId ? updated : m)),
-    }));
-  },
 
-  updateMinerFromServer: (data) => {
-    set((s) => ({
-      miners: s.miners.map((m) => {
-        if (m.id !== data.id) return m;
-        return {
-          ...m,
-          isOnline: data.isOnline,
-          lastSeen: data.lastSeen ?? m.lastSeen,
-          status: data.status ?? (data.isOnline ? m.status : undefined),
-          info: data.info ?? m.info,
-        };
-      }),
-    }));
-  },
+      updateMinerFromServer: (data) => {
+        set((s) => ({
+          miners: s.miners.map((m) => {
+            if (m.id !== data.id) return m;
+            return {
+              ...m,
+              isOnline: data.isOnline,
+              lastSeen: data.lastSeen ?? m.lastSeen,
+              status: data.status ?? (data.isOnline ? m.status : undefined),
+              info: data.info ?? m.info,
+            };
+          }),
+        }));
+      },
 
-  clearError: () => set({ error: null }),
-  clearMinerErrors: () => set({ minerErrors: {} }),
+      clearError: () => set({ error: null }),
+      clearMinerErrors: () => set({ minerErrors: {} }),
 
-  getSnapshots: async (minerId: string, limit: number = 100) => {
-    const local = await DB.getSnapshots(minerId, limit);
-    const token = getAuthToken();
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (token && miner?.remoteId) {
-      try {
-        const remote = await fetchStats(miner.remoteId);
-        if (Array.isArray(remote)) {
-          for (const s of remote) {
-            const exists = local.some((l) => l.timestamp === s.timestamp);
-            if (!exists && s.timestamp > 0) {
-              local.push({ ...s, minerId });
+      getSnapshots: async (minerId: string, limit: number = 100) => {
+        const local = await DB.getSnapshots(minerId, limit);
+        const token = getAuthToken();
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (token && miner?.remoteId) {
+          try {
+            const remote = await fetchStats(miner.remoteId);
+            if (Array.isArray(remote)) {
+              for (const s of remote) {
+                const exists = local.some((l) => l.timestamp === s.timestamp);
+                if (!exists && s.timestamp > 0) {
+                  local.push({ ...s, minerId });
+                }
+              }
+              local.sort((a, b) => a.timestamp - b.timestamp);
+            }
+          } catch {
+            // best-effort
+            console.warn('fetchStats failed');
+          }
+        }
+        return local.slice(-limit);
+      },
+
+      loadAutoAssignRules: async () => {
+        const raw = await DB.getSetting('auto_assign_rules');
+        if (!raw) return [];
+        try {
+          return JSON.parse(raw) as AutoAssignRule[];
+        } catch {
+          return [];
+        }
+      },
+
+      saveAutoAssignRules: async (rules: AutoAssignRule[]) => {
+        await DB.setSetting('auto_assign_rules', JSON.stringify(rules));
+      },
+
+      applyAutoAssignRules: async (minerId: string) => {
+        const miner = get().miners.find((m) => m.id === minerId);
+        if (!miner) return;
+        const rules = await get().loadAutoAssignRules();
+        const activeRules = rules.filter((r) => r.enabled);
+        if (activeRules.length === 0) return;
+        for (const rule of activeRules) {
+          let value = '';
+          if (rule.field === 'ip') value = miner.ip;
+          else if (rule.field === 'name') value = miner.name;
+          else if (rule.field === 'tag') value = (miner.tags && miner.tags[0]) || '';
+          if (!value) continue;
+          try {
+            const regex = new RegExp(rule.pattern, 'i');
+            if (regex.test(value)) {
+              await get().setMinerGroup(minerId, rule.group);
+              return;
+            }
+          } catch {
+            if (value.includes(rule.pattern)) {
+              await get().setMinerGroup(minerId, rule.group);
+              return;
             }
           }
-          local.sort((a, b) => a.timestamp - b.timestamp);
         }
-      } catch {
-        // best-effort
-        console.warn('fetchStats failed');
-      }
-    }
-    return local.slice(-limit);
-  },
+      },
 
-  loadAutoAssignRules: async () => {
-    const raw = await DB.getSetting('auto_assign_rules');
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw) as AutoAssignRule[];
-    } catch {
-      return [];
-    }
-  },
-
-  saveAutoAssignRules: async (rules: AutoAssignRule[]) => {
-    await DB.setSetting('auto_assign_rules', JSON.stringify(rules));
-  },
-
-  applyAutoAssignRules: async (minerId: string) => {
-    const miner = get().miners.find((m) => m.id === minerId);
-    if (!miner) return;
-    const rules = await get().loadAutoAssignRules();
-    const activeRules = rules.filter((r) => r.enabled);
-    if (activeRules.length === 0) return;
-    for (const rule of activeRules) {
-      let value = '';
-      if (rule.field === 'ip') value = miner.ip;
-      else if (rule.field === 'name') value = miner.name;
-      else if (rule.field === 'tag') value = (miner.tags && miner.tags[0]) || '';
-      if (!value) continue;
-      try {
-        const regex = new RegExp(rule.pattern, 'i');
-        if (regex.test(value)) {
-          await get().setMinerGroup(minerId, rule.group);
-          return;
+      applyAutoAssignRulesAll: async () => {
+        const minersList = get().miners;
+        for (const m of minersList) {
+          await get().applyAutoAssignRules(m.id);
         }
-      } catch {
-        if (value.includes(rule.pattern)) {
-          await get().setMinerGroup(minerId, rule.group);
-          return;
+      },
+
+      loadGroupConfigs: async () => {
+        const raw = await DB.getSetting('group_configs');
+        if (!raw) return [];
+        try {
+          return JSON.parse(raw) as GroupConfig[];
+        } catch {
+          return [];
         }
-      }
-    }
-  },
+      },
 
-  applyAutoAssignRulesAll: async () => {
-    const minersList = get().miners;
-    for (const m of minersList) {
-      await get().applyAutoAssignRules(m.id);
-    }
-  },
+      saveGroupConfigs: async (configs: GroupConfig[]) => {
+        await DB.setSetting('group_configs', JSON.stringify(configs));
+      },
 
-  loadGroupConfigs: async () => {
-    const raw = await DB.getSetting('group_configs');
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw) as GroupConfig[];
-    } catch {
-      return [];
-    }
-  },
-
-  saveGroupConfigs: async (configs: GroupConfig[]) => {
-    await DB.setSetting('group_configs', JSON.stringify(configs));
-  },
-
-  loadGroupAlerts: async () => {
-    const raw = await DB.getSetting('group_alerts');
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw) as GroupAlertConfig[];
-    } catch {
-      return [];
-    }
-  },
-
-  saveGroupAlerts: async (alerts: GroupAlertConfig[]) => {
-    await DB.setSetting('group_alerts', JSON.stringify(alerts));
-  },
-
-  evaluateGroupAlerts: async () => {
-    const alerts = await get().loadGroupAlerts();
-    const activeAlerts = alerts.filter((a) => a.enabled);
-    if (activeAlerts.length === 0) return [];
-
-    const miners = get().miners;
-    const triggered: GroupAlertConfig[] = [];
-
-    for (const alert of activeAlerts) {
-      const groupMiners = miners.filter((m) => m.group === alert.groupId);
-      if (groupMiners.length === 0) continue;
-
-      switch (alert.type) {
-        case 'hashrate_drop': {
-          const onlineMiners = groupMiners.filter((m) => m.isOnline);
-          const dropPct =
-            groupMiners.length > 0
-              ? ((groupMiners.length - onlineMiners.length) / groupMiners.length) * 100
-              : 0;
-          if (dropPct >= alert.threshold) triggered.push(alert);
-          break;
+      loadGroupAlerts: async () => {
+        const raw = await DB.getSetting('group_alerts');
+        if (!raw) return [];
+        try {
+          return JSON.parse(raw) as GroupAlertConfig[];
+        } catch {
+          return [];
         }
-        case 'temp_high': {
-          const hotMiners = groupMiners.filter(
-            (m) => (m.status?.temperature ?? 0) >= alert.threshold,
-          );
-          if (hotMiners.length > 0) triggered.push(alert);
-          break;
-        }
-        case 'offline_count': {
-          const offlineCount = groupMiners.filter((m) => !m.isOnline).length;
-          if (offlineCount >= alert.threshold) triggered.push(alert);
-          break;
-        }
-        case 'efficiency_drop': {
-          const efficiencies = groupMiners
-            .filter((m) => m.isOnline && m.status?.power && m.status?.hashRate)
-            .map((m) => {
-              const power = m.status!.power;
-              const hashes = toHashesPerSecond(m.status!.hashRate, m.status!.hashRateUnit);
-              return power > 0 ? hashes / power : 0;
-            });
-          if (efficiencies.length === 0) break;
-          const avgEff = efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length;
-          if (avgEff > 0 && avgEff < alert.threshold) triggered.push(alert);
-          break;
-        }
-      }
-    }
+      },
 
-    return triggered;
-  },
-}));
+      saveGroupAlerts: async (alerts: GroupAlertConfig[]) => {
+        await DB.setSetting('group_alerts', JSON.stringify(alerts));
+      },
+
+      evaluateGroupAlerts: async () => {
+        const alerts = await get().loadGroupAlerts();
+        const activeAlerts = alerts.filter((a) => a.enabled);
+        if (activeAlerts.length === 0) return [];
+
+        const miners = get().miners;
+        const triggered: GroupAlertConfig[] = [];
+
+        for (const alert of activeAlerts) {
+          const groupMiners = miners.filter((m) => m.group === alert.groupId);
+          if (groupMiners.length === 0) continue;
+
+          switch (alert.type) {
+            case 'hashrate_drop': {
+              const onlineMiners = groupMiners.filter((m) => m.isOnline);
+              const dropPct =
+                groupMiners.length > 0
+                  ? ((groupMiners.length - onlineMiners.length) / groupMiners.length) * 100
+                  : 0;
+              if (dropPct >= alert.threshold) triggered.push(alert);
+              break;
+            }
+            case 'temp_high': {
+              const hotMiners = groupMiners.filter(
+                (m) => (m.status?.temperature ?? 0) >= alert.threshold,
+              );
+              if (hotMiners.length > 0) triggered.push(alert);
+              break;
+            }
+            case 'offline_count': {
+              const offlineCount = groupMiners.filter((m) => !m.isOnline).length;
+              if (offlineCount >= alert.threshold) triggered.push(alert);
+              break;
+            }
+            case 'efficiency_drop': {
+              const efficiencies = groupMiners
+                .filter((m) => m.isOnline && m.status?.power && m.status?.hashRate)
+                .map((m) => {
+                  const power = m.status!.power;
+                  const hashes = toHashesPerSecond(m.status!.hashRate, m.status!.hashRateUnit);
+                  return power > 0 ? hashes / power : 0;
+                });
+              if (efficiencies.length === 0) break;
+              const avgEff = efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length;
+              if (avgEff > 0 && avgEff < alert.threshold) triggered.push(alert);
+              break;
+            }
+          }
+        }
+
+        return triggered;
+      },
+
+      syncPendingMinerChanges: async () => {
+        const pending = getPendingChangesForStore('miners');
+        if (pending.length === 0) return;
+
+        for (const change of pending) {
+          try {
+            const token = getAuthToken();
+            if (!token) continue;
+
+            if (change.action === 'miner_added') {
+              const payload = change.payload as { miner: Miner };
+              if (payload.miner.remoteId) {
+                clearSyncedChange(change.id);
+              } else {
+                const remoteId = await createRemoteMiner(payload.miner);
+                const localMiner = get().miners.find((m) => m.id === payload.miner.id);
+                if (localMiner) {
+                  const updated = { ...localMiner, remoteId };
+                  await DB.saveMiner(updated);
+                  set((s) => ({
+                    miners: s.miners.map((m) => (m.id === localMiner.id ? updated : m)),
+                  }));
+                }
+                clearSyncedChange(change.id);
+              }
+            } else if (change.action === 'miner_removed') {
+              const payload = change.payload as { minerId: string; remoteId?: string };
+              if (payload.remoteId) {
+                await deleteRemoteMiner(payload.remoteId);
+              }
+              clearSyncedChange(change.id);
+            } else {
+              clearSyncedChange(change.id);
+            }
+          } catch {
+            // will retry on next reconnect
+          }
+        }
+      },
+
+      getPendingSyncCount: () => {
+        return getPendingChangesForStore('miners').length;
+      },
+    }),
+    'miners',
+  ),
+);
 
 onAuthLogin(() => {
   useMinerStore.getState().syncWithBackend();
+  if (getNetworkStatus()) {
+    useMinerStore.getState().syncPendingMinerChanges();
+  }
+});
+
+onNetworkReconnect(() => {
+  useMinerStore.getState().syncPendingMinerChanges();
 });

@@ -299,6 +299,8 @@ export function ThemeMarketplaceScreen() {
             haptic.selection();
             setActiveTab('browse');
           }}
+          accessibilityRole="button"
+          accessibilityLabel={t('marketplace.browse', 'Browse')}
         >
           <Text style={[styles.tabText, { color: activeTab === 'browse' ? '#FFF' : theme.text }]}>
             {t('marketplace.browse', 'Browse')}
@@ -310,6 +312,8 @@ export function ThemeMarketplaceScreen() {
             haptic.selection();
             setActiveTab('url');
           }}
+          accessibilityRole="button"
+          accessibilityLabel={t('marketplace.fromUrl', 'From URL')}
         >
           <Text style={[styles.tabText, { color: activeTab === 'url' ? '#FFF' : theme.text }]}>
             {t('marketplace.fromUrl', 'From URL')}
@@ -322,6 +326,8 @@ export function ThemeMarketplaceScreen() {
           <Pressable
             style={[styles.actionBtn, styles.actionBtnSecondary, { marginBottom: spacing.md }]}
             onPress={handleImportFromJSON}
+            accessibilityRole="button"
+            accessibilityLabel={t('marketplace.importFromClipboard', 'Import from Clipboard')}
           >
             <Text style={[styles.actionBtnText, { color: theme.text }]}>
               {t('marketplace.importFromClipboard', 'Import from Clipboard')}
@@ -356,6 +362,8 @@ export function ThemeMarketplaceScreen() {
                     setPreviewName(ct.name);
                     setPreviewTheme(ct.colors);
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('marketplace.preview', 'Preview')}
                 >
                   <Text style={[styles.actionBtnText, { color: theme.text }]}>
                     {t('marketplace.preview', 'Preview')}
@@ -364,6 +372,8 @@ export function ThemeMarketplaceScreen() {
                 <Pressable
                   style={[styles.actionBtn, styles.actionBtnPrimary]}
                   onPress={() => handleInstallCommunity(ct)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('marketplace.install', 'Install')}
                 >
                   <Text style={[styles.actionBtnText, { color: '#FFF' }]}>
                     {t('marketplace.install', 'Install')}
@@ -372,6 +382,8 @@ export function ThemeMarketplaceScreen() {
                 <Pressable
                   style={[styles.actionBtn, styles.actionBtnSecondary]}
                   onPress={() => handleShareTheme(ct)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('marketplace.share', 'Share')}
                 >
                   <Text style={[styles.actionBtnText, { color: theme.text }]}>
                     {t('marketplace.share', 'Share')}
@@ -399,8 +411,15 @@ export function ThemeMarketplaceScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
+              accessibilityLabel={t('marketplace.importFromUrl', 'Import from URL')}
             />
-            <Pressable style={styles.importBtn} onPress={handleImportFromUrl} disabled={loading}>
+            <Pressable
+              style={styles.importBtn}
+              onPress={handleImportFromUrl}
+              disabled={loading}
+              accessibilityRole="button"
+              accessibilityLabel={t('marketplace.import', 'Import')}
+            >
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
@@ -446,6 +465,8 @@ export function ThemeMarketplaceScreen() {
               };
               input.click();
             }}
+            accessibilityRole="button"
+            accessibilityLabel={t('marketplace.chooseFile', 'Choose JSON File')}
           >
             <Text style={[styles.actionBtnText, { color: theme.text }]}>
               {t('marketplace.chooseFile', 'Choose JSON File')}
@@ -490,6 +511,8 @@ export function ThemeMarketplaceScreen() {
                 setPreviewTheme(null);
                 setPreviewName('');
               }}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.close', 'Close')}
             >
               <Text style={{ color: previewTheme.text || '#FFF', fontSize: fontSize.lg }}>✕</Text>
             </Pressable>
@@ -537,6 +560,8 @@ export function ThemeMarketplaceScreen() {
                 setPreviewTheme(null);
                 setPreviewName('');
               }}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel', 'Cancel')}
             >
               <Text style={{ color: previewTheme.text || '#FFF', fontWeight: fontWeight.semibold }}>
                 {t('common.cancel', 'Cancel')}
@@ -551,6 +576,8 @@ export function ThemeMarketplaceScreen() {
                 alignItems: 'center',
               }}
               onPress={handleConfirmImport}
+              accessibilityRole="button"
+              accessibilityLabel={t('marketplace.install', 'Install')}
             >
               <Text style={{ color: '#FFF', fontWeight: fontWeight.bold }}>
                 {t('marketplace.install', 'Install')}

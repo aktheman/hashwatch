@@ -18,9 +18,18 @@ import { useGroupSharingStore } from '../store/groupSharing';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { SkeletonCard } from '../components/SkeletonCard';
-import { Miner, AutoAssignRule, GroupConfig, GroupAlertConfig, GroupShare } from '../types';
+import {
+  Miner,
+  AutoAssignRule,
+  GroupConfig,
+  GroupAlertConfig,
+  GroupShare,
+  NavigationProp,
+} from '../types';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import * as DB from '../db/database';
+import * as haptics from '../utils/haptics';
 import { toHashesPerSecond, formatHashrateValue } from '../utils/hashrate';
 
 async function loadEmptyGroups(): Promise<string[]> {
@@ -41,6 +50,7 @@ async function saveEmptyGroups(groups: string[]): Promise<void> {
 export function GroupsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const navigation = useNavigation<NavigationProp>();
   const miners = useMinerStore((s) => s.miners);
   const setMinerGroup = useMinerStore((s) => s.setMinerGroup);
 
@@ -1133,6 +1143,17 @@ export function GroupsScreen() {
           )}
         </View>
       )}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('groupSharing.title', 'Shared Groups')}
+        style={styles.addRuleBtn}
+        onPress={() => {
+          haptics.light();
+          navigation.navigate('SharedGroups');
+        }}
+      >
+        <Text style={styles.addRuleBtnText}>{t('groupSharing.title', 'Shared Groups')}</Text>
+      </Pressable>
       <Modal
         visible={showRuleEditor}
         transparent
