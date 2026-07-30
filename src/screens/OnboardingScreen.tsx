@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -31,13 +31,34 @@ export function OnboardingScreen({ onComplete }: Props) {
     { icon: '⬡', title: t('onboarding.slide1Title'), subtitle: t('onboarding.slide1Body') },
     { icon: '📡', title: t('onboarding.slide2Title'), subtitle: t('onboarding.slide2Body') },
     { icon: '🔔', title: t('onboarding.slide3Title'), subtitle: t('onboarding.slide3Body') },
-    { icon: '🔍', title: t('onboarding.slide5Title'), subtitle: t('onboarding.slide5Body'), interactive: true },
+    {
+      icon: '🔍',
+      title: t('onboarding.slide5Title'),
+      subtitle: t('onboarding.slide5Body'),
+      interactive: true,
+    },
     { icon: '⭐', title: t('onboarding.slide4Title'), subtitle: t('onboarding.slide4Body') },
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentIndexRef = useRef(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= slides.length) return;
+      currentIndexRef.current = index;
+      setCurrentIndex(index);
+      flatListRef.current?.scrollToIndex({ index, animated: true });
+      Animated.timing(progressAnim, {
+        toValue: (index + 1) / slides.length,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    },
+    [slides.length, progressAnim],
+  );
 
   const handleNext = async () => {
     const currentSlide = slides[currentIndexRef.current];
@@ -76,6 +97,11 @@ export function OnboardingScreen({ onComplete }: Props) {
     if (idx !== currentIndexRef.current) {
       currentIndexRef.current = idx;
       setCurrentIndex(idx);
+      Animated.timing(progressAnim, {
+        toValue: (idx + 1) / slides.length,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
     }
   };
 
@@ -172,6 +198,20 @@ export function OnboardingScreen({ onComplete }: Props) {
           fontSize: fontSize.xl,
           fontWeight: fontWeight.bold,
         },
+        progressBarContainer: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          backgroundColor: theme.primary + '30',
+          zIndex: 20,
+        },
+        progressBar: {
+          height: 3,
+          backgroundColor: theme.primary,
+          borderRadius: 2,
+        },
         tutorialBox: {
           marginTop: spacing.xl,
           alignItems: 'center',
@@ -205,8 +245,16 @@ export function OnboardingScreen({ onComplete }: Props) {
     [theme],
   );
 
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
   return (
     <View style={styles.container}>
+      <View style={styles.progressBarContainer}>
+        <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
+      </View>
       <Pressable accessibilityRole="button" style={styles.skipBtn} onPress={handleSkip}>
         <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
       </Pressable>
@@ -248,7 +296,10 @@ export function OnboardingScreen({ onComplete }: Props) {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('onboarding.tutorialScanButton')}
-                    style={[styles.scanBtn, { backgroundColor: theme.primary + '20', borderColor: theme.primary }]}
+                    style={[
+                      styles.scanBtn,
+                      { backgroundColor: theme.primary + '20', borderColor: theme.primary },
+                    ]}
                     onPress={handleSimulateScan}
                   >
                     <Text style={[styles.scanBtnText, { color: theme.primary }]}>
@@ -265,7 +316,15 @@ export function OnboardingScreen({ onComplete }: Props) {
       <View style={styles.bottom}>
         <View style={styles.dots}>
           {slides.map((_, i) => (
-            <View key={i} style={[styles.dot, { opacity: i === currentIndex ? 1 : 0.25 }]} />
+            <Pressable
+              key={i}
+              accessibilityRole="button"
+              accessibilityLabel={`Go to slide ${i + 1}`}
+              onPress={() => goToSlide(i)}
+              hitSlop={8}
+            >
+              <View style={[styles.dot, { opacity: i === currentIndex ? 1 : 0.25 }]} />
+            </Pressable>
           ))}
         </View>
 
@@ -274,6 +333,23 @@ export function OnboardingScreen({ onComplete }: Props) {
             {isLast ? t('onboarding.getStarted') : t('onboarding.next')}
           </Text>
         </Pressable>
+        {isLast && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleSkip}
+            style={{ marginTop: spacing.md }}
+          >
+            <Text
+              style={{
+                color: theme.textDim,
+                fontSize: fontSize.base,
+                fontWeight: fontWeight.semibold,
+              }}
+            >
+              {t('onboarding.alreadySetup')}
+            </Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );

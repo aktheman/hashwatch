@@ -32,6 +32,9 @@ export interface MinerStatus {
   poolPort: number;
   poolUser: string;
   poolResponseTime: number;
+  asicBoost?: boolean;
+  chipType?: string;
+  firmwareType?: 'stock' | 'bitaxe' | 'esp-miner' | 'braiins-os';
 }
 
 export interface Wallet {

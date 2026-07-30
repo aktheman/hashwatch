@@ -39,6 +39,8 @@ import { teamRouter } from './routes/teams';
 import { alertChannelsRouter } from './routes/alertChannels';
 import { botChannelsRouter } from './routes/botChannels';
 import { stripeRouter, stripeWebhookRouter } from './routes/stripe';
+import { groupsRouter } from './routes/groups';
+import { pushWebRouter } from './routes/pushWeb';
 import { log } from './logger';
 
 const app = express();
@@ -139,6 +141,8 @@ app.use('/api/teams', authMiddleware, teamRouter);
 app.use('/api/alert-channels', authMiddleware, alertChannelsRouter);
 app.use('/api/bot-channels', authMiddleware, botChannelsRouter);
 app.use('/api/stripe', authMiddleware, stripeRouter);
+app.use('/api/groups', groupsRouter);
+app.use('/api/push', pushWebRouter);
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;

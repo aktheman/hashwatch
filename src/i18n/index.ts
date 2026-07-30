@@ -7,6 +7,7 @@ import zh from './zh.json';
 import ja from './ja.json';
 import de from './de.json';
 import fr from './fr.json';
+import nb from './nb.json';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -16,6 +17,7 @@ i18n.use(initReactI18next).init({
     ja: { translation: ja },
     de: { translation: de },
     fr: { translation: fr },
+    nb: { translation: nb },
   },
   lng: Localization.getLocales()[0]?.languageCode || 'en',
   fallbackLng: 'en',

@@ -62,7 +62,7 @@ config.transformer = {
       drop_console: false,
       // 3 passes: first merges constants, second eliminates dead code, third cleans up
       passes: 3,
-      pure_funcs: [],
+      pure_funcs: ['console.log', 'console.warn'],
       // Enable dead-code elimination
       dead_code: true,
       // Drop unused variables
@@ -83,6 +83,7 @@ config.transformer = {
       join_vars: true,
       // Simplify boolean returns
       booleans: true,
+      pure_funcs: ['console.log', 'console.warn'],
     },
   },
 };
@@ -113,6 +114,13 @@ config.serializer = {
     // Keep all modules; the ID factory above groups them.
     // This hook is a convenient place for future per-module exclusions.
     return true;
+  },
+};
+
+config.server = {
+  ...config.server,
+  enhanceMiddleware: (middleware) => (req, res, next) => {
+    return middleware(req, res, next);
   },
 };
 

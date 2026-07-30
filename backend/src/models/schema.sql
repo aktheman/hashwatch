@@ -209,3 +209,24 @@ CREATE TABLE IF NOT EXISTS darkpool_aggregates (
 );
 
 CREATE INDEX IF NOT EXISTS idx_darkpool_aggregates_time ON darkpool_aggregates("periodEnd", "computedAt" DESC);
+
+CREATE TABLE IF NOT EXISTS miner_groups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  miner_ids JSONB NOT NULL DEFAULT '[]',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_miner_groups_user ON miner_groups(user_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS web_push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subscription JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_web_push_user ON web_push_subscriptions(user_id);

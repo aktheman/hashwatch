@@ -488,7 +488,8 @@
     "slide5Body": "Test the network scan feature to discover miners on your local network.",
     "tutorialScanButton": "Scan Network",
     "tutorialScanning": "Scanning...",
-    "tutorialFound": "Miners found! Tap Next to continue."
+    "tutorialFound": "Miners found! Tap Next to continue.",
+    "alreadySetup": "Already set up? Skip →"
   },
   "comparison": {
     "title": "Miner Comparison",

@@ -44,6 +44,7 @@ import { MinerDrillDownModal } from '../components/MinerDrillDownModal';
 import { TimeAgo } from '../components/TimeAgo';
 import { recommendPools } from '../utils/poolRecommendation';
 import { getAutomatedActionsSettings, getLastActionLog } from '../services/automatedActions';
+import { KioskScreen } from './KioskScreen';
 
 const LazyWorldMap = lazy(() =>
   import('../components/WorldMap').then((m) => ({ default: m.WorldMap })),
@@ -1891,32 +1892,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   return (
     <Outer {...outerProps}>
       {kioskMode ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Exit kiosk mode"
-          style={{
-            position: 'absolute',
-            top: 50,
-            right: 12,
-            zIndex: 100,
-            width: 24,
-            height: 24,
-            borderRadius: radius.md,
-            backgroundColor: theme.textMuted + '40',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            Alert.alert(t('dashboard.exitKioskTitle'), t('dashboard.exitKioskBody'), [
-              { text: t('common.cancel'), style: 'cancel' },
-              { text: t('dashboard.exitKioskExit'), onPress: () => handleToggleKiosk(false) },
-            ]);
-          }}
-        >
-          <Text style={{ color: theme.text, fontSize: fontSize.base, fontWeight: fontWeight.bold }}>
-            ✕
-          </Text>
-        </Pressable>
+        <KioskScreen miners={miners} onExit={() => handleToggleKiosk(false)} />
       ) : (
         <View style={styles.headerBar}>
           {selectionMode ? (
