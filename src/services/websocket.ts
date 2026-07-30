@@ -1,5 +1,5 @@
 import { useMinerStore } from '../store/miners';
-import { MinerSnapshot, WSMessage } from '../types';
+import { Miner, MinerSnapshot, WSMessage } from '../types';
 import { getExtra } from '../constants';
 
 const RECONNECT_DELAY_MS = 5000;
@@ -40,6 +40,7 @@ function doConnect() {
     ws = new WebSocket(url);
     ws.onopen = () => {
       reconnectAttempts = 0;
+      useMinerStore.setState({ wsConnected: true });
       if (token) {
         ws?.send(JSON.stringify({ type: 'auth', token }));
       }
@@ -55,6 +56,7 @@ function doConnect() {
     };
     ws.onclose = () => {
       ws = null;
+      useMinerStore.setState({ wsConnected: false });
       scheduleReconnect();
     };
     ws.onerror = () => {
@@ -90,8 +92,31 @@ function handleMessage(msg: WSMessage) {
     }
   }
   if (msg.type === 'miner_update' && msg.miner) {
-    const data = msg.miner as { id: string; isOnline: boolean; lastSeen?: number };
-    useMinerStore.getState().updateMinerFromServer(data);
+    const data = msg.miner as Partial<Miner>;
+    useMinerStore.getState().updateMinerFromWs(data);
+  }
+  if (msg.type === 'miner_snapshot' && msg.snapshot) {
+    const snap = msg.snapshot as MinerSnapshot;
+    const miner = useMinerStore.getState().miners.find((m) => m.remoteId === snap.minerId);
+    if (miner) {
+      useMinerStore.getState().applyRemoteSnapshot(miner.id, snap);
+    }
+  }
+  if (msg.type === 'miner_offline' && msg.minerId) {
+    const mid = msg.minerId as string;
+    const store = useMinerStore.getState();
+    const miner = store.miners.find((m) => m.id === mid || m.remoteId === mid);
+    if (miner) {
+      store.setMinerOnlineStatus(miner.id, false);
+    }
+  }
+  if (msg.type === 'miner_online' && msg.minerId) {
+    const mid = msg.minerId as string;
+    const store = useMinerStore.getState();
+    const miner = store.miners.find((m) => m.id === mid || m.remoteId === mid);
+    if (miner) {
+      store.setMinerOnlineStatus(miner.id, true);
+    }
   }
 }
 

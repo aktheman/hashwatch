@@ -13,7 +13,7 @@ src/
 ├── constants/      # App-wide constants
 ├── db/             # Database layer (web: localStorage, native: SQLite)
 ├── hooks/          # Custom React hooks
-├── i18n/           # Internationalization (6 locales)
+├── i18n/           # Internationalization (7 locales)
 ├── navigation/     # React Navigation config
 ├── services/       # Business logic (WebSocket, notifications, etc.)
 ├── store/          # Zustand state management
@@ -53,25 +53,42 @@ electron/           # Electron desktop shell
 - **Offline**: localStorage (web) / SQLite (native) with settings queue for backend sync
 - **Real-time**: WebSocket for miner updates, polling fallback (30s/5min)
 - **Testing**: Jest + React Native Testing Library (frontend), Jest (backend), Playwright (E2E)
-- **i18n**: react-i18next with en/es/fr/de/ja/zh locales
+- **i18n**: react-i18next with en/es/fr/de/ja/zh/nb locales
 - **PWA**: Service worker with stale-while-revalidate caching, offline fallback
 
 ## Screens
 
-| Screen           | Tab       | Description                                             |
-| ---------------- | --------- | ------------------------------------------------------- |
-| Dashboard        | Home      | Miner cards, filtering, pool recommendations, batch ops |
-| Analytics        | Analytics | Hashrate charts, comparison, earnings                   |
-| Pools            | Pools     | Pool management and coverage                            |
-| Settings         | Settings  | Auth, theme, notifications, data retention              |
-| MinerDetail      | Stack     | Per-miner stats, charts, firmware, notes                |
-| Firmware         | Stack     | Batch firmware flashing, version checking               |
-| DarkPool         | Stack     | Anonymous hashrate pooling (Pro)                        |
-| ThemeMarketplace | Stack     | Community theme browser (Pro)                           |
-| Subscription     | Stack     | Pro plan purchase/restore                               |
-| Groups           | Stack     | Miner grouping with drag-to-reorder                     |
-| Wallets          | Stack     | Wallet management                                       |
-| ImportData       | Stack     | CSV/JSON data import                                    |
+| Screen                 | Tab       | Description                                               |
+| ---------------------- | --------- | --------------------------------------------------------- |
+| Dashboard              | Home      | Miner cards, filtering, pool recommendations, batch ops   |
+| Analytics              | Analytics | Hashrate charts, comparison, earnings                     |
+| Pools                  | Pools     | Pool management and coverage                              |
+| Settings               | Settings  | Auth, theme, notifications, data retention                |
+| MinerDetail            | Stack     | Per-miner stats, charts, firmware, notes                  |
+| Firmware               | Stack     | Batch firmware flashing, version checking                 |
+| DarkPool               | Stack     | Anonymous hashrate pooling (Pro)                          |
+| ThemeMarketplace       | Stack     | Community theme browser (Pro)                             |
+| Subscription           | Stack     | Pro plan purchase/restore                                 |
+| Groups                 | Stack     | Miner grouping with drag-to-reorder                       |
+| Wallets                | Stack     | Wallet management                                         |
+| ImportData             | Stack     | CSV/JSON data import                                      |
+| DashboardBuilder       | Stack     | Custom widget layout (Pro)                                |
+| PredictiveMaintenance  | Stack     | Uptime forecasting, scheduling (Pro)                      |
+| ActivityFeed           | Stack     | Event timeline with filters                               |
+| WorldMap               | Stack     | Geographic miner view with health dots                    |
+| PoolProviders          | Stack     | Connect/manage pool provider accounts                     |
+| AutomatedActions       | Stack     | Auto-restart + pool-switch rules                          |
+| FleetHealth            | Stack     | Fleet-wide health trends, earnings, recommendations       |
+| NotificationChannels   | Stack     | Multi-channel alert delivery (Push, SMS, Email, Telegram) |
+| MinerComparison        | Stack     | Side-by-side miner stat comparison                        |
+| DashboardSharing       | Stack     | Public read-only dashboard sharing (Pro)                  |
+| MinerMarketplace       | Stack     | Buy/sell used miners (Pro)                                |
+| TeamSettings           | Stack     | Team/Org management with roles                            |
+| ContributorLeaderboard | Stack     | GitHub contributor rankings and stats                     |
+| AnomalyDetection       | Stack     | AI-based hashrate/temp anomaly alerts (Pro)               |
+| EnergyTracking         | Stack     | Solar/renewable energy monitoring                         |
+| ProfitabilitySwitching | Stack     | Auto-switch pools based on profitability                  |
+| WebSidebar             | Sidebar   | Collapsible desktop nav sidebar (web)                     |
 
 ## Subscription Tiers
 

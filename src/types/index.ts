@@ -147,6 +147,10 @@ export type RemoteMiner = {
 export type WSMessage =
   | { type: 'snapshot'; snapshot: MinerSnapshot }
   | { type: 'auth'; token: string }
+  | { type: 'miner_update'; miner: Partial<Miner> }
+  | { type: 'miner_snapshot'; snapshot: MinerSnapshot }
+  | { type: 'miner_offline'; minerId: string }
+  | { type: 'miner_online'; minerId: string }
   | { type: string; [key: string]: unknown };
 
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';

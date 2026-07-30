@@ -1,15 +1,20 @@
 import { connectWebSocket, disconnectWebSocket } from '../src/services/websocket';
 
 const mockApply = jest.fn();
-const mockUpdateFromServer = jest.fn();
+const mockUpdateFromWs = jest.fn();
+const mockSetOnlineStatus = jest.fn();
 
 jest.mock('../src/store/miners', () => ({
   useMinerStore: {
     getState: () => ({
       miners: [{ id: 'local-1', remoteId: 'remote-1' }],
       applyRemoteSnapshot: (id: string) => mockApply(id),
-      updateMinerFromServer: (data: any) => mockUpdateFromServer(data),
+      updateMinerFromWs: (data: any) => mockUpdateFromWs(data),
+      setMinerOnlineStatus: (minerId: string, isOnline: boolean) =>
+        mockSetOnlineStatus(minerId, isOnline),
     }),
+    setState: jest.fn(),
+    subscribe: jest.fn(() => jest.fn()),
   },
 }));
 
@@ -91,7 +96,19 @@ describe('connectWebSocket', () => {
       miner: { id: 'local-1', isOnline: true, lastSeen: 1000 },
     };
     mockWsOnmessage?.({ data: JSON.stringify(update) });
-    expect(mockUpdateFromServer).toHaveBeenCalledWith(update.miner);
+    expect(mockUpdateFromWs).toHaveBeenCalledWith(update.miner);
+  });
+
+  it('handles miner_offline messages', () => {
+    connectWebSocket('test-token');
+    mockWsOnmessage?.({ data: JSON.stringify({ type: 'miner_offline', minerId: 'remote-1' }) });
+    expect(mockSetOnlineStatus).toHaveBeenCalledWith('local-1', false);
+  });
+
+  it('handles miner_online messages', () => {
+    connectWebSocket('test-token');
+    mockWsOnmessage?.({ data: JSON.stringify({ type: 'miner_online', minerId: 'remote-1' }) });
+    expect(mockSetOnlineStatus).toHaveBeenCalledWith('local-1', true);
   });
 
   it('ignores non-snapshot non-miner_update messages', () => {

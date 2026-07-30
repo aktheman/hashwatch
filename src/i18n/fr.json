@@ -1166,5 +1166,23 @@
     "notSignedIn": "Non connecté",
     "error": "Erreur",
     "success": "Succès"
+  },
+  "notificationChannels": {
+    "title": "Notification Channels",
+    "addChannel": "Add Channel",
+    "channelType": "Channel Type",
+    "channelName": "Channel Name",
+    "webhookUrl": "Webhook URL",
+    "apiKey": "API Key",
+    "phoneNumber": "Phone Number",
+    "chatId": "Chat ID",
+    "save": "Save",
+    "test": "Test",
+    "delete": "Delete",
+    "noChannels": "No notification channels configured",
+    "addFirst": "Add your first notification channel to receive alerts",
+    "testSuccess": "Test notification sent successfully",
+    "testFailed": "Test notification failed",
+    "saved": "Channel saved"
   }
 }

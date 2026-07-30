@@ -63,6 +63,7 @@ interface MinersState {
   error: string | null;
   minerErrors: Record<string, string>;
   lastRefreshTimestamp: number;
+  wsConnected: boolean;
 
   loadMiners: () => Promise<void>;
   syncWithBackend: () => Promise<void>;
@@ -90,6 +91,9 @@ interface MinersState {
     status?: MinerStatus;
     info?: MinerInfo;
   }) => void;
+  updateMinerFromWs: (miner: Partial<Miner>) => void;
+  setMinerOnlineStatus: (minerId: string, isOnline: boolean) => void;
+  setWsConnected: (connected: boolean) => void;
   clearError: () => void;
   clearMinerErrors: () => void;
   getSnapshots: (minerId: string, limit?: number) => Promise<MinerSnapshot[]>;
@@ -117,6 +121,7 @@ export const useMinerStore = create<MinersState>()(
       error: null,
       minerErrors: {},
       lastRefreshTimestamp: 0,
+      wsConnected: false,
 
       loadMiners: async () => {
         set({ loading: true, error: null });
@@ -338,37 +343,32 @@ export const useMinerStore = create<MinersState>()(
         }
       },
 
-      startPolling: (intervalMs: number = 30000) => {
+      startPolling: (intervalMs: number = 10000) => {
         let interval: ReturnType<typeof setInterval> | null = null;
         let paused = false;
-        let wsActive = false;
-
-        const getInterval = () => (wsActive ? 300000 : intervalMs);
 
         const tick = () => {
-          if (!paused) get().refreshAll();
+          if (paused) return;
+          get().refreshAll();
         };
 
         get().refreshAll();
-        interval = setInterval(tick, getInterval());
-        if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
-          (interval as { unref: () => void }).unref();
-        }
 
-        import('../services/websocket').then((ws) => {
-          const unsub = ws.onWebSocketMessage?.((msg) => {
-            if (msg.type === 'miner_update') {
-              if (!wsActive) {
-                wsActive = true;
-                if (interval) clearInterval(interval);
-                interval = setInterval(tick, getInterval());
-                if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
-                  (interval as { unref: () => void }).unref();
-                }
-              }
-            }
-          });
-          return unsub;
+        const schedule = () => {
+          if (interval) clearInterval(interval);
+          const effective = get().wsConnected ? 60000 : intervalMs;
+          interval = setInterval(tick, effective);
+          if (typeof interval === 'object' && interval !== null && 'unref' in interval) {
+            (interval as { unref: () => void }).unref();
+          }
+        };
+
+        schedule();
+
+        const unsubWs = useMinerStore.subscribe((s) => {
+          if (interval && s.wsConnected !== get().wsConnected) {
+            schedule();
+          }
         });
 
         const sub = AppState.addEventListener('change', (state) => {
@@ -393,6 +393,7 @@ export const useMinerStore = create<MinersState>()(
           if (interval) clearInterval(interval);
           clearInterval(bgTimer);
           sub.remove();
+          unsubWs();
         };
       },
 
@@ -578,6 +579,29 @@ export const useMinerStore = create<MinersState>()(
             };
           }),
         }));
+      },
+
+      updateMinerFromWs: (miner) => {
+        if (!miner.id) return;
+        set((s) => ({
+          miners: s.miners.map((m) => {
+            if (m.id !== miner.id && m.remoteId !== miner.id) return m;
+            return { ...m, ...miner, id: m.id };
+          }),
+        }));
+      },
+
+      setMinerOnlineStatus: (minerId, isOnline) => {
+        set((s) => ({
+          miners: s.miners.map((m) => {
+            if (m.id !== minerId) return m;
+            return { ...m, isOnline };
+          }),
+        }));
+      },
+
+      setWsConnected: (connected) => {
+        set({ wsConnected: connected });
       },
 
       clearError: () => set({ error: null }),

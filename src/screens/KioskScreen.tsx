@@ -24,7 +24,7 @@ export function KioskScreen({ miners, onExit }: KioskScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const { width } = useWindowDimensions();
-  const [showExit, setShowExit] = useState(false);
+  const [, setShowExit] = useState(false);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshAll = useMinerStore((s) => s.refreshAll);
 

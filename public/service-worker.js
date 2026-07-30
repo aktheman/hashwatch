@@ -4,6 +4,7 @@ const STATIC_ASSETS = ['/', '/index.html', '/offline.html'];
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/app.html',
   '/offline.html',
   '/manifest.json',
 ];
@@ -34,19 +35,25 @@ self.addEventListener('fetch', (e) => {
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       caches.open(API_CACHE).then(async (cache) => {
-        try {
-          const networkRes = await fetch(request);
-          if (networkRes.ok) {
-            cache.put(request, networkRes.clone());
-          }
-          return networkRes;
-        } catch {
-          const cached = await cache.match(request);
-          return cached || new Response(JSON.stringify({ error: 'offline' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
+        const cached = await cache.match(request);
+        const networkFetch = fetch(request)
+          .then((res) => {
+            if (res.ok) {
+              cache.put(request, res.clone());
+            }
+            return res;
+          })
+          .catch(() => {
+            return cached || new Response(JSON.stringify({ error: 'offline' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' },
+            });
           });
+        if (cached) {
+          networkFetch.catch(() => {});
+          return cached;
         }
+        return networkFetch;
       }),
     );
     return;

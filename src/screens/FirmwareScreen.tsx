@@ -23,6 +23,7 @@ import {
 } from '../utils/version';
 import { BitAxeClient } from '../api/bitaxe';
 import { Miner } from '../types';
+import { flashMinerOTA, batchFlashOTA } from '../services/otaFlash';
 import { getSetting, setSetting } from '../db/database';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import * as haptic from '../utils/haptics';
@@ -51,6 +52,8 @@ export default function FirmwareScreen() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchFlashing, setBatchFlashing] = useState(false);
   const [minerStates, setMinerStates] = useState<Record<string, MinerFlashState>>({});
+  const [otaFlashing, setOtaFlashing] = useState(false);
+  const [otaProgress, setOtaProgress] = useState({ completed: 0, total: 0, current: '' });
 
   const loadSkipVersion = useCallback(async () => {
     const sv = await getSetting(SKIP_KEY);
@@ -259,6 +262,102 @@ export default function FirmwareScreen() {
             }
 
             setBatchFlashing(false);
+          },
+        },
+      ],
+    );
+  }, [latest, selectedIds, onlineMiners, minerVersionMap, t]);
+
+  const handleFlashOTA = useCallback(
+    async (miner: Miner) => {
+      if (!latest) return;
+      const current = minerVersionMap[miner.id];
+      if (current && !needsUpdate(current, latest.version)) return;
+
+      Alert.alert(
+        t('firmware.confirmFlashOTA', 'Flash via WiFi (OTA)?'),
+        t('firmware.confirmFlashOTABody', {
+          version: latest.version,
+          name: miner.name,
+          defaultValue: `Update ${miner.name} to ${latest.version} via WiFi? The miner must support OTA flashing.`,
+        }),
+        [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('firmware.flash', 'Flash'),
+            onPress: async () => {
+              setMinerStates((prev) => ({
+                ...prev,
+                [miner.id]: { status: 'flashing', progress: 0 },
+              }));
+
+              const result = await flashMinerOTA(miner, latest.downloadUrl);
+
+              setMinerStates((prev) => ({
+                ...prev,
+                [miner.id]: {
+                  status: result.success ? 'success' : 'failed',
+                  progress: result.success ? 100 : 0,
+                },
+              }));
+              if (result.success) {
+                haptic.success();
+              } else {
+                haptic.error();
+              }
+            },
+          },
+        ],
+      );
+    },
+    [latest, minerVersionMap, t],
+  );
+
+  const handleBatchFlashOTA = useCallback(async () => {
+    if (!latest || selectedIds.size === 0) return;
+
+    const targets = onlineMiners.filter(
+      (m) =>
+        selectedIds.has(m.id) &&
+        (!minerVersionMap[m.id] || needsUpdate(minerVersionMap[m.id]!, latest.version)),
+    );
+
+    if (targets.length === 0) return;
+
+    Alert.alert(
+      t('firmware.batchFlashOTATitle', 'Batch Flash via WiFi'),
+      t('firmware.batchFlashOTABody', {
+        count: targets.length,
+        version: latest.version,
+        defaultValue: `Flash ${targets.length} miner(s) via WiFi (OTA)? All miners will reboot.`,
+      }),
+      [
+        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('firmware.flashAll', 'Flash All'),
+          onPress: async () => {
+            setOtaFlashing(true);
+
+            const results = await batchFlashOTA(
+              targets,
+              latest.downloadUrl,
+              (completed, total, current) => {
+                setOtaProgress({ completed, total, current });
+              },
+            );
+
+            setSelectedIds(new Set());
+            const initial: Record<string, MinerFlashState> = {};
+            for (const r of results) {
+              initial[r.minerId] = {
+                status: r.success ? 'success' : 'failed',
+                progress: r.success ? 100 : 0,
+              };
+            }
+            setMinerStates(initial);
+            setOtaFlashing(false);
+            if (results.some((r) => r.success)) haptic.success();
+            if (results.some((r) => !r.success)) haptic.error();
           },
         },
       ],
@@ -536,114 +635,135 @@ export default function FirmwareScreen() {
                   const isSelected = selectedIds.has(miner.id);
 
                   return (
-                    <Pressable
-                      key={miner.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${miner.name}, ${currentVer ?? t('firmware.unknown', 'unknown')}`}
-                      style={[
-                        styles.minerRow,
-                        {
-                          backgroundColor: theme.surface,
-                          borderColor: isSelected ? theme.primary : theme.border,
-                        },
-                        flashState?.status === 'success' && {
-                          borderColor: theme.success,
-                        },
-                        flashState?.status === 'failed' && {
-                          borderColor: theme.danger,
-                        },
-                      ]}
-                      onPress={() => {
-                        if (needsFlash && latest) {
-                          haptic.heavy();
-                          handleFlashSingle(miner);
-                        }
-                      }}
-                    >
-                      <View style={styles.minerRowTop}>
-                        {latest && needsFlash && (
-                          <Switch
-                            value={isSelected}
-                            onValueChange={() => handleToggleSelect(miner.id)}
-                            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
-                            thumbColor={isSelected ? theme.primary : theme.surface}
-                            disabled={batchFlashing || hasActiveFlash}
-                          />
-                        )}
-                        <View style={styles.minerInfo}>
-                          <Text style={[styles.minerName, { color: theme.text }]} numberOfLines={1}>
-                            {miner.name}
-                          </Text>
-                          <Text style={[styles.minerIp, { color: theme.textDim }]}>{miner.ip}</Text>
-                        </View>
-                        <View style={styles.minerVersionInfo}>
-                          <Text
-                            style={[
-                              styles.minerCurrentVer,
-                              { color: currentVer ? theme.text : theme.textDim },
-                            ]}
-                          >
-                            {currentVer ?? t('firmware.unknown', 'unknown')}
-                          </Text>
+                    <View key={miner.id} style={styles.minerItemWrap}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`${miner.name}, ${currentVer ?? t('firmware.unknown', 'unknown')}`}
+                        style={[
+                          styles.minerRow,
+                          {
+                            backgroundColor: theme.surface,
+                            borderColor: isSelected ? theme.primary : theme.border,
+                          },
+                          flashState?.status === 'success' && {
+                            borderColor: theme.success,
+                          },
+                          flashState?.status === 'failed' && {
+                            borderColor: theme.danger,
+                          },
+                        ]}
+                        onPress={() => {
+                          if (needsFlash && latest) {
+                            haptic.heavy();
+                            handleFlashSingle(miner);
+                          }
+                        }}
+                      >
+                        <View style={styles.minerRowTop}>
                           {latest && needsFlash && (
-                            <View style={styles.versionArrow}>
-                              <Text style={{ color: theme.textDim }}>→</Text>
-                              <Text style={[styles.minerTargetVer, { color: theme.primary }]}>
-                                {latest.version}
+                            <Switch
+                              value={isSelected}
+                              onValueChange={() => handleToggleSelect(miner.id)}
+                              trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+                              thumbColor={isSelected ? theme.primary : theme.surface}
+                              disabled={batchFlashing || hasActiveFlash}
+                            />
+                          )}
+                          <View style={styles.minerInfo}>
+                            <Text
+                              style={[styles.minerName, { color: theme.text }]}
+                              numberOfLines={1}
+                            >
+                              {miner.name}
+                            </Text>
+                            <Text style={[styles.minerIp, { color: theme.textDim }]}>
+                              {miner.ip}
+                            </Text>
+                          </View>
+                          <View style={styles.minerVersionInfo}>
+                            <Text
+                              style={[
+                                styles.minerCurrentVer,
+                                { color: currentVer ? theme.text : theme.textDim },
+                              ]}
+                            >
+                              {currentVer ?? t('firmware.unknown', 'unknown')}
+                            </Text>
+                            {latest && needsFlash && (
+                              <View style={styles.versionArrow}>
+                                <Text style={{ color: theme.textDim }}>→</Text>
+                                <Text style={[styles.minerTargetVer, { color: theme.primary }]}>
+                                  {latest.version}
+                                </Text>
+                              </View>
+                            )}
+                            {latest && !needsFlash && currentVer && (
+                              <Text style={[styles.upToDateBadge, { color: theme.success }]}>
+                                ✓ {t('firmware.upToDate', 'Up to Date')}
                               </Text>
-                            </View>
-                          )}
-                          {latest && !needsFlash && currentVer && (
-                            <Text style={[styles.upToDateBadge, { color: theme.success }]}>
-                              ✓ {t('firmware.upToDate', 'Up to Date')}
-                            </Text>
-                          )}
+                            )}
+                          </View>
                         </View>
-                      </View>
 
-                      {flashState && (
-                        <View style={styles.flashStatusContainer}>
-                          {flashState.status === 'pending' && (
-                            <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
-                              {t('firmware.pending', 'Pending...')}
-                            </Text>
-                          )}
-                          {flashState.status === 'flashing' && (
-                            <View style={styles.flashProgressWrap}>
-                              <View
-                                style={[
-                                  styles.flashProgressTrack,
-                                  { backgroundColor: theme.surfaceLight },
-                                ]}
-                              >
+                        {flashState && (
+                          <View style={styles.flashStatusContainer}>
+                            {flashState.status === 'pending' && (
+                              <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
+                                {t('firmware.pending', 'Pending...')}
+                              </Text>
+                            )}
+                            {flashState.status === 'flashing' && (
+                              <View style={styles.flashProgressWrap}>
                                 <View
                                   style={[
-                                    styles.flashProgressFill,
-                                    {
-                                      backgroundColor: theme.primary,
-                                      width: `${flashState.progress}%`,
-                                    },
+                                    styles.flashProgressTrack,
+                                    { backgroundColor: theme.surfaceLight },
                                   ]}
-                                />
+                                >
+                                  <View
+                                    style={[
+                                      styles.flashProgressFill,
+                                      {
+                                        backgroundColor: theme.primary,
+                                        width: `${flashState.progress}%`,
+                                      },
+                                    ]}
+                                  />
+                                </View>
+                                <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
+                                  {t('firmware.flashing', 'Flashing...')}
+                                </Text>
                               </View>
-                              <Text style={[styles.flashStatusText, { color: theme.textDim }]}>
-                                {t('firmware.flashing', 'Flashing...')}
+                            )}
+                            {flashState.status === 'success' && (
+                              <Text style={[styles.flashStatusText, { color: theme.success }]}>
+                                ✓ {t('firmware.flashSuccess', 'Success — Miner rebooting')}
                               </Text>
-                            </View>
-                          )}
-                          {flashState.status === 'success' && (
-                            <Text style={[styles.flashStatusText, { color: theme.success }]}>
-                              ✓ {t('firmware.flashSuccess', 'Success — Miner rebooting')}
-                            </Text>
-                          )}
-                          {flashState.status === 'failed' && (
-                            <Text style={[styles.flashStatusText, { color: theme.danger }]}>
-                              ✗ {t('firmware.flashFailed', 'Flash failed')}
-                            </Text>
-                          )}
-                        </View>
+                            )}
+                            {flashState.status === 'failed' && (
+                              <Text style={[styles.flashStatusText, { color: theme.danger }]}>
+                                ✗ {t('firmware.flashFailed', 'Flash failed')}
+                              </Text>
+                            )}
+                          </View>
+                        )}
+                      </Pressable>
+                      {latest && needsFlash && (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('firmware.flashOTA', 'Flash via WiFi (OTA)')}
+                          style={[styles.otaBtn, { borderColor: theme.primary }]}
+                          onPress={() => {
+                            haptic.light();
+                            handleFlashOTA(miner);
+                          }}
+                        >
+                          <Text style={[styles.otaBtnText, { color: theme.primary }]}>
+                            {t('firmware.flashOTA', 'Flash via WiFi (OTA)')}
+                          </Text>
+                        </Pressable>
                       )}
-                    </Pressable>
+                    </View>
                   );
                 })}
               </View>
@@ -700,6 +820,42 @@ export default function FirmwareScreen() {
                     </Text>
                   )}
                 </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    'firmware.flashSelectedOTA',
+                    'Flash selected miners via WiFi',
+                  )}
+                  style={[
+                    styles.batchBtn,
+                    styles.flashAllBtn,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity:
+                        selectedIds.size === 0 || otaFlashing || batchFlashing || hasActiveFlash
+                          ? 0.5
+                          : 1,
+                    },
+                  ]}
+                  disabled={
+                    selectedIds.size === 0 || otaFlashing || batchFlashing || hasActiveFlash
+                  }
+                  onPress={() => {
+                    haptic.heavy();
+                    handleBatchFlashOTA();
+                  }}
+                >
+                  {otaFlashing ? (
+                    <ActivityIndicator size="small" color={buttonText} />
+                  ) : (
+                    <Text style={styles.flashAllBtnText}>
+                      {t('firmware.flashSelectedOTA', {
+                        count: selectedIds.size,
+                        defaultValue: `Flash via WiFi (OTA) (${selectedIds.size})`,
+                      })}
+                    </Text>
+                  )}
+                </Pressable>
               </View>
             </View>
           )}
@@ -742,6 +898,35 @@ export default function FirmwareScreen() {
                     {t('firmware.clearResults', 'Clear Results')}
                   </Text>
                 </Pressable>
+              </View>
+            </View>
+          )}
+
+          {otaFlashing && (
+            <View style={styles.section}>
+              <View
+                style={[
+                  styles.card,
+                  { backgroundColor: theme.surface, borderColor: theme.primary },
+                ]}
+              >
+                <Text style={[styles.otaProgressTitle, { color: theme.text }]}>
+                  {t('firmware.otaFlashing', 'Flashing via WiFi...')}
+                </Text>
+                <Text style={[styles.otaProgressText, { color: theme.textDim }]}>
+                  {otaProgress.current} ({otaProgress.completed}/{otaProgress.total})
+                </Text>
+                <View style={[styles.flashProgressTrack, { backgroundColor: theme.surfaceLight }]}>
+                  <View
+                    style={[
+                      styles.flashProgressFill,
+                      {
+                        backgroundColor: theme.primary,
+                        width: `${otaProgress.total > 0 ? (otaProgress.completed / otaProgress.total) * 100 : 0}%`,
+                      },
+                    ]}
+                  />
+                </View>
               </View>
             </View>
           )}
@@ -944,6 +1129,28 @@ const styles = StyleSheet.create({
   flashProgressFill: {
     height: '100%',
     borderRadius: radius.xxs,
+  },
+  minerItemWrap: {
+    gap: spacing.xxs,
+  },
+  otaBtn: {
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.xxs,
+    paddingHorizontal: spacing.sm,
+    alignSelf: 'flex-start',
+  },
+  otaBtnText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+  },
+  otaProgressTitle: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+  },
+  otaProgressText: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.xxs,
   },
   batchActions: {
     flexDirection: 'row',

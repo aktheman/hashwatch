@@ -58,7 +58,8 @@ config.transformer = {
   ...config.transformer,
   minifierConfig: {
     compress: {
-      // Keep console for debugging; remove in production builds via CI flag
+      // Keep console for debugging; set drop_console: true for production builds
+      // config.transformer.minifierConfig.compress.drop_console = true
       drop_console: false,
       // 3 passes: first merges constants, second eliminates dead code, third cleans up
       passes: 3,
