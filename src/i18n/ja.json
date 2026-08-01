@@ -656,7 +656,16 @@
     "long_uptime": "長時間稼働",
     "sync": "同期",
     "today": "今日",
-    "yesterday": "昨日"
+    "yesterday": "昨日",
+    "filterAll": "すべて",
+    "filterOffline": "オフライン",
+    "filterOnline": "オンライン",
+    "filterHot": "高温",
+    "filterHashrateDrop": "ハッシュレート低下",
+    "filterPoolLost": "プール喪失",
+    "clearFilters": "フィルターをクリア",
+    "noMatchingAlerts": "検索に一致するアラートはありません",
+    "searchPlaceholder": "アラートを検索..."
   },
   "notificationHistory": {
     "title": "通知履歴",

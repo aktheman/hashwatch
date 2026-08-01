@@ -39,6 +39,7 @@ import { exportAllData } from '../utils/export';
 import { BitAxeClient } from '../api/bitaxe';
 import { LATEST_FIRMWARE, getFirmwareBinaryUrl } from '../utils/version';
 import { trackScreenView } from '../services/analytics';
+import { useNetworkStatus } from '../services/networkStatus';
 import { MetricTile, ProfitabilityCard } from '../components/DashboardComponents';
 import { MinerDrillDownModal } from '../components/MinerDrillDownModal';
 import { TimeAgo } from '../components/TimeAgo';
@@ -72,6 +73,14 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const miners = useMinerStore((s) => s.miners);
+  const wsConnected = useMinerStore((s) => s.wsConnected);
+  const { isOnline } = useNetworkStatus();
+
+  const wsStatus = wsConnected
+    ? { color: theme.success, label: t('dashboard.wsConnected', 'Realtime connected') }
+    : isOnline
+      ? { color: theme.warning, label: t('dashboard.wsPolling', 'Polling mode') }
+      : { color: theme.danger, label: t('dashboard.wsOffline', 'Offline') };
 
   useEffect(() => {
     trackScreenView('Dashboard');
@@ -350,6 +359,19 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     setSelectionMode(false);
     setSelectedIds(new Set());
   }, []);
+
+  const onPressHashrate = useCallback(() => {
+    setDrillDown({ metricType: 'hashrate', title: t('dashboard.hashrate') });
+  }, [t]);
+  const onPressPower = useCallback(() => {
+    setDrillDown({ metricType: 'power', title: t('dashboard.power') });
+  }, [t]);
+  const onPressTemp = useCallback(() => {
+    setDrillDown({ metricType: 'temp', title: t('dashboard.temp') });
+  }, [t]);
+  const onPressUptime = useCallback(() => {
+    setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') });
+  }, [t]);
 
   const handleBatchGroup = useCallback(() => {
     const selected = miners.filter((m) => selectedIds.has(m.id));
@@ -1363,9 +1385,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   chart={metrics.recentHashrates.length > 0 ? 'sparkline' : undefined}
                   chartData={metrics.recentHashrates}
                   size="lg"
-                  onPress={() =>
-                    setDrillDown({ metricType: 'hashrate', title: t('dashboard.hashrate') })
-                  }
+                  onPress={onPressHashrate}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -1390,7 +1410,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   chart={metrics.recentPower.length > 0 ? 'bars' : undefined}
                   chartData={metrics.recentPower}
                   size="lg"
-                  onPress={() => setDrillDown({ metricType: 'power', title: t('dashboard.power') })}
+                  onPress={onPressPower}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -1400,7 +1420,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   accent={avgTemp > 70 ? 'danger' : 'success'}
                   chart="gauge"
                   size="lg"
-                  onPress={() => setDrillDown({ metricType: 'temp', title: t('dashboard.temp') })}
+                  onPress={onPressTemp}
                 />
               </View>
             </View>
@@ -1417,9 +1437,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   chart={metrics.recentUptimes.length > 0 ? 'sparkline' : undefined}
                   chartData={uptimeChartData}
                   size="lg"
-                  onPress={() =>
-                    setDrillDown({ metricType: 'uptime', title: t('dashboard.uptime') })
-                  }
+                  onPress={onPressUptime}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -1928,8 +1946,9 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                 >
                   HashWatch
                 </Text>
-                <Text style={styles.headerSub}>
-                  <Text style={styles.liveDot}>●</Text> {t('dashboard.subtitle')}
+                <Text style={styles.headerSub} accessibilityLabel={wsStatus.label}>
+                  <Text style={[styles.liveDot, { color: wsStatus.color }]}>●</Text>{' '}
+                  {t('dashboard.subtitle')}
                 </Text>
               </View>
               <View

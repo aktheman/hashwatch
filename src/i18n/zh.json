@@ -656,7 +656,16 @@
     "long_uptime": "长时间运行",
     "sync": "同步",
     "today": "今天",
-    "yesterday": "昨天"
+    "yesterday": "昨天",
+    "filterAll": "全部",
+    "filterOffline": "离线",
+    "filterOnline": "在线",
+    "filterHot": "高温",
+    "filterHashrateDrop": "算力下降",
+    "filterPoolLost": "矿池丢失",
+    "clearFilters": "清除筛选",
+    "noMatchingAlerts": "没有匹配的告警",
+    "searchPlaceholder": "搜索告警..."
   },
   "notificationHistory": {
     "title": "通知历史",

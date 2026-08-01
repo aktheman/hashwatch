@@ -149,6 +149,12 @@ beforeEach(() => {
   mockRegister.mockResolvedValue(false);
 });
 
+afterEach(() => {
+  jest.clearAllTimers();
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
+
 it('renders settings title', async () => {
   const r = await render(<SettingsScreen navigation={navigation} />);
   expect(await r.findByText('settings.title', {}, { timeout: 15000 })).toBeTruthy();

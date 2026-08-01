@@ -27,6 +27,16 @@ const AXEOS_GITHUB_REPO = 'bitaxeorg/AXeOS';
 
 const GITHUB_API = `https://api.github.com/repos/${AXEOS_GITHUB_REPO}/releases/latest`;
 
+export function parseChangelog(changelog: string): string[] {
+  if (!changelog) return [];
+  return changelog
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('-') || line.startsWith('*') || line.startsWith('#'))
+    .map((line) => line.replace(/^[-*#]\s*/, '').trim())
+    .filter(Boolean);
+}
+
 export async function checkForFirmwareUpdate(
   currentVersion: string,
 ): Promise<FirmwareVersion | null> {

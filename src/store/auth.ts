@@ -70,7 +70,12 @@ async function processQueue(): Promise<void> {
   let delayMs = 500;
 
   for (const item of _settingsQueue) {
-    await new Promise((r) => setTimeout(r, delayMs));
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, delayMs);
+      if (typeof timer === 'object' && timer !== null && 'unref' in timer) {
+        (timer as { unref: () => void }).unref();
+      }
+    });
     try {
       await API.putSetting(item.key, item.value);
       delayMs = 500;

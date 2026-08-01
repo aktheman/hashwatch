@@ -5,7 +5,13 @@ import { useAuthStore } from '../store/auth';
 import { useToastStore } from '../store/toast';
 import { MinerSnapshot, Wallet, MinerNoteItem } from '../types';
 import * as DB from '../db/database';
-import { fetchMinerNotes, addMinerNote, deleteMinerNote, recordPoolChange } from '../api/client';
+import {
+  fetchMinerNotes,
+  addMinerNote,
+  updateMinerNote,
+  deleteMinerNote,
+  recordPoolChange,
+} from '../api/client';
 import { getAlertRules, setAlertRules, DEFAULT_RULES, AlertRule } from '../services/notifications';
 import { BitAxeClient } from '../api/bitaxe';
 import { analyzeMinerHealth, HealthPrediction } from '../utils/healthPredictions';
@@ -203,6 +209,30 @@ export function useMinerDetail(minerId: string) {
     [minerId, setMinerNotes, t],
   );
 
+  const updateNote = useCallback(
+    async (noteId: number, text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || !minerId) return;
+      try {
+        const token = useAuthStore.getState().token;
+        if (token) {
+          await updateMinerNote(minerId, noteId, trimmed);
+        }
+        setNotes((prev) => {
+          const updated = prev.map((n) => (n.id === noteId ? { ...n, text: trimmed } : n));
+          setMinerNotes(minerId, updated.map((n) => n.text).join('\n'), updated);
+          return updated;
+        });
+      } catch {
+        Alert.alert(
+          t('minerDetail.error'),
+          t('minerDetail.updateNoteFailed', 'Failed to update note'),
+        );
+      }
+    },
+    [minerId, setMinerNotes, t],
+  );
+
   const deleteNote = useCallback(
     async (noteId: number) => {
       try {
@@ -248,6 +278,13 @@ export function useMinerDetail(minerId: string) {
         DB.saveMiner(updated);
         setMinerGroup(minerId, text || undefined);
       }, 500);
+      if (
+        groupDebounceRef.current &&
+        typeof groupDebounceRef.current === 'object' &&
+        'unref' in groupDebounceRef.current
+      ) {
+        groupDebounceRef.current.unref();
+      }
     },
     [miner, minerId, setMinerGroup],
   );
@@ -275,6 +312,7 @@ export function useMinerDetail(minerId: string) {
     savePool,
     deleteMinerAction,
     addNote,
+    updateNote,
     deleteNote,
     updateAlertRules,
     resetAlertRules,

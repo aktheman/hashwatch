@@ -77,11 +77,12 @@ export function AlertHistoryScreen({ navigation: _navigation }: { navigation: Na
   const isAuthed = !!useAuthStore.getState().token;
 
   useEffect(() => {
+    loadEvents();
     if (isAuthed) {
       syncFromBackend();
       syncToBackend();
     }
-  }, [isAuthed, syncFromBackend, syncToBackend]);
+  }, [isAuthed, loadEvents, syncFromBackend, syncToBackend]);
 
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

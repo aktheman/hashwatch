@@ -109,6 +109,56 @@ export async function clearLocalStorage(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
 }
 
+export async function seedAlertHistory(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(() => {
+    const now = Date.now();
+    const events = [
+      {
+        id: 'alert-offline',
+        minerId: 'miner-1',
+        minerName: 'Miner Alpha',
+        type: 'offline',
+        title: 'Miner Alpha went offline',
+        timestamp: now,
+        read: false,
+      },
+      {
+        id: 'alert-online',
+        minerId: 'miner-2',
+        minerName: 'Miner Beta',
+        type: 'online',
+        title: 'Miner Beta is back online',
+        timestamp: now - 60000,
+        read: false,
+      },
+      {
+        id: 'alert-hot',
+        minerId: 'miner-1',
+        minerName: 'Miner Alpha',
+        type: 'hot',
+        title: 'Miner Alpha temperature high',
+        timestamp: now - 120000,
+        read: true,
+      },
+    ];
+    localStorage.setItem(
+      'hashwatch_settings',
+      JSON.stringify({
+        theme_mode: 'dark',
+        auto_scan: 'false',
+        power_cost: '0.12',
+        onboarding_complete: 'true',
+        last_seen_version: '1.1.0',
+        hashwatch_alert_history: JSON.stringify(events),
+      }),
+    );
+  });
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+}
+
 export async function skipOnboarding(page: Page): Promise<void> {
   await page.goto('/');
   await page.waitForLoadState('networkidle');

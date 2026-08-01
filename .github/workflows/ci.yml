@@ -12,6 +12,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install frontend dependencies
+        run: npm install
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+      - name: Frontend typecheck
+        run: npx tsc --noEmit
+      - name: Frontend lint
+        run: npx eslint src/ --max-warnings=0
+      - name: Backend typecheck
+        working-directory: backend
+        run: npx tsc --noEmit
+      - name: Backend lint
+        working-directory: backend
+        run: npx eslint src/ --max-warnings=0
+
   backend:
     name: Backend
     runs-on: ubuntu-latest
@@ -30,9 +56,8 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm install
       - run: npm run build
-      - run: npm run lint
-      - run: npx tsc --noEmit
-      - run: npm test
+      - name: Run backend tests
+        run: npx jest --no-coverage
 
   frontend:
     name: Frontend
@@ -47,10 +72,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm install
-      - run: npm run typecheck
-      - run: npm run lint
       - run: npm audit --audit-level=high || echo "Audit warnings (non-blocking)"
-      - run: npm test -- --coverage
+      - name: Run frontend tests with coverage thresholds
+        run: npx jest --coverage --silent
 
   web-build:
     name: Web Build
@@ -165,11 +189,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: actions/download-artifact@v4
-        with:
-          name: web-dist
-          path: dist/
       - run: npm install
+      - name: Build web bundle
+        run: npm run build:web
+        env:
+          EXPO_NO_TELEMETRY: 1
       - name: Check Vercel secrets
         id: check-secrets
         run: |

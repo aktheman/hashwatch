@@ -151,6 +151,12 @@ beforeEach(() => {
   (getSetting as jest.Mock).mockResolvedValue(null);
 });
 
+afterEach(() => {
+  jest.clearAllTimers();
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
+
 it('renders HashWatch title', async () => {
   await render(<DashboardScreen navigation={navigation} />);
   expect(screen.getByText('HashWatch')).toBeTruthy();

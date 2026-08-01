@@ -14,7 +14,11 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useMinerStore } from '../store/miners';
-import { checkForFirmwareUpdate, FirmwareVersion } from '../services/firmwareUpdate';
+import {
+  checkForFirmwareUpdate,
+  FirmwareVersion,
+  parseChangelog,
+} from '../services/firmwareUpdate';
 import {
   parseVersion,
   needsUpdate,
@@ -54,6 +58,7 @@ export default function FirmwareScreen() {
   const [minerStates, setMinerStates] = useState<Record<string, MinerFlashState>>({});
   const [otaFlashing, setOtaFlashing] = useState(false);
   const [otaProgress, setOtaProgress] = useState({ completed: 0, total: 0, current: '' });
+  const [changelogExpanded, setChangelogExpanded] = useState(false);
 
   const loadSkipVersion = useCallback(async () => {
     const sv = await getSetting(SKIP_KEY);
@@ -78,6 +83,8 @@ export default function FirmwareScreen() {
     }
     return map;
   }, [miners]);
+
+  const changelogItems = useMemo(() => (latest ? parseChangelog(latest.changelog) : []), [latest]);
 
   const minersNeedingUpdate = useMemo(() => {
     if (!latest) return [];
@@ -576,6 +583,53 @@ export default function FirmwareScreen() {
                   </Pressable>
                 </View>
               </View>
+
+              {changelogItems.length > 0 && (
+                <View
+                  style={[
+                    styles.card,
+                    { backgroundColor: theme.surface, borderColor: theme.border },
+                  ]}
+                >
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.textDim }]}
+                    accessibilityRole="header"
+                  >
+                    {t('firmware.whatsNew', "What's New")}
+                  </Text>
+                  <View style={styles.changelogList}>
+                    {(changelogExpanded ? changelogItems : changelogItems.slice(0, 5)).map(
+                      (item, i) => (
+                        <View key={i} style={styles.changelogItem}>
+                          <Text style={[styles.changelogBullet, { color: theme.primary }]}>•</Text>
+                          <Text style={[styles.changelogItemText, { color: theme.text }]}>
+                            {item}
+                          </Text>
+                        </View>
+                      ),
+                    )}
+                  </View>
+                  {changelogItems.length > 5 && (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t(
+                        changelogExpanded ? 'firmware.showLess' : 'firmware.showMore',
+                        changelogExpanded ? 'Show Less' : 'Show More',
+                      )}
+                      onPress={() => {
+                        haptic.light();
+                        setChangelogExpanded((prev) => !prev);
+                      }}
+                    >
+                      <Text style={[styles.changelogText, { color: theme.primary }]}>
+                        {changelogExpanded
+                          ? t('firmware.showLess', 'Show Less')
+                          : t('firmware.showMore', 'Show More')}
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+              )}
             </View>
           )}
 
@@ -1020,6 +1074,22 @@ const styles = StyleSheet.create({
   changelogText: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
+  },
+  changelogList: {
+    gap: spacing.xs,
+  },
+  changelogItem: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  changelogBullet: {
+    fontSize: fontSize.sm,
+    lineHeight: 18,
+  },
+  changelogItemText: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    lineHeight: 18,
   },
   skipBadge: {
     flexDirection: 'row',

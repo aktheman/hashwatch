@@ -83,9 +83,10 @@ function parseMarkdown(text: string, baseStyle: TextStyle): React.ReactNode[] {
 interface MarkdownTextProps {
   children: string;
   style?: TextStyle;
+  numberOfLines?: number;
 }
 
-export function MarkdownText({ children, style }: MarkdownTextProps) {
+export function MarkdownText({ children, style, numberOfLines }: MarkdownTextProps) {
   const nodes = useMemo(() => parseMarkdown(children, style || {}), [children, style]);
-  return <Text>{nodes}</Text>;
+  return <Text numberOfLines={numberOfLines}>{nodes}</Text>;
 }

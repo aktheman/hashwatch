@@ -23,6 +23,9 @@
   "dashboard": {
     "title": "HashWatch",
     "subtitle": "Live Monitor",
+    "wsConnected": "Realtime connected",
+    "wsPolling": "Polling mode",
+    "wsOffline": "Offline",
     "noMiners": "No Miners Yet",
     "noMinersBody": "Add your first BitAxe miner to start monitoring",
     "step1": "1. Know your miner's IP address",
@@ -95,6 +98,11 @@
     "exitKioskTitle": "Exit Kiosk",
     "exitKioskBody": "Tap \"Exit\" to leave kiosk mode.",
     "exitKioskExit": "Exit"
+  },
+  "firmware": {
+    "whatsNew": "What's New",
+    "showMore": "Show More",
+    "showLess": "Show Less"
   },
   "dashboardCustomizer": {
     "title": "Customize Dashboard",
@@ -308,6 +316,9 @@
     "addNotePlaceholder": "Write a note...",
     "addNoteFailed": "Failed to add note",
     "deleteNoteFailed": "Failed to delete note",
+    "viewFullNote": "View Full Note",
+    "editNote": "Edit Note",
+    "saveNote": "Save Note",
     "dangerZone": "Danger Zone",
     "removeMiner": "Remove Miner",
     "removeConfirm": "This permanently deletes {{name}} and all its history.",
@@ -523,7 +534,16 @@
     "long_uptime": "Long Uptime",
     "sync": "Sync",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "filterAll": "All",
+    "filterOffline": "Offline",
+    "filterOnline": "Online",
+    "filterHot": "Hot",
+    "filterHashrateDrop": "Hashrate Drop",
+    "filterPoolLost": "Pool Lost",
+    "clearFilters": "Clear filters",
+    "noMatchingAlerts": "No alerts match your search",
+    "searchPlaceholder": "Search alerts..."
   },
   "notificationHistory": {
     "title": "Notification History",

@@ -1,26 +1,26 @@
 {
-  "buildCommand": "npx expo export --platform web; mv dist/index.html dist/app.html; cp -f public/*.html public/*.css public/robots.txt public/sitemap.xml public/og-image.png dist/; cp -f dist/landing.html dist/index.html",
+  "buildCommand": "npm run build:web && cp -f public/*.html public/*.css public/*.json public/robots.txt public/sitemap.xml public/og-image.png public/og-image.svg dist/ && cp -f dist/landing.html dist/index.html",
   "outputDirectory": "dist",
   "framework": null,
   "trailingSlash": false,
-  "routes": [
-    { "src": "^/app(?:/(.*))?$", "dest": "/app.html" },
-    { "src": "^/pricing$", "dest": "/pricing.html" },
-    { "src": "^/changelog$", "dest": "/changelog.html" },
-    { "src": "^/blog$", "dest": "/blog.html" },
-    { "src": "^/blog/(.*)$", "dest": "/blog-$1.html" },
-    { "src": "^/calculator$", "dest": "/calculator.html" },
-    { "src": "^/bitaxe-comparison$", "dest": "/bitaxe-comparison.html" },
-    { "src": "^/api-docs$", "dest": "/api-docs.html" },
-    { "src": "^/openapi\\.json$", "dest": "/openapi.json" },
-    { "src": "^/support$", "dest": "/support.html" },
-    { "src": "^/terms$", "dest": "/terms.html" },
-    { "src": "^/privacy$", "dest": "/privacy.html" },
-    { "src": "^/landing$", "dest": "/landing.html" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/404.html" }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/app/:path*", "destination": "/app.html" },
+    { "source": "/blog/:slug", "destination": "/blog-:slug.html" }
   ],
   "headers": [
+    {
+      "source": "/app.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/service-worker.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
@@ -34,7 +34,12 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
       ]
     }
   ]

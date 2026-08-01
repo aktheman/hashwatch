@@ -1,4 +1,5 @@
 import { connectWebSocket, disconnectWebSocket } from '../src/services/websocket';
+import { useMinerStore } from '../src/store/miners';
 
 const mockApply = jest.fn();
 const mockUpdateFromWs = jest.fn();
@@ -82,10 +83,33 @@ describe('connectWebSocket', () => {
     expect(mockWsSend).toHaveBeenCalledWith(JSON.stringify({ type: 'auth', token: 'test-token' }));
   });
 
+  it('sets wsConnected to true on open', () => {
+    connectWebSocket('test-token');
+    mockWsOnopen?.();
+    expect(useMinerStore.setState).toHaveBeenCalledWith({ wsConnected: true });
+    disconnectWebSocket();
+  });
+
+  it('sets wsConnected to false on close', () => {
+    jest.useFakeTimers();
+    connectWebSocket('test-token');
+    mockWsOnclose?.();
+    expect(useMinerStore.setState).toHaveBeenCalledWith({ wsConnected: false });
+    disconnectWebSocket();
+    jest.useRealTimers();
+  });
+
   it('handles snapshot messages', () => {
     connectWebSocket('test-token');
     const snapshot = { minerId: 'remote-1', hashRate: 500, timestamp: Date.now() };
     mockWsOnmessage?.({ data: JSON.stringify({ type: 'snapshot', snapshot }) });
+    expect(mockApply).toHaveBeenCalledWith('local-1');
+  });
+
+  it('handles miner_snapshot messages by applying the remote snapshot', () => {
+    connectWebSocket('test-token');
+    const snapshot = { minerId: 'remote-1', hashRate: 500, timestamp: Date.now() };
+    mockWsOnmessage?.({ data: JSON.stringify({ type: 'miner_snapshot', snapshot }) });
     expect(mockApply).toHaveBeenCalledWith('local-1');
   });
 
@@ -190,5 +214,62 @@ describe('disconnectWebSocket', () => {
     jest.advanceTimersByTime(5000);
     expect(global.WebSocket).toHaveBeenCalledTimes(1);
     jest.useRealTimers();
+  });
+});
+
+describe('SW_RECONNECT listener', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+    delete (global as any).window;
+  });
+
+  it('installs a window message listener on connect', () => {
+    const addEventListener = jest.fn();
+    (global as any).window = { addEventListener };
+    jest.isolateModules(() => {
+      const { connectWebSocket, disconnectWebSocket } = require('../src/services/websocket');
+      connectWebSocket('test-token');
+      expect(addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      disconnectWebSocket();
+    });
+  });
+
+  it('reconnects when a SW_RECONNECT message arrives while disconnected', () => {
+    jest.useFakeTimers();
+    let swHandler: ((e: { data?: { type?: string } }) => void) | null = null;
+    (global as any).window = {
+      addEventListener: (_type: string, handler: (e: { data?: { type?: string } }) => void) => {
+        swHandler = handler;
+      },
+    };
+    jest.isolateModules(() => {
+      const { connectWebSocket, disconnectWebSocket } = require('../src/services/websocket');
+      connectWebSocket('test-token');
+      mockWsOnclose?.();
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+
+      swHandler?.({ data: { type: 'SW_RECONNECT' } });
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+
+      disconnectWebSocket();
+    });
+  });
+
+  it('ignores SW_RECONNECT messages while a connection is active', () => {
+    jest.useFakeTimers();
+    let swHandler: ((e: { data?: { type?: string } }) => void) | null = null;
+    (global as any).window = {
+      addEventListener: (_type: string, handler: (e: { data?: { type?: string } }) => void) => {
+        swHandler = handler;
+      },
+    };
+    jest.isolateModules(() => {
+      const { connectWebSocket, disconnectWebSocket } = require('../src/services/websocket');
+      connectWebSocket('test-token');
+      swHandler?.({ data: { type: 'SW_RECONNECT' } });
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+
+      disconnectWebSocket();
+    });
   });
 });

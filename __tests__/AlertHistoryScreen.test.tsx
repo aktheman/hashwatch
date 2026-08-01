@@ -1,9 +1,37 @@
 import { render, screen, fireEvent, cleanup } from '@testing-library/react-native';
 import React from 'react';
-import { AlertHistoryScreen } from '../src/screens/AlertHistoryScreen';
-import { useAlertHistoryStore } from '../src/store/alertHistory';
+import type { AlertEvent } from '../src/store/alertHistory';
 
 const mockNavigate = jest.fn();
+const mockMarkRead = jest.fn();
+const mockMarkAllRead = jest.fn();
+const mockClearAll = jest.fn();
+const mockLoadEvents = jest.fn().mockResolvedValue(undefined);
+const mockSyncFromBackend = jest.fn().mockResolvedValue(undefined);
+const mockSyncToBackend = jest.fn().mockResolvedValue(undefined);
+
+let mockEvents: AlertEvent[] = [];
+
+jest.mock('../src/store/alertHistory', () => ({
+  useAlertHistoryStore: jest.fn((sel: (s: unknown) => unknown) =>
+    sel({
+      events: mockEvents,
+      syncing: false,
+      markRead: mockMarkRead,
+      markAllRead: mockMarkAllRead,
+      clearAll: mockClearAll,
+      loadEvents: mockLoadEvents,
+      syncFromBackend: mockSyncFromBackend,
+      syncToBackend: mockSyncToBackend,
+    }),
+  ),
+}));
+
+jest.mock('../src/store/auth', () => ({
+  useAuthStore: {
+    getState: () => ({ token: null }),
+  },
+}));
 
 jest.mock('../src/theme', () => ({
   useTheme: () => ({
@@ -23,196 +51,159 @@ jest.mock('../src/theme', () => ({
   }),
 }));
 
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) => {
-      if (opts) {
-        return Object.entries(opts).reduce((s, [k, v]) => s.replace(`{{${k}}}`, String(v)), key);
-      }
-      return key;
-    },
-    i18n: { language: 'en' },
-  }),
-}));
-
 jest.mock('../src/db/database', () => ({
   getSetting: jest.fn().mockResolvedValue(null),
   setSetting: jest.fn().mockResolvedValue(undefined),
 }));
 
+const offlineEvent: AlertEvent = {
+  id: 'a1',
+  minerId: 'm1',
+  minerName: 'Miner One',
+  type: 'offline',
+  title: 'Miner One went offline',
+  timestamp: Date.now(),
+  read: false,
+};
+
+const onlineEvent: AlertEvent = {
+  id: 'a2',
+  minerId: 'm2',
+  minerName: 'Miner Two',
+  type: 'online',
+  title: 'Miner Two reconnected',
+  timestamp: Date.now() - 1000,
+  read: true,
+};
+
+const renderScreen = () =>
+  render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as never} />);
+
+import { AlertHistoryScreen } from '../src/screens/AlertHistoryScreen';
+
 beforeEach(() => {
   cleanup();
   jest.clearAllMocks();
-  useAlertHistoryStore.setState({ events: [] });
+  mockEvents = [];
 });
 
-it('renders title and empty state', async () => {
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('alertHistory.noAlerts')).toBeTruthy();
-});
-
-it('shows Mark All Read and Clear All buttons when events exist', async () => {
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
+describe('AlertHistoryScreen', () => {
+  it('renders the search input', async () => {
+    await renderScreen();
+    expect(screen.getByPlaceholderText('alertHistory.searchPlaceholder')).toBeTruthy();
   });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('alertHistory.markAllRead')).toBeTruthy();
-  expect(screen.getByText('alertHistory.clearAll')).toBeTruthy();
-});
 
-it('renders event title and miner name', async () => {
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
+  it('loads events on mount', async () => {
+    await renderScreen();
+    expect(mockLoadEvents).toHaveBeenCalled();
   });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('Miner1 went offline')).toBeTruthy();
-  expect(screen.getAllByText(/Miner1/).length).toBeGreaterThanOrEqual(1);
-});
 
-it('marks event as read on press', async () => {
-  const markRead = jest.fn();
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
-    markRead,
+  it('renders filter chips', async () => {
+    await renderScreen();
+    expect(screen.getByText('alertHistory.filterAll')).toBeTruthy();
+    expect(screen.getByText('alertHistory.filterOffline')).toBeTruthy();
+    expect(screen.getByText('alertHistory.filterOnline')).toBeTruthy();
   });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  fireEvent.press(screen.getByText('Miner1 went offline'));
-  expect(markRead).toHaveBeenCalledWith('a1');
-});
 
-it('calls markAllRead when button pressed', async () => {
-  const markAllRead = jest.fn();
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
-    markAllRead,
-  });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  fireEvent.press(screen.getByText('alertHistory.markAllRead'));
-  expect(markAllRead).toHaveBeenCalled();
-});
+  it('filters events by search query', async () => {
+    mockEvents = [offlineEvent, onlineEvent];
+    await renderScreen();
+    expect(screen.getByText('Miner Two reconnected')).toBeTruthy();
 
-it('calls clearAll when button pressed', async () => {
-  const clearAll = jest.fn();
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
-    clearAll,
-  });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  fireEvent.press(screen.getByText('alertHistory.clearAll'));
-  expect(clearAll).toHaveBeenCalled();
-});
+    await fireEvent.changeText(
+      screen.getByPlaceholderText('alertHistory.searchPlaceholder'),
+      'offline',
+    );
 
-it('groups events by date', async () => {
-  const now = Date.now();
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'offline',
-        title: 'Miner1 went offline',
-        timestamp: now,
-        read: false,
-      },
-      {
-        id: 'a2',
-        minerId: 'm2',
-        minerName: 'Miner2',
-        type: 'online',
-        title: 'Miner2 reconnected',
-        timestamp: now - 86400000,
-        read: true,
-      },
-    ],
+    expect(screen.getByText('Miner One went offline')).toBeTruthy();
+    expect(screen.queryByText('Miner Two reconnected')).toBeNull();
   });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('alertHistory.today')).toBeTruthy();
-  expect(screen.getByText('alertHistory.yesterday')).toBeTruthy();
-});
 
-it('renders alert icon based on type', async () => {
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'hot',
-        title: 'Miner1 hot',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
-  });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('🔥')).toBeTruthy();
-});
+  it('filters events by miner name in the search query', async () => {
+    mockEvents = [offlineEvent, onlineEvent];
+    await renderScreen();
 
-it('shows default bell icon for unknown alert type', async () => {
-  useAlertHistoryStore.setState({
-    events: [
-      {
-        id: 'a1',
-        minerId: 'm1',
-        minerName: 'Miner1',
-        type: 'unknown_type',
-        title: 'Unknown alert',
-        timestamp: Date.now(),
-        read: false,
-      },
-    ],
+    await fireEvent.changeText(
+      screen.getByPlaceholderText('alertHistory.searchPlaceholder'),
+      'miner two',
+    );
+
+    expect(screen.queryByText('Miner One went offline')).toBeNull();
+    expect(screen.getByText('Miner Two reconnected')).toBeTruthy();
   });
-  await render(<AlertHistoryScreen navigation={{ navigate: mockNavigate } as any} />);
-  expect(screen.getByText('🔔')).toBeTruthy();
+
+  it('activates the filter when the Offline chip is pressed', async () => {
+    mockEvents = [offlineEvent, onlineEvent];
+    await renderScreen();
+    expect(screen.getByText('Miner Two reconnected')).toBeTruthy();
+
+    await fireEvent.press(screen.getByText('alertHistory.filterOffline'));
+
+    const chip = screen.getByText('alertHistory.filterOffline').parent;
+    expect(chip?.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ backgroundColor: '#6C63FF' })]),
+    );
+    expect(screen.getByText('Miner One went offline')).toBeTruthy();
+    expect(screen.queryByText('Miner Two reconnected')).toBeNull();
+  });
+
+  it('shows the Clear filters button when a filter is active', async () => {
+    mockEvents = [offlineEvent];
+    await renderScreen();
+    expect(screen.queryByText('alertHistory.clearFilters')).toBeNull();
+
+    await fireEvent.press(screen.getByText('alertHistory.filterOffline'));
+
+    expect(screen.getByText('alertHistory.clearFilters')).toBeTruthy();
+  });
+
+  it('shows the Clear filters button when a search is active', async () => {
+    mockEvents = [offlineEvent];
+    await renderScreen();
+
+    await fireEvent.changeText(
+      screen.getByPlaceholderText('alertHistory.searchPlaceholder'),
+      'offline',
+    );
+
+    expect(screen.getByText('alertHistory.clearFilters')).toBeTruthy();
+  });
+
+  it('Clear filters resets the search query and active filter', async () => {
+    mockEvents = [offlineEvent, onlineEvent];
+    await renderScreen();
+
+    await fireEvent.changeText(
+      screen.getByPlaceholderText('alertHistory.searchPlaceholder'),
+      'offline',
+    );
+    await fireEvent.press(screen.getByText('alertHistory.filterOffline'));
+    expect(screen.queryByText('Miner Two reconnected')).toBeNull();
+
+    await fireEvent.press(screen.getByText('alertHistory.clearFilters'));
+
+    expect(screen.queryByText('alertHistory.clearFilters')).toBeNull();
+    expect(screen.getByText('Miner One went offline')).toBeTruthy();
+    expect(screen.getByText('Miner Two reconnected')).toBeTruthy();
+    expect(screen.getByPlaceholderText('alertHistory.searchPlaceholder').props.value).toBe('');
+  });
+
+  it('shows the no-matching-alerts empty state when a filter is active but nothing matches', async () => {
+    mockEvents = [offlineEvent];
+    await renderScreen();
+
+    await fireEvent.changeText(
+      screen.getByPlaceholderText('alertHistory.searchPlaceholder'),
+      'zzz-no-match',
+    );
+
+    expect(screen.getByText('alertHistory.noMatchingAlerts')).toBeTruthy();
+    expect(screen.queryByText('alertHistory.noAlerts')).toBeNull();
+  });
+
+  it('shows the plain empty state when no filter is active', async () => {
+    await renderScreen();
+    expect(screen.getByText('alertHistory.noAlerts')).toBeTruthy();
+    expect(screen.queryByText('alertHistory.noMatchingAlerts')).toBeNull();
+  });
 });

@@ -510,7 +510,16 @@
     "long_uptime": "Uptime Largo",
     "sync": "Sincronizar",
     "today": "Hoy",
-    "yesterday": "Ayer"
+    "yesterday": "Ayer",
+    "filterAll": "Todos",
+    "filterOffline": "Desconectado",
+    "filterOnline": "En línea",
+    "filterHot": "Caliente",
+    "filterHashrateDrop": "Caída de Hashrate",
+    "filterPoolLost": "Pool Perdido",
+    "clearFilters": "Limpiar filtros",
+    "noMatchingAlerts": "Ninguna alerta coincide con tu búsqueda",
+    "searchPlaceholder": "Buscar alertas..."
   },
   "notificationHistory": {
     "title": "Historial de Notificaciones",

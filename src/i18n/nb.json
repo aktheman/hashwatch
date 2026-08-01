@@ -23,6 +23,9 @@
   "dashboard": {
     "title": "HashWatch",
     "subtitle": "Live Overvåking",
+    "wsConnected": "Sanntidskoblet",
+    "wsPolling": "Polling-modus",
+    "wsOffline": "Frakoblet",
     "noMiners": "Ingen Minere",
     "noMinersBody": "Legg til din første BitAxe-miner for å starte overvåking",
     "step1": "1. Finn minerens IP-adresse",
@@ -95,6 +98,11 @@
     "exitKioskTitle": "Avslutt Kiosk",
     "exitKioskBody": "Trykk \"Avslutt\" for å forlate kiosk-modus.",
     "exitKioskExit": "Avslutt"
+  },
+  "firmware": {
+    "whatsNew": "Hva er Nytt",
+    "showMore": "Vis Mer",
+    "showLess": "Vis Mindre"
   },
   "dashboardCustomizer": {
     "title": "Tilpass Dashboard",
@@ -308,6 +316,9 @@
     "addNotePlaceholder": "Skriv et notat...",
     "addNoteFailed": "Kunne ikke legge til notat",
     "deleteNoteFailed": "Kunne ikke slette notat",
+    "viewFullNote": "Vis Hele Notatet",
+    "editNote": "Rediger Notat",
+    "saveNote": "Lagre Notat",
     "dangerZone": "Faresone",
     "removeMiner": "Fjern Miner",
     "removeConfirm": "Dette sletter {{name}} permanent og all historikk.",
@@ -528,7 +539,16 @@
     "long_uptime": "Lang Oppetid",
     "sync": "Synk",
     "today": "I Dag",
-    "yesterday": "I Går"
+    "yesterday": "I Går",
+    "filterAll": "Alle",
+    "filterOffline": "Offline",
+    "filterOnline": "Online",
+    "filterHot": "Varm",
+    "filterHashrateDrop": "Hashrate Fall",
+    "filterPoolLost": "Pool Mistet",
+    "clearFilters": "Fjern filtre",
+    "noMatchingAlerts": "Ingen varsler matcher søket",
+    "searchPlaceholder": "Søk i varsler..."
   },
   "notificationHistory": {
     "title": "Varslingshistorikk",

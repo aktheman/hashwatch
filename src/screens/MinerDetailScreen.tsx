@@ -10,9 +10,10 @@ import {
   Alert,
   RefreshControl,
   Switch,
+  Modal,
 } from 'react-native';
 
-import { NavigationProp } from '../types';
+import { NavigationProp, MinerNoteItem } from '../types';
 import { StatWidget } from '../components/StatWidget';
 import { SubscriptionGate } from '../components/SubscriptionGate';
 import { FirmwareBanner } from '../components/FirmwareBanner';
@@ -275,6 +276,72 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
           fontSize: fontSize.base,
           marginRight: spacing.xxs,
         },
+        noteActions: {
+          flexDirection: 'row',
+          gap: spacing.md,
+          marginTop: spacing.xs,
+        },
+        noteActionLink: {
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
+        },
+        modalOverlay: {
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          justifyContent: 'center',
+          padding: spacing.xl,
+        },
+        modalContent: {
+          borderRadius: radius.lg,
+          borderWidth: 1,
+          borderColor: theme.border,
+          padding: spacing.lg,
+          gap: spacing.md,
+          maxHeight: '70%',
+        },
+        modalTitle: {
+          fontSize: fontSize.lg,
+          fontWeight: fontWeight.bold,
+        },
+        modalScroll: {
+          flexGrow: 0,
+        },
+        modalCloseBtn: {
+          borderWidth: 1,
+          borderRadius: radius.md,
+          paddingVertical: spacing.sm,
+          alignItems: 'center',
+        },
+        modalCloseText: {
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
+        },
+        editNoteInput: {
+          minHeight: 100,
+          maxHeight: 200,
+          borderRadius: radius.md,
+          borderWidth: 1,
+          padding: spacing.sm,
+          fontSize: fontSize.base,
+        },
+        modalBtnRow: {
+          flexDirection: 'row',
+          gap: spacing.sm,
+        },
+        modalBtn: {
+          flex: 1,
+          borderWidth: 1,
+          borderRadius: radius.md,
+          paddingVertical: spacing.sm,
+          alignItems: 'center',
+        },
+        modalBtnPrimary: {
+          borderWidth: 0,
+        },
+        modalBtnText: {
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
+        },
         statsGrid: {
           flexDirection: 'row',
           flexWrap: 'wrap',
@@ -378,6 +445,7 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
     savePool,
     deleteMinerAction,
     addNote,
+    updateNote,
     deleteNote,
     updateAlertRules,
     resetAlertRules,
@@ -394,6 +462,9 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   const [editPoolPort, setEditPoolPort] = useState('');
   const [editPoolUser, setEditPoolUser] = useState('');
   const [noteText, setNoteText] = useState('');
+  const [fullNote, setFullNote] = useState<MinerNoteItem | null>(null);
+  const [editingNote, setEditingNote] = useState<MinerNoteItem | null>(null);
+  const [editNoteText, setEditNoteText] = useState('');
   const statsRef = useRef<View>(null);
   const tagInputRef = useRef<TextInput>(null);
 
@@ -478,1243 +549,1379 @@ export function MinerDetailScreen({ route, navigation }: MinerDetailScreenProps)
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.primary} />
-      }
-    >
-      <View ref={statsRef} collapsable={false}>
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View style={styles.nameRow}>
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.primary} />
+        }
+      >
+        <View ref={statsRef} collapsable={false}>
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
+              <View style={styles.nameRow}>
+                <View
+                  style={[
+                    styles.dot,
+                    { backgroundColor: miner.isOnline ? theme.success : theme.danger },
+                  ]}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Choose icon"
+                  onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+                  style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                >
+                  <Text style={{ fontSize: fontSize.h2, marginRight: spacing.xxs }}>
+                    {miner.icon || '⬡'}
+                  </Text>
+                  <Text style={styles.name}>{miner.name}</Text>
+                  <Text
+                    style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: spacing.xxs }}
+                  >
+                    ✎
+                  </Text>
+                </Pressable>
+              </View>
               <View
                 style={[
-                  styles.dot,
-                  { backgroundColor: miner.isOnline ? theme.success : theme.danger },
+                  styles.badge,
+                  {
+                    backgroundColor: miner.isOnline ? theme.success + '26' : theme.danger + '26',
+                  },
                 ]}
-              />
+              >
+                <Text
+                  style={[
+                    styles.badgeText,
+                    { color: miner.isOnline ? theme.success : theme.danger },
+                  ]}
+                >
+                  {miner.isOnline ? t('minerDetail.live') : t('minerDetail.offlineBadge')}
+                </Text>
+              </View>
+            </View>
+            {editingIP ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TextInput
+                  style={[
+                    styles.ip,
+                    { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.primary },
+                  ]}
+                  value={editIPValue}
+                  onChangeText={setEditIPValue}
+                  autoFocus
+                  onSubmitEditing={() => {
+                    if (editIPValue.trim()) {
+                      setMinerIp(minerId, editIPValue.trim());
+                    }
+                    setEditingIP(false);
+                  }}
+                  returnKeyType="done"
+                  accessibilityLabel="Edit IP address"
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Save IP"
+                  onPress={() => {
+                    if (editIPValue.trim()) {
+                      setMinerIp(minerId, editIPValue.trim());
+                    }
+                    setEditingIP(false);
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: fontSize.lg, color: theme.success, marginLeft: spacing.xs }}
+                  >
+                    ✓
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Choose icon"
-                onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-              >
-                <Text style={{ fontSize: fontSize.h2, marginRight: spacing.xxs }}>
-                  {miner.icon || '⬡'}
-                </Text>
-                <Text style={styles.name}>{miner.name}</Text>
-                <Text
-                  style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: spacing.xxs }}
-                >
-                  ✎
-                </Text>
-              </Pressable>
-            </View>
-            <View
-              style={[
-                styles.badge,
-                {
-                  backgroundColor: miner.isOnline ? theme.success + '26' : theme.danger + '26',
-                },
-              ]}
-            >
-              <Text
-                style={[styles.badgeText, { color: miner.isOnline ? theme.success : theme.danger }]}
-              >
-                {miner.isOnline ? t('minerDetail.live') : t('minerDetail.offlineBadge')}
-              </Text>
-            </View>
-          </View>
-          {editingIP ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TextInput
-                style={[
-                  styles.ip,
-                  { flex: 1, borderBottomWidth: 1, borderBottomColor: theme.primary },
-                ]}
-                value={editIPValue}
-                onChangeText={setEditIPValue}
-                autoFocus
-                onSubmitEditing={() => {
-                  if (editIPValue.trim()) {
-                    setMinerIp(minerId, editIPValue.trim());
-                  }
-                  setEditingIP(false);
-                }}
-                returnKeyType="done"
                 accessibilityLabel="Edit IP address"
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Save IP"
                 onPress={() => {
-                  if (editIPValue.trim()) {
-                    setMinerIp(minerId, editIPValue.trim());
-                  }
-                  setEditingIP(false);
+                  setEditIPValue(miner.ip);
+                  setEditingIP(true);
                 }}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <Text
-                  style={{ fontSize: fontSize.lg, color: theme.success, marginLeft: spacing.xs }}
-                >
-                  ✓
+                <Text style={styles.ip}>{miner.ip}</Text>
+                <Text style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: 6 }}>
+                  ✏️
                 </Text>
               </Pressable>
-            </View>
-          ) : (
+            )}
+            {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
+            {miner.info?.version && (
+              <FirmwareBanner
+                rawVersion={miner.info.version}
+                minerIp={miner.ip}
+                minerPort={miner.port}
+                apiPath={miner.apiPath}
+                statusPath={miner.statusPath}
+              />
+            )}
+            {showEmojiPicker && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: spacing.xs,
+                  marginTop: spacing.xs,
+                }}
+              >
+                {[
+                  '⬡',
+                  '⚡',
+                  '🔧',
+                  '💎',
+                  '🔥',
+                  '⚙️',
+                  '📡',
+                  '🔌',
+                  '🖥️',
+                  '🧊',
+                  '🌊',
+                  '⭐',
+                  '🎯',
+                  '💪',
+                  '🚀',
+                  '🔋',
+                  '💡',
+                  '🌀',
+                ].map((emoji) => (
+                  <Pressable
+                    key={emoji}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Set icon ${emoji}`}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: radius.md,
+                      backgroundColor:
+                        miner.icon === emoji ? theme.primary + '30' : theme.surfaceLight,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: miner.icon === emoji ? 2 : 1,
+                      borderColor: miner.icon === emoji ? theme.primary : theme.border,
+                    }}
+                    onPress={() => {
+                      setMinerIcon(minerId, emoji);
+                      setShowEmojiPicker(false);
+                    }}
+                  >
+                    <Text style={{ fontSize: fontSize.xl }}>{emoji}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <NotificationPrefs minerId={miner.id} />
+
+          <View style={styles.section}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Edit IP address"
-              onPress={() => {
-                setEditIPValue(miner.ip);
-                setEditingIP(true);
-              }}
-              style={{ flexDirection: 'row', alignItems: 'center' }}
+              accessibilityLabel="Assign wallet"
+              style={styles.walletRow}
+              onPress={() => setShowWalletPicker(!showWalletPicker)}
             >
-              <Text style={styles.ip}>{miner.ip}</Text>
-              <Text style={{ fontSize: fontSize.sm, color: theme.primary, marginLeft: 6 }}>✏️</Text>
+              <View style={styles.walletRowLeft}>
+                <Text style={styles.walletRowIcon}>💼</Text>
+                <Text style={styles.walletRowText}>
+                  {miner.walletId
+                    ? wallets.find((w) => w.id === miner.walletId)?.name ||
+                      t('minerDetail.unknownWallet')
+                    : t('minerDetail.noWallet')}
+                </Text>
+              </View>
+              <Text style={styles.walletRowArrow}>{t('minerDetail.assign')}</Text>
             </Pressable>
-          )}
-          {miner.info?.hostname && <Text style={styles.hostname}>{miner.info.hostname}</Text>}
-          {miner.info?.version && (
-            <FirmwareBanner
-              rawVersion={miner.info.version}
-              minerIp={miner.ip}
-              minerPort={miner.port}
-              apiPath={miner.apiPath}
-              statusPath={miner.statusPath}
-            />
-          )}
-          {showEmojiPicker && (
-            <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: spacing.xs,
-                marginTop: spacing.xs,
-              }}
-            >
-              {[
-                '⬡',
-                '⚡',
-                '🔧',
-                '💎',
-                '🔥',
-                '⚙️',
-                '📡',
-                '🔌',
-                '🖥️',
-                '🧊',
-                '🌊',
-                '⭐',
-                '🎯',
-                '💪',
-                '🚀',
-                '🔋',
-                '💡',
-                '🌀',
-              ].map((emoji) => (
-                <Pressable
-                  key={emoji}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Set icon ${emoji}`}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: radius.md,
-                    backgroundColor:
-                      miner.icon === emoji ? theme.primary + '30' : theme.surfaceLight,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderWidth: miner.icon === emoji ? 2 : 1,
-                    borderColor: miner.icon === emoji ? theme.primary : theme.border,
-                  }}
-                  onPress={() => {
-                    setMinerIcon(minerId, emoji);
-                    setShowEmojiPicker(false);
-                  }}
-                >
-                  <Text style={{ fontSize: fontSize.xl }}>{emoji}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-        </View>
-
-        <NotificationPrefs minerId={miner.id} />
-
-        <View style={styles.section}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Assign wallet"
-            style={styles.walletRow}
-            onPress={() => setShowWalletPicker(!showWalletPicker)}
-          >
-            <View style={styles.walletRowLeft}>
-              <Text style={styles.walletRowIcon}>💼</Text>
-              <Text style={styles.walletRowText}>
-                {miner.walletId
-                  ? wallets.find((w) => w.id === miner.walletId)?.name ||
-                    t('minerDetail.unknownWallet')
-                  : t('minerDetail.noWallet')}
-              </Text>
-            </View>
-            <Text style={styles.walletRowArrow}>{t('minerDetail.assign')}</Text>
-          </Pressable>
-          {showWalletPicker && (
-            <View style={styles.walletPicker}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="No wallet"
-                style={[
-                  styles.walletOption,
-                  { backgroundColor: !miner.walletId ? theme.primary + '20' : 'transparent' },
-                ]}
-                onPress={() => {
-                  setMinerWallet(minerId, undefined);
-                  setShowWalletPicker(false);
-                }}
-              >
-                <Text style={styles.walletName}>{t('common.none')}</Text>
-              </Pressable>
-              {wallets.map((w) => (
+            {showWalletPicker && (
+              <View style={styles.walletPicker}>
                 <Pressable
                   accessibilityRole="button"
-                  key={w.id}
-                  accessibilityLabel={`Select wallet: ${w.name}`}
+                  accessibilityLabel="No wallet"
                   style={[
-                    styles.walletOptionRow,
-                    {
-                      backgroundColor:
-                        miner.walletId === w.id ? theme.primary + '20' : 'transparent',
-                    },
+                    styles.walletOption,
+                    { backgroundColor: !miner.walletId ? theme.primary + '20' : 'transparent' },
                   ]}
                   onPress={() => {
-                    setMinerWallet(minerId, w.id);
+                    setMinerWallet(minerId, undefined);
                     setShowWalletPicker(false);
                   }}
                 >
-                  <View style={[styles.walletDot, { backgroundColor: w.color }]} />
-                  <Text style={styles.walletName}>{w.name}</Text>
+                  <Text style={styles.walletName}>{t('common.none')}</Text>
+                </Pressable>
+                {wallets.map((w) => (
+                  <Pressable
+                    accessibilityRole="button"
+                    key={w.id}
+                    accessibilityLabel={`Select wallet: ${w.name}`}
+                    style={[
+                      styles.walletOptionRow,
+                      {
+                        backgroundColor:
+                          miner.walletId === w.id ? theme.primary + '20' : 'transparent',
+                      },
+                    ]}
+                    onPress={() => {
+                      setMinerWallet(minerId, w.id);
+                      setShowWalletPicker(false);
+                    }}
+                  >
+                    <View style={[styles.walletDot, { backgroundColor: w.color }]} />
+                    <Text style={styles.walletName}>{w.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={[styles.section, styles.groupTagRow]}>
+            <Text style={styles.groupTagIcon}>📁</Text>
+            <TextInput
+              style={styles.groupTagInput}
+              value={miner.group || ''}
+              onChangeText={(text) => saveGroupTag(text)}
+              placeholder={t('minerDetail.groupPlaceholder')}
+              placeholderTextColor={theme.textMuted}
+              accessibilityLabel="Group tag input"
+            />
+          </View>
+
+          <View style={[styles.section, styles.groupTagRow]}>
+            <Text style={styles.groupTagIcon}>📍</Text>
+            <Pressable
+              style={{ flex: 1 }}
+              onPress={() => setShowLocationPicker(!showLocationPicker)}
+            >
+              <Text style={{ color: theme.text, fontSize: fontSize.base }}>
+                {miner.location || 'Set location...'}
+              </Text>
+            </Pressable>
+          </View>
+          {showLocationPicker && (
+            <View style={[styles.section, styles.walletPicker, { marginHorizontal: spacing.md }]}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Clear location"
+                onPress={() => {
+                  setMinerLocation(minerId, undefined);
+                  setShowLocationPicker(false);
+                }}
+              >
+                <Text style={[styles.walletName, { padding: 12 }]}>{t('common.none')}</Text>
+              </Pressable>
+              {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
+                <Pressable
+                  key={loc}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Set location to ${loc}`}
+                  onPress={() => {
+                    setMinerLocation(minerId, loc);
+                    setShowLocationPicker(false);
+                  }}
+                >
+                  <Text style={[styles.walletName, { padding: 12 }]}>
+                    {t(`minerDetail.location${loc.replace(/\s+/g, '')}`)}
+                  </Text>
                 </Pressable>
               ))}
             </View>
           )}
-        </View>
 
-        <View style={[styles.section, styles.groupTagRow]}>
-          <Text style={styles.groupTagIcon}>📁</Text>
-          <TextInput
-            style={styles.groupTagInput}
-            value={miner.group || ''}
-            onChangeText={(text) => saveGroupTag(text)}
-            placeholder={t('minerDetail.groupPlaceholder')}
-            placeholderTextColor={theme.textMuted}
-            accessibilityLabel="Group tag input"
-          />
-        </View>
-
-        <View style={[styles.section, styles.groupTagRow]}>
-          <Text style={styles.groupTagIcon}>📍</Text>
-          <Pressable style={{ flex: 1 }} onPress={() => setShowLocationPicker(!showLocationPicker)}>
-            <Text style={{ color: theme.text, fontSize: fontSize.base }}>
-              {miner.location || 'Set location...'}
-            </Text>
-          </Pressable>
-        </View>
-        {showLocationPicker && (
-          <View style={[styles.section, styles.walletPicker, { marginHorizontal: spacing.md }]}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Clear location"
-              onPress={() => {
-                setMinerLocation(minerId, undefined);
-                setShowLocationPicker(false);
-              }}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🏷️ Tags</Text>
+            <View
+              style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: 8 }}
             >
-              <Text style={[styles.walletName, { padding: 12 }]}>{t('common.none')}</Text>
-            </Pressable>
-            {['Home', 'Office', 'Data Center', 'Mining Farm', 'Colocation'].map((loc) => (
-              <Pressable
-                key={loc}
-                accessibilityRole="button"
-                accessibilityLabel={`Set location to ${loc}`}
-                onPress={() => {
-                  setMinerLocation(minerId, loc);
-                  setShowLocationPicker(false);
-                }}
-              >
-                <Text style={[styles.walletName, { padding: 12 }]}>
-                  {t(`minerDetail.location${loc.replace(/\s+/g, '')}`)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🏷️ Tags</Text>
-          <View
-            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: 8 }}
-          >
-            {(miner.tags || []).map((tag) => (
-              <Pressable
-                key={tag}
-                accessibilityRole="button"
-                accessibilityLabel={`Remove tag ${tag}`}
-                onPress={() =>
-                  setMinerTags(
-                    minerId,
-                    (miner.tags || []).filter((t) => t !== tag),
-                  )
-                }
-                style={{
-                  backgroundColor: theme.primary + '30',
-                  borderRadius: radius.sm,
-                  paddingHorizontal: spacing.sm,
-                  paddingVertical: spacing.xxs,
-                }}
-              >
-                <Text
+              {(miner.tags || []).map((tag) => (
+                <Pressable
+                  key={tag}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove tag ${tag}`}
+                  onPress={() =>
+                    setMinerTags(
+                      minerId,
+                      (miner.tags || []).filter((t) => t !== tag),
+                    )
+                  }
                   style={{
-                    color: theme.primary,
-                    fontSize: fontSize.xs,
-                    fontWeight: fontWeight.semibold,
+                    backgroundColor: theme.primary + '30',
+                    borderRadius: radius.sm,
+                    paddingHorizontal: spacing.sm,
+                    paddingVertical: spacing.xxs,
                   }}
                 >
-                  {tag} ✕
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          <TextInput
-            ref={tagInputRef}
-            placeholder="Add tag..."
-            placeholderTextColor={theme.textMuted}
-            onSubmitEditing={(e) => {
-              const tag = e.nativeEvent.text.trim();
-              if (tag && !(miner.tags || []).includes(tag)) {
-                setMinerTags(minerId, [...(miner.tags || []), tag]);
-              }
-              tagInputRef.current?.clear();
-            }}
-            style={{
-              backgroundColor: theme.surfaceLight,
-              borderRadius: radius.md,
-              padding: spacing.sm,
-              color: theme.text,
-              fontSize: fontSize.xs,
-              borderWidth: 1,
-              borderColor: theme.border,
-            }}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>📝</Text> {t('minerDetail.notes')}
-          </Text>
-          {notes.length > 0 && (
-            <View style={{ gap: spacing.xs, marginBottom: spacing.sm }}>
-              {notes.map((note) => (
-                <View
-                  key={note.id}
-                  style={{
-                    flexDirection: 'row',
-                    backgroundColor: theme.surfaceLight,
-                    borderRadius: radius.md,
-                    padding: spacing.sm,
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <View style={{ flex: 1 }}>
-                    <MarkdownText style={{ color: theme.text, fontSize: fontSize.base }}>
-                      {note.text}
-                    </MarkdownText>
-                    {note.createdat && (
-                      <TimeAgo
-                        timestamp={new Date(note.createdat).getTime()}
-                        style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: 2 }}
-                      />
-                    )}
-                  </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Delete note"
-                    hitSlop={8}
-                    onPress={() => deleteNote(note.id)}
+                  <Text
+                    style={{
+                      color: theme.primary,
+                      fontSize: fontSize.xs,
+                      fontWeight: fontWeight.semibold,
+                    }}
                   >
-                    <Text
-                      style={{ color: theme.danger, fontSize: fontSize.lg, marginLeft: spacing.xs }}
-                    >
-                      ✕
-                    </Text>
-                  </Pressable>
-                </View>
+                    {tag} ✕
+                  </Text>
+                </Pressable>
               ))}
             </View>
-          )}
-          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <TextInput
-              style={[
-                styles.groupTagInput,
-                {
-                  flex: 1,
-                  minHeight: 36,
-                  maxHeight: 80,
-                  textAlignVertical: 'top',
-                },
-              ]}
-              value={noteText}
-              onChangeText={setNoteText}
-              placeholder={String(t('minerDetail.addNotePlaceholder'))}
+              ref={tagInputRef}
+              placeholder="Add tag..."
               placeholderTextColor={theme.textMuted}
-              multiline
-              accessibilityLabel="New note input"
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Add note"
-              style={[
-                styles.actionBtn,
-                {
-                  backgroundColor: theme.primary + '15',
-                  borderColor: theme.primary + '30',
-                  paddingHorizontal: spacing.md,
-                  justifyContent: 'center',
-                  opacity: noteText.trim().length === 0 ? 0.5 : 1,
-                },
-              ]}
-              disabled={noteText.trim().length === 0}
-              onPress={async () => {
-                if (!noteText.trim()) return;
-                await addNote(noteText);
-                setNoteText('');
+              onSubmitEditing={(e) => {
+                const tag = e.nativeEvent.text.trim();
+                if (tag && !(miner.tags || []).includes(tag)) {
+                  setMinerTags(minerId, [...(miner.tags || []), tag]);
+                }
+                tagInputRef.current?.clear();
               }}
-            >
-              <Text style={[styles.actionBtnText, { color: theme.primary }]}>
-                {t('minerDetail.addNote')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.mining')}
-          </Text>
-          <View style={styles.statsGrid}>
-            <StatWidget
-              icon="⚡"
-              label={t('minerDetail.hashrate')}
-              value={formatHashrate(s.hashRate, s.hashRateUnit)}
-              color={theme.primary}
-            />
-            <StatWidget
-              icon="〰"
-              label={t('minerDetail.frequency')}
-              value={`${s.frequency} MHz`}
-              color={theme.info}
-            />
-            <StatWidget
-              icon="🎯"
-              label={t('minerDetail.bestDiff')}
-              value={formatDifficulty(s.bestDiff)}
-              color={theme.warning}
-            />
-            <StatWidget
-              icon="🏆"
-              label={t('minerDetail.bestSession')}
-              value={formatDifficulty(s.bestSessionDiff)}
-              color={theme.warning}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>💊</Text> {t('health.title', 'Health Score')}
-          </Text>
-          <View
-            accessibilityRole="summary"
-            accessibilityLabel={`${t('health.title', 'Health Score')} ${healthScore.grade} ${healthScore.score}/100`}
-            style={[styles.poolCard, { borderColor: healthGradeColor + '40' }]}
-          >
-            <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: spacing.md,
+                backgroundColor: theme.surfaceLight,
+                borderRadius: radius.md,
+                padding: spacing.sm,
+                color: theme.text,
+                fontSize: fontSize.xs,
+                borderWidth: 1,
+                borderColor: theme.border,
               }}
-            >
-              <View
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 26,
-                  borderWidth: 2,
-                  borderColor: healthGradeColor,
-                  backgroundColor: healthGradeColor + '18',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: spacing.md,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: fontSize.xl,
-                    fontWeight: fontWeight.extrabold,
-                    color: healthGradeColor,
-                  }}
-                  accessibilityLabel={`${t('health.grade', 'Grade')} ${healthScore.grade}`}
-                >
-                  {healthScore.grade}
-                </Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    fontSize: fontSize.md,
-                    fontWeight: fontWeight.bold,
-                    color: theme.text,
-                  }}
-                >
-                  {t('health.title', 'Health Score')}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: fontSize.sm,
-                    color: theme.textDim,
-                  }}
-                  accessibilityLabel={`${healthScore.score} ${t('health.outOf100', 'out of 100')}`}
-                >
-                  {healthScore.score}/100
-                </Text>
-              </View>
-            </View>
+            />
+          </View>
 
-            {healthFactors.map((f) => {
-              const value = healthScore[f.key] as number;
-              const barColor =
-                value >= 80 ? theme.success : value >= 60 ? theme.warning : theme.danger;
-              return (
-                <View
-                  key={f.key}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: spacing.xs,
-                    gap: spacing.xs,
-                  }}
-                >
-                  <Text
-                    accessibilityLabel={`${f.label}: ${value}`}
-                    style={{
-                      width: 80,
-                      fontSize: fontSize.xs,
-                      color: theme.textMuted,
-                    }}
-                  >
-                    {f.label}
-                  </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>📝</Text> {t('minerDetail.notes')}
+            </Text>
+            {notes.length > 0 && (
+              <View style={{ gap: spacing.xs, marginBottom: spacing.sm }}>
+                {notes.map((note) => (
                   <View
-                    style={{
-                      flex: 1,
-                      height: 5,
-                      borderRadius: 3,
-                      backgroundColor: theme.surfaceLight,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <View
-                      style={{
-                        height: '100%',
-                        width: `${value}%`,
-                        borderRadius: 3,
-                        backgroundColor: barColor,
-                      }}
-                    />
-                  </View>
-                  <Text
-                    style={{
-                      width: 28,
-                      fontSize: fontSize.xs,
-                      color: theme.text,
-                      textAlign: 'right',
-                    }}
-                  >
-                    {value}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {healthPrediction && (
-          <Suspense fallback={null}>
-            <LazyHealthPredictionCard prediction={healthPrediction} />
-          </Suspense>
-        )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>🔧</Text> {t('minerDetail.hardware')}
-          </Text>
-          <View style={styles.statsGrid}>
-            <StatWidget
-              icon="🌡"
-              label={t('minerDetail.boardTemp')}
-              value={formatTemperature(s.temperature)}
-              color={s.temperature > 70 ? theme.danger : theme.success}
-            />
-            {s.vrTemp > 0 && (
-              <StatWidget
-                icon="🔌"
-                label={t('minerDetail.vrTemp')}
-                value={formatTemperature(s.vrTemp)}
-                color={theme.warningLight}
-              />
-            )}
-            <StatWidget
-              icon="⚡"
-              label={t('minerDetail.voltage')}
-              value={formatVoltage(s.voltage)}
-              color={theme.primary}
-            />
-            <StatWidget
-              icon="🔀"
-              label={t('minerDetail.current')}
-              value={`${s.current} mA`}
-              color={theme.accent}
-            />
-            <StatWidget
-              icon="🔋"
-              label={t('minerDetail.power')}
-              value={formatPower(s.power)}
-              color={theme.warning}
-            />
-            <StatWidget
-              icon="📊"
-              label={t('minerDetail.efficiency')}
-              value={formatWTHs(s.power, s.hashRate, s.hashRateUnit)}
-              color={theme.successLight}
-            />
-            <StatWidget
-              icon="🔬"
-              label={t('minerDetail.coreV')}
-              value={`${s.coreVoltage} mV`}
-              color={theme.primaryLight}
-            />
-            <StatWidget
-              icon="🌀"
-              label={t('minerDetail.fan')}
-              value={s.fanRpm > 0 ? `${s.fanRpm} RPM (${s.fanSpeed}%)` : `${s.fanSpeed}%`}
-              color={theme.info}
-            />
-            {miner.info?.ssid && (
-              <StatWidget
-                icon="📶"
-                label={t('minerDetail.wifiNetwork', 'WiFi')}
-                value={miner.info.ssid}
-                color={theme.info}
-              />
-            )}
-            {miner.info?.wifiSignal != null && (
-              <StatWidget
-                icon="📡"
-                label={t('minerDetail.wifiSignal', 'Signal')}
-                value={`${miner.info.wifiSignal}%`}
-                color={
-                  miner.info.wifiSignal > 50
-                    ? theme.success
-                    : miner.info.wifiSignal > 25
-                      ? theme.warning
-                      : theme.danger
-                }
-              />
-            )}
-            {miner.info?.powerMode != null && (
-              <StatWidget
-                icon="🔌"
-                label={t('minerDetail.powerMode', 'Mode')}
-                value={
-                  miner.info.powerMode === 0
-                    ? t('minerDetail.powerModeStandard')
-                    : miner.info.powerMode === 1
-                      ? t('minerDetail.powerModeECO')
-                      : `P${miner.info.powerMode}`
-                }
-                color={theme.primary}
-              />
-            )}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>📦</Text> {t('minerDetail.shares')}
-          </Text>
-          <View style={styles.statsGrid}>
-            <StatWidget
-              icon="✓"
-              label={t('minerDetail.accepted')}
-              value={formatNumber(s.sharesAccepted)}
-              color={theme.success}
-            />
-            <StatWidget
-              icon="✗"
-              label={t('minerDetail.rejected')}
-              value={formatNumber(s.sharesRejected)}
-              color={theme.danger}
-            />
-            <StatWidget
-              icon="⏱"
-              label={t('minerDetail.uptime')}
-              value={formatUptime(s.uptimeSeconds)}
-              color={theme.primary}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>🌊</Text> {t('minerDetail.pool')}
-          </Text>
-          <View style={styles.poolCard}>
-            {editingPool ? (
-              <View style={{ gap: spacing.sm }}>
-                <View>
-                  <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
-                  <TextInput
-                    style={[
-                      styles.poolValue,
-                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
-                    ]}
-                    value={editPoolUrl}
-                    onChangeText={setEditPoolUrl}
-                    placeholder="pool.example.com"
-                    placeholderTextColor={theme.textMuted}
-                    autoFocus
-                  />
-                </View>
-                <View>
-                  <Text style={styles.poolLabel}>{t('minerDetail.port', 'Port')}</Text>
-                  <TextInput
-                    style={[
-                      styles.poolValue,
-                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
-                    ]}
-                    value={editPoolPort}
-                    onChangeText={setEditPoolPort}
-                    placeholder="3333"
-                    placeholderTextColor={theme.textMuted}
-                    keyboardType="number-pad"
-                  />
-                </View>
-                <View>
-                  <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
-                  <TextInput
-                    style={[
-                      styles.poolValue,
-                      { borderBottomWidth: 1, borderBottomColor: theme.primary },
-                    ]}
-                    value={editPoolUser}
-                    onChangeText={setEditPoolUser}
-                    placeholder="username.worker"
-                    placeholderTextColor={theme.textMuted}
-                  />
-                </View>
-                <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
-                  <Pressable
-                    style={[styles.flashBtn, { flex: 1, backgroundColor: theme.success }]}
-                    onPress={async () => {
-                      if (!editPoolUrl.trim()) return;
-                      const ok = await savePool(editPoolUrl, editPoolPort, editPoolUser);
-                      if (ok) {
-                        Alert.alert(
-                          t('common.success', 'Success'),
-                          t('minerDetail.poolUpdated', 'Pool updated'),
-                        );
-                      } else {
-                        Alert.alert(
-                          t('common.error', 'Error'),
-                          t('minerDetail.poolUpdateFailed', 'Failed to update pool'),
-                        );
-                      }
-                      setEditingPool(false);
-                    }}
-                  >
-                    <Text style={{ color: '#fff', fontWeight: fontWeight.bold }}>
-                      {t('common.save')}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.flashBtn, { flex: 1, backgroundColor: theme.surfaceLight }]}
-                    onPress={() => setEditingPool(false)}
-                  >
-                    <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
-                      {t('common.cancel')}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : (
-              <>
-                <View style={styles.poolRow}>
-                  <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
-                  <View
+                    key={note.id}
                     style={{
                       flexDirection: 'row',
-                      alignItems: 'center',
-                      flex: 1,
-                      justifyContent: 'flex-end',
+                      backgroundColor: theme.surfaceLight,
+                      borderRadius: radius.md,
+                      padding: spacing.sm,
+                      alignItems: 'flex-start',
                     }}
                   >
-                    <Text style={styles.poolValue}>
-                      {s.pool && s.poolPort ? `${s.pool}:${s.poolPort}` : s.pool || t('common.na')}
-                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <MarkdownText
+                        style={{ color: theme.text, fontSize: fontSize.base }}
+                        numberOfLines={3}
+                      >
+                        {note.text}
+                      </MarkdownText>
+                      {note.createdat && (
+                        <TimeAgo
+                          timestamp={new Date(note.createdat).getTime()}
+                          style={{ color: theme.textMuted, fontSize: fontSize.xs, marginTop: 2 }}
+                        />
+                      )}
+                      <View style={styles.noteActions}>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('minerDetail.viewFullNote', 'View Full Note')}
+                          hitSlop={8}
+                          onPress={() => setFullNote(note)}
+                        >
+                          <Text style={[styles.noteActionLink, { color: theme.primary }]}>
+                            {t('minerDetail.viewFullNote', 'View Full Note')}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('minerDetail.editNote', 'Edit Note')}
+                          hitSlop={8}
+                          onPress={() => {
+                            setEditingNote(note);
+                            setEditNoteText(note.text);
+                          }}
+                        >
+                          <Text style={[styles.noteActionLink, { color: theme.primary }]}>
+                            {t('minerDetail.editNote', 'Edit Note')}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Change pool"
-                      onPress={() => {
-                        setEditPoolUrl(s.pool || '');
-                        setEditPoolPort(String(s.poolPort || 3333));
-                        setEditPoolUser(s.poolUser || '');
-                        setEditingPool(true);
-                      }}
+                      accessibilityLabel="Delete note"
+                      hitSlop={8}
+                      onPress={() => deleteNote(note.id)}
                     >
                       <Text
                         style={{
-                          fontSize: fontSize.sm,
-                          color: theme.primary,
-                          marginLeft: spacing.sm,
+                          color: theme.danger,
+                          fontSize: fontSize.lg,
+                          marginLeft: spacing.xs,
                         }}
                       >
-                        {t('common.edit')}
+                        ✕
+                      </Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            )}
+            <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+              <TextInput
+                style={[
+                  styles.groupTagInput,
+                  {
+                    flex: 1,
+                    minHeight: 36,
+                    maxHeight: 80,
+                    textAlignVertical: 'top',
+                  },
+                ]}
+                value={noteText}
+                onChangeText={setNoteText}
+                placeholder={String(t('minerDetail.addNotePlaceholder'))}
+                placeholderTextColor={theme.textMuted}
+                multiline
+                accessibilityLabel="New note input"
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add note"
+                style={[
+                  styles.actionBtn,
+                  {
+                    backgroundColor: theme.primary + '15',
+                    borderColor: theme.primary + '30',
+                    paddingHorizontal: spacing.md,
+                    justifyContent: 'center',
+                    opacity: noteText.trim().length === 0 ? 0.5 : 1,
+                  },
+                ]}
+                disabled={noteText.trim().length === 0}
+                onPress={async () => {
+                  if (!noteText.trim()) return;
+                  await addNote(noteText);
+                  setNoteText('');
+                }}
+              >
+                <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+                  {t('minerDetail.addNote')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.mining')}
+            </Text>
+            <View style={styles.statsGrid}>
+              <StatWidget
+                icon="⚡"
+                label={t('minerDetail.hashrate')}
+                value={formatHashrate(s.hashRate, s.hashRateUnit)}
+                color={theme.primary}
+              />
+              <StatWidget
+                icon="〰"
+                label={t('minerDetail.frequency')}
+                value={`${s.frequency} MHz`}
+                color={theme.info}
+              />
+              <StatWidget
+                icon="🎯"
+                label={t('minerDetail.bestDiff')}
+                value={formatDifficulty(s.bestDiff)}
+                color={theme.warning}
+              />
+              <StatWidget
+                icon="🏆"
+                label={t('minerDetail.bestSession')}
+                value={formatDifficulty(s.bestSessionDiff)}
+                color={theme.warning}
+              />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>💊</Text> {t('health.title', 'Health Score')}
+            </Text>
+            <View
+              accessibilityRole="summary"
+              accessibilityLabel={`${t('health.title', 'Health Score')} ${healthScore.grade} ${healthScore.score}/100`}
+              style={[styles.poolCard, { borderColor: healthGradeColor + '40' }]}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: spacing.md,
+                }}
+              >
+                <View
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 26,
+                    borderWidth: 2,
+                    borderColor: healthGradeColor,
+                    backgroundColor: healthGradeColor + '18',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: spacing.md,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: fontSize.xl,
+                      fontWeight: fontWeight.extrabold,
+                      color: healthGradeColor,
+                    }}
+                    accessibilityLabel={`${t('health.grade', 'Grade')} ${healthScore.grade}`}
+                  >
+                    {healthScore.grade}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: fontSize.md,
+                      fontWeight: fontWeight.bold,
+                      color: theme.text,
+                    }}
+                  >
+                    {t('health.title', 'Health Score')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: fontSize.sm,
+                      color: theme.textDim,
+                    }}
+                    accessibilityLabel={`${healthScore.score} ${t('health.outOf100', 'out of 100')}`}
+                  >
+                    {healthScore.score}/100
+                  </Text>
+                </View>
+              </View>
+
+              {healthFactors.map((f) => {
+                const value = healthScore[f.key] as number;
+                const barColor =
+                  value >= 80 ? theme.success : value >= 60 ? theme.warning : theme.danger;
+                return (
+                  <View
+                    key={f.key}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: spacing.xs,
+                      gap: spacing.xs,
+                    }}
+                  >
+                    <Text
+                      accessibilityLabel={`${f.label}: ${value}`}
+                      style={{
+                        width: 80,
+                        fontSize: fontSize.xs,
+                        color: theme.textMuted,
+                      }}
+                    >
+                      {f.label}
+                    </Text>
+                    <View
+                      style={{
+                        flex: 1,
+                        height: 5,
+                        borderRadius: 3,
+                        backgroundColor: theme.surfaceLight,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <View
+                        style={{
+                          height: '100%',
+                          width: `${value}%`,
+                          borderRadius: 3,
+                          backgroundColor: barColor,
+                        }}
+                      />
+                    </View>
+                    <Text
+                      style={{
+                        width: 28,
+                        fontSize: fontSize.xs,
+                        color: theme.text,
+                        textAlign: 'right',
+                      }}
+                    >
+                      {value}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+
+          {healthPrediction && (
+            <Suspense fallback={null}>
+              <LazyHealthPredictionCard prediction={healthPrediction} />
+            </Suspense>
+          )}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🔧</Text> {t('minerDetail.hardware')}
+            </Text>
+            <View style={styles.statsGrid}>
+              <StatWidget
+                icon="🌡"
+                label={t('minerDetail.boardTemp')}
+                value={formatTemperature(s.temperature)}
+                color={s.temperature > 70 ? theme.danger : theme.success}
+              />
+              {s.vrTemp > 0 && (
+                <StatWidget
+                  icon="🔌"
+                  label={t('minerDetail.vrTemp')}
+                  value={formatTemperature(s.vrTemp)}
+                  color={theme.warningLight}
+                />
+              )}
+              <StatWidget
+                icon="⚡"
+                label={t('minerDetail.voltage')}
+                value={formatVoltage(s.voltage)}
+                color={theme.primary}
+              />
+              <StatWidget
+                icon="🔀"
+                label={t('minerDetail.current')}
+                value={`${s.current} mA`}
+                color={theme.accent}
+              />
+              <StatWidget
+                icon="🔋"
+                label={t('minerDetail.power')}
+                value={formatPower(s.power)}
+                color={theme.warning}
+              />
+              <StatWidget
+                icon="📊"
+                label={t('minerDetail.efficiency')}
+                value={formatWTHs(s.power, s.hashRate, s.hashRateUnit)}
+                color={theme.successLight}
+              />
+              <StatWidget
+                icon="🔬"
+                label={t('minerDetail.coreV')}
+                value={`${s.coreVoltage} mV`}
+                color={theme.primaryLight}
+              />
+              <StatWidget
+                icon="🌀"
+                label={t('minerDetail.fan')}
+                value={s.fanRpm > 0 ? `${s.fanRpm} RPM (${s.fanSpeed}%)` : `${s.fanSpeed}%`}
+                color={theme.info}
+              />
+              {miner.info?.ssid && (
+                <StatWidget
+                  icon="📶"
+                  label={t('minerDetail.wifiNetwork', 'WiFi')}
+                  value={miner.info.ssid}
+                  color={theme.info}
+                />
+              )}
+              {miner.info?.wifiSignal != null && (
+                <StatWidget
+                  icon="📡"
+                  label={t('minerDetail.wifiSignal', 'Signal')}
+                  value={`${miner.info.wifiSignal}%`}
+                  color={
+                    miner.info.wifiSignal > 50
+                      ? theme.success
+                      : miner.info.wifiSignal > 25
+                        ? theme.warning
+                        : theme.danger
+                  }
+                />
+              )}
+              {miner.info?.powerMode != null && (
+                <StatWidget
+                  icon="🔌"
+                  label={t('minerDetail.powerMode', 'Mode')}
+                  value={
+                    miner.info.powerMode === 0
+                      ? t('minerDetail.powerModeStandard')
+                      : miner.info.powerMode === 1
+                        ? t('minerDetail.powerModeECO')
+                        : `P${miner.info.powerMode}`
+                  }
+                  color={theme.primary}
+                />
+              )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>📦</Text> {t('minerDetail.shares')}
+            </Text>
+            <View style={styles.statsGrid}>
+              <StatWidget
+                icon="✓"
+                label={t('minerDetail.accepted')}
+                value={formatNumber(s.sharesAccepted)}
+                color={theme.success}
+              />
+              <StatWidget
+                icon="✗"
+                label={t('minerDetail.rejected')}
+                value={formatNumber(s.sharesRejected)}
+                color={theme.danger}
+              />
+              <StatWidget
+                icon="⏱"
+                label={t('minerDetail.uptime')}
+                value={formatUptime(s.uptimeSeconds)}
+                color={theme.primary}
+              />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🌊</Text> {t('minerDetail.pool')}
+            </Text>
+            <View style={styles.poolCard}>
+              {editingPool ? (
+                <View style={{ gap: spacing.sm }}>
+                  <View>
+                    <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
+                    <TextInput
+                      style={[
+                        styles.poolValue,
+                        { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                      ]}
+                      value={editPoolUrl}
+                      onChangeText={setEditPoolUrl}
+                      placeholder="pool.example.com"
+                      placeholderTextColor={theme.textMuted}
+                      autoFocus
+                    />
+                  </View>
+                  <View>
+                    <Text style={styles.poolLabel}>{t('minerDetail.port', 'Port')}</Text>
+                    <TextInput
+                      style={[
+                        styles.poolValue,
+                        { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                      ]}
+                      value={editPoolPort}
+                      onChangeText={setEditPoolPort}
+                      placeholder="3333"
+                      placeholderTextColor={theme.textMuted}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <View>
+                    <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
+                    <TextInput
+                      style={[
+                        styles.poolValue,
+                        { borderBottomWidth: 1, borderBottomColor: theme.primary },
+                      ]}
+                      value={editPoolUser}
+                      onChangeText={setEditPoolUser}
+                      placeholder="username.worker"
+                      placeholderTextColor={theme.textMuted}
+                    />
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
+                    <Pressable
+                      style={[styles.flashBtn, { flex: 1, backgroundColor: theme.success }]}
+                      onPress={async () => {
+                        if (!editPoolUrl.trim()) return;
+                        const ok = await savePool(editPoolUrl, editPoolPort, editPoolUser);
+                        if (ok) {
+                          Alert.alert(
+                            t('common.success', 'Success'),
+                            t('minerDetail.poolUpdated', 'Pool updated'),
+                          );
+                        } else {
+                          Alert.alert(
+                            t('common.error', 'Error'),
+                            t('minerDetail.poolUpdateFailed', 'Failed to update pool'),
+                          );
+                        }
+                        setEditingPool(false);
+                      }}
+                    >
+                      <Text style={{ color: '#fff', fontWeight: fontWeight.bold }}>
+                        {t('common.save')}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      style={[styles.flashBtn, { flex: 1, backgroundColor: theme.surfaceLight }]}
+                      onPress={() => setEditingPool(false)}
+                    >
+                      <Text style={{ color: theme.text, fontWeight: fontWeight.semibold }}>
+                        {t('common.cancel')}
                       </Text>
                     </Pressable>
                   </View>
                 </View>
-                <View style={styles.poolDivider} />
-                <View style={styles.poolRow}>
-                  <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
-                  <Text style={styles.poolValue} selectable>
-                    {s.poolUser || t('common.na')}
-                  </Text>
-                </View>
-                <View style={styles.poolDivider} />
-                <View style={styles.poolRow}>
-                  <Text style={styles.poolLabel}>{t('minerDetail.responseTime')}</Text>
-                  <Text style={styles.poolValue}>
-                    {s.poolResponseTime > 0
-                      ? `${s.poolResponseTime.toFixed(0)} ms`
-                      : t('common.na')}
-                  </Text>
-                </View>
-              </>
-            )}
-          </View>
-          <PoolChangeHistory minerId={miner.id} />
-        </View>
-
-        {alertRules && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>🔔</Text>{' '}
-              {t('minerDetail.alertRules', 'Alert Rules')}
-            </Text>
-            <View style={[styles.poolCard, { gap: spacing.sm }]}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    color: theme.text,
-                    fontSize: fontSize.md,
-                    fontWeight: fontWeight.semibold,
-                  }}
-                >
-                  {t('minerDetail.alertRulesEnabled', 'Enabled')}
-                </Text>
-                <Switch
-                  value={alertRules.enabled}
-                  onValueChange={(v) => updateAlertRules({ enabled: v })}
-                  trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
-                  thumbColor={alertRules.enabled ? theme.primary : theme.textMuted}
-                  accessibilityLabel="Toggle alert rules"
-                />
-              </View>
-              {alertRules.enabled && (
+              ) : (
                 <>
-                  <AlertRuleSlider
-                    label={t('minerDetail.tempThreshold', 'Temp Threshold')}
-                    value={alertRules.tempThreshold}
-                    min={50}
-                    max={100}
-                    unit="°C"
-                    onChange={(v) => updateAlertRules({ tempThreshold: v })}
-                  />
-                  <AlertRuleSlider
-                    label={t('minerDetail.hashrateDrop', 'Hashrate Drop %')}
-                    value={alertRules.hashrateDropPercent}
-                    min={10}
-                    max={90}
-                    unit="%"
-                    onChange={(v) => updateAlertRules({ hashrateDropPercent: v })}
-                  />
-                  <AlertRuleSlider
-                    label={t('minerDetail.offlineReminder', 'Offline Reminder (min)')}
-                    value={alertRules.offlineReminderMinutes}
-                    min={1}
-                    max={60}
-                    unit="min"
-                    onChange={(v) => updateAlertRules({ offlineReminderMinutes: v })}
-                  />
-                  <AlertRuleSlider
-                    label={t('minerDetail.uptimeThreshold', 'Uptime Alert (hours)')}
-                    value={alertRules.uptimeThresholdHours}
-                    min={1}
-                    max={168}
-                    unit="h"
-                    onChange={(v) => updateAlertRules({ uptimeThresholdHours: v })}
-                  />
-                  <AlertRuleSlider
-                    label={t('minerDetail.shareRejection', 'Share Rejection %')}
-                    value={alertRules.shareRejectionPercent}
-                    min={1}
-                    max={50}
-                    unit="%"
-                    onChange={(v) => updateAlertRules({ shareRejectionPercent: v })}
-                  />
-                  <Pressable
-                    onPress={resetAlertRules}
-                    style={({ pressed }) => ({
-                      paddingVertical: spacing.xs,
-                      paddingHorizontal: spacing.md,
-                      borderRadius: radius.sm,
-                      backgroundColor: theme.surfaceLight,
-                      opacity: pressed ? 0.6 : 1,
-                      alignItems: 'center',
-                      marginTop: spacing.xs,
-                    })}
-                    accessibilityRole="button"
-                    accessibilityLabel="Reset alert rules to defaults"
-                  >
-                    <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
-                      {t('minerDetail.resetDefaults', 'Reset to Defaults')}
+                  <View style={styles.poolRow}>
+                    <Text style={styles.poolLabel}>{t('minerDetail.url')}</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: 1,
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      <Text style={styles.poolValue}>
+                        {s.pool && s.poolPort
+                          ? `${s.pool}:${s.poolPort}`
+                          : s.pool || t('common.na')}
+                      </Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Change pool"
+                        onPress={() => {
+                          setEditPoolUrl(s.pool || '');
+                          setEditPoolPort(String(s.poolPort || 3333));
+                          setEditPoolUser(s.poolUser || '');
+                          setEditingPool(true);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: fontSize.sm,
+                            color: theme.primary,
+                            marginLeft: spacing.sm,
+                          }}
+                        >
+                          {t('common.edit')}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  <View style={styles.poolDivider} />
+                  <View style={styles.poolRow}>
+                    <Text style={styles.poolLabel}>{t('minerDetail.user')}</Text>
+                    <Text style={styles.poolValue} selectable>
+                      {s.poolUser || t('common.na')}
                     </Text>
-                  </Pressable>
+                  </View>
+                  <View style={styles.poolDivider} />
+                  <View style={styles.poolRow}>
+                    <Text style={styles.poolLabel}>{t('minerDetail.responseTime')}</Text>
+                    <Text style={styles.poolValue}>
+                      {s.poolResponseTime > 0
+                        ? `${s.poolResponseTime.toFixed(0)} ms`
+                        : t('common.na')}
+                    </Text>
+                  </View>
                 </>
               )}
             </View>
+            <PoolChangeHistory minerId={miner.id} />
           </View>
-        )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>📈</Text> {t('minerDetail.hashrateHistory')}
-          </Text>
-          <SubscriptionGate feature="30-day charts">
-            <Suspense fallback={null}>
-              <LazyHashrateChart snapshots={snapshots} />
-            </Suspense>
-          </SubscriptionGate>
-        </View>
-
-        {snapshots.length > 1 && (
-          <View style={[styles.section, { paddingTop: 0 }]}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>📊</Text> {t('minerDetail.efficiencyTrend')}
-            </Text>
-            <SubscriptionGate feature="30-day charts">
-              <Suspense fallback={null}>
-                <LazyEfficiencyTrend snapshots={snapshots} />
-              </Suspense>
-            </SubscriptionGate>
-          </View>
-        )}
-
-        {snapshots.length > 1 && (
-          <View style={[styles.section, { paddingTop: 0 }]}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>🌡</Text>{' '}
-              {t('minerDetail.temperatureHistory', 'Temperature History')}
-            </Text>
-            <SubscriptionGate feature="30-day charts">
-              <Suspense fallback={null}>
-                <LazyTemperatureChart snapshots={snapshots} />
-              </Suspense>
-            </SubscriptionGate>
-          </View>
-        )}
-
-        {snapshots.length > 1 && (
-          <View style={[styles.section, { paddingTop: 0 }]}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>⚡</Text>{' '}
-              {t('minerDetail.powerHistory', 'Power History')}
-            </Text>
-            <SubscriptionGate feature="30-day charts">
-              <Suspense fallback={null}>
-                <LazyPowerChart snapshots={snapshots} />
-              </Suspense>
-            </SubscriptionGate>
-          </View>
-        )}
-
-        {snapshots.length > 1 && (
-          <View style={[styles.section, { paddingTop: 0 }]}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>🔋</Text>{' '}
-              {t('minerDetail.voltageHistory', 'Voltage History')}
-            </Text>
-            <SubscriptionGate feature="30-day charts">
-              <Suspense fallback={null}>
-                <LazyVoltageChart snapshots={snapshots} />
-              </Suspense>
-            </SubscriptionGate>
-          </View>
-        )}
-
-        {snapshots.length > 1 && (
-          <View style={[styles.section, { paddingTop: 0 }]}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.sectionIcon}>🌀</Text>{' '}
-              {t('minerDetail.fanHistory', 'Fan Speed History')}
-            </Text>
-            <SubscriptionGate feature="30-day charts">
-              <Suspense fallback={null}>
-                <LazyFanChart snapshots={snapshots} />
-              </Suspense>
-            </SubscriptionGate>
-          </View>
-        )}
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Text style={styles.sectionIcon}>🖼</Text> Snapshot
-          </Text>
-          <MinerSnapshotCard miner={miner} />
-          <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 12 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Share Stats"
-              style={[
-                styles.actionBtn,
-                {
-                  flex: 1,
-                  backgroundColor: theme.primary + '15',
-                  borderColor: theme.primary + '30',
-                },
-              ]}
-              onPress={handleShare}
-            >
-              <Text style={styles.actionBtnIcon}>📤</Text>
-              <Text style={[styles.actionBtnText, { color: theme.primary }]}>
-                {t('minerDetail.shareStats')}
+          {alertRules && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>🔔</Text>{' '}
+                {t('minerDetail.alertRules', 'Alert Rules')}
               </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('minerDetail.shareAsImage')}
-              style={[
-                styles.actionBtn,
-                { flex: 1, backgroundColor: theme.info + '15', borderColor: theme.info + '30' },
-              ]}
-              onPress={handleShareAsImage}
-            >
-              <Text style={styles.actionBtnIcon}>🖼</Text>
-              <Text style={[styles.actionBtnText, { color: theme.info }]}>
-                {t('minerDetail.shareAsImage')}
-              </Text>
-            </Pressable>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Export miner CSV"
-              style={[
-                styles.actionBtn,
-                {
-                  flex: 1,
-                  backgroundColor: theme.success + '15',
-                  borderColor: theme.success + '30',
-                },
-              ]}
-              onPress={async () => {
-                const { exportMinerCSV } = await import('../utils/export');
-                await exportMinerCSV(miner.id);
-              }}
-            >
-              <Text style={styles.actionBtnIcon}>📊</Text>
-              <Text style={[styles.actionBtnText, { color: theme.success }]}>
-                {t('minerDetail.exportCsv', 'Export CSV')}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('exportReport.title', 'Export Report')}
-              style={[
-                styles.actionBtn,
-                {
-                  flex: 1,
-                  backgroundColor: theme.info + '15',
-                  borderColor: theme.info + '30',
-                },
-              ]}
-              onPress={() => {
-                navigation.navigate('ExportReport');
-              }}
-            >
-              <Text style={styles.actionBtnIcon}>📄</Text>
-              <Text style={[styles.actionBtnText, { color: theme.info }]}>
-                {t('exportReport.title', 'Export Report')}
-              </Text>
-            </Pressable>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('publicDashboard.shareMiner', 'Share Live Status')}
-              style={[
-                styles.actionBtn,
-                {
-                  flex: 1,
-                  backgroundColor: theme.accent + '15',
-                  borderColor: theme.accent + '30',
-                },
-              ]}
-              onPress={async () => {
-                try {
-                  const { createPublicDashboard } = await import('../api/client');
-                  const { getBaseUrl } = await import('../api/client');
-                  const data = await createPublicDashboard(miner.remoteId || miner.id);
-                  const baseUrl = getBaseUrl().replace('/api', '');
-                  const url = `${baseUrl}/public-dashboard/${data.token}`;
-
-                  if (typeof Share !== 'undefined' && Share.share) {
-                    await Share.share({
-                      message: `${t('publicDashboard.shareUrl')}: ${url}`,
-                      url,
-                      title: miner.name,
-                    });
-                  } else {
-                    Alert.alert(t('publicDashboard.shareUrl'), url, [
-                      {
-                        text: 'OK',
-                        style: 'cancel',
-                      },
-                    ]);
-                  }
-                } catch {
-                  Alert.alert(t('common.error'), t('common.error'));
-                }
-              }}
-            >
-              <Text style={styles.actionBtnIcon}>🔗</Text>
-              <Text style={[styles.actionBtnText, { color: theme.accent }]}>
-                {t('publicDashboard.shareMiner')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.warning }]}>
-            <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.actions')}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('minerDetail.restartMiner')}
-            style={[
-              styles.actionBtn,
-              {
-                backgroundColor: theme.warning + '15',
-                borderColor: theme.warning + '30',
-                marginBottom: 12,
-              },
-            ]}
-            onPress={async () => {
-              const ok = await handleRestart();
-              Alert.alert(
-                ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
-                ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
-              );
-            }}
-          >
-            <Text style={styles.actionBtnIcon}>🔄</Text>
-            <Text style={[styles.actionBtnText, { color: theme.warning }]}>
-              {t('minerDetail.restartMiner')}
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              miner.maintenanceMode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'
-            }
-            style={[
-              styles.actionBtn,
-              {
-                backgroundColor: miner.maintenanceMode
-                  ? theme.success + '15'
-                  : theme.warning + '15',
-                borderColor: miner.maintenanceMode ? theme.success + '30' : theme.warning + '30',
-                marginBottom: 12,
-              },
-            ]}
-            onPress={() => setMinerMaintenance(miner.id, !miner.maintenanceMode)}
-          >
-            <Text style={styles.actionBtnIcon}>{miner.maintenanceMode ? '✅' : '🔧'}</Text>
-            <Text
-              style={[
-                styles.actionBtnText,
-                { color: miner.maintenanceMode ? theme.success : theme.warning },
-              ]}
-            >
-              {miner.maintenanceMode
-                ? t('minerDetail.maintenanceOn')
-                : t('minerDetail.maintenanceOff')}
-            </Text>
-          </Pressable>
-          <Text style={[styles.sectionTitle, { color: theme.danger }]}>
-            <Text style={styles.sectionIcon}>⚠</Text> {t('minerDetail.dangerZone')}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Remove Miner"
-            style={styles.deleteBtn}
-            onPress={() => setShowConfirm(!showConfirm)}
-          >
-            <Text style={styles.deleteBtnText}>{t('minerDetail.removeMiner')}</Text>
-          </Pressable>
-          {showConfirm && (
-            <View style={styles.confirmBox}>
-              <Text style={styles.confirmText}>
-                {t('minerDetail.removeConfirm', { name: miner.name })}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Yes, Remove"
-                style={styles.confirmBtn}
-                onPress={() => {
-                  navigation.goBack();
-                  deleteMinerAction();
-                }}
-              >
-                <Text style={styles.confirmBtnText}>{t('minerDetail.yesRemove')}</Text>
-              </Pressable>
+              <View style={[styles.poolCard, { gap: spacing.sm }]}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.text,
+                      fontSize: fontSize.md,
+                      fontWeight: fontWeight.semibold,
+                    }}
+                  >
+                    {t('minerDetail.alertRulesEnabled', 'Enabled')}
+                  </Text>
+                  <Switch
+                    value={alertRules.enabled}
+                    onValueChange={(v) => updateAlertRules({ enabled: v })}
+                    trackColor={{ false: theme.textMuted, true: theme.primary + '80' }}
+                    thumbColor={alertRules.enabled ? theme.primary : theme.textMuted}
+                    accessibilityLabel="Toggle alert rules"
+                  />
+                </View>
+                {alertRules.enabled && (
+                  <>
+                    <AlertRuleSlider
+                      label={t('minerDetail.tempThreshold', 'Temp Threshold')}
+                      value={alertRules.tempThreshold}
+                      min={50}
+                      max={100}
+                      unit="°C"
+                      onChange={(v) => updateAlertRules({ tempThreshold: v })}
+                    />
+                    <AlertRuleSlider
+                      label={t('minerDetail.hashrateDrop', 'Hashrate Drop %')}
+                      value={alertRules.hashrateDropPercent}
+                      min={10}
+                      max={90}
+                      unit="%"
+                      onChange={(v) => updateAlertRules({ hashrateDropPercent: v })}
+                    />
+                    <AlertRuleSlider
+                      label={t('minerDetail.offlineReminder', 'Offline Reminder (min)')}
+                      value={alertRules.offlineReminderMinutes}
+                      min={1}
+                      max={60}
+                      unit="min"
+                      onChange={(v) => updateAlertRules({ offlineReminderMinutes: v })}
+                    />
+                    <AlertRuleSlider
+                      label={t('minerDetail.uptimeThreshold', 'Uptime Alert (hours)')}
+                      value={alertRules.uptimeThresholdHours}
+                      min={1}
+                      max={168}
+                      unit="h"
+                      onChange={(v) => updateAlertRules({ uptimeThresholdHours: v })}
+                    />
+                    <AlertRuleSlider
+                      label={t('minerDetail.shareRejection', 'Share Rejection %')}
+                      value={alertRules.shareRejectionPercent}
+                      min={1}
+                      max={50}
+                      unit="%"
+                      onChange={(v) => updateAlertRules({ shareRejectionPercent: v })}
+                    />
+                    <Pressable
+                      onPress={resetAlertRules}
+                      style={({ pressed }) => ({
+                        paddingVertical: spacing.xs,
+                        paddingHorizontal: spacing.md,
+                        borderRadius: radius.sm,
+                        backgroundColor: theme.surfaceLight,
+                        opacity: pressed ? 0.6 : 1,
+                        alignItems: 'center',
+                        marginTop: spacing.xs,
+                      })}
+                      accessibilityRole="button"
+                      accessibilityLabel="Reset alert rules to defaults"
+                    >
+                      <Text style={{ color: theme.textDim, fontSize: fontSize.sm }}>
+                        {t('minerDetail.resetDefaults', 'Reset to Defaults')}
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
             </View>
           )}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>📈</Text> {t('minerDetail.hashrateHistory')}
+            </Text>
+            <SubscriptionGate feature="30-day charts">
+              <Suspense fallback={null}>
+                <LazyHashrateChart snapshots={snapshots} />
+              </Suspense>
+            </SubscriptionGate>
+          </View>
+
+          {snapshots.length > 1 && (
+            <View style={[styles.section, { paddingTop: 0 }]}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>📊</Text> {t('minerDetail.efficiencyTrend')}
+              </Text>
+              <SubscriptionGate feature="30-day charts">
+                <Suspense fallback={null}>
+                  <LazyEfficiencyTrend snapshots={snapshots} />
+                </Suspense>
+              </SubscriptionGate>
+            </View>
+          )}
+
+          {snapshots.length > 1 && (
+            <View style={[styles.section, { paddingTop: 0 }]}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>🌡</Text>{' '}
+                {t('minerDetail.temperatureHistory', 'Temperature History')}
+              </Text>
+              <SubscriptionGate feature="30-day charts">
+                <Suspense fallback={null}>
+                  <LazyTemperatureChart snapshots={snapshots} />
+                </Suspense>
+              </SubscriptionGate>
+            </View>
+          )}
+
+          {snapshots.length > 1 && (
+            <View style={[styles.section, { paddingTop: 0 }]}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>⚡</Text>{' '}
+                {t('minerDetail.powerHistory', 'Power History')}
+              </Text>
+              <SubscriptionGate feature="30-day charts">
+                <Suspense fallback={null}>
+                  <LazyPowerChart snapshots={snapshots} />
+                </Suspense>
+              </SubscriptionGate>
+            </View>
+          )}
+
+          {snapshots.length > 1 && (
+            <View style={[styles.section, { paddingTop: 0 }]}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>🔋</Text>{' '}
+                {t('minerDetail.voltageHistory', 'Voltage History')}
+              </Text>
+              <SubscriptionGate feature="30-day charts">
+                <Suspense fallback={null}>
+                  <LazyVoltageChart snapshots={snapshots} />
+                </Suspense>
+              </SubscriptionGate>
+            </View>
+          )}
+
+          {snapshots.length > 1 && (
+            <View style={[styles.section, { paddingTop: 0 }]}>
+              <Text style={styles.sectionTitle}>
+                <Text style={styles.sectionIcon}>🌀</Text>{' '}
+                {t('minerDetail.fanHistory', 'Fan Speed History')}
+              </Text>
+              <SubscriptionGate feature="30-day charts">
+                <Suspense fallback={null}>
+                  <LazyFanChart snapshots={snapshots} />
+                </Suspense>
+              </SubscriptionGate>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.sectionIcon}>🖼</Text> Snapshot
+            </Text>
+            <MinerSnapshotCard miner={miner} />
+            <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 12 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Share Stats"
+                style={[
+                  styles.actionBtn,
+                  {
+                    flex: 1,
+                    backgroundColor: theme.primary + '15',
+                    borderColor: theme.primary + '30',
+                  },
+                ]}
+                onPress={handleShare}
+              >
+                <Text style={styles.actionBtnIcon}>📤</Text>
+                <Text style={[styles.actionBtnText, { color: theme.primary }]}>
+                  {t('minerDetail.shareStats')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('minerDetail.shareAsImage')}
+                style={[
+                  styles.actionBtn,
+                  { flex: 1, backgroundColor: theme.info + '15', borderColor: theme.info + '30' },
+                ]}
+                onPress={handleShareAsImage}
+              >
+                <Text style={styles.actionBtnIcon}>🖼</Text>
+                <Text style={[styles.actionBtnText, { color: theme.info }]}>
+                  {t('minerDetail.shareAsImage')}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Export miner CSV"
+                style={[
+                  styles.actionBtn,
+                  {
+                    flex: 1,
+                    backgroundColor: theme.success + '15',
+                    borderColor: theme.success + '30',
+                  },
+                ]}
+                onPress={async () => {
+                  const { exportMinerCSV } = await import('../utils/export');
+                  await exportMinerCSV(miner.id);
+                }}
+              >
+                <Text style={styles.actionBtnIcon}>📊</Text>
+                <Text style={[styles.actionBtnText, { color: theme.success }]}>
+                  {t('minerDetail.exportCsv', 'Export CSV')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('exportReport.title', 'Export Report')}
+                style={[
+                  styles.actionBtn,
+                  {
+                    flex: 1,
+                    backgroundColor: theme.info + '15',
+                    borderColor: theme.info + '30',
+                  },
+                ]}
+                onPress={() => {
+                  navigation.navigate('ExportReport');
+                }}
+              >
+                <Text style={styles.actionBtnIcon}>📄</Text>
+                <Text style={[styles.actionBtnText, { color: theme.info }]}>
+                  {t('exportReport.title', 'Export Report')}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('publicDashboard.shareMiner', 'Share Live Status')}
+                style={[
+                  styles.actionBtn,
+                  {
+                    flex: 1,
+                    backgroundColor: theme.accent + '15',
+                    borderColor: theme.accent + '30',
+                  },
+                ]}
+                onPress={async () => {
+                  try {
+                    const { createPublicDashboard } = await import('../api/client');
+                    const { getBaseUrl } = await import('../api/client');
+                    const data = await createPublicDashboard(miner.remoteId || miner.id);
+                    const baseUrl = getBaseUrl().replace('/api', '');
+                    const url = `${baseUrl}/public-dashboard/${data.token}`;
+
+                    if (typeof Share !== 'undefined' && Share.share) {
+                      await Share.share({
+                        message: `${t('publicDashboard.shareUrl')}: ${url}`,
+                        url,
+                        title: miner.name,
+                      });
+                    } else {
+                      Alert.alert(t('publicDashboard.shareUrl'), url, [
+                        {
+                          text: 'OK',
+                          style: 'cancel',
+                        },
+                      ]);
+                    }
+                  } catch {
+                    Alert.alert(t('common.error'), t('common.error'));
+                  }
+                }}
+              >
+                <Text style={styles.actionBtnIcon}>🔗</Text>
+                <Text style={[styles.actionBtnText, { color: theme.accent }]}>
+                  {t('publicDashboard.shareMiner')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.warning }]}>
+              <Text style={styles.sectionIcon}>⚡</Text> {t('minerDetail.actions')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('minerDetail.restartMiner')}
+              style={[
+                styles.actionBtn,
+                {
+                  backgroundColor: theme.warning + '15',
+                  borderColor: theme.warning + '30',
+                  marginBottom: 12,
+                },
+              ]}
+              onPress={async () => {
+                const ok = await handleRestart();
+                Alert.alert(
+                  ok ? t('minerDetail.restartSent') : t('minerDetail.restartFailed'),
+                  ok ? t('minerDetail.restartSentBody') : t('minerDetail.restartFailedBody'),
+                );
+              }}
+            >
+              <Text style={styles.actionBtnIcon}>🔄</Text>
+              <Text style={[styles.actionBtnText, { color: theme.warning }]}>
+                {t('minerDetail.restartMiner')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                miner.maintenanceMode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'
+              }
+              style={[
+                styles.actionBtn,
+                {
+                  backgroundColor: miner.maintenanceMode
+                    ? theme.success + '15'
+                    : theme.warning + '15',
+                  borderColor: miner.maintenanceMode ? theme.success + '30' : theme.warning + '30',
+                  marginBottom: 12,
+                },
+              ]}
+              onPress={() => setMinerMaintenance(miner.id, !miner.maintenanceMode)}
+            >
+              <Text style={styles.actionBtnIcon}>{miner.maintenanceMode ? '✅' : '🔧'}</Text>
+              <Text
+                style={[
+                  styles.actionBtnText,
+                  { color: miner.maintenanceMode ? theme.success : theme.warning },
+                ]}
+              >
+                {miner.maintenanceMode
+                  ? t('minerDetail.maintenanceOn')
+                  : t('minerDetail.maintenanceOff')}
+              </Text>
+            </Pressable>
+            <Text style={[styles.sectionTitle, { color: theme.danger }]}>
+              <Text style={styles.sectionIcon}>⚠</Text> {t('minerDetail.dangerZone')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Remove Miner"
+              style={styles.deleteBtn}
+              onPress={() => setShowConfirm(!showConfirm)}
+            >
+              <Text style={styles.deleteBtnText}>{t('minerDetail.removeMiner')}</Text>
+            </Pressable>
+            {showConfirm && (
+              <View style={styles.confirmBox}>
+                <Text style={styles.confirmText}>
+                  {t('minerDetail.removeConfirm', { name: miner.name })}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Yes, Remove"
+                  style={styles.confirmBtn}
+                  onPress={() => {
+                    navigation.goBack();
+                    deleteMinerAction();
+                  }}
+                >
+                  <Text style={styles.confirmBtnText}>{t('minerDetail.yesRemove')}</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      <Modal
+        visible={fullNote !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFullNote(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">
+              {t('minerDetail.viewFullNote', 'View Full Note')}
+            </Text>
+            <ScrollView style={styles.modalScroll} bounces={false}>
+              <MarkdownText style={{ color: theme.text, fontSize: fontSize.md }}>
+                {fullNote?.text ?? ''}
+              </MarkdownText>
+            </ScrollView>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.close', 'Close')}
+              style={[styles.modalCloseBtn, { borderColor: theme.border }]}
+              onPress={() => setFullNote(null)}
+            >
+              <Text style={[styles.modalCloseText, { color: theme.text }]}>
+                {t('common.close', 'Close')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={editingNote !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditingNote(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">
+              {t('minerDetail.editNote', 'Edit Note')}
+            </Text>
+            <TextInput
+              style={[
+                styles.editNoteInput,
+                {
+                  backgroundColor: theme.surfaceLight,
+                  borderColor: theme.border,
+                  color: theme.text,
+                },
+              ]}
+              value={editNoteText}
+              onChangeText={setEditNoteText}
+              multiline
+              autoFocus
+              textAlignVertical="top"
+              accessibilityLabel="Edit note input"
+            />
+            <View style={styles.modalBtnRow}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel', 'Cancel')}
+                style={[styles.modalBtn, { borderColor: theme.border }]}
+                onPress={() => setEditingNote(null)}
+              >
+                <Text style={[styles.modalBtnText, { color: theme.text }]}>
+                  {t('common.cancel', 'Cancel')}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('minerDetail.saveNote', 'Save Note')}
+                style={[
+                  styles.modalBtn,
+                  styles.modalBtnPrimary,
+                  { backgroundColor: theme.primary },
+                ]}
+                onPress={async () => {
+                  if (editingNote) {
+                    await updateNote(editingNote.id, editNoteText);
+                  }
+                  setEditingNote(null);
+                }}
+              >
+                <Text style={[styles.modalBtnText, { color: buttonText }]}>
+                  {t('minerDetail.saveNote', 'Save Note')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }

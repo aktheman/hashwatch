@@ -662,7 +662,16 @@
     "long_uptime": "Lange Betriebszeit",
     "sync": "Synchronisieren",
     "today": "Heute",
-    "yesterday": "Gestern"
+    "yesterday": "Gestern",
+    "filterAll": "Alle",
+    "filterOffline": "Offline",
+    "filterOnline": "Online",
+    "filterHot": "Heiß",
+    "filterHashrateDrop": "Hashrate-Abfall",
+    "filterPoolLost": "Pool verloren",
+    "clearFilters": "Filter löschen",
+    "noMatchingAlerts": "Keine Alerts entsprechen Ihrer Suche",
+    "searchPlaceholder": "Alerts durchsuchen..."
   },
   "notificationHistory": {
     "title": "Benachrichtigungsverlauf",

@@ -1,42 +1,47 @@
 # Contributing to HashWatch
 
+Thanks for wanting to contribute! This guide covers how to contribute code, what conventions to follow, and how to get your changes reviewed and merged.
+
 ## Prerequisites
 
 - Node.js 22+
-- Expo CLI (`npm install -g expo-cli`)
 - PostgreSQL 16 (for backend)
 - Xcode 15+ (for iOS)
 - Android Studio (for Android)
 
-## Development Setup
+## How to Contribute
+
+1. **Fork** the repository on GitHub (`https://github.com/aktheman/hashwatch`).
+2. **Clone** your fork and add the upstream remote:
+
+   ```bash
+   git clone https://github.com/your-username/hashwatch.git
+   cd hashwatch
+   git remote add upstream https://github.com/aktheman/hashwatch.git
+   ```
+
+3. **Create a branch** with a descriptive prefix (see [Branch Naming](#branch-naming)):
+
+   ```bash
+   git checkout -b feat/dark-pool-screen
+   ```
+
+4. **Make your changes** and commit them with [Conventional Commits](#commit-messages).
+5. **Push** and open a **Pull Request** against `main`. Reference the issue if one exists.
 
 ```bash
-# Clone and install
-git clone https://github.com/aktheman/hashwatch.git
-cd hashwatch
-npm install
-
-# Backend setup
-cd backend
-cp .env.example .env  # configure DATABASE_URL, JWT_SECRET
-npm install
-npm run db:init
-npm run dev
-
-# Frontend (new terminal)
-cd ..
-npm start
+git push -u origin feat/dark-pool-screen
 ```
 
 ## Branch Naming
 
 Use descriptive prefixes:
 
-- `feat/` -- New features (e.g., `feat/dark-pool-screen`)
-- `fix/` -- Bug fixes (e.g., `fix/push-token-ownership`)
-- `test/` -- Test additions/fixes (e.g., `test/alert-rules`)
-- `chore/` -- Maintenance (e.g., `chore/upgrade-expo`)
-- `docs/` -- Documentation (e.g., `docs/api-reference`)
+- `feat/` — New features (e.g., `feat/dark-pool-screen`)
+- `fix/` — Bug fixes (e.g., `fix/push-token-ownership`)
+- `test/` — Test additions/fixes (e.g., `test/alert-rules`)
+- `chore/` — Maintenance (e.g., `chore/upgrade-expo`)
+- `docs/` — Documentation (e.g., `docs/api-reference`)
 
 ## Commit Messages
 
@@ -47,67 +52,99 @@ feat: add dark pool contribution screen
 fix: prevent concurrent refreshAll calls
 test: add webhook delivery edge cases
 chore: update expo to 56.0.11
+docs: document the errors endpoint
+refactor: extract shared chart config
 ```
 
-Prefixes: `feat:`, `fix:`, `test:`, `chore:`, `docs:`, `refactor:`
+Supported prefixes: `feat:`, `fix:`, `test:`, `chore:`, `docs:`, `refactor:`, `perf:`, `build:`, `ci:`.
+
+## Development Workflow
+
+```bash
+# Frontend dev server
+npx expo start
+
+# Web dev server
+npm run web
+
+# Backend (new terminal) — hot reload on port 4000
+cd backend && npm install && npm run db:init && npm run dev
+
+# Serve the production web build locally (port 3000)
+npm run build:web
+node serve.js
+```
+
+Useful scripts (see `package.json`):
+
+| Script              | Description                      |
+| ------------------- | -------------------------------- |
+| `npm test`          | Frontend Jest tests              |
+| `npm run test:e2e`  | Playwright end-to-end tests      |
+| `npm run typecheck` | TypeScript type checking         |
+| `npm run lint`      | ESLint (with `--max-warnings=0`) |
+| `npm run format`    | Prettier check                   |
+| `npm run build:web` | Production web build             |
+
+## Code Conventions
+
+- **Language** — TypeScript only, strict typing. Run `npx tsc --noEmit` before pushing.
+- **Linting** — `npx eslint src/ --max-warnings=0`. ESLint 10 + Prettier 3 are configured; `npm run lint:fix` and `npm run format:fix` auto-fix.
+- **No comments** in code unless explicitly requested.
+- **Design tokens** — Use tokens from `src/utils/design.ts` (spacing, radius, fontSize, fontWeight, cardShadow, cardStyle) instead of hardcoded values.
+- **Accessibility** — Add `accessibilityRole` and `accessibilityLabel` on root containers and interactive elements.
+- **Performance** — Wrap components in `React.memo` when they render static content or are expensive to re-render; lazy-load heavy charts.
+- **Timers** — Always call `.unref()` on intervals/timeouts so Jest workers don't leak.
+- **i18n** — Use the `useTranslation()` hook; no hardcoded UI strings. Add keys to all 7 locale files (`src/i18n/en|es|fr|de|ja|zh|nb.json`). Accessibility labels stay as readable English.
+- **Do NOT run `npm audit fix --force`** — it downgrades Expo and breaks the build.
+
+## Test Conventions
+
+- **Testing Library** — Use `@testing-library/react-native` v14 APIs (async `render`/`renderHook`, no `UNSAFE_getAllByType`).
+- **`jest.mock` placement** — Mock modules with `jest.mock()` _before_ imports of the module under test.
+- **Timers** — Timers in modules must call `.unref()`; tests that use them should restore with `afterEach(() => jest.restoreAllMocks())`.
+- **Hidden elements** — Use `{ includeHiddenElements: true }` query option when accessibility-hidden elements are present.
+- **i18n keys** — Assert against i18n keys (e.g., `'dashboard.title'`), not translated strings.
+- **Queries** — Use render-result queries (`r.getByText(...)`) instead of the `screen` singleton to avoid stale references.
+- **Async events** — Always `await fireEvent.changeText` / `fireEvent.press` calls for state flush.
+
+### Running Tests
+
+```bash
+# Frontend
+npx jest --no-coverage
+
+# Backend
+cd backend && npx jest --no-coverage
+
+# E2E (build first)
+npm run build:web
+npm run test:e2e
+```
 
 ## Pull Requests
 
 Before submitting, ensure:
 
-1. **All tests pass**
-   - Frontend: `./node_modules/.bin/jest --no-coverage --maxWorkers=4`
-   - Backend: `cd backend && ./node_modules/.bin/jest --no-coverage`
+1. **All tests pass** — frontend `npx jest --no-coverage`, backend `cd backend && npx jest --no-coverage`
+2. **TypeScript is clean** — `npx tsc --noEmit` (frontend + backend)
+3. **ESLint is clean** — `npx eslint src/ --max-warnings=0`
+4. **Prettier is clean** — `npm run format`
+5. **No comments** added to code unless explicitly requested
+6. **PR description** includes what changed and why, plus test/verification steps
 
-2. **TypeScript is clean**
-   - Frontend: `npx tsc --noEmit`
-   - Backend: `cd backend && npx tsc --noEmit`
+## Code Review Checklist
 
-3. **ESLint is clean**
-   - Frontend: `npx eslint src/ --max-warnings=0`
-
-4. **No comments** added to code unless explicitly requested
-
-5. **PR description** includes what changed and why
-
-## Code Style
-
-- **No comments** in code unless the user explicitly requests them
-- **Use design tokens** from `src/utils/design.ts` (spacing, radius, fontSize, fontWeight, cardShadow, cardStyle)
-- **Accessibility** -- Add `accessibilityRole` and `accessibilityLabel` on root containers
-- **Performance** -- Wrap components in `React.memo` when they render static content or are expensive to re-render
-- **Timers** -- Always call `.unref()` on intervals/timeouts to prevent Jest worker leaks
-- **i18n** -- Use `useTranslation()` hook; no hardcoded UI strings. Accessibility labels stay as readable English.
-- **Testing Library** -- Use `@testing-library/react-native` v14 APIs (async `render`/`renderHook`, no `UNSAFE_getAllByType`)
-- **Hidden elements** -- Use `{ includeHiddenElements: true }` query option when accessibility-hidden elements are present
-
-## Testing Guide
-
-### Frontend
-
-```bash
-./node_modules/.bin/jest --no-coverage --maxWorkers=4
-```
-
-### Backend
-
-```bash
-cd backend && ./node_modules/.bin/jest --no-coverage
-```
-
-### E2E (Playwright)
-
-```bash
-npm run build:web
-npm run test:e2e
-```
-
-### Test Conventions
-
-- Tests assert against i18n keys (e.g., `'dashboard.title'`) not translated strings
-- Use `render result` queries (`r.getByText(...)`) instead of `screen` singleton to avoid stale references
-- Always `await` `fireEvent.changeText` / `fireEvent.press` calls for state flush
-- Add `afterEach(() => jest.restoreAllMocks())` when using `jest.spyOn` to prevent worker leaks
+- [ ] Conventional commit message matches the change
+- [ ] Tests added/updated and all pass (frontend, backend, E2E where relevant)
+- [ ] TypeScript and ESLint clean
+- [ ] No hardcoded UI strings — i18n keys added to all 7 locales
+- [ ] Design tokens used instead of magic numbers/values
+- [ ] `accessibilityRole`/`accessibilityLabel` present on interactive elements
+- [ ] Timers call `.unref()`
+- [ ] `React.memo` applied where re-render cost matters
+- [ ] Backend routes: input validated (Zod), try/catch with structured `log.error`, no internal details leaked
+- [ ] No secrets or API keys introduced
 
 ## Disk Space
 

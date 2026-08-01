@@ -662,7 +662,16 @@
     "long_uptime": "Longue disponibilité",
     "sync": "Synchroniser",
     "today": "Auj.",
-    "yesterday": "Hier"
+    "yesterday": "Hier",
+    "filterAll": "Tous",
+    "filterOffline": "Hors ligne",
+    "filterOnline": "En ligne",
+    "filterHot": "Chaud",
+    "filterHashrateDrop": "Baisse du taux de hachage",
+    "filterPoolLost": "Pool perdu",
+    "clearFilters": "Effacer les filtres",
+    "noMatchingAlerts": "Aucune alerte ne correspond à votre recherche",
+    "searchPlaceholder": "Rechercher des alertes..."
   },
   "notificationHistory": {
     "title": "Historique des notifications",
