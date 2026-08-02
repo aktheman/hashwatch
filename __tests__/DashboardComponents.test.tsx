@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, cleanup } from '@testing-library/react-native';
+import { render, fireEvent, cleanup, screen, waitFor } from '@testing-library/react-native';
 import { MetricTile, ProfitabilityCard } from '../src/components/DashboardComponents';
 
 jest.mock('react-native-svg', () => {
@@ -44,12 +44,12 @@ jest.mock('../src/theme', () => ({
 }));
 
 jest.mock('../src/utils/hashrate', () => ({
-  getBTCPrice: () => 100000,
-  getBTCPriceHistory: () => [95000, 98000, 100000],
-  getNetworkHashrate: () => 750_000_000_000_000_000_000,
-  estimateBTCPerDay: (hps: number) => (hps / 750_000_000_000_000_000_000) * 144 * 3.125,
-  formatBTC: (btc: number) => `${btc.toFixed(8)}`,
-  formatHashrateValue: (h: number) => `${(h / 1e15).toFixed(1)} EH/s`,
+  getBTCPrice: jest.fn().mockReturnValue(100000),
+  getBTCPriceHistory: jest.fn().mockReturnValue([95000, 98000, 100000]),
+  getNetworkHashrate: jest.fn().mockReturnValue(750_000_000_000_000_000_000),
+  estimateBTCPerDay: jest.fn((hps: number) => (hps / 750_000_000_000_000_000_000) * 144 * 3.125),
+  formatBTC: jest.fn((btc: number) => `${btc.toFixed(8)}`),
+  formatHashrateValue: jest.fn((h: number) => `${(h / 1e15).toFixed(1)} EH/s`),
 }));
 
 jest.mock('../src/db/database', () => ({
@@ -58,12 +58,44 @@ jest.mock('../src/db/database', () => ({
 }));
 
 jest.mock('../src/store/poolAnalytics', () => ({
-  usePoolAnalyticsStore: (sel: (s: { stats: never[] }) => unknown) =>
+  usePoolAnalyticsStore: jest.fn((sel: (s: any) => unknown) =>
     sel({ stats: [], config: [], loading: false, error: null }),
+  ),
 }));
+
+const minerA: any = {
+  id: 'm1',
+  name: 'Miner A',
+  ip: '10.0.0.1',
+  port: 80,
+  isOnline: true,
+  status: { hashRate: 1, hashRateUnit: 'TH/s', power: 10, temperature: 55 },
+};
+
+const minerB: any = {
+  id: 'm2',
+  name: 'Miner B',
+  ip: '10.0.0.2',
+  port: 80,
+  isOnline: true,
+  status: { hashRate: 2, hashRateUnit: 'TH/s', power: 20, temperature: 60 },
+};
 
 beforeEach(() => {
   cleanup();
+  jest.clearAllMocks();
+  const hr = jest.requireMock('../src/utils/hashrate');
+  (hr.getBTCPrice as jest.Mock).mockReturnValue(100000);
+  (hr.getBTCPriceHistory as jest.Mock).mockReturnValue([95000, 98000, 100000]);
+  (hr.estimateBTCPerDay as jest.Mock).mockImplementation(
+    (hps: number) => (hps / 750_000_000_000_000_000_000) * 144 * 3.125,
+  );
+  const db = jest.requireMock('../src/db/database');
+  (db.getSetting as jest.Mock).mockResolvedValue(null);
+  const pool = jest.requireMock('../src/store/poolAnalytics');
+  (pool.usePoolAnalyticsStore as jest.Mock).mockImplementation((sel: (s: any) => unknown) =>
+    sel({ stats: [], config: [], loading: false, error: null }),
+  );
 });
 
 describe('MetricTile', () => {
@@ -90,6 +122,11 @@ describe('MetricTile', () => {
     expect(tree.getByText('+12%')).toBeTruthy();
   });
 
+  it('does not render trend badge without trend', async () => {
+    await render(<MetricTile title="Hashrate" value="500" />);
+    expect(screen.queryByText(/\+/)).toBeNull();
+  });
+
   it('renders sparkline chart when chart prop is sparkline', async () => {
     const tree = await render(
       <MetricTile title="Hashrate" value="500" chart="sparkline" chartData={[1, 2, 3]} />,
@@ -107,21 +144,44 @@ describe('MetricTile', () => {
   it('renders donut chart when chart prop is donut', async () => {
     const tree = await render(<MetricTile title="Uptime" value="99.9%" chart="donut" />);
     expect(tree.toJSON()).toBeTruthy();
+    expect(screen.getByText('72%')).toBeTruthy();
   });
 
   it('renders gauge chart when chart prop is gauge', async () => {
     const tree = await render(<MetricTile title="Load" value="65%" chart="gauge" />);
     expect(tree.toJSON()).toBeTruthy();
+    expect(screen.getByText('65°')).toBeTruthy();
+  });
+
+  it('renders chart prop without chart data', async () => {
+    const tree = await render(<MetricTile title="Test" value="X" chart="sparkline" />);
+    expect(tree.toJSON()).toBeTruthy();
   });
 
   it('renders with different sizes', async () => {
-    const tree = await render(<MetricTile title="Test" value="X" size="lg" />);
-    expect(tree.toJSON()).toBeTruthy();
+    for (const size of ['sm', 'md', 'lg'] as const) {
+      const tree = await render(<MetricTile title="Test" value="X" size={size} />);
+      expect(tree.toJSON()).toBeTruthy();
+    }
   });
 
   it('applies accent color via prop', async () => {
     const tree = await render(<MetricTile title="Test" value="X" accent="danger" />);
     expect(tree.toJSON()).toBeTruthy();
+  });
+
+  it('renders every accent color', async () => {
+    for (const accent of ['primary', 'success', 'warning', 'danger', 'info'] as const) {
+      const tree = await render(<MetricTile title="Test" value="X" accent={accent} />);
+      expect(tree.toJSON()).toBeTruthy();
+    }
+  });
+
+  it('calls onPress when the tile is pressed', async () => {
+    const onPress = jest.fn();
+    await render(<MetricTile title="Hashrate" value="500" onPress={onPress} />);
+    await fireEvent.press(screen.getByText('Hashrate'));
+    expect(onPress).toHaveBeenCalled();
   });
 });
 
@@ -148,6 +208,14 @@ describe('ProfitabilityCard', () => {
     expect(tree.getByText(/▲/)).toBeTruthy();
   });
 
+  it('shows downward trend when price decreased', async () => {
+    const hr = jest.requireMock('../src/utils/hashrate');
+    (hr.getBTCPriceHistory as jest.Mock).mockReturnValue([100000, 95000, 90000]);
+    await render(<ProfitabilityCard miners={[]} />);
+    expect(screen.getByText(/▼/)).toBeTruthy();
+    expect(screen.getByText(/10\.0%/)).toBeTruthy();
+  });
+
   it('shows trend percentage', async () => {
     const miners = [] as any[];
     const tree = await render(<ProfitabilityCard miners={miners} />);
@@ -157,5 +225,101 @@ describe('ProfitabilityCard', () => {
   it('shows Total /day for empty miners', async () => {
     const tree = await render(<ProfitabilityCard miners={[]} />);
     expect(tree.getByText('dashboardExtra.total')).toBeTruthy();
+  });
+
+  it('renders per-miner earnings and weekly/monthly totals', async () => {
+    await render(<ProfitabilityCard miners={[minerA, minerB]} />);
+    expect(screen.getByText(/0\.00000060/)).toBeTruthy();
+    expect(screen.getByText(/0\.00000120/)).toBeTruthy();
+    expect(screen.getByText(/0\.00000180/)).toBeTruthy();
+    expect(screen.getByText(/0\.00001260/)).toBeTruthy();
+    expect(screen.getByText(/0\.00005400/)).toBeTruthy();
+    expect(screen.getByText(/~\$0\.06/)).toBeTruthy();
+    expect(screen.getByText(/~\$0\.12/)).toBeTruthy();
+    expect(screen.getAllByText(/~\$0\.18/).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('hides USD amounts when BTC price is zero', async () => {
+    const hr = jest.requireMock('../src/utils/hashrate');
+    (hr.getBTCPrice as jest.Mock).mockReturnValue(0);
+    await render(<ProfitabilityCard miners={[minerA]} />);
+    expect(screen.queryByText(/~\$/)).toBeNull();
+  });
+
+  it('renders BTC price sparkline when history has 4+ points', async () => {
+    const hr = jest.requireMock('../src/utils/hashrate');
+    (hr.getBTCPriceHistory as jest.Mock).mockReturnValue([90000, 92000, 94000, 96000]);
+    const tree = await render(<ProfitabilityCard miners={[]} />);
+    expect(tree.toJSON()).toBeTruthy();
+  });
+
+  it('shows net per day, pool fee, and break-even sections with power cost', async () => {
+    await render(<ProfitabilityCard miners={[minerA]} powerCost={0.2} />);
+    expect(screen.getByText('dashboardExtra.netPerDay')).toBeTruthy();
+    expect(screen.getByText('dashboardExtra.poolFeeNet')).toBeTruthy();
+    expect(screen.getByText('dashboardExtra.breakEvenAnalysis')).toBeTruthy();
+  });
+
+  it('loads saved hardware cost into the break-even input', async () => {
+    const db = jest.requireMock('../src/db/database');
+    (db.getSetting as jest.Mock).mockResolvedValue('1500');
+    await render(<ProfitabilityCard miners={[minerA]} powerCost={0.2} />);
+    await waitFor(() => {
+      expect(screen.getByLabelText('dashboardExtra.hardwareInvestment')).toBeTruthy();
+    });
+    const input = screen.getByLabelText('dashboardExtra.hardwareInvestment');
+    expect(input.props.value).toBe('1500');
+  });
+
+  it('saves hardware cost on blur', async () => {
+    const db = jest.requireMock('../src/db/database');
+    await render(<ProfitabilityCard miners={[minerA]} powerCost={0.2} />);
+    const input = screen.getByLabelText('dashboardExtra.hardwareInvestment');
+    await fireEvent.changeText(input, '2000');
+    await fireEvent(input, 'blur');
+    expect(db.setSetting).toHaveBeenCalledWith('hardware_cost', '2000');
+  });
+
+  it('clears hardware cost when input is invalid on blur', async () => {
+    const db = jest.requireMock('../src/db/database');
+    await render(<ProfitabilityCard miners={[minerA]} powerCost={0.2} />);
+    const input = screen.getByLabelText('dashboardExtra.hardwareInvestment');
+    await fireEvent.changeText(input, 'abc');
+    await fireEvent(input, 'blur');
+    expect(db.setSetting).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('dashboardExtra.hardwareInvestment').props.value).toBe('');
+  });
+
+  it('shows break-even days when profitable', async () => {
+    const db = jest.requireMock('../src/db/database');
+    (db.getSetting as jest.Mock).mockResolvedValue('10');
+    await render(<ProfitabilityCard miners={[minerA]} powerCost={0.01} />);
+    await waitFor(() => {
+      expect(screen.getByText('dashboardExtra.breakEvenDays')).toBeTruthy();
+    });
+  });
+
+  it('shows no break-even message when unprofitable', async () => {
+    const db = jest.requireMock('../src/db/database');
+    (db.getSetting as jest.Mock).mockResolvedValue('1000');
+    await render(<ProfitabilityCard miners={[]} powerCost={5} />);
+    await waitFor(() => {
+      expect(screen.getByText('dashboardExtra.noBreakEven')).toBeTruthy();
+    });
+  });
+
+  it('renders pool comparison stats when pool stats exist', async () => {
+    const pool = jest.requireMock('../src/store/poolAnalytics');
+    (pool.usePoolAnalyticsStore as jest.Mock).mockImplementation((sel: (s: any) => unknown) =>
+      sel({
+        stats: [{ provider: 'PoolA', btcEarned: 0.5 }],
+        config: [],
+        loading: false,
+        error: null,
+      }),
+    );
+    await render(<ProfitabilityCard miners={[minerA]} />);
+    expect(screen.getByText('dashboardExtra.estVsPool')).toBeTruthy();
+    expect(screen.getByText(/vsEstimated/)).toBeTruthy();
   });
 });

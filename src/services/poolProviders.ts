@@ -20,6 +20,18 @@ export interface PoolProvider {
 
 const TIMEOUT = 10000;
 
+const zeroedStats: PoolStats = {
+  hashrate: 0,
+  hashrateUnit: 'TH/s',
+  workers: 0,
+  activeWorkers: 0,
+  earnings24h: 0,
+  earningsUnit: 'BTC',
+  luck: 0,
+  payoutPending: 0,
+  lastPayout: 0,
+};
+
 function createProvider(
   name: string,
   baseUrl: string,
@@ -27,7 +39,13 @@ function createProvider(
 ): PoolProvider {
   return {
     name,
-    fetchStats: fetchStatsImpl,
+    async fetchStats(apiKey: string): Promise<PoolStats> {
+      try {
+        return await fetchStatsImpl(apiKey);
+      } catch {
+        return { ...zeroedStats };
+      }
+    },
     async testConnection(apiKey: string): Promise<boolean> {
       try {
         await fetchStatsImpl(apiKey);
@@ -53,39 +71,25 @@ const braiinsProvider: PoolProvider = createProvider(
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
-    try {
-      const [statsRes, workersRes] = await Promise.all([
-        client.get('/v2/accounting/btc/stats'),
-        client.get('/v2/workers'),
-      ]);
+    const [statsRes, workersRes] = await Promise.all([
+      client.get('/v2/accounting/btc/stats'),
+      client.get('/v2/workers'),
+    ]);
 
-      const stats = statsRes.data;
-      const workers = workersRes.data;
+    const stats = statsRes.data;
+    const workers = workersRes.data;
 
-      return {
-        hashrate: stats.hashrate ?? 0,
-        hashrateUnit: 'TH/s',
-        workers: workers.total ?? 0,
-        activeWorkers: workers.active ?? 0,
-        earnings24h: stats.earnings_24h ?? 0,
-        earningsUnit: 'BTC',
-        luck: stats.luck ?? 100,
-        payoutPending: stats.pending_payout ?? 0,
-        lastPayout: stats.last_payout ?? 0,
-      };
-    } catch {
-      return {
-        hashrate: 0,
-        hashrateUnit: 'TH/s',
-        workers: 0,
-        activeWorkers: 0,
-        earnings24h: 0,
-        earningsUnit: 'BTC',
-        luck: 0,
-        payoutPending: 0,
-        lastPayout: 0,
-      };
-    }
+    return {
+      hashrate: stats.hashrate ?? 0,
+      hashrateUnit: 'TH/s',
+      workers: workers.total ?? 0,
+      activeWorkers: workers.active ?? 0,
+      earnings24h: stats.earnings_24h ?? 0,
+      earningsUnit: 'BTC',
+      luck: stats.luck ?? 100,
+      payoutPending: stats.pending_payout ?? 0,
+      lastPayout: stats.last_payout ?? 0,
+    };
   },
 );
 
@@ -103,39 +107,25 @@ const luxorProvider: PoolProvider = createProvider(
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
-    try {
-      const [workersRes, statsRes] = await Promise.all([
-        client.post('/v2/pools/btc/workers/summary', {}),
-        client.post('/v2/pools/btc/stats', {}),
-      ]);
+    const [workersRes, statsRes] = await Promise.all([
+      client.post('/v2/pools/btc/workers/summary', {}),
+      client.post('/v2/pools/btc/stats', {}),
+    ]);
 
-      const workers = workersRes.data;
-      const stats = statsRes.data;
+    const workers = workersRes.data;
+    const stats = statsRes.data;
 
-      return {
-        hashrate: stats.hashrate ?? 0,
-        hashrateUnit: 'TH/s',
-        workers: workers.total_workers ?? 0,
-        activeWorkers: workers.active_workers ?? 0,
-        earnings24h: stats.revenue_24h ?? 0,
-        earningsUnit: 'BTC',
-        luck: stats.luck ?? 100,
-        payoutPending: stats.pending_payout ?? 0,
-        lastPayout: stats.last_payout ?? 0,
-      };
-    } catch {
-      return {
-        hashrate: 0,
-        hashrateUnit: 'TH/s',
-        workers: 0,
-        activeWorkers: 0,
-        earnings24h: 0,
-        earningsUnit: 'BTC',
-        luck: 0,
-        payoutPending: 0,
-        lastPayout: 0,
-      };
-    }
+    return {
+      hashrate: stats.hashrate ?? 0,
+      hashrateUnit: 'TH/s',
+      workers: workers.total_workers ?? 0,
+      activeWorkers: workers.active_workers ?? 0,
+      earnings24h: stats.revenue_24h ?? 0,
+      earningsUnit: 'BTC',
+      luck: stats.luck ?? 100,
+      payoutPending: stats.pending_payout ?? 0,
+      lastPayout: stats.last_payout ?? 0,
+    };
   },
 );
 
@@ -153,39 +143,25 @@ const viabtcProvider: PoolProvider = createProvider(
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 
-    try {
-      const [statsRes, workersRes] = await Promise.all([
-        client.get(`/v1/account/stats?api_key=${apiKey}`),
-        client.get(`/v1/account/workers?api_key=${apiKey}&coin=BTC`),
-      ]);
+    const [statsRes, workersRes] = await Promise.all([
+      client.get(`/v1/account/stats?api_key=${apiKey}`),
+      client.get(`/v1/account/workers?api_key=${apiKey}&coin=BTC`),
+    ]);
 
-      const stats = statsRes.data?.data ?? statsRes.data;
-      const workers = workersRes.data?.data ?? workersRes.data;
+    const stats = statsRes.data?.data ?? statsRes.data;
+    const workers = workersRes.data?.data ?? workersRes.data;
 
-      return {
-        hashrate: stats.hashrate ?? 0,
-        hashrateUnit: 'TH/s',
-        workers: workers.total ?? 0,
-        activeWorkers: workers.active ?? 0,
-        earnings24h: stats.income_24h ?? 0,
-        earningsUnit: 'BTC',
-        luck: stats.luck ?? 100,
-        payoutPending: stats.unpaid ?? 0,
-        lastPayout: stats.last_payout ?? 0,
-      };
-    } catch {
-      return {
-        hashrate: 0,
-        hashrateUnit: 'TH/s',
-        workers: 0,
-        activeWorkers: 0,
-        earnings24h: 0,
-        earningsUnit: 'BTC',
-        luck: 0,
-        payoutPending: 0,
-        lastPayout: 0,
-      };
-    }
+    return {
+      hashrate: stats.hashrate ?? 0,
+      hashrateUnit: 'TH/s',
+      workers: workers.total ?? 0,
+      activeWorkers: workers.active ?? 0,
+      earnings24h: stats.income_24h ?? 0,
+      earningsUnit: 'BTC',
+      luck: stats.luck ?? 100,
+      payoutPending: stats.unpaid ?? 0,
+      lastPayout: stats.last_payout ?? 0,
+    };
   },
 );
 
@@ -203,39 +179,25 @@ const f2poolProvider: PoolProvider = createProvider(
       headers: { 'X-F2Pool-Token': apiKey },
     });
 
-    try {
-      const [accountRes, workersRes] = await Promise.all([
-        client.get(`/v2/btc/account?token=${apiKey}`),
-        client.get(`/v2/btc/workers?token=${apiKey}`),
-      ]);
+    const [accountRes, workersRes] = await Promise.all([
+      client.get(`/v2/btc/account?token=${apiKey}`),
+      client.get(`/v2/btc/workers?token=${apiKey}`),
+    ]);
 
-      const account = accountRes.data;
-      const workers = workersRes.data;
+    const account = accountRes.data;
+    const workers = workersRes.data;
 
-      return {
-        hashrate: account.hash_rate ?? 0,
-        hashrateUnit: 'TH/s',
-        workers: workers.total ?? 0,
-        activeWorkers: workers.active ?? 0,
-        earnings24h: account.income_24h ?? 0,
-        earningsUnit: 'BTC',
-        luck: account.luck ?? 100,
-        payoutPending: account.unpaid ?? 0,
-        lastPayout: account.last_payment_time ?? 0,
-      };
-    } catch {
-      return {
-        hashrate: 0,
-        hashrateUnit: 'TH/s',
-        workers: 0,
-        activeWorkers: 0,
-        earnings24h: 0,
-        earningsUnit: 'BTC',
-        luck: 0,
-        payoutPending: 0,
-        lastPayout: 0,
-      };
-    }
+    return {
+      hashrate: account.hash_rate ?? 0,
+      hashrateUnit: 'TH/s',
+      workers: workers.total ?? 0,
+      activeWorkers: workers.active ?? 0,
+      earnings24h: account.income_24h ?? 0,
+      earningsUnit: 'BTC',
+      luck: account.luck ?? 100,
+      payoutPending: account.unpaid ?? 0,
+      lastPayout: account.last_payment_time ?? 0,
+    };
   },
 );
 
@@ -253,39 +215,25 @@ const poolinProvider: PoolProvider = createProvider(
       headers: { Authorization: `Token ${apiKey}` },
     });
 
-    try {
-      const [statsRes, workersRes] = await Promise.all([
-        client.get(`/api/v1/accounts/stats?token=${apiKey}`),
-        client.get(`/api/v1/accounts/workers?token=${apiKey}`),
-      ]);
+    const [statsRes, workersRes] = await Promise.all([
+      client.get(`/api/v1/accounts/stats?token=${apiKey}`),
+      client.get(`/api/v1/accounts/workers?token=${apiKey}`),
+    ]);
 
-      const stats = statsRes.data?.results ?? statsRes.data;
-      const workers = workersRes.data?.results ?? workersRes.data;
+    const stats = statsRes.data?.results ?? statsRes.data;
+    const workers = workersRes.data?.results ?? workersRes.data;
 
-      return {
-        hashrate: stats.hashrate ?? 0,
-        hashrateUnit: 'TH/s',
-        workers: workers.total ?? 0,
-        activeWorkers: workers.active ?? 0,
-        earnings24h: stats.income_24h ?? 0,
-        earningsUnit: 'BTC',
-        luck: stats.luck ?? 100,
-        payoutPending: stats.unpaid ?? 0,
-        lastPayout: stats.last_payout ?? 0,
-      };
-    } catch {
-      return {
-        hashrate: 0,
-        hashrateUnit: 'TH/s',
-        workers: 0,
-        activeWorkers: 0,
-        earnings24h: 0,
-        earningsUnit: 'BTC',
-        luck: 0,
-        payoutPending: 0,
-        lastPayout: 0,
-      };
-    }
+    return {
+      hashrate: stats.hashrate ?? 0,
+      hashrateUnit: 'TH/s',
+      workers: workers.total ?? 0,
+      activeWorkers: workers.active ?? 0,
+      earnings24h: stats.income_24h ?? 0,
+      earningsUnit: 'BTC',
+      luck: stats.luck ?? 100,
+      payoutPending: stats.unpaid ?? 0,
+      lastPayout: stats.last_payout ?? 0,
+    };
   },
 );
 

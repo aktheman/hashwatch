@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { FirmwareBanner } from '../src/components/FirmwareBanner';
-import { Linking } from 'react-native';
+import { Linking, Alert } from 'react-native';
 
 const mockOpenURL = jest.fn().mockResolvedValue(undefined);
 jest.spyOn(Linking, 'openURL').mockImplementation(mockOpenURL);
@@ -44,6 +44,24 @@ const defaultProps = {
   apiPath: '/api/system/info',
   statusPath: '/api/system/status',
 };
+
+let alertSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  (jest.requireMock('../src/utils/version').fetchLatestFirmware as jest.Mock).mockResolvedValue(
+    'v2.2.1',
+  );
+  const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+  (BitAxeClient as jest.Mock).mockImplementation(() => ({
+    flashFirmware: jest.fn().mockResolvedValue(true),
+  }));
+  alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  alertSpy.mockRestore();
+});
 
 describe('FirmwareBanner', () => {
   it('renders nothing when no version', async () => {
@@ -93,5 +111,117 @@ describe('FirmwareBanner', () => {
     await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
     fireEvent.press(screen.getByText(/viewReleaseNotes/));
     expect(mockOpenURL).toHaveBeenCalled();
+  });
+
+  it('flashes firmware and shows success alert on update press', async () => {
+    const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+    const flashMock = jest.fn().mockResolvedValue(true);
+    (BitAxeClient as jest.Mock).mockImplementation(() => ({ flashFirmware: flashMock }));
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await fireEvent.press(screen.getByText('firmwareBanner.updateTo'));
+    await waitFor(() => {
+      expect(flashMock).toHaveBeenCalledWith(
+        'https://github.com/skot/bitaxe/releases/download/v2.2.1/bitaxe-v2.2.1.bin',
+      );
+      expect(alertSpy).toHaveBeenCalledWith(
+        'firmwareBanner.flashSent',
+        'firmwareBanner.flashSentBody',
+      );
+    });
+  });
+
+  it('shows failure alert when flash fails', async () => {
+    const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+    (BitAxeClient as jest.Mock).mockImplementation(() => ({
+      flashFirmware: jest.fn().mockResolvedValue(false),
+    }));
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await fireEvent.press(screen.getByText('firmwareBanner.updateTo'));
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'firmwareBanner.flashFailed',
+        'firmwareBanner.flashFailedBody',
+      );
+    });
+  });
+
+  it('shows failure alert when flash throws', async () => {
+    const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+    (BitAxeClient as jest.Mock).mockImplementation(() => ({
+      flashFirmware: jest.fn().mockRejectedValue(new Error('boom')),
+    }));
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await fireEvent.press(screen.getByText('firmwareBanner.updateTo'));
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'firmwareBanner.flashFailed',
+        'firmwareBanner.flashFailedBody',
+      );
+    });
+  });
+
+  it('shows flashing indicator while flashing and disables the button', async () => {
+    const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+    let resolveFlash!: (v: boolean) => void;
+    (BitAxeClient as jest.Mock).mockImplementation(() => ({
+      flashFirmware: jest.fn().mockImplementation(
+        () =>
+          new Promise<boolean>((res) => {
+            resolveFlash = res;
+          }),
+      ),
+    }));
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    const pressPromise = fireEvent.press(screen.getByText('firmwareBanner.updateTo'));
+    await waitFor(() => {
+      expect(screen.getByText('firmwareBanner.flashingHint')).toBeTruthy();
+    });
+    resolveFlash(true);
+    await pressPromise;
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'firmwareBanner.flashSent',
+        'firmwareBanner.flashSentBody',
+      );
+    });
+  });
+
+  it('shows success checkmark after successful flash', async () => {
+    const { BitAxeClient } = jest.requireMock('../src/api/bitaxe');
+    (BitAxeClient as jest.Mock).mockImplementation(() => ({
+      flashFirmware: jest.fn().mockResolvedValue(true),
+    }));
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await fireEvent.press(screen.getByText('firmwareBanner.updateTo'));
+    await waitFor(() => {
+      expect(screen.getByText(/✓/)).toBeTruthy();
+    });
+  });
+
+  it('shows check for updates button and refetches when pressed', async () => {
+    const { fetchLatestFirmware } = jest.requireMock('../src/utils/version');
+    (fetchLatestFirmware as jest.Mock).mockResolvedValue(null);
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await waitFor(() => {
+      expect(screen.getByText('firmwareBanner.checkForUpdates')).toBeTruthy();
+    });
+    await fireEvent.press(screen.getByText('firmwareBanner.checkForUpdates'));
+    expect(fetchLatestFirmware).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows cached version hint when latest firmware is unavailable', async () => {
+    const { fetchLatestFirmware } = jest.requireMock('../src/utils/version');
+    (fetchLatestFirmware as jest.Mock).mockResolvedValue(null);
+    await render(<FirmwareBanner rawVersion="v2.0.0" {...defaultProps} />);
+    await waitFor(() => {
+      expect(screen.getByText('firmwareBanner.checkForUpdates')).toBeTruthy();
+    });
+    expect(screen.getAllByText(/firmwareBanner\.cached/).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('does not show flash button when no update is needed', async () => {
+    await render(<FirmwareBanner rawVersion="v2.2.1" {...defaultProps} />);
+    expect(screen.queryByText('firmwareBanner.updateTo')).toBeNull();
+    expect(screen.queryByText('firmwareBanner.viewReleaseNotes')).toBeNull();
   });
 });
