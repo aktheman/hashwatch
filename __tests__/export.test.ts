@@ -14,6 +14,7 @@ const mockSaveSnapshot = jest.fn();
 const mockSaveWallet = jest.fn();
 const mockGetSetting = jest.fn();
 const mockSetSetting = jest.fn();
+const mockAddMiner = jest.fn();
 
 jest.mock('../src/db/database', () => ({
   loadMiners: () => mockLoadMiners(),
@@ -29,7 +30,7 @@ jest.mock('../src/db/database', () => ({
 jest.mock('../src/store/miners', () => ({
   useMinerStore: {
     getState: () => ({
-      addMiner: jest.fn(),
+      addMiner: mockAddMiner,
     }),
   },
 }));
@@ -181,6 +182,82 @@ describe('exportAllData', () => {
 
     await expect(exportAllData()).resolves.toBeUndefined();
     expect((globalThis as any).URL.createObjectURL).toHaveBeenCalled();
+  });
+});
+
+describe('exportSnapshotsWithRange', () => {
+  let exportSnapshotsWithRange: typeof import('../src/utils/export').exportSnapshotsWithRange;
+
+  beforeAll(async () => {
+    exportSnapshotsWithRange = (await import('../src/utils/export')).exportSnapshotsWithRange;
+  });
+
+  it('filters snapshots to the requested range', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    const inRange: MinerSnapshot = { ...sampleSnapshot, timestamp: 5000 };
+    const outOfRange: MinerSnapshot = { ...sampleSnapshot, timestamp: 5_000_000 };
+    mockGetSnapshots.mockResolvedValue([inRange, outOfRange]);
+
+    await exportSnapshotsWithRange(1000, 10000);
+
+    const blob = (globalThis as any).URL.createObjectURL.mock.calls[0][0];
+    const text = await blob.text();
+    expect(text).toContain('00:00:05.000Z');
+    expect(text).not.toContain('01:23:20.000Z');
+  });
+
+  it('names the file with the date range', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSnapshots.mockResolvedValue([]);
+
+    const startMs = 1_705_593_600_000;
+    const endMs = 1_705_680_000_000;
+    await exportSnapshotsWithRange(startMs, endMs);
+
+    const anchor = (globalThis as any).window.document.createElement.mock.results[0].value;
+    const start = new Date(startMs).toISOString().slice(0, 10);
+    const end = new Date(endMs).toISOString().slice(0, 10);
+    expect(anchor.download).toBe(`hashwatch_export_${start}_to_${end}.csv`);
+  });
+
+  it('uses Share.share on non-web platform', async () => {
+    mockPlatform = 'android';
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSnapshots.mockResolvedValue([]);
+    const mockShare = require('react-native').Share.share;
+
+    await exportSnapshotsWithRange(0, 1);
+
+    expect(mockShare).toHaveBeenCalled();
+    expect(mockShare.mock.calls[0][0].title).toContain('hashwatch_export');
+  });
+});
+
+describe('exportMinerCSV', () => {
+  let exportMinerCSV: typeof import('../src/utils/export').exportMinerCSV;
+
+  beforeAll(async () => {
+    exportMinerCSV = (await import('../src/utils/export')).exportMinerCSV;
+  });
+
+  it('exports a single miner with a sanitized filename', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+    mockGetSnapshots.mockResolvedValue([sampleSnapshot]);
+
+    await exportMinerCSV('m1');
+
+    const anchor = (globalThis as any).window.document.createElement.mock.results[0].value;
+    expect(anchor.download).toContain('hashwatch_TestMiner');
+    const blob = (globalThis as any).URL.createObjectURL.mock.calls[0][0];
+    const text = await blob.text();
+    expect(text).toContain('TestMiner');
+  });
+
+  it('does nothing when the miner is not found', async () => {
+    mockLoadMiners.mockResolvedValue([sampleMiner]);
+
+    await expect(exportMinerCSV('missing')).resolves.toBeUndefined();
+    expect((globalThis as any).URL.createObjectURL).not.toHaveBeenCalled();
   });
 });
 
@@ -336,6 +413,40 @@ describe('importFromJSON', () => {
   });
 });
 
+describe('previewCSV', () => {
+  let previewCSV: typeof import('../src/utils/export').previewCSV;
+
+  beforeAll(async () => {
+    previewCSV = (await import('../src/utils/export')).previewCSV;
+  });
+
+  it('returns empty result and error for empty input', () => {
+    const result = previewCSV('');
+    expect(result.valid).toEqual([]);
+    expect(result.errors[0]).toContain('header');
+  });
+
+  it('returns error when name column is missing', () => {
+    const result = previewCSV('ip,port\n192.168.1.1,80');
+    expect(result.errors[0]).toContain('name');
+  });
+
+  it('parses valid rows with a default port when omitted', () => {
+    const result = previewCSV('name,ip\nMiner1,192.168.1.1\nMiner2,192.168.1.2');
+    expect(result.errors).toEqual([]);
+    expect(result.valid).toEqual([
+      { name: 'Miner1', ip: '192.168.1.1', port: 80 },
+      { name: 'Miner2', ip: '192.168.1.2', port: 80 },
+    ]);
+  });
+
+  it('reports rows missing name or IP', () => {
+    const result = previewCSV('name,ip,port\n,192.168.1.1,80\nMiner2,,80');
+    expect(result.valid).toHaveLength(0);
+    expect(result.errors.length).toBe(2);
+  });
+});
+
 describe('importFromCSV', () => {
   let importFromCSV: typeof import('../src/utils/export').importFromCSV;
 
@@ -377,5 +488,13 @@ describe('importFromCSV', () => {
 
   it('uses default port 80 when port column is missing', async () => {
     await importFromCSV('name,ip\nMiner1,192.168.1.1');
+  });
+
+  it('reports the error message when addMiner throws', async () => {
+    mockAddMiner.mockRejectedValueOnce(new Error('pro limit reached'));
+    const result = await importFromCSV('name,ip\nMiner1,192.168.1.1');
+    expect(result.imported).toBe(0);
+    expect(result.errors[0]).toContain('pro limit reached');
+    expect(mockAddMiner).toHaveBeenCalledWith('192.168.1.1', 80, 'Miner1');
   });
 });

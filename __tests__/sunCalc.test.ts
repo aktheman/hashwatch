@@ -98,3 +98,49 @@ describe('getNextSunEvent', () => {
     expect(['sunrise', 'sunset']).toContain(event.type);
   });
 });
+
+describe('getNextSunEvent branch coverage', () => {
+  const nycLat = 40.7128;
+  const nycLng = -74.006;
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  function freezeAt(ms: number) {
+    jest.useFakeTimers();
+    jest.setSystemTime(ms);
+  }
+
+  it('returns sunrise when now is before sunrise', () => {
+    const day = new Date(Date.UTC(2026, 5, 21));
+    const { sunrise } = getSunTimes(nycLat, nycLng, day);
+    freezeAt(sunrise.getTime() - 3600_000);
+    const event = getNextSunEvent(nycLat, nycLng);
+    expect(event.type).toBe('sunrise');
+  });
+
+  it('returns sunset when now is between sunrise and sunset', () => {
+    const day = new Date(Date.UTC(2026, 5, 21));
+    const { sunrise, sunset } = getSunTimes(nycLat, nycLng, day);
+    freezeAt(sunrise.getTime() + (sunset.getTime() - sunrise.getTime()) / 2);
+    const event = getNextSunEvent(nycLat, nycLng);
+    expect(event.type).toBe('sunset');
+  });
+
+  it('returns next-day sunrise when now is after sunset', () => {
+    const day = new Date(Date.UTC(2026, 5, 21));
+    const { sunset } = getSunTimes(nycLat, nycLng, day);
+    freezeAt(sunset.getTime() + 3600_000);
+    const event = getNextSunEvent(nycLat, nycLng);
+    expect(event.type).toBe('sunrise');
+  });
+
+  it('getSunTimes works without an explicit date', () => {
+    freezeAt(Date.UTC(2026, 5, 21, 12));
+    const { sunrise, sunset } = getSunTimes(nycLat, nycLng);
+    expect(sunrise).toBeInstanceOf(Date);
+    expect(sunset).toBeInstanceOf(Date);
+    expect(sunrise.getTime()).toBeLessThan(sunset.getTime());
+  });
+});

@@ -1,9 +1,11 @@
+let mockPlatform = 'web';
+
 jest.mock('react-native', () => ({
   Platform: {
     get OS() {
-      return 'web';
+      return mockPlatform;
     },
-    select: (obj: Record<string, unknown>) => obj.web || obj.default,
+    select: (obj: Record<string, unknown>) => obj[mockPlatform] || obj.default,
   },
   Share: { share: jest.fn() },
 }));
@@ -212,6 +214,18 @@ describe('reportCSV', () => {
     const lines = csv.split('\n');
     expect(lines[1]).toContain('98.0');
   });
+
+  it('formats sub-hour uptime as minutes', () => {
+    const shortUptime = { ...sampleMiner, status: { ...sampleMiner.status!, uptimeSeconds: 1800 } };
+    const csv = reportCSV([shortUptime], [], baseOptions);
+    expect(csv).toContain('30m');
+  });
+
+  it('formats zero uptime as 0h', () => {
+    const zeroUptime = { ...sampleMiner, status: { ...sampleMiner.status!, uptimeSeconds: 0 } };
+    const csv = reportCSV([zeroUptime], [], baseOptions);
+    expect(csv).toContain('0h');
+  });
 });
 
 describe('reportJSON', () => {
@@ -298,8 +312,6 @@ describe('reportJSON', () => {
 });
 
 describe('downloadReport', () => {
-  let mockPlatform = 'web';
-
   beforeEach(() => {
     jest.clearAllMocks();
     const click = jest.fn();
@@ -329,5 +341,20 @@ describe('downloadReport', () => {
   it('triggers download on web with object content', () => {
     downloadReport({ key: 'value' }, 'test.json', 'application/json');
     expect((globalThis as any).URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('uses Share.share on non-web platforms', () => {
+    mockPlatform = 'android';
+    const mockShare = require('react-native').Share.share;
+    downloadReport('hello', 'report.txt', 'text/plain');
+    expect(mockShare).toHaveBeenCalledWith({ message: 'hello', title: 'report.txt' });
+  });
+
+  it('serializes object content for Share.share', () => {
+    mockPlatform = 'ios';
+    const mockShare = require('react-native').Share.share;
+    downloadReport({ a: 1 }, 'r.json', 'application/json');
+    expect(mockShare).toHaveBeenCalled();
+    expect(mockShare.mock.calls[0][0].message).toContain('"a": 1');
   });
 });

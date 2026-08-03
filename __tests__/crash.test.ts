@@ -10,6 +10,7 @@ import {
 } from '../src/utils/crash';
 
 beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
   clearCrashReports();
   initCrashReporting({ enabled: true });
 });
@@ -77,6 +78,68 @@ describe('crash utils', () => {
   test('limits to 50 reports', () => {
     for (let i = 0; i < 60; i++) {
       captureError(new Error(`err${i}`));
+    }
+    expect(getCrashReports()).toHaveLength(50);
+  });
+});
+
+describe('crash utils with localStorage', () => {
+  function createLocalStorage() {
+    const store = new Map<string, string>();
+    return {
+      getItem: jest.fn((k: string) => store.get(k) ?? null),
+      setItem: jest.fn((k: string, v: string) => {
+        store.set(k, v);
+      }),
+      removeItem: jest.fn((k: string) => {
+        store.delete(k);
+      }),
+      _store: store,
+    };
+  }
+
+  let storage: ReturnType<typeof createLocalStorage>;
+
+  beforeEach(() => {
+    storage = createLocalStorage();
+    (globalThis as any).localStorage = storage;
+  });
+
+  afterEach(() => {
+    delete (globalThis as any).localStorage;
+  });
+
+  test('captureError persists to localStorage', () => {
+    captureError(new Error('persisted'));
+    expect(storage.setItem).toHaveBeenCalled();
+    const [key, value] = storage.setItem.mock.calls[0];
+    expect(key).toBe('crash_reports');
+    const parsed = JSON.parse(value);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].message).toBe('persisted');
+  });
+
+  test('getCrashReports reads persisted JSON from localStorage', () => {
+    storage._store.set('crash_reports', JSON.stringify([{ id: 'old', message: 'old error' }]));
+    const reports = getCrashReports();
+    expect(reports).toHaveLength(1);
+    expect(reports[0].message).toBe('old error');
+  });
+
+  test('getCrashReports returns empty array when nothing stored', () => {
+    expect(getCrashReports()).toEqual([]);
+  });
+
+  test('clearCrashReports removes the key from localStorage', () => {
+    storage._store.set('crash_reports', '[]');
+    clearCrashReports();
+    expect(storage.removeItem).toHaveBeenCalledWith('crash_reports');
+    expect(getCrashReports()).toEqual([]);
+  });
+
+  test('caps reports at 50 via localStorage', () => {
+    for (let i = 0; i < 60; i++) {
+      captureError(new Error(`ls${i}`));
     }
     expect(getCrashReports()).toHaveLength(50);
   });
