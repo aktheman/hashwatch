@@ -1,28 +1,40 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import React from 'react';
 import { Alert } from 'react-native';
 import { TeamsScreen } from '../src/screens/TeamsScreen';
+
+let mockToken: string | null = 't1';
+const mockLogout = jest.fn();
+
+jest.mock('../src/store/auth', () => ({
+  useAuthStore: Object.assign(
+    (selector?: (state: any) => any) => {
+      const state = { token: mockToken, logout: mockLogout };
+      return selector ? selector(state) : state;
+    },
+    { getState: () => ({ token: mockToken, logout: mockLogout }) },
+  ),
+}));
+
+jest.mock('../src/api/client', () => ({
+  getBaseUrl: () => 'http://localhost:4000',
+}));
 
 jest.mock('../src/theme', () => ({
   useTheme: () => ({
     bg: '#0a0a0f',
     surface: '#12121a',
+    surfaceLight: '#1a1a24',
+    border: '#2a2940',
     text: '#e2e0ff',
     textDim: '#9694b0',
+    textMuted: '#6b6990',
     primary: '#6c63ff',
-    primaryDark: '#5a52d5',
     success: '#22c55e',
     danger: '#ef4444',
     warning: '#f59e0b',
-    border: '#2a2940',
-    surfaceLight: '#1a1a24',
-    textMuted: '#6b6990',
-  }),
-}));
-
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, fallback?: any) => (typeof fallback === 'string' ? fallback : key),
+    accent: '#3b82f6',
+    info: '#06b6d4',
   }),
 }));
 
@@ -36,134 +48,277 @@ jest.mock('../src/utils/haptics', () => ({
   selection: jest.fn(),
 }));
 
-jest.mock('../src/store/auth', () => {
-  const useAuthStore = Object.assign(
-    (selector?: (s: any) => any) => {
-      const state = { token: 'mock-token' };
-      return selector ? selector(state) : state;
-    },
-    {
-      getState: () => ({ token: 'mock-token' }),
-    },
-  );
-  return { useAuthStore };
-});
-
-jest.mock('../src/api/client', () => ({
-  getBaseUrl: jest.fn().mockReturnValue('http://localhost:4000'),
-}));
-
 let mockTeams: any[] = [];
 let mockInvitations: any[] = [];
 const mockFetch = jest.fn();
+global.fetch = mockFetch as unknown as typeof fetch;
+
+const team = {
+  id: 't1',
+  name: 'Alpha',
+  ownerId: 'u1',
+  memberCount: 4,
+  role: 'owner',
+  createdAt: 1000,
+};
+
+const inv = {
+  id: 'i1',
+  teamId: 'invited-team',
+  email: 'x@y.com',
+  role: 'viewer',
+  invitedBy: 'u9',
+  createdAt: 1000,
+  status: 'pending',
+};
+
+function okJson(data: unknown) {
+  return { ok: true, status: 200, json: async () => data };
+}
+
+function mockAlertButton(buttonText: string) {
+  return jest
+    .spyOn(Alert, 'alert')
+    .mockImplementation(
+      (
+        _title?: string,
+        _msg?: string,
+        buttons?: Array<{ text?: string; onPress?: () => void }>,
+      ) => {
+        const btn = buttons?.find((b) => b.text === buttonText);
+        if (btn?.onPress) btn.onPress();
+      },
+    );
+}
+
+function hapticMocks() {
+  return jest.requireMock('../src/utils/haptics') as Record<string, jest.Mock>;
+}
+
+const navProps = { navigation: { navigate: jest.fn(), goBack: jest.fn() } as any };
 
 beforeEach(() => {
+  cleanup();
   jest.clearAllMocks();
+  mockToken = 't1';
   mockTeams = [];
   mockInvitations = [];
+  mockFetch.mockReset();
   mockFetch.mockImplementation(async (url: string) => {
     if (
-      url.includes('/teams') &&
+      url.includes('/api/teams') &&
       !url.includes('/accept') &&
       !url.includes('/leave') &&
       !url.includes('/invite')
     ) {
-      return { ok: true, json: async () => ({ teams: mockTeams, invitations: mockInvitations }) };
+      return okJson({ teams: mockTeams, invitations: mockInvitations });
     }
-    return { ok: true, json: async () => ({}) };
+    return okJson({});
   });
-  global.fetch = mockFetch;
 });
 
+afterEach(() => jest.restoreAllMocks());
+
 it('renders the screen title', async () => {
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
-  const titles = screen.getAllByText('teams.title');
-  expect(titles.length).toBeGreaterThanOrEqual(1);
+  await render(<TeamsScreen {...navProps} />);
+  expect(screen.getAllByText('teams.title').length).toBeGreaterThanOrEqual(1);
 });
 
 it('shows empty state when no teams', async () => {
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
+  await render(<TeamsScreen {...navProps} />);
   await waitFor(() => {
     expect(screen.getByText('teams.noTeams')).toBeTruthy();
   });
 });
 
-it('shows create team button', async () => {
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
-  expect(screen.getByText(/teams.createTeam/)).toBeTruthy();
-});
-
-it('opens create team modal', async () => {
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
-  await act(async () => {
-    fireEvent.press(screen.getByText(/teams.createTeam/));
-  });
+it('displays existing teams with member count', async () => {
+  mockTeams = [team];
+  await render(<TeamsScreen {...navProps} />);
   await waitFor(() => {
-    expect(screen.getAllByText('teams.createTeam').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    expect(screen.getByText('teams.memberCount')).toBeTruthy();
+    expect(screen.getByText('teams.owner')).toBeTruthy();
   });
 });
 
-it('displays existing teams', async () => {
-  mockTeams = [
-    {
-      id: 't1',
-      name: 'Mining Team',
-      ownerId: 'u1',
-      memberCount: 3,
-      role: 'owner',
-      createdAt: Date.now(),
-    },
-  ];
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
+it('shows invitations with accept and decline', async () => {
+  mockInvitations = [inv];
+  await render(<TeamsScreen {...navProps} />);
   await waitFor(() => {
-    expect(screen.getByText('Mining Team')).toBeTruthy();
+    expect(screen.getByText('invited-team')).toBeTruthy();
+    expect(screen.getByLabelText('teams.accept')).toBeTruthy();
+    expect(screen.getByLabelText('teams.decline')).toBeTruthy();
   });
 });
 
-it('shows invitations section', async () => {
-  mockInvitations = [
-    {
-      id: 'inv1',
-      teamId: 't2',
-      email: 'me@test.com',
-      role: 'viewer',
-      invitedBy: 'admin',
-      createdAt: Date.now(),
-      status: 'pending',
-    },
-  ];
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
+it('accepts an invitation', async () => {
+  mockInvitations = [inv];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByLabelText('teams.accept')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.accept'));
   await waitFor(() => {
-    expect(screen.getByText('teams.invitations')).toBeTruthy();
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams/invited-team/accept',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+  expect(hapticMocks().success).toHaveBeenCalled();
+});
+
+it('declining an invitation only triggers haptic', async () => {
+  mockInvitations = [inv];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByLabelText('teams.decline')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.decline'));
+  expect(hapticMocks().light).toHaveBeenCalled();
+});
+
+it('creates a new team', async () => {
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('teams.noTeams')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.createTeam'));
+  await waitFor(() => expect(screen.getByLabelText('teams.teamName')).toBeTruthy());
+  await fireEvent.changeText(screen.getByLabelText('teams.teamName'), 'New Squad');
+  const buttons = screen.getAllByLabelText('teams.createTeam');
+  await fireEvent.press(buttons[buttons.length - 1]);
+  await waitFor(() => {
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: 'New Squad' }),
+      }),
+    );
+  });
+  expect(hapticMocks().success).toHaveBeenCalled();
+});
+
+it('does not create a team with an empty name', async () => {
+  await render(<TeamsScreen {...navProps} />);
+  await fireEvent.press(screen.getByLabelText('teams.createTeam'));
+  await waitFor(() => expect(screen.getByLabelText('teams.teamName')).toBeTruthy());
+  const buttons = screen.getAllByLabelText('teams.createTeam');
+  await fireEvent.press(buttons[buttons.length - 1]);
+  expect(mockFetch).not.toHaveBeenCalledWith(
+    'http://localhost:4000/api/teams',
+    expect.objectContaining({ method: 'POST' }),
+  );
+});
+
+it('shows error alert when team creation fails', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
+    if (init?.method === 'POST') throw new Error('boom');
+    return okJson({ teams: mockTeams, invitations: mockInvitations });
+  });
+  await render(<TeamsScreen {...navProps} />);
+  await fireEvent.press(screen.getByLabelText('teams.createTeam'));
+  await waitFor(() => expect(screen.getByLabelText('teams.teamName')).toBeTruthy());
+  await fireEvent.changeText(screen.getByLabelText('teams.teamName'), 'Fails');
+  const buttons = screen.getAllByLabelText('teams.createTeam');
+  await fireEvent.press(buttons[buttons.length - 1]);
+  await waitFor(() => {
+    expect(alertSpy).toHaveBeenCalledWith('common.error', 'boom');
+  });
+  alertSpy.mockRestore();
+});
+
+it('opens team detail on card tap', async () => {
+  mockTeams = [team];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => {
+    expect(screen.getByText('teams.miners')).toBeTruthy();
+    expect(screen.getByText('teams.members')).toBeTruthy();
   });
 });
 
-it('cancels create team modal', async () => {
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
-  await act(async () => {
-    fireEvent.press(screen.getByText(/teams.createTeam/));
-  });
+it('navigates back from team detail', async () => {
+  mockTeams = [team];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('common.goBack')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('common.goBack'));
   await waitFor(() => {
-    expect(screen.getByLabelText('common.cancel')).toBeTruthy();
-  });
-  await act(async () => {
-    fireEvent.press(screen.getByLabelText('common.cancel'));
+    expect(screen.getByLabelText('Alpha, 4 members')).toBeTruthy();
   });
 });
 
-it('shows team member count', async () => {
-  mockTeams = [
-    {
-      id: 't1',
-      name: 'Big Team',
-      ownerId: 'u1',
-      memberCount: 5,
-      role: 'admin',
-      createdAt: Date.now(),
-    },
-  ];
-  await render(<TeamsScreen navigation={{ navigate: jest.fn() } as any} />);
+it('shows invite button but hides leave for owner', async () => {
+  mockTeams = [{ ...team, role: 'owner' }];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.inviteMember')).toBeTruthy());
+  expect(screen.queryByLabelText('teams.leave')).toBeNull();
+});
+
+it('shows leave button but hides invite for viewer', async () => {
+  mockTeams = [{ ...team, role: 'viewer' }];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.leave')).toBeTruthy());
+  expect(screen.queryByLabelText('teams.inviteMember')).toBeNull();
+});
+
+it('leaves a team when confirmed', async () => {
+  const alertSpy = mockAlertButton('teams.leave');
+  mockTeams = [{ ...team, role: 'viewer' }];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.leave')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.leave'));
   await waitFor(() => {
-    expect(screen.getByText('Big Team')).toBeTruthy();
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams/t1/leave',
+      expect.objectContaining({ method: 'DELETE' }),
+    );
   });
+  alertSpy.mockRestore();
+});
+
+it('invites a member with the selected role', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  mockTeams = [{ ...team, role: 'admin' }];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.inviteMember')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.inviteMember'));
+  await waitFor(() => expect(screen.getByLabelText('teams.email')).toBeTruthy());
+  await fireEvent.changeText(screen.getByLabelText('teams.email'), 'friend@x.com');
+  await fireEvent.press(screen.getByLabelText('teams.admin'));
+  const submitButtons = screen.getAllByLabelText('teams.inviteMember');
+  await fireEvent.press(submitButtons[submitButtons.length - 1]);
+  await waitFor(() => {
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams/t1/invite',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ email: 'friend@x.com', role: 'admin' }),
+      }),
+    );
+  });
+  expect(alertSpy).toHaveBeenCalledWith('common.success', 'teams.inviteSent');
+  alertSpy.mockRestore();
+});
+
+it('does not invite with an empty email', async () => {
+  mockTeams = [{ ...team, role: 'owner' }];
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.inviteMember')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.inviteMember'));
+  await waitFor(() => expect(screen.getByLabelText('teams.email')).toBeTruthy());
+  const submitButtons = screen.getAllByLabelText('teams.inviteMember');
+  await fireEvent.press(submitButtons[submitButtons.length - 1]);
+  expect(mockFetch).not.toHaveBeenCalledWith(
+    'http://localhost:4000/api/teams/t1/invite',
+    expect.objectContaining({ method: 'POST' }),
+  );
 });
