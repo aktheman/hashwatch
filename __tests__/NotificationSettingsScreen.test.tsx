@@ -43,6 +43,16 @@ jest.mock('../src/services/notifications', () => ({
   sendMinerAlert: jest.fn().mockResolvedValue(undefined),
 }));
 
+const mockProfitState: { enabled: boolean; dropPercent: number } = {
+  enabled: false,
+  dropPercent: 5,
+};
+
+jest.mock('../src/services/profitAlerts', () => ({
+  getProfitAlertSettings: jest.fn().mockResolvedValue(mockProfitState),
+  setProfitAlertSettings: jest.fn().mockResolvedValue(undefined),
+}));
+
 let mockRequestPermission: jest.Mock;
 let mockSendMinerAlert: jest.Mock;
 
@@ -106,6 +116,11 @@ beforeEach(() => {
   mockStoreState.quietHoursEnd = 7;
   mockStoreState.loaded = true;
   mockRequestPermission.mockResolvedValue(true);
+  mockProfitState.enabled = false;
+  mockProfitState.dropPercent = 5;
+  jest
+    .requireMock('../src/services/profitAlerts')
+    .getProfitAlertSettings.mockResolvedValue(mockProfitState);
 });
 
 afterEach(() => {
@@ -279,4 +294,33 @@ it('returns null before settings are loaded', async () => {
   mockStoreState.loaded = false;
   await render(<NotificationSettingsScreen />);
   expect(screen.queryByText('notificationSettings.title')).toBeNull();
+});
+
+it('renders the profitability price alert section', async () => {
+  await render(<NotificationSettingsScreen />);
+  await waitFor(() => {
+    expect(screen.getByText('notificationSettings.profitTitle')).toBeTruthy();
+  });
+  expect(screen.getByText('notificationSettings.profitDesc')).toBeTruthy();
+  expect(screen.getByText('notificationSettings.profitDrop')).toBeTruthy();
+  expect(screen.getAllByText('5%').length).toBeGreaterThan(0);
+  expect(screen.getByLabelText('profitability price alert toggle')).toBeTruthy();
+});
+
+it('enables profitability price alerts and persists the setting', async () => {
+  const mockSetProfit = jest.requireMock('../src/services/profitAlerts').setProfitAlertSettings;
+  await render(<NotificationSettingsScreen />);
+  await fireEvent(screen.getByLabelText('profitability price alert toggle'), 'valueChange', true);
+  await waitFor(() => {
+    expect(mockSetProfit).toHaveBeenCalledWith({ enabled: true, dropPercent: 5 });
+  });
+});
+
+it('selects a price drop threshold and persists it', async () => {
+  const mockSetProfit = jest.requireMock('../src/services/profitAlerts').setProfitAlertSettings;
+  await render(<NotificationSettingsScreen />);
+  await fireEvent.press(screen.getByLabelText('Set price drop threshold to 10%'));
+  await waitFor(() => {
+    expect(mockSetProfit).toHaveBeenCalledWith({ enabled: false, dropPercent: 10 });
+  });
 });

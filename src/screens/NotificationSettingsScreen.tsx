@@ -1,9 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { View, Text, ScrollView, Pressable, Switch, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { useNotificationSettingsStore } from '../store/notificationSettings';
 import { requestNotificationPermission } from '../services/notifications';
+import { getProfitAlertSettings, setProfitAlertSettings } from '../services/profitAlerts';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as haptic from '../utils/haptics';
 
@@ -13,6 +14,8 @@ const THRESHOLD_PRESETS = {
   hashrateDropPercent: { min: 10, max: 90, step: 5, unit: '%' },
   offlineTimeoutMin: { min: 1, max: 30, step: 1, unit: 'min' },
 } as const;
+
+const PROFIT_DROP_PRESETS = [3, 5, 10, 15];
 
 function ThresholdControl({
   label,
@@ -88,9 +91,36 @@ export function NotificationSettingsScreen() {
     setQuietHours,
   } = useNotificationSettingsStore();
 
+  const [profitEnabled, setProfitEnabled] = useState(false);
+  const [profitDrop, setProfitDrop] = useState(5);
+  const [profitLoaded, setProfitLoaded] = useState(false);
+
   useEffect(() => {
     loadSettings();
+    getProfitAlertSettings().then((s) => {
+      setProfitEnabled(s.enabled);
+      setProfitDrop(s.dropPercent);
+      setProfitLoaded(true);
+    });
   }, []);
+
+  const handleProfitToggle = useCallback(
+    (enabled: boolean) => {
+      haptic.selection();
+      setProfitEnabled(enabled);
+      void setProfitAlertSettings({ enabled, dropPercent: profitDrop });
+    },
+    [profitDrop],
+  );
+
+  const handleProfitDropChange = useCallback(
+    (v: number) => {
+      haptic.selection();
+      setProfitDrop(v);
+      void setProfitAlertSettings({ enabled: profitEnabled, dropPercent: v });
+    },
+    [profitEnabled],
+  );
 
   const handleTestNotification = useCallback(async () => {
     haptic.medium();
@@ -111,7 +141,7 @@ export function NotificationSettingsScreen() {
     Alert.alert(t('notificationSettings.testSent'), t('notificationSettings.testSentBody'));
   }, [thresholds, t]);
 
-  if (!loaded) return null;
+  if (!loaded || !profitLoaded) return null;
 
   return (
     <ScrollView
@@ -153,6 +183,66 @@ export function NotificationSettingsScreen() {
           theme={theme}
           onChange={(v) => updateThresholds({ offlineTimeoutMin: v })}
         />
+      </View>
+
+      <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Text style={[styles.sectionTitle, { color: theme.textDim }]}>
+          {t('notificationSettings.profitTitle')}
+        </Text>
+        <Text style={[styles.quietDesc, { color: theme.textMuted }]}>
+          {t('notificationSettings.profitDesc')}
+        </Text>
+        <View style={[styles.channelRow, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.channelLabel, { color: theme.text }]}>
+            {t('notificationSettings.profitToggle')}
+          </Text>
+          <Switch
+            value={profitEnabled}
+            onValueChange={handleProfitToggle}
+            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+            thumbColor={profitEnabled ? theme.primary : theme.textMuted}
+            accessibilityLabel="profitability price alert toggle"
+          />
+        </View>
+        <ThresholdControl
+          label={t('notificationSettings.profitDrop')}
+          value={profitDrop}
+          presets={{
+            min: PROFIT_DROP_PRESETS[0],
+            max: PROFIT_DROP_PRESETS[PROFIT_DROP_PRESETS.length - 1],
+            step: 1,
+            unit: '%',
+          }}
+          theme={theme}
+          onChange={handleProfitDropChange}
+        />
+        <View style={styles.presetRow}>
+          {PROFIT_DROP_PRESETS.map((stepVal) => (
+            <Pressable
+              key={stepVal}
+              accessibilityRole="button"
+              accessibilityLabel={`Set price drop threshold to ${stepVal}%`}
+              style={[
+                styles.presetChip,
+                {
+                  backgroundColor: profitDrop === stepVal ? theme.primary : theme.surfaceLight,
+                  borderColor: profitDrop === stepVal ? theme.primary : theme.border,
+                },
+              ]}
+              onPress={() => handleProfitDropChange(stepVal)}
+            >
+              <Text
+                style={{
+                  color: profitDrop === stepVal ? '#FFF' : theme.text,
+                  fontSize: fontSize.xs,
+                  fontWeight: fontWeight.semibold,
+                }}
+              >
+                {stepVal}%
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>

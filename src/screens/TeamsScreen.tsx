@@ -9,6 +9,8 @@ import {
   Alert,
   RefreshControl,
   Modal,
+  Platform,
+  Share,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -16,6 +18,8 @@ import { useAuthStore } from '../store/auth';
 import { NavigationProp } from '../types';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as haptic from '../utils/haptics';
+import { exportTeamCSV, generateTeamReport, TeamReportData } from '../utils/teamExport';
+import { downloadReport } from '../utils/reportExport';
 
 interface Team {
   id: string;
@@ -153,6 +157,68 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
       Alert.alert(t('common.error'), err instanceof Error ? err.message : String(err));
     }
   }, [selectedTeam, inviteEmail, inviteRole, t]);
+
+  const handleExportTeam = useCallback(
+    async (format: 'csv' | 'pdf') => {
+      if (!selectedTeam) return;
+      haptic.light();
+      try {
+        const data = (await apiCall(`/api/teams/${selectedTeam.id}/miners`)) as {
+          miners: Array<{ name?: string; ip?: string }>;
+          memberIds: string[];
+        };
+        const reportData: TeamReportData = {
+          team: {
+            id: selectedTeam.id,
+            name: selectedTeam.name,
+            memberCount: selectedTeam.memberCount,
+            role: selectedTeam.role,
+            createdAt: selectedTeam.createdAt,
+          },
+          members: data.memberIds.map((id) => ({ memberId: id, role: 'member' })),
+          minerCount: data.miners.length,
+          minerNames: data.miners.map((m) => m.name ?? m.ip ?? 'unknown'),
+          generatedAt: Date.now(),
+        };
+
+        if (format === 'csv') {
+          downloadReport(
+            exportTeamCSV(reportData),
+            `team_${selectedTeam.name.replace(/[^a-zA-Z0-9]+/g, '_')}.csv`,
+            'text/csv',
+          );
+          return;
+        }
+
+        const result = await generateTeamReport(reportData);
+        if (result.blob) {
+          const url = URL.createObjectURL(result.blob);
+          const a = window.document.createElement('a');
+          a.href = url;
+          a.download = `team_${selectedTeam.name.replace(/[^a-zA-Z0-9]+/g, '_')}.html`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } else if (result.filePath || result.uri) {
+          const path = result.filePath || result.uri;
+          if (Platform.OS !== 'web') {
+            await Share.share({
+              message: path || 'HashWatch Team Report',
+              title: selectedTeam.name,
+            });
+          }
+        } else if (result.html) {
+          downloadReport(
+            result.html,
+            `team_${selectedTeam.name.replace(/[^a-zA-Z0-9]+/g, '_')}.html`,
+            'text/html',
+          );
+        }
+      } catch (err: unknown) {
+        Alert.alert(t('common.error'), err instanceof Error ? err.message : String(err));
+      }
+    },
+    [selectedTeam, t],
+  );
 
   const roleColors: Record<string, string> = {
     owner: theme.warning,
@@ -354,6 +420,31 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
             <Text style={styles.cardSub}>
               {t('teams.memberCount', { count: selectedTeam.memberCount })}
             </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('teams.export')}</Text>
+          <Text style={[styles.cardSub, { marginBottom: spacing.sm }]}>
+            {t('teams.exportDesc', 'Export team analytics as a CSV file or PDF report.')}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('teams.exportCSV')}
+              style={[styles.btn, { backgroundColor: theme.primary, flex: 1 }]}
+              onPress={() => handleExportTeam('csv')}
+            >
+              <Text style={[styles.btnText, { color: '#FFF' }]}>{t('teams.exportCSV')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('teams.exportPDF')}
+              style={[styles.btn, { backgroundColor: theme.primary + '20', flex: 1 }]}
+              onPress={() => handleExportTeam('pdf')}
+            >
+              <Text style={[styles.btnText, { color: theme.primary }]}>{t('teams.exportPDF')}</Text>
+            </Pressable>
           </View>
         </View>
 

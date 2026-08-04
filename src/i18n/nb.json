@@ -102,7 +102,16 @@
   "firmware": {
     "whatsNew": "Hva er Nytt",
     "showMore": "Vis Mer",
-    "showLess": "Vis Mindre"
+    "showLess": "Vis Mindre",
+    "autoUpdate": "Automatisk oppdatering utenom arbeidstid",
+    "autoUpdateDesc": "Oppdater miner automatisk utenom arbeidstid",
+    "autoUpdateWindow": "Vindu",
+    "autoUpdateActive": "aktiv nå",
+    "offHours_Midnight": "Midnatt",
+    "offHours_Night": "Natt",
+    "offHours_Deep Night": "Dyp natt",
+    "offHours_Afternoon": "Ettermiddag",
+    "offHours_Evening": "Kveld"
   },
   "dashboardCustomizer": {
     "title": "Tilpass Dashboard",
@@ -1094,7 +1103,11 @@
     "joinTeam": "Bli Med i Team",
     "inviteSent": "Invitasjon sendt",
     "minerList": "Minere delt med dette teamet vil vises her.",
-    "miners": "Team Minere"
+    "miners": "Team Minere",
+    "export": "Eksporter",
+    "exportDesc": "Eksporter team-analyse som CSV-fil eller PDF-rapport.",
+    "exportCSV": "Eksporter CSV",
+    "exportPDF": "Eksporter PDF"
   },
   "alertChannels": {
     "title": "Varslingskanaler",
@@ -1403,6 +1416,10 @@
     "testNotification": "Send Testvarsel",
     "testSent": "Test Sendt",
     "testSentBody": "Et testvarsel har blitt sendt.",
+    "profitTitle": "Lønnsomhetsvarsler for priser",
+    "profitDesc": "Varsle når BTC-prisen faller under din overvåkingsgrunnlinje",
+    "profitToggle": "Aktiver prisvarsler",
+    "profitDrop": "Prisfall %",
     "permissionDenied": "Varsler Deaktivert",
     "permissionDeniedBody": "Aktiver varsler i enhetsinnstillingene for å motta varsler."
   },
@@ -1449,7 +1466,12 @@
     "connectFirst": "Koble til en pool-leverandør for å se statistikk",
     "testConnection": "Tester tilkobling...",
     "connectionSuccess": "Tilkoblet vellykket",
-    "connectionFailed": "Tilkobling feilet. Sjekk din API-nøkkel."
+    "connectionFailed": "Tilkobling feilet. Sjekk din API-nøkkel.",
+    "payoutHistory": "Utbetalingshistorikk",
+    "totalPaid": "Totalt utbetalt",
+    "payouts": "Utbetalinger",
+    "lastPayout": "Siste utbetaling",
+    "clearPayouts": "Tøm utbetalingshistorikk"
   },
   "notificationChannels": {
     "title": "Notification Channels",

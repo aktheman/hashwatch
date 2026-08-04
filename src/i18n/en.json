@@ -102,7 +102,16 @@
   "firmware": {
     "whatsNew": "What's New",
     "showMore": "Show More",
-    "showLess": "Show Less"
+    "showLess": "Show Less",
+    "autoUpdate": "Off-Hours Auto-Update",
+    "autoUpdateDesc": "Update miners automatically during off-hours",
+    "autoUpdateWindow": "Window",
+    "autoUpdateActive": "active now",
+    "offHours_Midnight": "Midnight",
+    "offHours_Night": "Night",
+    "offHours_Deep Night": "Deep Night",
+    "offHours_Afternoon": "Afternoon",
+    "offHours_Evening": "Evening"
   },
   "dashboardCustomizer": {
     "title": "Customize Dashboard",
@@ -1089,7 +1098,11 @@
     "joinTeam": "Join Team",
     "inviteSent": "Invitation sent",
     "minerList": "Miners shared with this team will appear here.",
-    "miners": "Team Miners"
+    "miners": "Team Miners",
+    "export": "Export",
+    "exportDesc": "Export team analytics as a CSV file or PDF report.",
+    "exportCSV": "Export CSV",
+    "exportPDF": "Export PDF"
   },
   "alertChannels": {
     "title": "Alert Channels",
@@ -1398,6 +1411,10 @@
     "testNotification": "Send Test Notification",
     "testSent": "Test Sent",
     "testSentBody": "A test notification has been sent.",
+    "profitTitle": "Profitability Price Alerts",
+    "profitDesc": "Alert when BTC price drops below your monitoring baseline",
+    "profitToggle": "Enable price alerts",
+    "profitDrop": "Price Drop %",
     "permissionDenied": "Notifications Disabled",
     "permissionDeniedBody": "Enable notifications in your device settings to receive alerts."
   },
@@ -1444,7 +1461,12 @@
     "connectFirst": "Connect a pool provider to see stats",
     "testConnection": "Testing connection...",
     "connectionSuccess": "Connected successfully",
-    "connectionFailed": "Connection failed. Check your API key."
+    "connectionFailed": "Connection failed. Check your API key.",
+    "payoutHistory": "Payout History",
+    "totalPaid": "Total Paid",
+    "payouts": "Payouts",
+    "lastPayout": "Last Payout",
+    "clearPayouts": "Clear Payout History"
   },
   "notificationChannels": {
     "title": "Notification Channels",

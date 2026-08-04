@@ -49,6 +49,22 @@ jest.mock('../src/services/otaFlash', () => ({
   batchFlashOTA: jest.fn(),
 }));
 
+jest.mock('../src/services/firmwareScheduler', () => ({
+  getFirmwareScheduleSettings: jest.fn().mockResolvedValue({
+    enabled: false,
+    startHour: 0,
+    endHour: 6,
+    lastRunDay: null,
+  }),
+  setFirmwareScheduleSettings: jest.fn().mockResolvedValue(undefined),
+  isInOffHours: jest.fn(() => false),
+  OFF_HOURS_PRESETS: [
+    { start: 0, end: 6, label: 'Midnight' },
+    { start: 22, end: 6, label: 'Night' },
+  ],
+  DEFAULT_SCHEDULE: { enabled: false, startHour: 0, endHour: 6, lastRunDay: null },
+}));
+
 jest.mock('../src/db/database', () => ({
   getSetting: jest.fn().mockResolvedValue(null),
   setSetting: jest.fn().mockResolvedValue(undefined),
@@ -162,6 +178,15 @@ beforeEach(() => {
   mockBatchFlashOTA.mockResolvedValue([]);
   const { getSetting } = jest.requireMock('../src/db/database');
   getSetting.mockResolvedValue(null);
+  const scheduler = jest.requireMock('../src/services/firmwareScheduler');
+  scheduler.getFirmwareScheduleSettings.mockResolvedValue({
+    enabled: false,
+    startHour: 0,
+    endHour: 6,
+    lastRunDay: null,
+  });
+  scheduler.setFirmwareScheduleSettings.mockResolvedValue(undefined);
+  scheduler.isInOffHours.mockReturnValue(false);
   alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
 
@@ -216,6 +241,51 @@ describe('FirmwareScreen', () => {
     ]);
     await renderLoaded();
     expect(screen.getByText('firmware.noOnlineMiners')).toBeTruthy();
+  });
+
+  it('renders the off-hours auto-update section', async () => {
+    await renderLoaded();
+    expect(screen.getByText('firmware.autoUpdate')).toBeTruthy();
+    expect(screen.getByText('firmware.autoUpdateDesc')).toBeTruthy();
+    expect(screen.getByLabelText('off-hours auto firmware update toggle')).toBeTruthy();
+  });
+
+  it('hides the window presets until auto-update is enabled', async () => {
+    await renderLoaded();
+    expect(screen.queryByLabelText('Set auto-update window to Midnight')).toBeNull();
+  });
+
+  it('enables auto-update and persists the setting', async () => {
+    const scheduler = jest.requireMock('../src/services/firmwareScheduler');
+    await renderLoaded();
+    await fireEvent(
+      screen.getByLabelText('off-hours auto firmware update toggle'),
+      'valueChange',
+      true,
+    );
+    await waitFor(() => {
+      expect(scheduler.setFirmwareScheduleSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true, startHour: 0, endHour: 6 }),
+      );
+    });
+    expect(screen.getByLabelText('Set auto-update window to Midnight')).toBeTruthy();
+  });
+
+  it('selects an off-hours preset and persists it', async () => {
+    const scheduler = jest.requireMock('../src/services/firmwareScheduler');
+    await renderLoaded();
+    await fireEvent(
+      screen.getByLabelText('off-hours auto firmware update toggle'),
+      'valueChange',
+      true,
+    );
+    await fireEvent.press(screen.getByLabelText('Set auto-update window to Night'));
+    await waitFor(() => {
+      expect(scheduler.setFirmwareScheduleSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: true, startHour: 22, endHour: 6 }),
+      );
+    });
+    expect(screen.getByText(/22:00/)).toBeTruthy();
   });
 
   it('fetches latest firmware and shows update available', async () => {

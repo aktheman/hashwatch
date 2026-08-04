@@ -14,7 +14,15 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import { getAvailableProviders, fetchAllPoolStats, PoolStats } from '../services/poolProviders';
+import {
+  getPayoutHistory,
+  recordPoolSnapshot,
+  summarizePayouts,
+  clearPayoutHistory,
+  PayoutEntry,
+} from '../services/payoutHistory';
 import { getSetting, setSetting } from '../db/database';
+import { formatBTC } from '../utils/hashrate';
 import * as haptics from '../utils/haptics';
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
@@ -42,6 +50,15 @@ export function PoolProvidersScreen() {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [payoutHistory, setPayoutHistory] = useState<PayoutEntry[]>([]);
+
+  const loadPayoutHistory = useCallback(async () => {
+    setPayoutHistory(await getPayoutHistory());
+  }, []);
+
+  useEffect(() => {
+    loadPayoutHistory();
+  }, [loadPayoutHistory]);
 
   const availableProviders = useMemo(() => getAvailableProviders(), []);
 
@@ -73,6 +90,14 @@ export function PoolProvidersScreen() {
           error: allStats[p.name] === null ? 'Failed to fetch stats' : null,
         })),
       );
+      for (const name of providers) {
+        const stats = allStats[name.name];
+        if (stats) {
+          void recordPoolSnapshot(name.name, stats.lastPayout, stats.payoutPending).then(() =>
+            loadPayoutHistory(),
+          );
+        }
+      }
     }
 
     setInitialized(true);
@@ -173,6 +198,14 @@ export function PoolProvidersScreen() {
   );
 
   const connectedNames = useMemo(() => new Set(connected.map((p) => p.name)), [connected]);
+
+  const payoutSummary = useMemo(() => summarizePayouts(payoutHistory), [payoutHistory]);
+
+  const handleClearPayouts = useCallback(async () => {
+    haptics.light();
+    await clearPayoutHistory();
+    setPayoutHistory([]);
+  }, []);
 
   const multiPoolOverview = useMemo(() => {
     if (connected.length < 2) return null;
@@ -434,6 +467,43 @@ export function PoolProvidersScreen() {
         luckGood: { color: theme.success },
         luckOk: { color: theme.warning },
         luckBad: { color: theme.danger },
+        payoutRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingVertical: spacing.sm,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.border,
+        },
+        payoutProvider: {
+          color: theme.text,
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.semibold,
+        },
+        payoutDate: {
+          color: theme.textMuted,
+          fontSize: fontSize.xs,
+          marginTop: spacing.xxs,
+        },
+        payoutAmount: {
+          color: theme.success,
+          fontSize: fontSize.base,
+          fontWeight: fontWeight.bold,
+        },
+        clearBtn: {
+          marginTop: spacing.md,
+          alignSelf: 'flex-start',
+          paddingVertical: spacing.xs,
+          paddingHorizontal: spacing.md,
+          borderRadius: radius.sm,
+          borderWidth: 1,
+          borderColor: theme.danger,
+        },
+        clearBtnText: {
+          color: theme.danger,
+          fontSize: fontSize.sm,
+          fontWeight: fontWeight.semibold,
+        },
       }),
     [theme],
   );
@@ -641,6 +711,63 @@ export function PoolProvidersScreen() {
                 <View style={[styles.providerSection, { borderBottomWidth: 0 }]} />
               </View>
             ))}
+          </View>
+        )}
+
+        {payoutHistory.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.providerSectionTitle}>
+              {t('poolProviders.payoutHistory', 'Payout History')}
+            </Text>
+            <View style={styles.overviewRow}>
+              <View style={styles.overviewStat}>
+                <Text style={styles.overviewValue}>{formatBTC(payoutSummary.totalPaid)}</Text>
+                <Text style={styles.overviewLabel}>
+                  {t('poolProviders.totalPaid', 'Total Paid')}
+                </Text>
+              </View>
+              <View style={styles.overviewStat}>
+                <Text style={styles.overviewValue}>{payoutSummary.count}</Text>
+                <Text style={styles.overviewLabel}>{t('poolProviders.payouts', 'Payouts')}</Text>
+              </View>
+              <View style={styles.overviewStat}>
+                <Text style={styles.overviewValue}>
+                  {payoutSummary.lastPayoutAt > 0
+                    ? new Date(payoutSummary.lastPayoutAt).toLocaleDateString()
+                    : '—'}
+                </Text>
+                <Text style={styles.overviewLabel}>
+                  {t('poolProviders.lastPayout', 'Last Payout')}
+                </Text>
+              </View>
+            </View>
+            {payoutHistory.map((entry) => (
+              <View key={entry.id} style={styles.payoutRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.payoutProvider}>
+                    {PROVIDER_DISPLAY_NAMES[entry.provider] ?? entry.provider}
+                  </Text>
+                  <Text style={styles.payoutDate}>
+                    {new Date(entry.timestamp).toLocaleDateString()}{' '}
+                    {new Date(entry.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
+                <Text style={styles.payoutAmount}>{formatBTC(entry.amount)}</Text>
+              </View>
+            ))}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('poolProviders.clearPayouts', 'Clear payout history')}
+              style={styles.clearBtn}
+              onPress={handleClearPayouts}
+            >
+              <Text style={styles.clearBtnText}>
+                {t('poolProviders.clearPayouts', 'Clear Payout History')}
+              </Text>
+            </Pressable>
           </View>
         )}
 

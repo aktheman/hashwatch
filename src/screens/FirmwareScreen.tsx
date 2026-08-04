@@ -28,6 +28,14 @@ import {
 import { BitAxeClient } from '../api/bitaxe';
 import { Miner } from '../types';
 import { flashMinerOTA, batchFlashOTA } from '../services/otaFlash';
+import {
+  getFirmwareScheduleSettings,
+  setFirmwareScheduleSettings,
+  isInOffHours,
+  OFF_HOURS_PRESETS,
+  DEFAULT_SCHEDULE,
+  FirmwareScheduleSettings,
+} from '../services/firmwareScheduler';
 import { getSetting, setSetting } from '../db/database';
 import { spacing, radius, fontSize, fontWeight, buttonText } from '../utils/design';
 import * as haptic from '../utils/haptics';
@@ -59,6 +67,7 @@ export default function FirmwareScreen() {
   const [otaFlashing, setOtaFlashing] = useState(false);
   const [otaProgress, setOtaProgress] = useState({ completed: 0, total: 0, current: '' });
   const [changelogExpanded, setChangelogExpanded] = useState(false);
+  const [schedule, setSchedule] = useState<FirmwareScheduleSettings | null>(null);
 
   const loadSkipVersion = useCallback(async () => {
     const sv = await getSetting(SKIP_KEY);
@@ -67,7 +76,26 @@ export default function FirmwareScreen() {
 
   useEffect(() => {
     loadSkipVersion();
+    getFirmwareScheduleSettings().then(setSchedule);
   }, [loadSkipVersion]);
+
+  const handleScheduleToggle = useCallback((enabled: boolean) => {
+    haptic.selection();
+    setSchedule((prev) => {
+      const next = { ...(prev ?? DEFAULT_SCHEDULE), enabled };
+      void setFirmwareScheduleSettings(next);
+      return next;
+    });
+  }, []);
+
+  const handleSchedulePreset = useCallback((start: number, end: number) => {
+    haptic.selection();
+    setSchedule((prev) => {
+      const next = { ...(prev ?? DEFAULT_SCHEDULE), startHour: start, endHour: end };
+      void setFirmwareScheduleSettings(next);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setInitialLoading(false), 500);
@@ -485,6 +513,82 @@ export default function FirmwareScreen() {
               </View>
             </View>
           </View>
+
+          {schedule && (
+            <View style={styles.section}>
+              <Text
+                style={[styles.sectionTitle, { color: theme.textDim }]}
+                accessibilityRole="header"
+              >
+                {t('firmware.autoUpdate', 'Off-Hours Auto-Update')}
+              </Text>
+              <View
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <View style={styles.cardRow}>
+                  <View style={styles.cardLeft}>
+                    <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
+                      {t('firmware.autoUpdateDesc', 'Update miners automatically during off-hours')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={schedule.enabled}
+                    onValueChange={handleScheduleToggle}
+                    trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+                    thumbColor={schedule.enabled ? theme.primary : theme.textMuted}
+                    accessibilityLabel="off-hours auto firmware update toggle"
+                  />
+                </View>
+                {schedule.enabled && (
+                  <>
+                    <View style={styles.presetRow}>
+                      {OFF_HOURS_PRESETS.map((p) => {
+                        const active = schedule.startHour === p.start && schedule.endHour === p.end;
+                        return (
+                          <Pressable
+                            key={p.label}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Set auto-update window to ${p.label}`}
+                            style={[
+                              styles.presetChip,
+                              {
+                                backgroundColor: active ? theme.primary : theme.surfaceLight,
+                                borderColor: active ? theme.primary : theme.border,
+                              },
+                            ]}
+                            onPress={() => handleSchedulePreset(p.start, p.end)}
+                          >
+                            <Text
+                              style={{
+                                color: active ? '#FFF' : theme.text,
+                                fontSize: fontSize.xs,
+                                fontWeight: fontWeight.semibold,
+                              }}
+                            >
+                              {t(`firmware.offHours_${p.label}`, p.label)}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                    <Text style={[styles.cardLabel, { color: theme.textMuted }]}>
+                      {t('firmware.autoUpdateWindow', 'Window')}: {schedule.startHour}:00 –{' '}
+                      {schedule.endHour}:00
+                      {isInOffHours(schedule)
+                        ? ` — ${t('firmware.autoUpdateActive', 'active now')}`
+                        : ''}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+          )}
 
           {latest && (
             <View style={styles.section}>
@@ -1058,6 +1162,18 @@ const styles = StyleSheet.create({
     color: buttonText,
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
+  },
+  presetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  presetChip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    alignItems: 'center',
   },
   updateBadge: {
     paddingVertical: spacing.xxs,
