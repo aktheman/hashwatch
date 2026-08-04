@@ -39,6 +39,14 @@ publicDashboardRouter.post('/', authMiddleware, async (req: AuthRequest, res) =>
 
     const userId = req.userId as string;
 
+    const ownerCheck = await query('SELECT id FROM miners WHERE id = $1 AND "userId" = $2', [
+      minerId,
+      userId,
+    ]);
+    if (ownerCheck.rows.length === 0) {
+      return res.status(403).json({ error: 'Miner not found or not owned by you' });
+    }
+
     // Check if a token already exists for this miner+user
     for (const entry of store.values()) {
       if (entry.minerId === minerId && entry.userId === userId) {

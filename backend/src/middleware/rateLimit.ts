@@ -6,7 +6,12 @@ interface RateLimitOptions {
   max: number;
 }
 
-const allWindows = new Map<string, Map<string, number[]>>();
+interface RateWindow {
+  windowMs: number;
+  windows: Map<string, number[]>;
+}
+
+const allWindows = new Map<symbol, RateWindow>();
 const CLEANUP_INTERVAL = 60_000;
 
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -14,11 +19,11 @@ function startCleanup() {
   if (cleanupTimer) return;
   cleanupTimer = setInterval(() => {
     const now = Date.now();
-    for (const [, windows] of allWindows) {
-      for (const [key, timestamps] of windows) {
-        const valid = timestamps.filter((t) => now - t < CLEANUP_INTERVAL);
-        if (valid.length === 0) windows.delete(key);
-        else windows.set(key, valid);
+    for (const [, entry] of allWindows) {
+      for (const [key, timestamps] of entry.windows) {
+        const valid = timestamps.filter((t) => now - t < entry.windowMs);
+        if (valid.length === 0) entry.windows.delete(key);
+        else entry.windows.set(key, valid);
       }
     }
   }, CLEANUP_INTERVAL);
@@ -32,7 +37,7 @@ startCleanup();
 export function rateLimit({ windowMs, max }: RateLimitOptions) {
   const windows = new Map<string, number[]>();
   const id = Symbol();
-  allWindows.set(id as unknown as string, windows);
+  allWindows.set(id, { windowMs, windows });
 
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const key = req.userId || req.ip || 'unknown';

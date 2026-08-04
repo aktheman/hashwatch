@@ -74,7 +74,7 @@ async function getAlertRules(minerId: string, userId: string): Promise<AlertRule
   }
   try {
     const result = await query(
-      'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
+      'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
       [userId, minerId],
     );
     if (result.rows.length > 0) {
@@ -120,8 +120,8 @@ export async function checkMinerStatus(
   hashRate: number = 0,
   pool: string | null = null,
   uptimeSeconds: number = 0,
-  sharesAccepted: number = 0,
-  sharesRejected: number = 0,
+  sharesAccepted: number | undefined = 0,
+  sharesRejected: number | undefined = 0,
 ): Promise<void> {
   const key = `${userId}:${minerId}`;
   const prev = minerStates.get(key) as MinerState | undefined;
@@ -175,11 +175,10 @@ export async function checkMinerStatus(
   }
 
   const prevHr = prev.hashRate;
-  const dropRatio = 100 / (100 - rules.hashratedroppercent);
   if (
     prevHr > 0 &&
     hashRate > 0 &&
-    prevHr / hashRate > dropRatio &&
+    ((prevHr - hashRate) / prevHr) * 100 >= rules.hashratedroppercent &&
     canNotify(`${key}:hashrate_drop`) &&
     prefs.hashrate_drop !== false
   ) {
@@ -212,8 +211,8 @@ export async function checkMinerStatus(
     }
   }
 
-  const deltaAccepted = sharesAccepted - (prev.sharesAccepted ?? 0);
-  const deltaRejected = sharesRejected - (prev.sharesRejected ?? 0);
+  const deltaAccepted = (sharesAccepted ?? 0) - (prev.sharesAccepted ?? 0);
+  const deltaRejected = (sharesRejected ?? 0) - (prev.sharesRejected ?? 0);
   if (deltaAccepted + deltaRejected > 0) {
     const rejectionRate = (deltaRejected / (deltaAccepted + deltaRejected)) * 100;
     if (

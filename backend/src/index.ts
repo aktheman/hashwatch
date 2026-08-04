@@ -44,6 +44,7 @@ import { pushWebRouter } from './routes/pushWeb';
 import { log } from './logger';
 
 const app = express();
+app.set('trust proxy', 1);
 const server = createServer(app);
 createWebSocketServer(server, '/ws');
 
@@ -197,6 +198,10 @@ initSchema().then(() => {
     log.info(`HashWatch API running on :${PORT}`);
     startMinerPoller();
   });
+});
+
+process.on('unhandledRejection', (reason) => {
+  log.error('Unhandled promise rejection:', reason instanceof Error ? reason.message : reason);
 });
 
 function gracefulShutdown(signal: string) {

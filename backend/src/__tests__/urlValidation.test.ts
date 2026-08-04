@@ -15,16 +15,17 @@ describe('isAllowedProxyUrl', () => {
     expect(isAllowedProxyUrl('http://192.168.1.100/api/info')).toBe(true);
   });
 
-  it('allows 127.0.0.1 (loopback is treated as private)', () => {
-    expect(isAllowedProxyUrl('http://127.0.0.1/api/info')).toBe(true);
+  it('blocks 127.0.0.1 (loopback)', () => {
+    expect(isAllowedProxyUrl('http://127.0.0.1/api/info')).toBe(false);
   });
 
-  it('allows 169.254.x.x (link-local is treated as private)', () => {
-    expect(isAllowedProxyUrl('http://169.254.1.1/api/info')).toBe(true);
+  it('blocks 169.254.x.x (link-local incl. cloud metadata)', () => {
+    expect(isAllowedProxyUrl('http://169.254.1.1/api/info')).toBe(false);
+    expect(isAllowedProxyUrl('http://169.254.169.254/api/info')).toBe(false);
   });
 
-  it('allows 0.0.0.0 (unspecified is treated as private)', () => {
-    expect(isAllowedProxyUrl('http://0.0.0.0/api/info')).toBe(true);
+  it('blocks 0.0.0.0 (unspecified)', () => {
+    expect(isAllowedProxyUrl('http://0.0.0.0/api/info')).toBe(false);
   });
 
   it('blocks public hostnames', () => {
@@ -60,8 +61,8 @@ describe('isAllowedProxyUrl', () => {
     expect(isAllowedProxyUrl('http://[fe80::1]/api/info')).toBe(true);
   });
 
-  it('allows IPv6 loopback (::1)', () => {
-    expect(isAllowedProxyUrl('http://[::1]/api/info')).toBe(true);
+  it('blocks IPv6 loopback (::1)', () => {
+    expect(isAllowedProxyUrl('http://[::1]/api/info')).toBe(false);
   });
 
   it('blocks public IPv6 addresses', () => {

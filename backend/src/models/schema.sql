@@ -230,3 +230,34 @@ CREATE TABLE IF NOT EXISTS web_push_subscriptions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_web_push_user ON web_push_subscriptions(user_id);
+
+CREATE TABLE IF NOT EXISTS teams (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  ownerId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_teams_owner ON teams(ownerId);
+
+CREATE TABLE IF NOT EXISTS team_members (
+  teamId UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'viewer',
+  joinedAt TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (teamId, userId)
+);
+
+CREATE INDEX IF NOT EXISTS idx_team_members_user ON team_members(userId);
+
+CREATE TABLE IF NOT EXISTS team_invitations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  teamId UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'viewer',
+  invitedBy UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending',
+  createdAt TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_team_invitations_team ON team_invitations(teamId, email);

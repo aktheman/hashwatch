@@ -41,6 +41,9 @@ export function cacheMiddleware(ttl = DEFAULT_TTL) {
     }
     const originalJson = res.json.bind(res);
     res.json = (body: unknown) => {
+      if (res.statusCode >= 400) {
+        return originalJson(body);
+      }
       if (cache.size >= MAX_CACHE_SIZE) {
         const oldestKey = cache.keys().next().value;
         if (oldestKey) cache.delete(oldestKey);

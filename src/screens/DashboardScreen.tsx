@@ -1395,6 +1395,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   unit="%"
                   accent={metrics.efficiencyPct > 50 ? 'success' : 'warning'}
                   chart="donut"
+                  chartValue={metrics.efficiencyPct}
                   size="lg"
                 />
               </View>
@@ -1419,6 +1420,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
                   value={avgTemp > 0 ? `${avgTemp.toFixed(0)}°` : '—°'}
                   accent={avgTemp > 70 ? 'danger' : 'success'}
                   chart="gauge"
+                  chartValue={avgTemp}
                   size="lg"
                   onPress={onPressTemp}
                 />

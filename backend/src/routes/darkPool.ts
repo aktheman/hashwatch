@@ -38,6 +38,10 @@ const PERIOD_INTERVALS: Record<string, string> = {
   '30d': '30 days',
 };
 
+const MAX_HASHRATE = 1e15; // 1 PH/s — a single Bitaxe is ~500 GH/s
+const MAX_POWER = 1e6; // 1 MW in watts
+const MAX_STRING_LEN = 100;
+
 export const darkPoolRouter = Router();
 darkPoolRouter.use(authMiddleware);
 
@@ -46,22 +50,43 @@ darkPoolRouter.post('/contribute', async (req: AuthRequest, res) => {
   try {
     const { hashrate, power, temp, poolName, region } = req.body;
 
-    if (typeof hashrate !== 'number' || hashrate <= 0 || !Number.isFinite(hashrate)) {
-      return res.status(400).json({ error: 'hashrate must be a positive number' });
+    if (
+      typeof hashrate !== 'number' ||
+      hashrate <= 0 ||
+      !Number.isFinite(hashrate) ||
+      hashrate > MAX_HASHRATE
+    ) {
+      return res
+        .status(400)
+        .json({ error: `hashrate must be a positive number no larger than ${MAX_HASHRATE}` });
     }
-    if (typeof power !== 'number' || power <= 0 || !Number.isFinite(power)) {
-      return res.status(400).json({ error: 'power must be a positive number' });
+    if (typeof power !== 'number' || power <= 0 || !Number.isFinite(power) || power > MAX_POWER) {
+      return res
+        .status(400)
+        .json({ error: `power must be a positive number no larger than ${MAX_POWER}` });
     }
     if (temp !== undefined && temp !== null) {
       if (typeof temp !== 'number' || temp < 0 || temp > 200 || !Number.isFinite(temp)) {
         return res.status(400).json({ error: 'temp must be between 0 and 200' });
       }
     }
-    if (poolName !== undefined && poolName !== null && typeof poolName !== 'string') {
-      return res.status(400).json({ error: 'poolName must be a string' });
+    if (
+      poolName !== undefined &&
+      poolName !== null &&
+      (typeof poolName !== 'string' || poolName.length > MAX_STRING_LEN)
+    ) {
+      return res
+        .status(400)
+        .json({ error: `poolName must be a string of ${MAX_STRING_LEN} characters or fewer` });
     }
-    if (region !== undefined && region !== null && typeof region !== 'string') {
-      return res.status(400).json({ error: 'region must be a string' });
+    if (
+      region !== undefined &&
+      region !== null &&
+      (typeof region !== 'string' || region.length > MAX_STRING_LEN)
+    ) {
+      return res
+        .status(400)
+        .json({ error: `region must be a string of ${MAX_STRING_LEN} characters or fewer` });
     }
 
     // Rate limit: max 1 contribution per user per 5 minutes

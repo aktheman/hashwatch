@@ -47,7 +47,7 @@ export const MinerDrillDownModal = React.memo(function MinerDrillDownModal({
       const results = await Promise.all(
         miners.map(async (m) => {
           const snaps = await DB.getSnapshots(m.id, 50);
-          const recent = snaps.slice(-20);
+          const recent = snaps.slice(0, 20).reverse();
           let values: number[];
           let current: number;
           switch (metricType) {

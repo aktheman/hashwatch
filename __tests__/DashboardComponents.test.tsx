@@ -142,15 +142,19 @@ describe('MetricTile', () => {
   });
 
   it('renders donut chart when chart prop is donut', async () => {
-    const tree = await render(<MetricTile title="Uptime" value="99.9%" chart="donut" />);
+    const tree = await render(
+      <MetricTile title="Uptime" value="99.9%" chart="donut" chartValue={99.9} />,
+    );
     expect(tree.toJSON()).toBeTruthy();
-    expect(screen.getByText('72%')).toBeTruthy();
+    expect(screen.getAllByText('99.9%').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders gauge chart when chart prop is gauge', async () => {
-    const tree = await render(<MetricTile title="Load" value="65%" chart="gauge" />);
+    const tree = await render(
+      <MetricTile title="Load" value="65%" chart="gauge" chartValue={65} />,
+    );
     expect(tree.toJSON()).toBeTruthy();
-    expect(screen.getByText('65°')).toBeTruthy();
+    expect(screen.getAllByText('65°').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders chart prop without chart data', async () => {

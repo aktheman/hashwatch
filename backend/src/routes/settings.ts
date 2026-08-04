@@ -7,14 +7,19 @@ export const settingsRouter = Router();
 settingsRouter.use(authMiddleware);
 
 settingsRouter.get('/', async (req: AuthRequest, res) => {
-  const result = await query('SELECT key, value FROM user_settings WHERE userId = $1', [
-    req.userId,
-  ]);
-  const settings: Record<string, string> = {};
-  for (const row of result.rows) {
-    settings[(row as { key: string }).key] = (row as { value: string }).value;
+  try {
+    const result = await query('SELECT key, value FROM user_settings WHERE userId = $1', [
+      req.userId,
+    ]);
+    const settings: Record<string, string> = {};
+    for (const row of result.rows) {
+      settings[(row as { key: string }).key] = (row as { value: string }).value;
+    }
+    res.json(settings);
+  } catch (err: unknown) {
+    log.error('Error fetching settings:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  res.json(settings);
 });
 
 settingsRouter.put('/', async (req: AuthRequest, res) => {
@@ -44,9 +49,14 @@ settingsRouter.put('/', async (req: AuthRequest, res) => {
 });
 
 settingsRouter.delete('/:key', async (req: AuthRequest, res) => {
-  await query('DELETE FROM user_settings WHERE userId = $1 AND key = $2', [
-    req.userId,
-    req.params.key,
-  ]);
-  res.json({ deleted: true });
+  try {
+    await query('DELETE FROM user_settings WHERE userId = $1 AND key = $2', [
+      req.userId,
+      req.params.key,
+    ]);
+    res.json({ deleted: true });
+  } catch (err: unknown) {
+    log.error('Error deleting setting:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });

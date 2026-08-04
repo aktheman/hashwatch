@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 import { stripeRouter, stripeWebhookRouter } from '../routes/stripe';
 import request from 'supertest';
 
@@ -201,6 +202,58 @@ describe('stripeWebhookRouter', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Invalid signature format');
+    process.env.STRIPE_SECRET_KEY = origSecret;
+    process.env.STRIPE_WEBHOOK_SECRET = origWebhook;
+  });
+
+  it('accepts a validly signed checkout.session.completed webhook', async () => {
+    const origSecret = process.env.STRIPE_SECRET_KEY;
+    const origWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+
+    const t = String(Math.floor(Date.now() / 1000));
+    const body = JSON.stringify({
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          metadata: { userId: 'user-123' },
+          subscription: 'sub_123',
+          customer: 'cus_123',
+          expires_at: Math.floor(Date.now() / 1000) + 86400,
+        },
+      },
+    });
+    const signedPayload = `${t}.${body}`;
+    const v1 = crypto.createHmac('sha256', 'whsec_test').update(signedPayload).digest('hex');
+
+    const res = await request(createWebhookApp())
+      .post('/api/stripe/webhook')
+      .set('Content-Type', 'application/json')
+      .set('stripe-signature', `t=${t},v1=${v1}`)
+      .send(body);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ received: true });
+    expect(mockQuery).toHaveBeenCalledTimes(1);
+    process.env.STRIPE_SECRET_KEY = origSecret;
+    process.env.STRIPE_WEBHOOK_SECRET = origWebhook;
+  });
+
+  it('rejects a webhook with an invalid signature', async () => {
+    const origSecret = process.env.STRIPE_SECRET_KEY;
+    const origWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+
+    const res = await request(createWebhookApp())
+      .post('/api/stripe/webhook')
+      .set('Content-Type', 'application/json')
+      .set('stripe-signature', 't=123,v1=wrongsignature')
+      .send('{}');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('Invalid signature');
     process.env.STRIPE_SECRET_KEY = origSecret;
     process.env.STRIPE_WEBHOOK_SECRET = origWebhook;
   });

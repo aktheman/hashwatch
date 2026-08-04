@@ -26,6 +26,7 @@ interface MetricTileProps {
   accent?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
   chart?: 'sparkline' | 'bars' | 'donut' | 'gauge';
   chartData?: number[];
+  chartValue?: number;
   size?: 'sm' | 'md' | 'lg';
   onPress?: () => void;
 }
@@ -39,6 +40,7 @@ export const MetricTile = React.memo(function MetricTile({
   accent = 'primary',
   chart,
   chartData = [],
+  chartValue = 0,
   size = 'md',
   onPress,
 }: MetricTileProps) {
@@ -112,7 +114,7 @@ export const MetricTile = React.memo(function MetricTile({
       {chart === 'donut' && (
         <View style={styles.chartCenter}>
           <DonutRing
-            value={72}
+            value={Math.min(100, Math.max(0, chartValue))}
             color={accentColor}
             size={size === 'lg' ? 80 : size === 'md' ? 64 : 48}
           />
@@ -122,7 +124,7 @@ export const MetricTile = React.memo(function MetricTile({
       {chart === 'gauge' && (
         <View style={styles.chartCenter}>
           <GaugeArc
-            value={65}
+            value={Math.min(100, Math.max(0, chartValue))}
             color={accentColor}
             width={size === 'lg' ? 140 : size === 'md' ? 120 : 100}
             height={size === 'lg' ? 80 : size === 'md' ? 68 : 56}

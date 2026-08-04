@@ -2,6 +2,7 @@ import { query } from '../db';
 import { checkMinerStatus } from './minerMonitor';
 import { broadcast } from '../ws';
 import { log } from '../logger';
+import { isAllowedProxyUrl } from '../utils/urlValidation';
 
 interface MinerRow {
   id: string;
@@ -13,6 +14,7 @@ interface MinerRow {
 
 const POLL_INTERVAL = 60_000;
 const TIMEOUT = 5000;
+const MAX_MINERS_PER_CYCLE = 200;
 
 async function fetchJson(url: string): Promise<unknown | null> {
   try {
@@ -39,8 +41,13 @@ function extractPool(info: unknown, status: unknown): string | null {
 }
 
 async function pollMiner(miner: MinerRow): Promise<void> {
-  const infoUrl = `http://${miner.ip}:${miner.port}/api/system/info`;
-  const statusUrl = `http://${miner.ip}:${miner.port}/api/system/status`;
+  const baseUrl = `http://${miner.ip}:${miner.port}`;
+  if (!isAllowedProxyUrl(`${baseUrl}/api/system/info`)) {
+    log.warn('Skipping miner with disallowed address:', miner.ip, miner.port);
+    return;
+  }
+  const infoUrl = `${baseUrl}/api/system/info`;
+  const statusUrl = `${baseUrl}/api/system/status`;
   const [infoData, statusData] = await Promise.all([fetchJson(infoUrl), fetchJson(statusUrl)]);
   const isOnline = !!infoData || !!statusData;
   const status = statusData as Record<string, unknown> | null;
@@ -70,6 +77,8 @@ async function pollMiner(miner: MinerRow): Promise<void> {
     hashRate,
     pool,
     uptimeSeconds,
+    (statusData as Record<string, unknown>)?.sharesAccepted as number | undefined,
+    (statusData as Record<string, unknown>)?.sharesRejected as number | undefined,
   );
 
   if (isOnline) {
@@ -143,7 +152,11 @@ export function stopMinerPoller(): void {
 
 async function pollAll(): Promise<void> {
   try {
-    const result = await query('SELECT id, userId, name, ip, port FROM miners');
+    const result = await query(
+      `SELECT id, userId, name, ip, port FROM miners
+       WHERE port >= 1 AND port <= 65535
+       LIMIT ${MAX_MINERS_PER_CYCLE}`,
+    );
     const miners: MinerRow[] = result.rows;
     await Promise.allSettled(miners.map(pollMiner));
   } catch {

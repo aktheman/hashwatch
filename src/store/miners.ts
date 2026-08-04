@@ -14,6 +14,8 @@ import {
 import { BitAxeClient } from '../api/bitaxe';
 import * as DB from '../db/database';
 import { checkMinerAlerts } from '../services/notifications';
+import { checkProfitAlert } from '../services/profitAlerts';
+import { runScheduledFirmwareUpdate } from '../services/firmwareScheduler';
 import { pushStats, fetchStats } from '../api/client';
 import { createRemoteMiner, deleteRemoteMiner, syncMinersWithBackend } from '../services/minerSync';
 import { getAuthToken, onAuthLogin } from './authToken';
@@ -225,6 +227,9 @@ export const useMinerStore = create<MinersState>()(
         if (!miner) return;
         if (miner.maintenanceMode) return;
 
+        let offlineRetries = 0;
+        const MAX_OFFLINE_RETRIES = 2;
+
         const attempt = async (retryMs = 0): Promise<void> => {
           if (retryMs > 0) await new Promise((resolve) => setTimeout(resolve, retryMs));
 
@@ -286,7 +291,12 @@ export const useMinerStore = create<MinersState>()(
             }));
 
             const nav = navigator as Navigator & { onLine?: boolean };
-            if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
+            if (
+              typeof nav?.onLine === 'boolean' &&
+              !nav.onLine &&
+              offlineRetries < MAX_OFFLINE_RETRIES
+            ) {
+              offlineRetries++;
               setTimeout(() => attempt(2000), 0);
             }
           }
@@ -325,6 +335,8 @@ export const useMinerStore = create<MinersState>()(
           if (current.length > 0) {
             checkMinerAlerts(prev, current);
           }
+          checkProfitAlert().catch(() => {});
+          runScheduledFirmwareUpdate().catch(() => {});
           const totalHash = current.reduce(
             (s, m) => s + toHashesPerSecond(m.status?.hashRate ?? 0, m.status?.hashRateUnit),
             0,
@@ -365,8 +377,8 @@ export const useMinerStore = create<MinersState>()(
 
         schedule();
 
-        const unsubWs = useMinerStore.subscribe((s) => {
-          if (interval && s.wsConnected !== get().wsConnected) {
+        const unsubWs = useMinerStore.subscribe((s, prev) => {
+          if (interval && s.wsConnected !== prev.wsConnected) {
             schedule();
           }
         });

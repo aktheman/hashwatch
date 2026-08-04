@@ -12,18 +12,17 @@ function parseIPv4(host: string): number[] | null {
 
 function isPrivateIPv4(octets: number[]): boolean {
   const [a, b] = octets;
+  if (a === 0 || a === 127) return false; // "this network" / loopback — never proxy targets
+  if (a === 169 && b === 254) return false; // link-local incl. cloud metadata 169.254.169.254
   if (a === 10) return true;
   if (a === 172 && b >= 16 && b <= 31) return true;
   if (a === 192 && b === 168) return true;
-  if (a === 127) return true;
-  if (a === 169 && b === 254) return true;
-  if (a === 0) return true;
   return false;
 }
 
 function isPrivateIPv6(host: string): boolean {
   const h = host.toLowerCase();
-  if (h === '::1') return true;
+  if (h === '::1') return false; // loopback — never a proxy target
   if (h.startsWith('fc') || h.startsWith('fd')) return true;
   if (h.startsWith('fe80')) return true;
   return false;

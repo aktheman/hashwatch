@@ -1296,7 +1296,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
                         219.9114857512855,
                       ]
                     }
-                    strokeDashoffset={61.57521601035995}
+                    strokeDashoffset={219.9114857512855}
                     strokeLinecap={1}
                     strokeWidth="6"
                   />
@@ -1324,7 +1324,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
                     }
                   }
                 >
-                  72
+                  0
                   %
                 </Text>
               </View>
@@ -1747,7 +1747,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
                           194.77874452256717,
                         ]
                       }
-                      strokeDashoffset={68.1725605828985}
+                      strokeDashoffset={194.77874452256717}
                       strokeLinecap={1}
                       strokeWidth="8"
                     />
@@ -1775,7 +1775,7 @@ exports[`DashboardScreen empty state matches snapshot 1`] = `
                       }
                     }
                   >
-                    65
+                    0
                     °
                   </Text>
                 </View>

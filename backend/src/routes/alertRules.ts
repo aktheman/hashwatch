@@ -24,33 +24,38 @@ export interface MinerAlertRule {
 }
 
 alertRulesRouter.get('/:minerId', async (req: AuthRequest, res) => {
-  const minerId = req.params.minerId as string;
-  if (!(await verifyMinerOwnership(minerId, req.userId as string))) {
-    return res.status(404).json({ error: 'miner not found' });
-  }
-  const result = await query(
-    'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
-    [req.userId as string, minerId],
-  );
-  if (result.rows.length === 0) {
-    return res.json({
-      enabled: true,
-      tempThreshold: 70,
-      hashrateDropPercent: 50,
-      offlineReminderMinutes: 5,
-      uptimeThresholdHours: 24,
-      shareRejectionPercent: 10,
+  try {
+    const minerId = req.params.minerId as string;
+    if (!(await verifyMinerOwnership(minerId, req.userId as string))) {
+      return res.status(404).json({ error: 'miner not found' });
+    }
+    const result = await query(
+      'SELECT enabled, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
+      [req.userId as string, minerId],
+    );
+    if (result.rows.length === 0) {
+      return res.json({
+        enabled: true,
+        tempThreshold: 70,
+        hashrateDropPercent: 50,
+        offlineReminderMinutes: 5,
+        uptimeThresholdHours: 24,
+        shareRejectionPercent: 10,
+      });
+    }
+    const row = result.rows[0] as MinerAlertRule;
+    res.json({
+      enabled: row.enabled,
+      tempThreshold: row.tempthreshold,
+      hashrateDropPercent: row.hashratedroppercent,
+      offlineReminderMinutes: row.offlinereminderminutes,
+      uptimeThresholdHours: row.uptimethresholdhours,
+      shareRejectionPercent: row.sharerejectionpercent,
     });
+  } catch (err: unknown) {
+    log.error('Error fetching alert rule:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  const row = result.rows[0] as MinerAlertRule;
-  res.json({
-    enabled: row.enabled,
-    tempThreshold: row.tempthreshold,
-    hashrateDropPercent: row.hashratedroppercent,
-    offlineReminderMinutes: row.offlinereminderminutes,
-    uptimeThresholdHours: row.uptimethresholdhours,
-    shareRejectionPercent: row.sharerejectionpercent,
-  });
 });
 
 alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {

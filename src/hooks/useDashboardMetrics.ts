@@ -63,7 +63,7 @@ export function useDashboardMetrics(filteredMiners: Miner[], timeRange: TimeRang
         await Promise.all(miners.map((m) => DB.getSnapshots(m.id, limits.snapCount)))
       )
         .flat()
-        .filter((s) => s.timestamp > Date.now() / 1000 - limits.nowWindow)
+        .filter((s) => s.timestamp > Date.now() - limits.nowWindow * 1000)
         .sort((a, b) => a.timestamp - b.timestamp);
 
       if (cancelled) return;

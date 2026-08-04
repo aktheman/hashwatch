@@ -37,7 +37,6 @@ stripeWebhookRouter.post(
       }
 
       const payload = req.body;
-      const timestamp = req.headers['stripe-timestamp'];
 
       const parts: Record<string, string> = {};
       for (const pair of sig.split(',')) {
@@ -49,7 +48,7 @@ stripeWebhookRouter.post(
         return res.status(400).json({ error: 'Invalid signature format' });
       }
 
-      const signedPayload = `${timestamp}.${payload}`;
+      const signedPayload = `${parts.t}.${payload}`;
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
         'raw',

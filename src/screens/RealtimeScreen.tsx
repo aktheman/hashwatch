@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -97,8 +97,10 @@ export function RealtimeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const miners = useMinerStore((s) =>
-    s.miners.map((m) => ({ id: m.id, name: m.name, ip: m.ip, isOnline: m.isOnline })),
+  const allMiners = useMinerStore((s) => s.miners);
+  const miners = useMemo(
+    () => allMiners.map((m) => ({ id: m.id, name: m.name, ip: m.ip, isOnline: m.isOnline })),
+    [allMiners],
   );
 
   const [connected, setConnected] = useState(false);

@@ -137,7 +137,6 @@ groupSharesRouter.get('/shared-miners/:groupId', async (req: AuthRequest, res) =
        WHERE m."userId" IN (
          SELECT "ownerId" FROM group_shares WHERE "groupId" = $1 AND "sharedWithUserId" = $2
        )
-       AND (m.group = $1)
        ORDER BY m.name`,
       [groupId, req.userId],
     );

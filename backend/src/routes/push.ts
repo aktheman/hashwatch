@@ -1,44 +1,55 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { log } from '../logger';
 
 export const pushRouter = Router();
 pushRouter.use(authMiddleware);
 
 pushRouter.post('/register', async (req: AuthRequest, res) => {
-  const { token, alertTypes, tokenType } = req.body;
-  if (!token) {
-    res.status(400).json({ error: 'token is required' });
-    return;
-  }
-  const alertTypesStr = Array.isArray(alertTypes) ? alertTypes.join(',') : null;
-  const type = tokenType === 'web' ? 'web' : 'expo';
+  try {
+    const { token, alertTypes, tokenType } = req.body;
+    if (!token) {
+      res.status(400).json({ error: 'token is required' });
+      return;
+    }
+    const alertTypesStr = Array.isArray(alertTypes) ? alertTypes.join(',') : null;
+    const type = tokenType === 'web' ? 'web' : 'expo';
 
-  const existing = await query('SELECT userId FROM push_tokens WHERE token = $1', [token]);
-  if (existing.rows.length > 0 && existing.rows[0].userId !== req.userId) {
-    return res.status(409).json({ error: 'Token is already registered to another user' });
-  }
+    const existing = await query('SELECT userId FROM push_tokens WHERE token = $1', [token]);
+    if (existing.rows.length > 0 && existing.rows[0].userId !== req.userId) {
+      return res.status(409).json({ error: 'Token is already registered to another user' });
+    }
 
-  await query(
-    `INSERT INTO push_tokens (userId, token, alert_types, token_type) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (token) DO UPDATE SET userId = EXCLUDED.userId, alert_types = EXCLUDED.alert_types, token_type = EXCLUDED.token_type`,
-    [req.userId, token, alertTypesStr, type],
-  );
-  res.json({ ok: true });
+    await query(
+      `INSERT INTO push_tokens (userId, token, alert_types, token_type) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (token) DO UPDATE SET userId = EXCLUDED.userId, alert_types = EXCLUDED.alert_types, token_type = EXCLUDED.token_type`,
+      [req.userId, token, alertTypesStr, type],
+    );
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error registering push token:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 pushRouter.delete('/unregister', async (req: AuthRequest, res) => {
-  const { token } = req.body;
-  if (!token) {
-    res.status(400).json({ error: 'token is required' });
-    return;
+  try {
+    const { token } = req.body;
+    if (!token) {
+      res.status(400).json({ error: 'token is required' });
+      return;
+    }
+    const result = await query(
+      'DELETE FROM push_tokens WHERE token = $1 AND userId = $2 RETURNING token',
+      [token, req.userId],
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'token not found' });
+    }
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error unregistering push token:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  const result = await query(
-    'DELETE FROM push_tokens WHERE token = $1 AND userId = $2 RETURNING token',
-    [token, req.userId],
-  );
-  if (result.rows.length === 0) {
-    return res.status(404).json({ error: 'token not found' });
-  }
-  res.json({ ok: true });
 });
