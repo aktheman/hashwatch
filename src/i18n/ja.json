@@ -1020,7 +1020,14 @@
     "joinTeam": "チームに参加",
     "inviteSent": "招待を送信しました",
     "minerList": "このチームと共有されたマイナーがここに表示されます。",
-    "miners": "チームマイナー"
+    "miners": "チームマイナー",
+    "shareMiner": "マイナーを共有",
+    "share": "共有",
+    "shareFetchFailed": "マイナーを読み込めませんでした",
+    "noMinersToShare": "共有できるマイナーがありません。",
+    "unshare": "共有解除",
+    "unshareTitle": "共有解除",
+    "unshareConfirm": "このマイナーをチームと共有するのをやめますか？"
   },
   "alertChannels": {
     "title": "アラートチャネル",

@@ -2,6 +2,12 @@ import { render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { Text } from 'react-native';
 import en from '../src/i18n/en.json';
+import nb from '../src/i18n/nb.json';
+import es from '../src/i18n/es.json';
+import fr from '../src/i18n/fr.json';
+import de from '../src/i18n/de.json';
+import ja from '../src/i18n/ja.json';
+import zh from '../src/i18n/zh.json';
 
 // expo-localization is only used by the i18n module at import time
 jest.mock('expo-localization', () => ({
@@ -98,4 +104,22 @@ it('i18n mock t replaces {{var}} placeholders', () => {
 it('i18n mock t handles no opts gracefully', () => {
   const { t } = require('react-i18next').useTranslation();
   expect(t('simple.key')).toBe('simple.key');
+});
+
+it('team miner sharing keys exist in all locales', () => {
+  const shareKeys = [
+    'shareMiner',
+    'share',
+    'shareFetchFailed',
+    'noMinersToShare',
+    'unshare',
+    'unshareTitle',
+    'unshareConfirm',
+  ];
+  const locales = { en, nb, es, fr, de, ja, zh };
+  for (const locale of Object.values(locales)) {
+    for (const key of shareKeys) {
+      expect(locale.teams[key]).toBeTruthy();
+    }
+  }
 });

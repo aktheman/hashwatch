@@ -1030,7 +1030,14 @@
     "joinTeam": "Unirse al Equipo",
     "inviteSent": "Invitación enviada",
     "minerList": "Los mineros compartidos con este equipo aparecerán aquí.",
-    "miners": "Mineros del Equipo"
+    "miners": "Mineros del Equipo",
+    "shareMiner": "Compartir Minero",
+    "share": "Compartir",
+    "shareFetchFailed": "No se pudieron cargar tus mineros",
+    "noMinersToShare": "No quedan mineros para compartir.",
+    "unshare": "Dejar de compartir",
+    "unshareTitle": "Dejar de Compartir Minero",
+    "unshareConfirm": "¿Dejar de compartir este minero con el equipo?"
   },
   "alertChannels": {
     "title": "Canales de Alerta",

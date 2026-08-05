@@ -1020,7 +1020,14 @@
     "joinTeam": "加入团队",
     "inviteSent": "邀请已发送",
     "minerList": "与此团队共享的矿机将显示在此处。",
-    "miners": "团队矿机"
+    "miners": "团队矿机",
+    "shareMiner": "共享矿机",
+    "share": "共享",
+    "shareFetchFailed": "无法加载您的矿机",
+    "noMinersToShare": "没有可共享的矿机了。",
+    "unshare": "取消共享",
+    "unshareTitle": "取消共享矿机",
+    "unshareConfirm": "停止与此团队共享这台矿机？"
   },
   "alertChannels": {
     "title": "警报通道",
