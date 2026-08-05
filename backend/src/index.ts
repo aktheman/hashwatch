@@ -41,6 +41,7 @@ import { botChannelsRouter } from './routes/botChannels';
 import { stripeRouter, stripeWebhookRouter } from './routes/stripe';
 import { groupsRouter } from './routes/groups';
 import { pushWebRouter } from './routes/pushWeb';
+import { activityRouter } from './routes/activity';
 import { log } from './logger';
 
 const app = express();
@@ -144,6 +145,7 @@ app.use('/api/bot-channels', authMiddleware, botChannelsRouter);
 app.use('/api/stripe', authMiddleware, stripeRouter);
 app.use('/api/groups', groupsRouter);
 app.use('/api/push', pushWebRouter);
+app.use('/api/activity', activityRouter);
 
 app.get('/api/health', async (_req, res) => {
   const commitSha = process.env.COMMIT_SHA || null;

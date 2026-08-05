@@ -261,3 +261,29 @@ CREATE TABLE IF NOT EXISTS team_invitations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_team_invitations_team ON team_invitations(teamId, email);
+
+CREATE TABLE IF NOT EXISTS team_miners (
+  teamId UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  minerId UUID NOT NULL REFERENCES miners(id) ON DELETE CASCADE,
+  sharedBy UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  addedAt TIMESTAMP DEFAULT NOW(),
+  PRIMARY KEY (teamId, minerId)
+);
+
+CREATE INDEX IF NOT EXISTS idx_team_miners_team ON team_miners(teamId);
+CREATE INDEX IF NOT EXISTS idx_team_miners_miner ON team_miners(minerId);
+
+CREATE TABLE IF NOT EXISTS activity_events (
+  id BIGSERIAL PRIMARY KEY,
+  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  minerId UUID REFERENCES miners(id) ON DELETE SET NULL,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  severity TEXT NOT NULL DEFAULT 'info',
+  timestamp BIGINT NOT NULL,
+  read BOOLEAN NOT NULL DEFAULT false,
+  metadata JSONB NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_events_user ON activity_events(userId, timestamp DESC);

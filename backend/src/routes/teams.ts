@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { log } from '../logger';
 import { query } from '../db';
+import { recordActivity } from '../services/activityFeed';
 
 export const teamRouter = Router();
 
@@ -286,6 +287,20 @@ teamRouter.post('/:id/accept', async (req: AuthRequest, res) => {
       : undefined;
 
     log.info('User', userId, 'accepted invitation to team:', teamId);
+    recordActivity(userId, {
+      type: 'team_member_joined',
+      title: `You joined team ${team?.name ?? teamId}`,
+      severity: 'success',
+      metadata: { teamId },
+    });
+    if (team?.ownerId) {
+      recordActivity(team.ownerId, {
+        type: 'team_member_joined',
+        title: `${req.userEmail} joined your team ${team.name}`,
+        severity: 'info',
+        metadata: { teamId },
+      });
+    }
     res.json({ membership, team });
   } catch (err: unknown) {
     log.error('Error accepting invitation:', err instanceof Error ? err.message : err);
@@ -306,9 +321,105 @@ teamRouter.get('/:id/miners', async (req: AuthRequest, res) => {
     const memberResult = await query('SELECT userId FROM team_members WHERE teamId = $1', [teamId]);
     const memberIds = (memberResult.rows as Array<{ userid: string }>).map((r) => r.userid);
 
-    res.json({ miners: [], memberIds });
+    const minerResult = await query(
+      `SELECT m.id, m.name, m.ip, m."userId" AS "ownerId"
+       FROM team_miners tm
+       JOIN miners m ON m.id = tm.minerId
+       WHERE tm.teamId = $1
+       ORDER BY tm."addedAt" DESC`,
+      [teamId],
+    );
+    const miners = minerResult.rows.map((r: Record<string, unknown>) => ({
+      id: r.id,
+      name: r.name,
+      ip: r.ip,
+      ownerId: r.ownerId,
+    }));
+
+    res.json({ miners, memberIds });
   } catch (err: unknown) {
     log.error('Error listing team miners:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+teamRouter.post('/:id/miners', async (req: AuthRequest, res) => {
+  try {
+    const teamId = req.params.id as string;
+    const userId = req.userId as string;
+    const membership = await getMembership(teamId, userId);
+
+    if (!membership) {
+      return res.status(404).json({ error: 'Team not found or not a member' });
+    }
+    if (membership.role !== 'owner' && membership.role !== 'admin') {
+      return res.status(403).json({ error: 'Only owners and admins can share miners' });
+    }
+
+    const { minerId } = req.body;
+    if (!minerId || typeof minerId !== 'string') {
+      return res.status(400).json({ error: 'minerId is required' });
+    }
+
+    const owned = await query('SELECT id FROM miners WHERE id = $1 AND "userId" = $2', [
+      minerId,
+      userId,
+    ]);
+    if (owned.rows.length === 0) {
+      return res.status(404).json({ error: 'Miner not found or not owned by you' });
+    }
+
+    await query(
+      `INSERT INTO team_miners (teamId, minerId, sharedBy)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (teamId, minerId) DO NOTHING`,
+      [teamId, minerId, userId],
+    );
+
+    log.info('Miner shared with team:', minerId, 'team:', teamId);
+    recordActivity(userId, {
+      type: 'miner_shared',
+      title: `Shared miner with team`,
+      description: `Team ${teamId}`,
+      severity: 'info',
+      minerId,
+      metadata: { teamId },
+    });
+    res.status(201).json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error sharing miner with team:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+teamRouter.delete('/:id/miners/:minerId', async (req: AuthRequest, res) => {
+  try {
+    const teamId = req.params.id as string;
+    const userId = req.userId as string;
+    const minerId = req.params.minerId as string;
+    const membership = await getMembership(teamId, userId);
+
+    if (!membership) {
+      return res.status(404).json({ error: 'Team not found or not a member' });
+    }
+    if (membership.role !== 'owner' && membership.role !== 'admin') {
+      return res.status(403).json({ error: 'Only owners and admins can unshare miners' });
+    }
+
+    await query('DELETE FROM team_miners WHERE teamId = $1 AND minerId = $2', [teamId, minerId]);
+
+    log.info('Miner removed from team:', minerId, 'team:', teamId);
+    recordActivity(userId, {
+      type: 'miner_unshared',
+      title: `Unshared miner from team`,
+      description: `Team ${teamId}`,
+      severity: 'info',
+      minerId,
+      metadata: { teamId },
+    });
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    log.error('Error removing miner from team:', err instanceof Error ? err.message : err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

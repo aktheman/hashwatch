@@ -1,10 +1,48 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { sendPushNotification } from '../services/pushNotifications';
 import { log } from '../logger';
 
 export const pushRouter = Router();
 pushRouter.use(authMiddleware);
+
+pushRouter.post('/test', async (req: AuthRequest, res) => {
+  try {
+    const tokenResult = await query(
+      'SELECT COUNT(*)::int AS count FROM push_tokens WHERE userId = $1',
+      [req.userId as string],
+    );
+    const count = (tokenResult.rows[0] as { count: number }).count;
+    if (count === 0) {
+      return res.status(400).json({ error: 'No push tokens registered' });
+    }
+
+    await sendPushNotification(
+      req.userId as string,
+      'test',
+      'HashWatch Test',
+      'This is a test notification from HashWatch.',
+    );
+    await query(
+      `INSERT INTO notification_history (userId, token, title, body, data, sentAt, status)
+       VALUES ($1, '', $2, $3, $4, $5, 'sent')`,
+      [
+        req.userId as string,
+        'HashWatch Test',
+        'This is a test notification from HashWatch.',
+        JSON.stringify({ type: 'test' }),
+        Date.now(),
+      ],
+    );
+
+    log.info('Test notification sent to user:', req.userId);
+    res.json({ ok: true, sentTo: count });
+  } catch (err: unknown) {
+    log.error('Error sending test notification:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 pushRouter.post('/register', async (req: AuthRequest, res) => {
   try {

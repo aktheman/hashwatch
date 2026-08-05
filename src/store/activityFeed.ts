@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { fetchActivityFeed, markActivityRead, markAllActivityRead } from '../api/client';
 
 export type ActivityType =
   | 'miner_online'
@@ -14,7 +15,9 @@ export type ActivityType =
   | 'maintenance_completed'
   | 'pool_switched'
   | 'miner_added'
-  | 'miner_removed';
+  | 'miner_removed'
+  | 'miner_shared'
+  | 'miner_unshared';
 
 export interface ActivityEvent {
   id: string;
@@ -31,23 +34,30 @@ export interface ActivityEvent {
 
 interface ActivityFeedState {
   events: ActivityEvent[];
+  syncing: boolean;
   addEvent: (event: Omit<ActivityEvent, 'id' | 'timestamp' | 'read'>) => void;
   markRead: (id: string) => void;
   markAllRead: () => void;
   clearEvents: () => void;
+  syncFromBackend: () => Promise<void>;
   getUnreadCount: () => number;
   getByMiner: (minerId: string) => ActivityEvent[];
 }
 
 const MAX_EVENTS = 500;
 
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export const useActivityFeedStore = create<ActivityFeedState>((set, get) => ({
   events: [],
+  syncing: false,
 
   addEvent: (event) => {
     const newEvent: ActivityEvent = {
       ...event,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      id: generateId(),
       timestamp: Date.now(),
       read: false,
     };
@@ -60,15 +70,51 @@ export const useActivityFeedStore = create<ActivityFeedState>((set, get) => ({
     set((state) => ({
       events: state.events.map((e) => (e.id === id ? { ...e, read: true } : e)),
     }));
+    markActivityRead(id).catch(() => {});
   },
 
   markAllRead: () => {
     set((state) => ({
       events: state.events.map((e) => ({ ...e, read: true })),
     }));
+    markAllActivityRead().catch(() => {});
   },
 
   clearEvents: () => set({ events: [] }),
+
+  syncFromBackend: async () => {
+    set({ syncing: true });
+    try {
+      const remote = await fetchActivityFeed(200);
+      if (remote.length === 0) return;
+      const local = get().events;
+      const localIds = new Set(local.map((e) => e.id));
+      const localKeys = new Set(local.map((e) => `${e.title}:${e.timestamp}`));
+      const merged = [...local];
+      for (const r of remote) {
+        if (localIds.has(r.id)) continue;
+        const key = `${r.title}:${r.timestamp}`;
+        if (localKeys.has(key)) continue;
+        merged.push({
+          id: r.id,
+          type: r.type as ActivityType,
+          title: r.title,
+          description: r.description ?? '',
+          timestamp: r.timestamp,
+          severity: r.severity,
+          read: r.read,
+          minerId: r.minerId,
+          metadata: (r.metadata ?? {}) as Record<string, string>,
+        });
+      }
+      merged.sort((a, b) => b.timestamp - a.timestamp);
+      set({ events: merged.slice(0, MAX_EVENTS) });
+    } catch {
+      // best-effort
+    } finally {
+      set({ syncing: false });
+    }
+  },
 
   getUnreadCount: () => get().events.filter((e) => !e.read).length,
 

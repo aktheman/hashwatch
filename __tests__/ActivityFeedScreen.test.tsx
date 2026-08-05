@@ -57,9 +57,11 @@ const mockEvents = [
 
 let mockFeedState: {
   events: typeof mockEvents;
+  syncing: boolean;
   markRead: jest.Mock;
   markAllRead: jest.Mock;
   clearEvents: jest.Mock;
+  syncFromBackend: jest.Mock;
 };
 
 jest.mock('../src/store/activityFeed', () => ({
@@ -71,9 +73,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockFeedState = {
     events: [],
+    syncing: false,
     markRead: jest.fn(),
     markAllRead: jest.fn(),
     clearEvents: jest.fn(),
+    syncFromBackend: jest.fn().mockResolvedValue(undefined),
   };
 });
 

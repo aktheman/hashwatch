@@ -9,6 +9,7 @@ import {
   sendShareRejectionNotification,
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
+import { recordActivity } from './activityFeed';
 
 interface MinerState {
   isOnline: boolean;
@@ -160,8 +161,22 @@ export async function checkMinerStatus(
 
   if (prev.isOnline && !isOnline && canNotify(`${key}:offline`) && prefs.offline !== false) {
     sendMinerOfflineNotification(userId, minerName, ip, minerId);
+    recordActivity(userId, {
+      type: 'miner_offline',
+      title: `${minerName} went offline`,
+      description: ip,
+      severity: 'error',
+      minerId,
+    });
   } else if (!prev.isOnline && isOnline && canNotify(`${key}:online`) && prefs.online !== false) {
     sendMinerOnlineNotification(userId, minerName, ip, minerId);
+    recordActivity(userId, {
+      type: 'miner_online',
+      title: `${minerName} came online`,
+      description: ip,
+      severity: 'success',
+      minerId,
+    });
   }
 
   const tempThreshold = rules.tempthreshold;
@@ -172,6 +187,14 @@ export async function checkMinerStatus(
     prefs.hot !== false
   ) {
     sendMinerHotNotification(userId, minerName, ip, temperature, minerId);
+    recordActivity(userId, {
+      type: 'alert_fired',
+      title: `${minerName} is running hot`,
+      description: `${temperature}°C`,
+      severity: 'warning',
+      minerId,
+      metadata: { temperature },
+    });
   }
 
   const prevHr = prev.hashRate;
@@ -184,6 +207,14 @@ export async function checkMinerStatus(
   ) {
     const pct = Math.round((1 - hashRate / prevHr) * 100);
     sendHashrateDropNotification(userId, minerName, minerId, pct);
+    recordActivity(userId, {
+      type: 'alert_fired',
+      title: `${minerName} hashrate dropped`,
+      description: `${pct}%`,
+      severity: 'warning',
+      minerId,
+      metadata: { dropPercent: pct },
+    });
   }
 
   if (
@@ -196,6 +227,14 @@ export async function checkMinerStatus(
     const oldPool = prev.pool || 'unknown';
     const newPool = pool || 'unknown';
     sendPoolChangeNotification(userId, minerName, minerId, oldPool, newPool);
+    recordActivity(userId, {
+      type: 'pool_switched',
+      title: `${minerName} switched pool`,
+      description: `${oldPool} → ${newPool}`,
+      severity: 'info',
+      minerId,
+      metadata: { oldPool, newPool },
+    });
   }
 
   if (
@@ -208,6 +247,14 @@ export async function checkMinerStatus(
     const uptimeSec = prev.uptimeSeconds ?? 0;
     if (uptimeSec > 0 && uptimeSec >= rules.uptimethresholdhours * 3600) {
       sendLongUptimeNotification(userId, minerName, minerId, uptimeSec);
+      recordActivity(userId, {
+        type: 'alert_fired',
+        title: `${minerName} has long uptime`,
+        description: `${Math.round(uptimeSec / 3600)}h`,
+        severity: 'info',
+        minerId,
+        metadata: { uptimeSeconds: uptimeSec },
+      });
     }
   }
 
@@ -221,6 +268,14 @@ export async function checkMinerStatus(
       prefs.share_rejection !== false
     ) {
       sendShareRejectionNotification(userId, minerName, minerId, Math.round(rejectionRate));
+      recordActivity(userId, {
+        type: 'alert_fired',
+        title: `${minerName} high share rejection`,
+        description: `${Math.round(rejectionRate)}%`,
+        severity: 'warning',
+        minerId,
+        metadata: { rejectionRate: Math.round(rejectionRate) },
+      });
     }
   }
 

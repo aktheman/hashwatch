@@ -40,6 +40,13 @@ interface Invitation {
   status: string;
 }
 
+interface SharedMiner {
+  id: string;
+  name: string;
+  ip: string;
+  ownerId?: string;
+}
+
 async function apiCall(path: string, options: RequestInit = {}): Promise<unknown> {
   const { getBaseUrl } = await import('../api/client');
   const { useAuthStore: getAuth } = await import('../store/auth');
@@ -74,6 +81,10 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'viewer' | 'admin'>('viewer');
+  const [teamMiners, setTeamMiners] = useState<SharedMiner[]>([]);
+  const [myMiners, setMyMiners] = useState<SharedMiner[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const fetchTeams = useCallback(async () => {
     if (!token) return;
@@ -93,11 +104,81 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
     fetchTeams();
   }, [fetchTeams]);
 
+  const fetchTeamMiners = useCallback(async (teamId: string) => {
+    try {
+      const data = (await apiCall(`/api/teams/${teamId}/miners`)) as { miners: SharedMiner[] };
+      setTeamMiners(data.miners ?? []);
+    } catch {
+      setTeamMiners([]);
+    }
+  }, []);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchTeams();
+    if (selectedTeam) {
+      await fetchTeamMiners(selectedTeam.id);
+    }
     setRefreshing(false);
-  }, [fetchTeams]);
+  }, [fetchTeams, selectedTeam, fetchTeamMiners]);
+
+  useEffect(() => {
+    if (selectedTeam) {
+      fetchTeamMiners(selectedTeam.id);
+    } else {
+      setTeamMiners([]);
+    }
+  }, [selectedTeam, fetchTeamMiners]);
+
+  const openShareModal = useCallback(async () => {
+    haptic.light();
+    try {
+      const data = (await apiCall('/api/miners')) as SharedMiner[];
+      const shared = new Set(teamMiners.map((m) => m.id));
+      setMyMiners(data.filter((m) => !shared.has(m.id)));
+      setShowShareModal(true);
+    } catch {
+      Alert.alert(t('common.error'), t('teams.shareFetchFailed', 'Failed to load your miners'));
+    }
+  }, [teamMiners, t]);
+
+  const shareMiner = useCallback(
+    async (minerId: string) => {
+      if (!selectedTeam) return;
+      setSharing(true);
+      try {
+        await apiCall(`/api/teams/${selectedTeam.id}/miners`, {
+          method: 'POST',
+          body: JSON.stringify({ minerId }),
+        });
+        haptic.success();
+        const data = (await apiCall(`/api/teams/${selectedTeam.id}/miners`)) as {
+          miners: SharedMiner[];
+        };
+        setTeamMiners(data.miners);
+        setMyMiners((prev) => prev.filter((m) => m.id !== minerId));
+      } catch (err: unknown) {
+        Alert.alert(t('common.error'), err instanceof Error ? err.message : String(err));
+      } finally {
+        setSharing(false);
+      }
+    },
+    [selectedTeam, t],
+  );
+
+  const unshareMiner = useCallback(
+    async (minerId: string) => {
+      if (!selectedTeam) return;
+      try {
+        await apiCall(`/api/teams/${selectedTeam.id}/miners/${minerId}`, { method: 'DELETE' });
+        haptic.success();
+        setTeamMiners((prev) => prev.filter((m) => m.id !== minerId));
+      } catch (err: unknown) {
+        Alert.alert(t('common.error'), err instanceof Error ? err.message : String(err));
+      }
+    },
+    [selectedTeam, t],
+  );
 
   const createTeam = useCallback(async () => {
     if (!newTeamName.trim()) return;
@@ -380,12 +461,74 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('teams.miners', 'Team Miners')}</Text>
-          <View style={styles.card}>
-            <Text style={styles.cardSub}>
-              {t('teams.minerList', 'Miners shared with this team will appear here.')}
-            </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: spacing.xs,
+            }}
+          >
+            <Text style={styles.sectionTitle}>{t('teams.miners', 'Team Miners')}</Text>
+            {(selectedTeam.role === 'owner' || selectedTeam.role === 'admin') && (
+              <Pressable
+                onPress={openShareModal}
+                accessibilityRole="button"
+                accessibilityLabel={t('teams.shareMiner', 'Share Miner')}
+              >
+                <Text
+                  style={{
+                    color: theme.primary,
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.semibold,
+                  }}
+                >
+                  + {t('teams.shareMiner', 'Share Miner')}
+                </Text>
+              </Pressable>
+            )}
           </View>
+          {teamMiners.length === 0 ? (
+            <View style={styles.card}>
+              <Text style={styles.cardSub}>
+                {t('teams.minerList', 'Miners shared with this team will appear here.')}
+              </Text>
+            </View>
+          ) : (
+            teamMiners.map((miner) => (
+              <View key={miner.id} style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cardTitle}>{miner.name}</Text>
+                  <Text style={styles.cardSub}>{miner.ip}</Text>
+                </View>
+                {(selectedTeam.role === 'owner' || selectedTeam.role === 'admin') && (
+                  <Pressable
+                    onPress={() => {
+                      haptic.light();
+                      Alert.alert(
+                        t('teams.unshareTitle', 'Unshare Miner'),
+                        t('teams.unshareConfirm', 'Stop sharing this miner with the team?'),
+                        [
+                          { text: t('common.cancel'), style: 'cancel' },
+                          {
+                            text: t('teams.unshare', 'Unshare'),
+                            style: 'destructive',
+                            onPress: () => unshareMiner(miner.id),
+                          },
+                        ],
+                      );
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('teams.unshare', 'Unshare')}
+                  >
+                    <Text style={{ color: theme.danger, fontSize: fontSize.sm }}>
+                      {t('teams.unshare', 'Unshare')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            ))
+          )}
         </View>
 
         <View style={styles.section}>
@@ -471,6 +614,59 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
             <Text style={[styles.btnText, { color: theme.danger }]}>{t('teams.leave')}</Text>
           </Pressable>
         )}
+
+        <Modal visible={showShareModal} transparent animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              justifyContent: 'center',
+              padding: spacing.xl,
+            }}
+          >
+            <View
+              style={{ backgroundColor: theme.bg, borderRadius: radius.lg, padding: spacing.lg }}
+            >
+              <Text style={[styles.cardTitle, { marginBottom: spacing.sm }]}>
+                {t('teams.shareMiner', 'Share Miner')}
+              </Text>
+              {myMiners.length === 0 ? (
+                <Text style={styles.cardSub}>
+                  {t('teams.noMinersToShare', 'No miners left to share.')}
+                </Text>
+              ) : (
+                <ScrollView style={{ maxHeight: 320 }} nestedScrollEnabled>
+                  {myMiners.map((miner) => (
+                    <Pressable
+                      key={miner.id}
+                      disabled={sharing}
+                      onPress={() => shareMiner(miner.id)}
+                      style={[styles.row, { marginBottom: spacing.xs }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('teams.shareMiner', 'Share Miner')}: ${miner.name}`}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cardTitle}>{miner.name}</Text>
+                        <Text style={styles.cardSub}>{miner.ip}</Text>
+                      </View>
+                      <Text style={{ color: theme.primary, fontSize: fontSize.sm }}>
+                        {t('teams.share', 'Share')}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
+              <Pressable
+                style={[styles.btn, { backgroundColor: theme.surfaceLight, marginTop: spacing.sm }]}
+                onPress={() => setShowShareModal(false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel')}
+              >
+                <Text style={[styles.btnText, { color: theme.text }]}>{t('common.cancel')}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
 
         <Modal visible={showInviteModal} transparent animationType="fade">
           <View

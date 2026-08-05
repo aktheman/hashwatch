@@ -356,6 +356,40 @@ export async function clearNotificationHistory(): Promise<OkResponse> {
   return res.data;
 }
 
+export async function sendTestPush(): Promise<{ ok: boolean; sentTo: number }> {
+  const res = await client.post<{ ok: boolean; sentTo: number }>('/api/push/test');
+  return res.data;
+}
+
+export interface ActivityEvent {
+  id: string;
+  type: string;
+  title: string;
+  description?: string;
+  severity: 'info' | 'warning' | 'error' | 'success';
+  timestamp: number;
+  read: boolean;
+  minerId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export async function fetchActivityFeed(limit?: number): Promise<ActivityEvent[]> {
+  const res = await client.get<{ events: ActivityEvent[] }>('/api/activity', {
+    params: { limit },
+  });
+  return res.data.events;
+}
+
+export async function markActivityRead(id: string): Promise<OkResponse> {
+  const res = await client.put<OkResponse>(`/api/activity/${id}/read`);
+  return res.data;
+}
+
+export async function markAllActivityRead(): Promise<OkResponse> {
+  const res = await client.put<OkResponse>('/api/activity/read');
+  return res.data;
+}
+
 export async function putMinerAlertRules(
   minerId: string,
   rules: MinerAlertRule,

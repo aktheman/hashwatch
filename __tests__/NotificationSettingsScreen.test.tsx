@@ -43,6 +43,10 @@ jest.mock('../src/services/notifications', () => ({
   sendMinerAlert: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../src/api/client', () => ({
+  sendTestPush: jest.fn().mockResolvedValue({ ok: true, sentTo: 1 }),
+}));
+
 const mockProfitState: { enabled: boolean; dropPercent: number } = {
   enabled: false,
   dropPercent: 5,
@@ -268,6 +272,10 @@ it('sends a test notification when permission is granted', async () => {
       'offline',
       mockStoreState.thresholds,
     );
+  });
+  const { sendTestPush } = jest.requireMock('../src/api/client');
+  await waitFor(() => {
+    expect(sendTestPush).toHaveBeenCalled();
   });
   expect(medium).toHaveBeenCalled();
   expect(alertSpy).toHaveBeenCalledWith(

@@ -92,3 +92,34 @@ describe('DELETE /api/push/unregister', () => {
     expect(res.body.error).toBe('token is required');
   });
 });
+
+describe('POST /api/push/test', () => {
+  it('sends a test push when tokens exist', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ count: 2 }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rowCount: 1 });
+
+    const res = await request(app).post('/api/push/test');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true, sentTo: 2 });
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO notification_history'),
+      expect.any(Array),
+    );
+  });
+
+  it('returns 400 when no push tokens are registered', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ count: 0 }] });
+
+    const res = await request(app).post('/api/push/test');
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('No push tokens registered');
+    expect(mockQuery).not.toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO notification_history'),
+      expect.anything(),
+    );
+  });
+});

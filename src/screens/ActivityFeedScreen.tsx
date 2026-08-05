@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
@@ -21,6 +21,8 @@ const TYPE_ICONS: Record<ActivityType, string> = {
   pool_switched: '🌊',
   miner_added: '➕',
   miner_removed: '➖',
+  miner_shared: '🔗',
+  miner_unshared: '🔓',
 };
 
 const SEVERITY_BORDER: Record<ActivityEvent['severity'], string> = {
@@ -106,13 +108,19 @@ export function ActivityFeedScreen() {
   const markRead = useActivityFeedStore((s) => s.markRead);
   const markAllRead = useActivityFeedStore((s) => s.markAllRead);
   const clearEvents = useActivityFeedStore((s) => s.clearEvents);
+  const syncFromBackend = useActivityFeedStore((s) => s.syncFromBackend);
 
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 400);
-  }, []);
+    await syncFromBackend();
+    setRefreshing(false);
+  }, [syncFromBackend]);
+
+  useEffect(() => {
+    syncFromBackend();
+  }, [syncFromBackend]);
 
   const unreadCount = useMemo(() => events.filter((e) => !e.read).length, [events]);
 

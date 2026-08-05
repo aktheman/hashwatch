@@ -1,7 +1,19 @@
 import { useActivityFeedStore } from '../src/store/activityFeed';
 import type { ActivityType } from '../src/store/activityFeed';
+import { fetchActivityFeed, markActivityRead, markAllActivityRead } from '../src/api/client';
+
+jest.mock('../src/api/client', () => ({
+  fetchActivityFeed: jest.fn().mockResolvedValue([]),
+  markActivityRead: jest.fn().mockResolvedValue({ ok: true }),
+  markAllActivityRead: jest.fn().mockResolvedValue({ ok: true }),
+}));
+
+const mockedFetch = fetchActivityFeed as jest.Mock;
+const mockedMarkRead = markActivityRead as jest.Mock;
+const mockedMarkAllRead = markAllActivityRead as jest.Mock;
 
 beforeEach(() => {
+  jest.clearAllMocks();
   useActivityFeedStore.setState({ events: [] });
 });
 
@@ -138,4 +150,70 @@ it('multiple addEvent calls maintain chronological order', () => {
   expect(events[2].title).toBe('First');
   expect(events[0].timestamp).toBeGreaterThanOrEqual(events[1].timestamp);
   expect(events[1].timestamp).toBeGreaterThanOrEqual(events[2].timestamp);
+});
+
+it('syncFromBackend does not duplicate remote events across repeated syncs', async () => {
+  const remoteEvent = {
+    id: '10',
+    type: 'miner_offline',
+    title: 'Miner B went offline',
+    description: '192.168.1.20',
+    severity: 'error',
+    timestamp: 1700000000000,
+    read: false,
+    minerId: 'miner-2',
+  };
+  mockedFetch.mockResolvedValue([remoteEvent]);
+
+  await useActivityFeedStore.getState().syncFromBackend();
+  await useActivityFeedStore.getState().syncFromBackend();
+
+  const events = useActivityFeedStore.getState().events;
+  expect(mockedFetch).toHaveBeenCalledWith(200);
+  expect(events).toHaveLength(1);
+  expect(events[0].id).toBe('10');
+});
+
+it('syncFromBackend adds remote events when local is empty', async () => {
+  mockedFetch.mockResolvedValueOnce([
+    {
+      id: '10',
+      type: 'miner_online',
+      title: 'Miner C came online',
+      description: '',
+      severity: 'success',
+      timestamp: 1700000000000,
+      read: false,
+      minerId: 'miner-3',
+    },
+  ]);
+
+  await useActivityFeedStore.getState().syncFromBackend();
+
+  const events = useActivityFeedStore.getState().events;
+  expect(events).toHaveLength(1);
+  expect(events[0]).toMatchObject({
+    id: '10',
+    type: 'miner_online',
+    title: 'Miner C came online',
+    severity: 'success',
+  });
+});
+
+it('markRead pushes read state to backend', () => {
+  useActivityFeedStore.getState().addEvent(baseEvent);
+  const id = useActivityFeedStore.getState().events[0].id;
+
+  useActivityFeedStore.getState().markRead(id);
+
+  expect(mockedMarkRead).toHaveBeenCalledWith(id);
+  expect(useActivityFeedStore.getState().events[0].read).toBe(true);
+});
+
+it('markAllRead pushes read state to backend', () => {
+  useActivityFeedStore.getState().addEvent(baseEvent);
+
+  useActivityFeedStore.getState().markAllRead();
+
+  expect(mockedMarkAllRead).toHaveBeenCalled();
 });

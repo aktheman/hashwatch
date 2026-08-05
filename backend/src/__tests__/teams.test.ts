@@ -250,3 +250,121 @@ describe('DELETE /api/teams/:id/leave', () => {
     expect(res.body).toEqual({ ok: true });
   });
 });
+
+describe('GET /api/teams/:id/miners', () => {
+  it('lists shared miners for a member', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      if (sql.includes('SELECT userId FROM team_members')) {
+        return { rows: [{ userid: 'u1' }, { userid: 'u2' }] };
+      }
+      if (sql.includes('JOIN miners m')) {
+        return { rows: [{ id: 'm1', name: 'Worker', ip: '10.0.0.5', ownerId: 'u1' }] };
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).get('/api/teams/team-1/miners');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      miners: [{ id: 'm1', name: 'Worker', ip: '10.0.0.5', ownerId: 'u1' }],
+      memberIds: ['u1', 'u2'],
+    });
+  });
+
+  it('returns 404 when the user is not a member', async () => {
+    withDb(async () => ({ rows: [] }));
+
+    const res = await request(app).get('/api/teams/team-1/miners');
+
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('POST /api/teams/:id/miners', () => {
+  it('shares an owned miner with the team', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      if (sql.includes('SELECT id FROM miners')) return row({ id: 'm1' });
+      return { rows: [], rowCount: 1 };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/miners').send({ minerId: 'm1' });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({ ok: true });
+  });
+
+  it('returns 403 when a viewer tries to share', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'viewer', joinedat: TS });
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/miners').send({ minerId: 'm1' });
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 404 when the miner is not owned by the user', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/miners').send({ minerId: 'm1' });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when minerId is missing', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/miners').send({});
+
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('DELETE /api/teams/:id/miners/:minerId', () => {
+  it('unshares a miner as owner', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      return { rows: [], rowCount: 1 };
+    });
+
+    const res = await request(app).delete('/api/teams/team-1/miners/m1');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true });
+  });
+
+  it('returns 403 when a viewer tries to unshare', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'viewer', joinedat: TS });
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).delete('/api/teams/team-1/miners/m1');
+
+    expect(res.status).toBe(403);
+  });
+});

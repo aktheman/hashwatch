@@ -138,6 +138,12 @@ export function NotificationSettingsScreen() {
       'offline',
       thresholds,
     );
+    const { sendTestPush } = await import('../api/client');
+    try {
+      await sendTestPush();
+    } catch {
+      // backend push is best-effort when unauthenticated or offline
+    }
     Alert.alert(t('notificationSettings.testSent'), t('notificationSettings.testSentBody'));
   }, [thresholds, t]);
 

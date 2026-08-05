@@ -322,3 +322,111 @@ it('does not invite with an empty email', async () => {
     expect.objectContaining({ method: 'POST' }),
   );
 });
+
+it('shows shared miners in team detail', async () => {
+  mockTeams = [team];
+  mockFetch.mockImplementation(async (url: string) => {
+    if (url.includes('/api/teams/t1/miners') && !url.endsWith('/miners')) {
+      return okJson({});
+    }
+    if (url.includes('/api/teams/t1/miners')) {
+      return okJson({
+        miners: [{ id: 'm1', name: 'Worker', ip: '10.0.0.5', ownerId: 'u1' }],
+        memberIds: ['u1'],
+      });
+    }
+    return okJson({ teams: mockTeams, invitations: mockInvitations });
+  });
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => {
+    expect(screen.getByText('Worker')).toBeTruthy();
+    expect(screen.getByText('10.0.0.5')).toBeTruthy();
+    expect(screen.getByLabelText('teams.shareMiner')).toBeTruthy();
+  });
+});
+
+it('opens share modal listing unshared miners', async () => {
+  mockTeams = [team];
+  mockFetch.mockImplementation(async (url: string) => {
+    if (url.includes('/api/teams/t1/miners')) {
+      return okJson({ miners: [{ id: 'm1', name: 'Shared', ip: '1.1.1.1' }], memberIds: ['u1'] });
+    }
+    if (url === 'http://localhost:4000/api/miners') {
+      return okJson([{ id: 'm2', name: 'MinerB', ip: '2.2.2.2' }]);
+    }
+    return okJson({ teams: mockTeams, invitations: mockInvitations });
+  });
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.shareMiner')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.shareMiner'));
+  await waitFor(() => {
+    expect(screen.getByText('MinerB')).toBeTruthy();
+    expect(screen.getByText('2.2.2.2')).toBeTruthy();
+  });
+});
+
+it('shares a miner with the team', async () => {
+  mockTeams = [team];
+  mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
+    if (init?.method === 'POST') {
+      return okJson({ ok: true });
+    }
+    if (url.includes('/api/teams/t1/miners')) {
+      return okJson({ miners: [{ id: 'm1', name: 'Shared', ip: '1.1.1.1' }], memberIds: ['u1'] });
+    }
+    if (url === 'http://localhost:4000/api/miners') {
+      return okJson([{ id: 'm2', name: 'MinerB', ip: '2.2.2.2' }]);
+    }
+    return okJson({ teams: mockTeams, invitations: mockInvitations });
+  });
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.shareMiner')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.shareMiner'));
+  await waitFor(() => expect(screen.getByText('MinerB')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.shareMiner: MinerB'));
+  await waitFor(() => {
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams/t1/miners',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ minerId: 'm2' }),
+      }),
+    );
+  });
+  expect(hapticMocks().success).toHaveBeenCalled();
+});
+
+it('unshares a miner from the team', async () => {
+  const alertSpy = mockAlertButton('teams.unshare');
+  mockTeams = [team];
+  mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
+    if (init?.method === 'DELETE') {
+      return okJson({ ok: true });
+    }
+    if (url.includes('/api/teams/t1/miners')) {
+      return okJson({
+        miners: [{ id: 'm1', name: 'Worker', ip: '10.0.0.5', ownerId: 'u1' }],
+        memberIds: ['u1'],
+      });
+    }
+    return okJson({ teams: mockTeams, invitations: mockInvitations });
+  });
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByText('Alpha')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Alpha, 4 members'));
+  await waitFor(() => expect(screen.getByLabelText('teams.unshare')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.unshare'));
+  await waitFor(() => {
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:4000/api/teams/t1/miners/m1',
+      expect.objectContaining({ method: 'DELETE' }),
+    );
+  });
+  alertSpy.mockRestore();
+});
