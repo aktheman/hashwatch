@@ -1027,7 +1027,11 @@
     "noMinersToShare": "没有可共享的矿机了。",
     "unshare": "取消共享",
     "unshareTitle": "取消共享矿机",
-    "unshareConfirm": "停止与此团队共享这台矿机？"
+    "unshareConfirm": "停止与此团队共享这台矿机？",
+    "export": "导出",
+    "exportDesc": "将团队分析导出为CSV文件或PDF报告。",
+    "exportCSV": "导出CSV",
+    "exportPDF": "导出PDF"
   },
   "alertChannels": {
     "title": "警报通道",

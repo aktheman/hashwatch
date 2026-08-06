@@ -1027,7 +1027,11 @@
     "noMinersToShare": "共有できるマイナーがありません。",
     "unshare": "共有解除",
     "unshareTitle": "共有解除",
-    "unshareConfirm": "このマイナーをチームと共有するのをやめますか？"
+    "unshareConfirm": "このマイナーをチームと共有するのをやめますか？",
+    "export": "エクスポート",
+    "exportDesc": "チーム分析をCSVファイルまたはPDFレポートとしてエクスポートします。",
+    "exportCSV": "CSVをエクスポート",
+    "exportPDF": "PDFをエクスポート"
   },
   "alertChannels": {
     "title": "アラートチャネル",

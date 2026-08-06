@@ -123,3 +123,13 @@ it('team miner sharing keys exist in all locales', () => {
     }
   }
 });
+
+it('team export keys exist in all locales', () => {
+  const exportKeys = ['export', 'exportDesc', 'exportCSV', 'exportPDF'];
+  const locales = { en, nb, es, fr, de, ja, zh };
+  for (const locale of Object.values(locales)) {
+    for (const key of exportKeys) {
+      expect(locale.teams[key]).toBeTruthy();
+    }
+  }
+});

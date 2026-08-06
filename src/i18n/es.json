@@ -1037,7 +1037,11 @@
     "noMinersToShare": "No quedan mineros para compartir.",
     "unshare": "Dejar de compartir",
     "unshareTitle": "Dejar de Compartir Minero",
-    "unshareConfirm": "¿Dejar de compartir este minero con el equipo?"
+    "unshareConfirm": "¿Dejar de compartir este minero con el equipo?",
+    "export": "Exportar",
+    "exportDesc": "Exporta los análisis del equipo como archivo CSV o informe PDF.",
+    "exportCSV": "Exportar CSV",
+    "exportPDF": "Exportar PDF"
   },
   "alertChannels": {
     "title": "Canales de Alerta",

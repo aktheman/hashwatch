@@ -1037,7 +1037,11 @@
     "noMinersToShare": "Keine Miner mehr zum Teilen.",
     "unshare": "Nicht mehr teilen",
     "unshareTitle": "Miner Freigabe Entfernen",
-    "unshareConfirm": "Diesen Miner nicht mehr mit dem Team teilen?"
+    "unshareConfirm": "Diesen Miner nicht mehr mit dem Team teilen?",
+    "export": "Exportieren",
+    "exportDesc": "Exportieren Sie Team-Analysen als CSV-Datei oder PDF-Bericht.",
+    "exportCSV": "CSV exportieren",
+    "exportPDF": "PDF exportieren"
   },
   "alertChannels": {
     "title": "Alarmkanäle",

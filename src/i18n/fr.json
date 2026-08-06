@@ -1037,7 +1037,11 @@
     "noMinersToShare": "Plus de miners à partager.",
     "unshare": "Ne plus partager",
     "unshareTitle": "Arrêter le Partage",
-    "unshareConfirm": "Arrêter de partager ce miner avec l'équipe ?"
+    "unshareConfirm": "Arrêter de partager ce miner avec l'équipe ?",
+    "export": "Exporter",
+    "exportDesc": "Exportez les analyses de l'équipe en fichier CSV ou rapport PDF.",
+    "exportCSV": "Exporter CSV",
+    "exportPDF": "Exporter PDF"
   },
   "alertChannels": {
     "title": "Canaux d'Alerte",
