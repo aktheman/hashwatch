@@ -16,6 +16,7 @@ const TYPE_ICONS: Record<ActivityType, string> = {
   settings_changed: '⚙️',
   team_member_joined: '👥',
   team_member_left: '👥',
+  team_invite: '📨',
   maintenance_scheduled: '🔧',
   maintenance_completed: '✅',
   pool_switched: '🌊',
@@ -44,7 +45,17 @@ const FILTERS: { key: FilterKey; label: string; types?: ActivityType[] }[] = [
     label: 'Maintenance',
     types: ['maintenance_scheduled', 'maintenance_completed'],
   },
-  { key: 'team_member_joined', label: 'Teams', types: ['team_member_joined', 'team_member_left'] },
+  {
+    key: 'team_member_joined',
+    label: 'Teams',
+    types: [
+      'team_member_joined',
+      'team_member_left',
+      'team_invite',
+      'miner_shared',
+      'miner_unshared',
+    ],
+  },
   {
     key: 'settings_changed',
     label: 'Settings',

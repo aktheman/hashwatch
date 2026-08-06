@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import React from 'react';
 import { Alert } from 'react-native';
 import { TeamsScreen } from '../src/screens/TeamsScreen';
+import { useActivityFeedStore } from '../src/store/activityFeed';
 
 let mockToken: string | null = 't1';
 const mockLogout = jest.fn();
@@ -18,6 +19,9 @@ jest.mock('../src/store/auth', () => ({
 
 jest.mock('../src/api/client', () => ({
   getBaseUrl: () => 'http://localhost:4000',
+  fetchActivityFeed: jest.fn().mockResolvedValue([]),
+  markActivityRead: jest.fn().mockResolvedValue({ ok: true }),
+  markAllActivityRead: jest.fn().mockResolvedValue({ ok: true }),
 }));
 
 jest.mock('../src/theme', () => ({
@@ -103,6 +107,7 @@ beforeEach(() => {
   mockToken = 't1';
   mockTeams = [];
   mockInvitations = [];
+  useActivityFeedStore.setState({ events: [] });
   mockFetch.mockReset();
   mockFetch.mockImplementation(async (url: string) => {
     if (
@@ -429,4 +434,82 @@ it('unshares a miner from the team', async () => {
     );
   });
   alertSpy.mockRestore();
+});
+
+it('hides unread badge when there are no team events', async () => {
+  await render(<TeamsScreen {...navProps} />);
+  expect(screen.queryByLabelText('teams.markTeamRead')).toBeNull();
+});
+
+it('shows unread badge with team event count', async () => {
+  useActivityFeedStore.setState({
+    events: [
+      {
+        id: 'e1',
+        type: 'team_invite',
+        title: 'Invite',
+        description: '',
+        timestamp: 1,
+        severity: 'info',
+        read: false,
+      },
+      {
+        id: 'e2',
+        type: 'miner_shared',
+        title: 'Shared',
+        description: '',
+        timestamp: 2,
+        severity: 'info',
+        read: false,
+      },
+      {
+        id: 'e3',
+        type: 'miner_offline',
+        title: 'Offline',
+        description: '',
+        timestamp: 3,
+        severity: 'error',
+        read: false,
+      },
+    ],
+  });
+
+  await render(<TeamsScreen {...navProps} />);
+
+  expect(screen.getByText('2')).toBeTruthy();
+  expect(screen.getByLabelText('teams.markTeamRead')).toBeTruthy();
+});
+
+it('marks team events read when badge is pressed', async () => {
+  useActivityFeedStore.setState({
+    events: [
+      {
+        id: 'e1',
+        type: 'team_invite',
+        title: 'Invite',
+        description: '',
+        timestamp: 1,
+        severity: 'info',
+        read: false,
+      },
+      {
+        id: 'e2',
+        type: 'miner_offline',
+        title: 'Offline',
+        description: '',
+        timestamp: 2,
+        severity: 'error',
+        read: false,
+      },
+    ],
+  });
+
+  await render(<TeamsScreen {...navProps} />);
+  await waitFor(() => expect(screen.getByLabelText('teams.markTeamRead')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('teams.markTeamRead'));
+
+  await waitFor(() => {
+    expect(useActivityFeedStore.getState().getTeamUnreadCount()).toBe(0);
+  });
+  expect(useActivityFeedStore.getState().events.find((e) => e.id === 'e2')?.read).toBe(false);
 });

@@ -11,6 +11,7 @@ export type ActivityType =
   | 'settings_changed'
   | 'team_member_joined'
   | 'team_member_left'
+  | 'team_invite'
   | 'maintenance_scheduled'
   | 'maintenance_completed'
   | 'pool_switched'
@@ -18,6 +19,14 @@ export type ActivityType =
   | 'miner_removed'
   | 'miner_shared'
   | 'miner_unshared';
+
+export const TEAM_ACTIVITY_TYPES: ActivityType[] = [
+  'team_member_joined',
+  'team_member_left',
+  'team_invite',
+  'miner_shared',
+  'miner_unshared',
+];
 
 export interface ActivityEvent {
   id: string;
@@ -41,6 +50,8 @@ interface ActivityFeedState {
   clearEvents: () => void;
   syncFromBackend: () => Promise<void>;
   getUnreadCount: () => number;
+  getTeamUnreadCount: () => number;
+  markTeamEventsRead: () => void;
   getByMiner: (minerId: string) => ActivityEvent[];
 }
 
@@ -117,6 +128,22 @@ export const useActivityFeedStore = create<ActivityFeedState>((set, get) => ({
   },
 
   getUnreadCount: () => get().events.filter((e) => !e.read).length,
+
+  getTeamUnreadCount: () =>
+    get().events.filter((e) => TEAM_ACTIVITY_TYPES.includes(e.type) && !e.read).length,
+
+  markTeamEventsRead: () => {
+    const ids = get()
+      .events.filter((e) => TEAM_ACTIVITY_TYPES.includes(e.type) && !e.read)
+      .map((e) => e.id);
+    if (ids.length === 0) return;
+    set((state) => ({
+      events: state.events.map((e) =>
+        TEAM_ACTIVITY_TYPES.includes(e.type) ? { ...e, read: true } : e,
+      ),
+    }));
+    ids.forEach((id) => markActivityRead(id).catch(() => {}));
+  },
 
   getByMiner: (minerId) => get().events.filter((e) => e.minerId === minerId),
 }));

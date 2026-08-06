@@ -217,3 +217,59 @@ it('markAllRead pushes read state to backend', () => {
 
   expect(mockedMarkAllRead).toHaveBeenCalled();
 });
+
+it('getTeamUnreadCount counts only unread team events', () => {
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'team_invite', title: 'Invite' });
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'miner_shared', title: 'Shared' });
+  useActivityFeedStore
+    .getState()
+    .addEvent({ ...baseEvent, type: 'miner_offline', title: 'Offline' });
+
+  expect(useActivityFeedStore.getState().getTeamUnreadCount()).toBe(2);
+});
+
+it('getTeamUnreadCount ignores read team events', () => {
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'team_invite', title: 'Invite' });
+  const id = useActivityFeedStore.getState().events[0].id;
+  useActivityFeedStore.getState().markRead(id);
+
+  expect(useActivityFeedStore.getState().getTeamUnreadCount()).toBe(0);
+});
+
+it('markTeamEventsRead marks only team events and ignores others', () => {
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'team_invite', title: 'Invite' });
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'miner_shared', title: 'Shared' });
+  useActivityFeedStore
+    .getState()
+    .addEvent({ ...baseEvent, type: 'miner_offline', title: 'Offline' });
+
+  useActivityFeedStore.getState().markTeamEventsRead();
+
+  const teamEvents = useActivityFeedStore
+    .getState()
+    .events.filter((e) => e.type === 'team_invite' || e.type === 'miner_shared');
+  const otherEvent = useActivityFeedStore.getState().events.find((e) => e.type === 'miner_offline');
+  expect(teamEvents.every((e) => e.read)).toBe(true);
+  expect(otherEvent?.read).toBe(false);
+  expect(useActivityFeedStore.getState().getTeamUnreadCount()).toBe(0);
+});
+
+it('markTeamEventsRead pushes each unread team event to backend', () => {
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'team_invite', title: 'Invite' });
+  useActivityFeedStore.getState().addEvent({ ...baseEvent, type: 'miner_shared', title: 'Shared' });
+
+  useActivityFeedStore.getState().markTeamEventsRead();
+
+  expect(mockedMarkRead).toHaveBeenCalledTimes(2);
+});
+
+it('markTeamEventsRead does nothing when no unread team events', () => {
+  useActivityFeedStore
+    .getState()
+    .addEvent({ ...baseEvent, type: 'miner_offline', title: 'Offline' });
+
+  useActivityFeedStore.getState().markTeamEventsRead();
+
+  expect(mockedMarkRead).not.toHaveBeenCalled();
+  expect(useActivityFeedStore.getState().events[0].read).toBe(false);
+});

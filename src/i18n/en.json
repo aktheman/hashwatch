@@ -654,15 +654,12 @@
     "settings": "Settings"
   },
   "navigator": {
-    "minerDetail": "Miner Details",
-    "addMiner": "Add Miner",
-    "subscription": "HashWatch Pro",
-    "wallets": "Wallets",
-    "groups": "Groups",
-    "importData": "Import Data",
-    "minerComparison": "Miner Comparison",
-    "firmware": "Firmware",
-    "darkPool": "Dark Pool"
+    "predictiveMaintenance": "Predictive Maintenance",
+    "activityFeed": "Activity Feed",
+    "worldMap": "World Map",
+    "dashboardBuilder": "Dashboard Builder",
+    "notificationSettings": "Notification Settings",
+    "realtime": "Real-Time Monitor"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -811,8 +808,29 @@
     "oneYear": "1 Year"
   },
   "worldMap": {
-    "dataCenter": "Data Center",
-    "miningFarm": "Mining Farm"
+    "title": "World Map",
+    "showAll": "Show All",
+    "onlineOnly": "Online Only",
+    "criticalOnly": "Critical Only",
+    "locations": "Locations",
+    "legend": "Legend",
+    "healthy": "Healthy",
+    "warning": "Warning",
+    "critical": "Critical",
+    "viewDetails": "View Details",
+    "noMiners": "No miners to display on map",
+    "stats": {
+      "total": "Total",
+      "online": "Online",
+      "critical": "Critical",
+      "locations": "Locations"
+    },
+    "locationCard": {
+      "miners": "{{count}} miners",
+      "onlineCount": "{{online}}/{{total}} online",
+      "avgTemp": "Avg {{temp}}°C",
+      "hashrate": "{{hashrate}} TH/s"
+    }
   },
   "minerHealth": {
     "offline": "Offline",
@@ -1109,7 +1127,8 @@
     "export": "Export",
     "exportDesc": "Export team analytics as a CSV file or PDF report.",
     "exportCSV": "Export CSV",
-    "exportPDF": "Export PDF"
+    "exportPDF": "Export PDF",
+    "markTeamRead": "Mark team updates read"
   },
   "alertChannels": {
     "title": "Alert Channels",
@@ -1320,31 +1339,6 @@
       "today": "Today"
     }
   },
-  "worldMap": {
-    "title": "World Map",
-    "showAll": "Show All",
-    "onlineOnly": "Online Only",
-    "criticalOnly": "Critical Only",
-    "locations": "Locations",
-    "legend": "Legend",
-    "healthy": "Healthy",
-    "warning": "Warning",
-    "critical": "Critical",
-    "viewDetails": "View Details",
-    "noMiners": "No miners to display on map",
-    "stats": {
-      "total": "Total",
-      "online": "Online",
-      "critical": "Critical",
-      "locations": "Locations"
-    },
-    "locationCard": {
-      "miners": "{{count}} miners",
-      "onlineCount": "{{online}}/{{total}} online",
-      "avgTemp": "Avg {{temp}}°C",
-      "hashrate": "{{hashrate}} TH/s"
-    }
-  },
   "dashboardBuilder": {
     "title": "Dashboard Builder",
     "layout": "Layout",
@@ -1380,14 +1374,6 @@
       "minerList": "Miner List",
       "minerListDesc": "Compact list of all miners"
     }
-  },
-  "navigator": {
-    "predictiveMaintenance": "Predictive Maintenance",
-    "activityFeed": "Activity Feed",
-    "worldMap": "World Map",
-    "dashboardBuilder": "Dashboard Builder",
-    "notificationSettings": "Notification Settings",
-    "realtime": "Real-Time Monitor"
   },
   "realtime": {
     "title": "Real-Time Monitor",

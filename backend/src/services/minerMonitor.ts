@@ -10,6 +10,7 @@ import {
 } from './pushNotifications';
 import { setPoolStatus } from './minerState';
 import { recordActivity } from './activityFeed';
+import { notifySharedMinerMembers } from './teamNotifications';
 
 interface MinerState {
   isOnline: boolean;
@@ -161,6 +162,14 @@ export async function checkMinerStatus(
 
   if (prev.isOnline && !isOnline && canNotify(`${key}:offline`) && prefs.offline !== false) {
     sendMinerOfflineNotification(userId, minerName, ip, minerId);
+    await notifySharedMinerMembers(
+      userId,
+      minerId,
+      'offline',
+      'Miner Offline',
+      `${minerName} (${ip}) has gone offline`,
+      { minerId },
+    );
     recordActivity(userId, {
       type: 'miner_offline',
       title: `${minerName} went offline`,
@@ -170,6 +179,14 @@ export async function checkMinerStatus(
     });
   } else if (!prev.isOnline && isOnline && canNotify(`${key}:online`) && prefs.online !== false) {
     sendMinerOnlineNotification(userId, minerName, ip, minerId);
+    await notifySharedMinerMembers(
+      userId,
+      minerId,
+      'online',
+      'Miner Reconnected',
+      `${minerName} (${ip}) is back online`,
+      { minerId },
+    );
     recordActivity(userId, {
       type: 'miner_online',
       title: `${minerName} came online`,
@@ -187,6 +204,14 @@ export async function checkMinerStatus(
     prefs.hot !== false
   ) {
     sendMinerHotNotification(userId, minerName, ip, temperature, minerId);
+    await notifySharedMinerMembers(
+      userId,
+      minerId,
+      'hot',
+      'High Temperature',
+      `${minerName} is ${temperature.toFixed(0)}°C — check cooling`,
+      { minerId, temperature },
+    );
     recordActivity(userId, {
       type: 'alert_fired',
       title: `${minerName} is running hot`,
@@ -207,6 +232,14 @@ export async function checkMinerStatus(
   ) {
     const pct = Math.round((1 - hashRate / prevHr) * 100);
     sendHashrateDropNotification(userId, minerName, minerId, pct);
+    await notifySharedMinerMembers(
+      userId,
+      minerId,
+      'hashrate_drop',
+      'Hashrate Drop',
+      `${minerName} hashrate dropped ${pct}%`,
+      { minerId, dropPercent: pct },
+    );
     recordActivity(userId, {
       type: 'alert_fired',
       title: `${minerName} hashrate dropped`,
@@ -227,6 +260,14 @@ export async function checkMinerStatus(
     const oldPool = prev.pool || 'unknown';
     const newPool = pool || 'unknown';
     sendPoolChangeNotification(userId, minerName, minerId, oldPool, newPool);
+    await notifySharedMinerMembers(
+      userId,
+      minerId,
+      'pool_lost',
+      'Pool Changed',
+      `${minerName} moved from ${oldPool} to ${newPool}`,
+      { minerId, oldPool, newPool },
+    );
     recordActivity(userId, {
       type: 'pool_switched',
       title: `${minerName} switched pool`,

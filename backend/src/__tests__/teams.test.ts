@@ -16,6 +16,24 @@ jest.mock('../middleware/auth', () => ({
   },
 }));
 
+const mockNotifyTeamInvite = jest.fn();
+const mockNotifyTeamJoin = jest.fn();
+const mockNotifyTeamLeave = jest.fn();
+const mockNotifyTeamMinerShared = jest.fn();
+const mockNotifyTeamMinerUnshared = jest.fn();
+const mockNotifyOwnerMinerShared = jest.fn();
+const mockNotifyOwnerMinerUnshared = jest.fn();
+
+jest.mock('../services/teamNotifications', () => ({
+  notifyTeamInvite: (...args: unknown[]) => mockNotifyTeamInvite(...args),
+  notifyTeamJoin: (...args: unknown[]) => mockNotifyTeamJoin(...args),
+  notifyTeamLeave: (...args: unknown[]) => mockNotifyTeamLeave(...args),
+  notifyTeamMinerShared: (...args: unknown[]) => mockNotifyTeamMinerShared(...args),
+  notifyTeamMinerUnshared: (...args: unknown[]) => mockNotifyTeamMinerUnshared(...args),
+  notifyOwnerMinerShared: (...args: unknown[]) => mockNotifyOwnerMinerShared(...args),
+  notifyOwnerMinerUnshared: (...args: unknown[]) => mockNotifyOwnerMinerUnshared(...args),
+}));
+
 import { teamRouter } from '../routes/teams';
 
 const app = express();
@@ -182,6 +200,72 @@ describe('POST /api/teams/:id/invite', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('notifies a registered invitee', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return membershipOwner;
+      }
+      if (sql.includes('SELECT u.id') && sql.includes('team_members tm')) return { rows: [] };
+      if (sql.includes("status = 'pending'")) return { rows: [] };
+      if (sql.includes('COUNT(*)::int AS count FROM team_invitations')) return row({ count: 0 });
+      if (sql.includes('INSERT INTO team_invitations')) {
+        return row({
+          id: 'inv-1',
+          teamid: 'team-1',
+          email: 'bob@test.com',
+          role: 'viewer',
+          invitedby: 'u1',
+          status: 'pending',
+          createdat: TS,
+        });
+      }
+      if (sql.includes('SELECT name FROM teams WHERE id = $1')) return row({ name: 'Alpha' });
+      if (sql.includes('SELECT id FROM users WHERE email = $1')) return row({ id: 'u2' });
+      return { rows: [] };
+    });
+
+    const res = await request(app)
+      .post('/api/teams/team-1/invite')
+      .send({ email: 'bob@test.com', role: 'viewer' });
+
+    expect(res.status).toBe(201);
+    expect(mockNotifyTeamInvite).toHaveBeenCalledWith('u2', 'Alpha', 'owner@test.com');
+  });
+});
+
+describe('POST /api/teams/:id/accept', () => {
+  it('accepts an invitation and notifies team admins', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT id, teamId, role, email FROM team_invitations')) {
+        return row({ id: 'inv-1', teamid: 'team-1', role: 'viewer', email: 'owner@test.com' });
+      }
+      if (sql.includes('COUNT(*)::int AS count FROM team_members')) return row({ count: 0 });
+      if (sql.includes('UPDATE team_invitations')) return { rows: [], rowCount: 1 };
+      if (sql.includes('SELECT id, name, ownerId, createdAt FROM teams')) {
+        return row({ id: 'team-1', name: 'Alpha', ownerid: 'u1', createdat: TS });
+      }
+      if (sql.includes('SELECT userId FROM team_members')) {
+        return { rows: [{ userid: 'admin1' }] };
+      }
+      return { rows: [], rowCount: 1 };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/accept');
+
+    expect(res.status).toBe(200);
+    expect(res.body.membership.role).toBe('viewer');
+    expect(res.body.team.name).toBe('Alpha');
+    expect(mockNotifyTeamJoin).toHaveBeenCalledWith(['admin1'], 'Alpha', 'owner@test.com');
+  });
+
+  it('returns 404 when there is no pending invitation', async () => {
+    withDb(async () => ({ rows: [] }));
+
+    const res = await request(app).post('/api/teams/team-1/accept');
+
+    expect(res.status).toBe(404);
+  });
 });
 
 describe('GET /api/teams', () => {
@@ -248,6 +332,28 @@ describe('DELETE /api/teams/:id/leave', () => {
     const res = await request(app).delete('/api/teams/team-1/leave');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
+  });
+
+  it('notifies admins when a member leaves', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'viewer', joinedat: TS });
+      }
+      if (sql.includes('SELECT name FROM teams WHERE id = $1')) return row({ name: 'Alpha' });
+      if (sql.includes('SELECT userId FROM team_members')) {
+        return { rows: [{ userid: 'admin1' }, { userid: 'admin2' }] };
+      }
+      return { rows: [] };
+    });
+
+    const res = await request(app).delete('/api/teams/team-1/leave');
+
+    expect(res.status).toBe(200);
+    expect(mockNotifyTeamLeave).toHaveBeenCalledWith(
+      ['admin1', 'admin2'],
+      'Alpha',
+      'owner@test.com',
+    );
   });
 });
 
@@ -338,6 +444,27 @@ describe('POST /api/teams/:id/miners', () => {
 
     expect(res.status).toBe(400);
   });
+
+  it('notifies team members and the owner when a miner is shared', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      if (sql.includes('SELECT id FROM miners')) return row({ id: 'm1' });
+      if (sql.includes('SELECT name FROM teams WHERE id = $1')) return row({ name: 'Alpha' });
+      if (sql.includes('SELECT name FROM miners WHERE id = $1')) return row({ name: 'Worker' });
+      if (sql.includes('SELECT userId FROM team_members')) {
+        return { rows: [{ userid: 'u2' }, { userid: 'u3' }] };
+      }
+      return { rows: [], rowCount: 1 };
+    });
+
+    const res = await request(app).post('/api/teams/team-1/miners').send({ minerId: 'm1' });
+
+    expect(res.status).toBe(201);
+    expect(mockNotifyTeamMinerShared).toHaveBeenCalledWith(['u2', 'u3'], 'Alpha', 'Worker');
+    expect(mockNotifyOwnerMinerShared).toHaveBeenCalledWith('u1', 'Alpha', 'Worker');
+  });
 });
 
 describe('DELETE /api/teams/:id/miners/:minerId', () => {
@@ -366,5 +493,26 @@ describe('DELETE /api/teams/:id/miners/:minerId', () => {
     const res = await request(app).delete('/api/teams/team-1/miners/m1');
 
     expect(res.status).toBe(403);
+  });
+
+  it('notifies members and the owner when a miner is unshared', async () => {
+    withDb(async (sql) => {
+      if (sql.includes('SELECT teamId, userId, role, joinedAt FROM team_members')) {
+        return row({ teamid: 'team-1', userid: 'u1', role: 'owner', joinedat: TS });
+      }
+      if (sql.includes('SELECT name FROM teams WHERE id = $1')) return row({ name: 'Alpha' });
+      if (sql.includes('SELECT name FROM miners WHERE id = $1')) return row({ name: 'Worker' });
+      if (sql.includes('SELECT "userId" AS "ownerId" FROM miners')) return row({ ownerId: 'u1' });
+      if (sql.includes('SELECT userId FROM team_members')) {
+        return { rows: [{ userid: 'u2' }, { userid: 'u3' }] };
+      }
+      return { rows: [], rowCount: 1 };
+    });
+
+    const res = await request(app).delete('/api/teams/team-1/miners/m1');
+
+    expect(res.status).toBe(200);
+    expect(mockNotifyTeamMinerUnshared).toHaveBeenCalledWith(['u2', 'u3'], 'Alpha', 'Worker');
+    expect(mockNotifyOwnerMinerUnshared).toHaveBeenCalledWith('u1', 'Alpha', 'Worker');
   });
 });

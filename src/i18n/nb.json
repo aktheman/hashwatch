@@ -659,15 +659,12 @@
     "settings": "Innstillinger"
   },
   "navigator": {
-    "minerDetail": "Miner Detaljer",
-    "addMiner": "Legg til Miner",
-    "subscription": "HashWatch Pro",
-    "wallets": "Lommebøker",
-    "groups": "Grupper",
-    "importData": "Importer Data",
-    "minerComparison": "Minersammenligning",
-    "firmware": "Firmware",
-    "darkPool": "Dark Pool"
+    "predictiveMaintenance": "Prediktivt Vedlikehold",
+    "activityFeed": "Aktivitetsfeed",
+    "worldMap": "Verdenskart",
+    "dashboardBuilder": "Dashboard Bygger",
+    "notificationSettings": "Varslingsinnstillinger",
+    "realtime": "Sanntids Overvåker"
   },
   "minerCard": {
     "hashrate": "Hashrate",
@@ -816,8 +813,29 @@
     "oneYear": "1 År"
   },
   "worldMap": {
-    "dataCenter": "Datasenter",
-    "miningFarm": "Mining Farm"
+    "title": "Verdenskart",
+    "showAll": "Vis Alle",
+    "onlineOnly": "Bare Online",
+    "criticalOnly": "Bare Kritiske",
+    "locations": "Steder",
+    "legend": "Forklaring",
+    "healthy": "Sunn",
+    "warning": "Advarsel",
+    "critical": "Kritisk",
+    "viewDetails": "Se Detaljer",
+    "noMiners": "Ingen minere å vise på kart",
+    "stats": {
+      "total": "Totalt",
+      "online": "Online",
+      "critical": "Kritisk",
+      "locations": "Steder"
+    },
+    "locationCard": {
+      "miners": "{{count}} minere",
+      "onlineCount": "{{online}}/{{total}} online",
+      "avgTemp": "Snitt {{temp}}°C",
+      "hashrate": "{{hashrate}} TH/s"
+    }
   },
   "minerHealth": {
     "offline": "Offline",
@@ -1114,7 +1132,8 @@
     "export": "Eksporter",
     "exportDesc": "Eksporter team-analyse som CSV-fil eller PDF-rapport.",
     "exportCSV": "Eksporter CSV",
-    "exportPDF": "Eksporter PDF"
+    "exportPDF": "Eksporter PDF",
+    "markTeamRead": "Merk teamoppdateringer som lest"
   },
   "alertChannels": {
     "title": "Varslingskanaler",
@@ -1325,31 +1344,6 @@
       "today": "I Dag"
     }
   },
-  "worldMap": {
-    "title": "Verdenskart",
-    "showAll": "Vis Alle",
-    "onlineOnly": "Bare Online",
-    "criticalOnly": "Bare Kritiske",
-    "locations": "Steder",
-    "legend": "Forklaring",
-    "healthy": "Sunn",
-    "warning": "Advarsel",
-    "critical": "Kritisk",
-    "viewDetails": "Se Detaljer",
-    "noMiners": "Ingen minere å vise på kart",
-    "stats": {
-      "total": "Totalt",
-      "online": "Online",
-      "critical": "Kritisk",
-      "locations": "Steder"
-    },
-    "locationCard": {
-      "miners": "{{count}} minere",
-      "onlineCount": "{{online}}/{{total}} online",
-      "avgTemp": "Snitt {{temp}}°C",
-      "hashrate": "{{hashrate}} TH/s"
-    }
-  },
   "dashboardBuilder": {
     "title": "Dashboard Bygger",
     "layout": "Oppsett",
@@ -1385,14 +1379,6 @@
       "minerList": "Miner Liste",
       "minerListDesc": "Kompakt liste over alle minere"
     }
-  },
-  "navigator": {
-    "predictiveMaintenance": "Prediktivt Vedlikehold",
-    "activityFeed": "Aktivitetsfeed",
-    "worldMap": "Verdenskart",
-    "dashboardBuilder": "Dashboard Bygger",
-    "notificationSettings": "Varslingsinnstillinger",
-    "realtime": "Sanntids Overvåker"
   },
   "realtime": {
     "title": "Sanntids Overvåker",

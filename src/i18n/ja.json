@@ -1031,7 +1031,8 @@
     "export": "エクスポート",
     "exportDesc": "チーム分析をCSVファイルまたはPDFレポートとしてエクスポートします。",
     "exportCSV": "CSVをエクスポート",
-    "exportPDF": "PDFをエクスポート"
+    "exportPDF": "PDFをエクスポート",
+    "markTeamRead": "チームの更新を既読にする"
   },
   "alertChannels": {
     "title": "アラートチャネル",

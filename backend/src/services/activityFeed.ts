@@ -10,6 +10,7 @@ export type ActivityType =
   | 'firmware_updated'
   | 'team_member_joined'
   | 'team_member_left'
+  | 'team_invite'
   | 'pool_switched'
   | 'miner_shared'
   | 'miner_unshared';

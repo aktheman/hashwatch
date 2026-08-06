@@ -1031,7 +1031,8 @@
     "export": "导出",
     "exportDesc": "将团队分析导出为CSV文件或PDF报告。",
     "exportCSV": "导出CSV",
-    "exportPDF": "导出PDF"
+    "exportPDF": "导出PDF",
+    "markTeamRead": "将团队更新标记为已读"
   },
   "alertChannels": {
     "title": "警报通道",

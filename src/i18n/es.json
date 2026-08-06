@@ -1041,7 +1041,8 @@
     "export": "Exportar",
     "exportDesc": "Exporta los análisis del equipo como archivo CSV o informe PDF.",
     "exportCSV": "Exportar CSV",
-    "exportPDF": "Exportar PDF"
+    "exportPDF": "Exportar PDF",
+    "markTeamRead": "Marcar actualizaciones del equipo como leídas"
   },
   "alertChannels": {
     "title": "Canales de Alerta",

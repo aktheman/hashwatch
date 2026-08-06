@@ -20,6 +20,7 @@ import { spacing, radius, fontSize, fontWeight } from '../utils/design';
 import * as haptic from '../utils/haptics';
 import { exportTeamCSV, generateTeamReport, TeamReportData } from '../utils/teamExport';
 import { downloadReport } from '../utils/reportExport';
+import { useActivityFeedStore } from '../store/activityFeed';
 
 interface Team {
   id: string;
@@ -72,6 +73,10 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
   const theme = useTheme();
   const { token } = useAuthStore();
 
+  const teamUnread = useActivityFeedStore((s) => s.getTeamUnreadCount());
+  const syncActivity = useActivityFeedStore((s) => s.syncFromBackend);
+  const markTeamEventsRead = useActivityFeedStore((s) => s.markTeamEventsRead);
+
   const [teamsList, setTeamsList] = useState<Team[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -119,8 +124,13 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
     if (selectedTeam) {
       await fetchTeamMiners(selectedTeam.id);
     }
+    syncActivity().catch(() => {});
     setRefreshing(false);
-  }, [fetchTeams, selectedTeam, fetchTeamMiners]);
+  }, [fetchTeams, selectedTeam, fetchTeamMiners, syncActivity]);
+
+  useEffect(() => {
+    syncActivity().catch(() => {});
+  }, [syncActivity]);
 
   useEffect(() => {
     if (selectedTeam) {
@@ -759,6 +769,33 @@ export function TeamsScreen(_props: { navigation: NavigationProp }) {
       }
     >
       <Text style={styles.title}>{t('teams.title')}</Text>
+
+      {teamUnread > 0 && (
+        <Pressable
+          onPress={markTeamEventsRead}
+          accessibilityRole="button"
+          accessibilityLabel={t('teams.markTeamRead', 'Mark team updates read')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.xs,
+            marginBottom: spacing.lg,
+          }}
+        >
+          <View style={[styles.badge, { backgroundColor: theme.primary }]}>
+            <Text style={styles.badgeText}>{teamUnread}</Text>
+          </View>
+          <Text
+            style={{
+              color: theme.primary,
+              fontSize: fontSize.sm,
+              fontWeight: fontWeight.semibold,
+            }}
+          >
+            {t('teams.markTeamRead', 'Mark team updates read')}
+          </Text>
+        </Pressable>
+      )}
 
       {invitations.length > 0 && (
         <View style={styles.section}>

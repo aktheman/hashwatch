@@ -133,3 +133,10 @@ it('team export keys exist in all locales', () => {
     }
   }
 });
+
+it('team notification keys exist in all locales', () => {
+  const locales = { en, nb, es, fr, de, ja, zh };
+  for (const locale of Object.values(locales)) {
+    expect(locale.teams.markTeamRead).toBeTruthy();
+  }
+});

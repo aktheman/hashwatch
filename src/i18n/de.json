@@ -1041,7 +1041,8 @@
     "export": "Exportieren",
     "exportDesc": "Exportieren Sie Team-Analysen als CSV-Datei oder PDF-Bericht.",
     "exportCSV": "CSV exportieren",
-    "exportPDF": "PDF exportieren"
+    "exportPDF": "PDF exportieren",
+    "markTeamRead": "Team-Updates als gelesen markieren"
   },
   "alertChannels": {
     "title": "Alarmkanäle",

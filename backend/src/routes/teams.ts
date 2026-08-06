@@ -3,6 +3,15 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { log } from '../logger';
 import { query } from '../db';
 import { recordActivity } from '../services/activityFeed';
+import {
+  notifyTeamInvite,
+  notifyTeamJoin,
+  notifyTeamLeave,
+  notifyTeamMinerShared,
+  notifyTeamMinerUnshared,
+  notifyOwnerMinerShared,
+  notifyOwnerMinerUnshared,
+} from '../services/teamNotifications';
 
 export const teamRouter = Router();
 
@@ -68,6 +77,33 @@ async function getMembership(teamId: string, userId: string): Promise<Membership
     [teamId, userId],
   );
   return result.rows[0] as MembershipRow | undefined;
+}
+
+async function getTeamName(teamId: string): Promise<string> {
+  const result = await query('SELECT name FROM teams WHERE id = $1', [teamId]);
+  return (result.rows[0] as { name?: string } | undefined)?.name ?? 'Team';
+}
+
+async function getMinerName(minerId: string): Promise<string> {
+  const result = await query('SELECT name FROM miners WHERE id = $1', [minerId]);
+  return (result.rows[0] as { name?: string } | undefined)?.name ?? 'a miner';
+}
+
+async function getTeamAdmins(teamId: string, excludeUserId?: string): Promise<string[]> {
+  const result = await query(
+    `SELECT userId FROM team_members
+     WHERE teamId = $1 AND role IN ('owner', 'admin') AND userId <> $2`,
+    [teamId, excludeUserId ?? ''],
+  );
+  return (result.rows as Array<{ userid: string }>).map((r) => r.userid);
+}
+
+async function getTeamMemberIds(teamId: string, excludeUserId?: string): Promise<string[]> {
+  const result = await query('SELECT userId FROM team_members WHERE teamId = $1 AND userId <> $2', [
+    teamId,
+    excludeUserId ?? '',
+  ]);
+  return (result.rows as Array<{ userid: string }>).map((r) => r.userid);
 }
 
 teamRouter.use(authMiddleware);
@@ -227,6 +263,19 @@ teamRouter.post('/:id/invite', async (req: AuthRequest, res) => {
     );
     const invitation = mapInvitation(result.rows[0] as InvitationRow);
 
+    const teamName = await getTeamName(teamId);
+    const invitee = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (invitee.rows.length > 0) {
+      const inviteeId = (invitee.rows[0] as { id: string }).id;
+      await notifyTeamInvite(inviteeId, teamName, req.userEmail as string);
+      recordActivity(inviteeId, {
+        type: 'team_invite',
+        title: `You were invited to join ${teamName}`,
+        severity: 'info',
+        metadata: { teamId },
+      });
+    }
+
     log.info('Invitation sent to:', email, 'for team:', teamId);
     res.status(201).json({ invitation });
   } catch (err: unknown) {
@@ -293,13 +342,17 @@ teamRouter.post('/:id/accept', async (req: AuthRequest, res) => {
       severity: 'success',
       metadata: { teamId },
     });
-    if (team?.ownerId) {
-      recordActivity(team.ownerId, {
-        type: 'team_member_joined',
-        title: `${req.userEmail} joined your team ${team.name}`,
-        severity: 'info',
-        metadata: { teamId },
-      });
+    if (team?.name) {
+      const adminIds = await getTeamAdmins(teamId, userId);
+      await notifyTeamJoin(adminIds, team.name, req.userEmail as string);
+      for (const adminId of adminIds) {
+        recordActivity(adminId, {
+          type: 'team_member_joined',
+          title: `${req.userEmail} joined your team ${team.name}`,
+          severity: 'info',
+          metadata: { teamId },
+        });
+      }
     }
     res.json({ membership, team });
   } catch (err: unknown) {
@@ -385,6 +438,21 @@ teamRouter.post('/:id/miners', async (req: AuthRequest, res) => {
       minerId,
       metadata: { teamId },
     });
+
+    const teamName = await getTeamName(teamId);
+    const minerName = await getMinerName(minerId);
+    const memberIds = await getTeamMemberIds(teamId, userId);
+    await notifyTeamMinerShared(memberIds, teamName, minerName);
+    for (const memberId of memberIds) {
+      recordActivity(memberId, {
+        type: 'miner_shared',
+        title: `${minerName} was shared with ${teamName}`,
+        severity: 'info',
+        minerId,
+        metadata: { teamId },
+      });
+    }
+    await notifyOwnerMinerShared(userId, teamName, minerName);
     res.status(201).json({ ok: true });
   } catch (err: unknown) {
     log.error('Error sharing miner with team:', err instanceof Error ? err.message : err);
@@ -417,6 +485,40 @@ teamRouter.delete('/:id/miners/:minerId', async (req: AuthRequest, res) => {
       minerId,
       metadata: { teamId },
     });
+
+    const teamName = await getTeamName(teamId);
+    const minerName = await getMinerName(minerId);
+    const ownerResult = await query('SELECT "userId" AS "ownerId" FROM miners WHERE id = $1', [
+      minerId,
+    ]);
+    const ownerId = (ownerResult.rows[0] as { ownerId?: string } | undefined)?.ownerId;
+
+    const memberResult = await query(
+      `SELECT userId FROM team_members
+       WHERE teamId = $1 AND userId <> $2 AND userId <> $3`,
+      [teamId, userId, ownerId ?? ''],
+    );
+    const memberIds = (memberResult.rows as Array<{ userid: string }>).map((r) => r.userid);
+    await notifyTeamMinerUnshared(memberIds, teamName, minerName);
+    for (const memberId of memberIds) {
+      recordActivity(memberId, {
+        type: 'miner_unshared',
+        title: `${minerName} was removed from ${teamName}`,
+        severity: 'info',
+        minerId,
+        metadata: { teamId },
+      });
+    }
+    if (ownerId) {
+      await notifyOwnerMinerUnshared(ownerId, teamName, minerName);
+      recordActivity(ownerId, {
+        type: 'miner_unshared',
+        title: `Your miner ${minerName} was removed from ${teamName}`,
+        severity: 'info',
+        minerId,
+        metadata: { teamId },
+      });
+    }
     res.json({ ok: true });
   } catch (err: unknown) {
     log.error('Error removing miner from team:', err instanceof Error ? err.message : err);
@@ -440,6 +542,25 @@ teamRouter.delete('/:id/leave', async (req: AuthRequest, res) => {
     }
 
     await query('DELETE FROM team_members WHERE teamId = $1 AND userId = $2', [teamId, userId]);
+
+    const teamName = await getTeamName(teamId);
+    const leaverEmail = req.userEmail as string;
+    const adminIds = await getTeamAdmins(teamId);
+    await notifyTeamLeave(adminIds, teamName, leaverEmail);
+    for (const adminId of adminIds) {
+      recordActivity(adminId, {
+        type: 'team_member_left',
+        title: `${leaverEmail} left ${teamName}`,
+        severity: 'info',
+        metadata: { teamId },
+      });
+    }
+    recordActivity(userId, {
+      type: 'team_member_left',
+      title: `You left ${teamName}`,
+      severity: 'info',
+      metadata: { teamId },
+    });
 
     log.info('User', userId, 'left team:', teamId);
     res.json({ ok: true });

@@ -55,7 +55,19 @@ it('registers push token with backend', async () => {
       }),
       body: JSON.stringify({
         token: 'expo-token-123',
-        alertTypes: ['offline', 'online', 'hot', 'hashrate_drop', 'pool_lost', 'long_uptime'],
+        alertTypes: [
+          'offline',
+          'online',
+          'hot',
+          'hashrate_drop',
+          'pool_lost',
+          'long_uptime',
+          'team_invite',
+          'team_join',
+          'team_leave',
+          'miner_shared',
+          'miner_unshared',
+        ],
       }),
     }),
   );

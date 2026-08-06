@@ -4,6 +4,7 @@ const mockSendOnline = jest.fn();
 const mockSendHot = jest.fn();
 const mockSendHashrateDrop = jest.fn();
 const mockSendPoolChange = jest.fn();
+const mockNotifySharedMinerMembers = jest.fn();
 
 jest.mock('../db', () => ({
   query: (...args: unknown[]) => mockQuery(...args),
@@ -15,6 +16,10 @@ jest.mock('../services/pushNotifications', () => ({
   sendMinerHotNotification: mockSendHot,
   sendHashrateDropNotification: mockSendHashrateDrop,
   sendPoolChangeNotification: mockSendPoolChange,
+}));
+
+jest.mock('../services/teamNotifications', () => ({
+  notifySharedMinerMembers: mockNotifySharedMinerMembers,
 }));
 
 import { checkMinerStatus } from '../services/minerMonitor';
@@ -110,5 +115,94 @@ describe('checkMinerStatus', () => {
 
     await checkMinerStatus('u9', 'm9', 'MyMiner', '192.168.1.100', false, 50, 0);
     expect(mockSendOffline).not.toHaveBeenCalled();
+  });
+
+  it('notifies shared-miner members when a miner goes offline', async () => {
+    await checkMinerStatus('t1', 'tm1', 'MyMiner', '192.168.1.100', true, 50, 500);
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t1', 'tm1', 'MyMiner', '192.168.1.100', false, 50, 0);
+
+    expect(mockNotifySharedMinerMembers).toHaveBeenCalledWith(
+      't1',
+      'tm1',
+      'offline',
+      'Miner Offline',
+      'MyMiner (192.168.1.100) has gone offline',
+      { minerId: 'tm1' },
+    );
+  });
+
+  it('notifies shared-miner members when a miner comes back online', async () => {
+    await checkMinerStatus('t2', 'tm2', 'MyMiner', '192.168.1.100', false, 50, 0);
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t2', 'tm2', 'MyMiner', '192.168.1.100', true, 50, 500);
+
+    expect(mockNotifySharedMinerMembers).toHaveBeenCalledWith(
+      't2',
+      'tm2',
+      'online',
+      'Miner Reconnected',
+      'MyMiner (192.168.1.100) is back online',
+      { minerId: 'tm2' },
+    );
+  });
+
+  it('notifies shared-miner members when a miner runs hot', async () => {
+    await checkMinerStatus('t3', 'tm3', 'MyMiner', '192.168.1.100', true, 50, 500);
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t3', 'tm3', 'MyMiner', '192.168.1.100', true, 85, 500);
+
+    expect(mockNotifySharedMinerMembers).toHaveBeenCalledWith(
+      't3',
+      'tm3',
+      'hot',
+      'High Temperature',
+      'MyMiner is 85°C — check cooling',
+      { minerId: 'tm3', temperature: 85 },
+    );
+  });
+
+  it('notifies shared-miner members on hashrate drop', async () => {
+    await checkMinerStatus('t4', 'tm4', 'MyMiner', '192.168.1.100', true, 50, 500);
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t4', 'tm4', 'MyMiner', '192.168.1.100', true, 50, 200);
+
+    expect(mockNotifySharedMinerMembers).toHaveBeenCalledWith(
+      't4',
+      'tm4',
+      'hashrate_drop',
+      'Hashrate Drop',
+      'MyMiner hashrate dropped 60%',
+      { minerId: 'tm4', dropPercent: 60 },
+    );
+  });
+
+  it('notifies shared-miner members on pool change', async () => {
+    await checkMinerStatus('t5', 'tm5', 'MyMiner', '192.168.1.100', true, 50, 500, 'poolA');
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t5', 'tm5', 'MyMiner', '192.168.1.100', true, 50, 500, 'poolB');
+
+    expect(mockNotifySharedMinerMembers).toHaveBeenCalledWith(
+      't5',
+      'tm5',
+      'pool_lost',
+      'Pool Changed',
+      'MyMiner moved from poolA to poolB',
+      { minerId: 'tm5', oldPool: 'poolA', newPool: 'poolB' },
+    );
+  });
+
+  it('does not notify shared-miner members when nothing changes', async () => {
+    await checkMinerStatus('t6', 'tm6', 'MyMiner', '192.168.1.100', true, 50, 500);
+    jest.clearAllMocks();
+
+    await checkMinerStatus('t6', 'tm6', 'MyMiner', '192.168.1.100', true, 50, 500);
+
+    expect(mockNotifySharedMinerMembers).not.toHaveBeenCalled();
   });
 });
