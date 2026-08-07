@@ -1,6 +1,7 @@
 import { query } from '../db';
 import { log } from '../logger';
 import { sendPushNotification } from './pushNotifications';
+import { sendTeamWebhooks } from './teamWebhooks';
 
 export type TeamNotificationType =
   | 'team_invite'
@@ -28,6 +29,24 @@ export async function sendTeamNotification(
   }
 }
 
+function dispatchTeamWebhook(
+  teamId: string,
+  eventType: string,
+  title: string,
+  body: string,
+  data: Record<string, unknown> = {},
+): void {
+  if (!teamId) return;
+  void sendTeamWebhooks(teamId, eventType, {
+    event: eventType,
+    title,
+    body,
+    severity: 'info',
+    data,
+    timestamp: Date.now(),
+  });
+}
+
 async function notifyList(
   userIds: string[],
   type: TeamNotificationType,
@@ -42,10 +61,20 @@ async function notifyList(
 }
 
 export function notifyTeamInvite(
+  teamId: string,
   inviteeId: string,
   teamName: string,
   inviterEmail: string,
 ): Promise<void> {
+  dispatchTeamWebhook(
+    teamId,
+    'team_invite',
+    'Team Invitation',
+    `${inviterEmail} invited you to join ${teamName}`,
+    {
+      teamName,
+    },
+  );
   return sendTeamNotification(
     inviteeId,
     'team_invite',
@@ -55,26 +84,45 @@ export function notifyTeamInvite(
 }
 
 export function notifyTeamJoin(
+  teamId: string,
   adminIds: string[],
   teamName: string,
   joinedEmail: string,
 ): Promise<void> {
+  dispatchTeamWebhook(teamId, 'team_join', 'New Team Member', `${joinedEmail} joined ${teamName}`, {
+    teamName,
+  });
   return notifyList(adminIds, 'team_join', 'New Team Member', `${joinedEmail} joined ${teamName}`);
 }
 
 export function notifyTeamLeave(
+  teamId: string,
   adminIds: string[],
   teamName: string,
   leaverEmail: string,
 ): Promise<void> {
+  dispatchTeamWebhook(teamId, 'team_leave', 'Team Member Left', `${leaverEmail} left ${teamName}`, {
+    teamName,
+  });
   return notifyList(adminIds, 'team_leave', 'Team Member Left', `${leaverEmail} left ${teamName}`);
 }
 
 export function notifyTeamMinerShared(
+  teamId: string,
   memberIds: string[],
   teamName: string,
   minerName: string,
 ): Promise<void> {
+  dispatchTeamWebhook(
+    teamId,
+    'miner_shared',
+    'Miner Shared',
+    `${minerName} was shared with ${teamName}`,
+    {
+      teamName,
+      minerName,
+    },
+  );
   return notifyList(
     memberIds,
     'miner_shared',
@@ -85,10 +133,21 @@ export function notifyTeamMinerShared(
 }
 
 export function notifyTeamMinerUnshared(
+  teamId: string,
   memberIds: string[],
   teamName: string,
   minerName: string,
 ): Promise<void> {
+  dispatchTeamWebhook(
+    teamId,
+    'miner_unshared',
+    'Miner Removed',
+    `${minerName} was removed from ${teamName}`,
+    {
+      teamName,
+      minerName,
+    },
+  );
   return notifyList(
     memberIds,
     'miner_unshared',
@@ -99,10 +158,21 @@ export function notifyTeamMinerUnshared(
 }
 
 export function notifyOwnerMinerShared(
+  teamId: string,
   ownerId: string,
   teamName: string,
   minerName: string,
 ): Promise<void> {
+  dispatchTeamWebhook(
+    teamId,
+    'miner_shared',
+    'Miner Shared with Team',
+    `Your miner ${minerName} was shared with ${teamName}`,
+    {
+      teamName,
+      minerName,
+    },
+  );
   return sendTeamNotification(
     ownerId,
     'miner_shared',
@@ -113,10 +183,21 @@ export function notifyOwnerMinerShared(
 }
 
 export function notifyOwnerMinerUnshared(
+  teamId: string,
   ownerId: string,
   teamName: string,
   minerName: string,
 ): Promise<void> {
+  dispatchTeamWebhook(
+    teamId,
+    'miner_unshared',
+    'Miner Removed from Team',
+    `Your miner ${minerName} was removed from ${teamName}`,
+    {
+      teamName,
+      minerName,
+    },
+  );
   return sendTeamNotification(
     ownerId,
     'miner_unshared',
@@ -136,14 +217,23 @@ export async function notifySharedMinerMembers(
 ): Promise<void> {
   try {
     const result = await query(
-      `SELECT DISTINCT me.userId AS userId
+      `SELECT DISTINCT tm.teamId AS teamId, me.userId AS userId
        FROM team_miners tm
        JOIN team_members me ON me.teamId = tm.teamId
        WHERE tm.minerId = $1 AND me.userId <> $2`,
       [minerId, ownerUserId],
     );
-    const memberIds = (result.rows as Array<{ userid: string }>).map((r) => r.userid);
+    const teamIdByMember = new Map<string, string>();
+    for (const row of result.rows as Array<{ teamid: string; userid: string }>) {
+      teamIdByMember.set(row.userid, row.teamid);
+    }
+    const memberIds = Array.from(teamIdByMember.keys());
     await notifyList(memberIds, type as TeamNotificationType, title, body, metadata);
+
+    const teamIds = Array.from(new Set(Array.from(teamIdByMember.values()).filter(Boolean)));
+    for (const teamId of teamIds) {
+      dispatchTeamWebhook(teamId, type, title, body, { minerId, ...metadata });
+    }
   } catch (err: unknown) {
     log.error(
       'Error notifying team members for shared miner:',

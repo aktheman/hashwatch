@@ -230,7 +230,7 @@ describe('POST /api/teams/:id/invite', () => {
       .send({ email: 'bob@test.com', role: 'viewer' });
 
     expect(res.status).toBe(201);
-    expect(mockNotifyTeamInvite).toHaveBeenCalledWith('u2', 'Alpha', 'owner@test.com');
+    expect(mockNotifyTeamInvite).toHaveBeenCalledWith('team-1', 'u2', 'Alpha', 'owner@test.com');
   });
 });
 
@@ -256,7 +256,12 @@ describe('POST /api/teams/:id/accept', () => {
     expect(res.status).toBe(200);
     expect(res.body.membership.role).toBe('viewer');
     expect(res.body.team.name).toBe('Alpha');
-    expect(mockNotifyTeamJoin).toHaveBeenCalledWith(['admin1'], 'Alpha', 'owner@test.com');
+    expect(mockNotifyTeamJoin).toHaveBeenCalledWith(
+      'team-1',
+      ['admin1'],
+      'Alpha',
+      'owner@test.com',
+    );
   });
 
   it('returns 404 when there is no pending invitation', async () => {
@@ -350,6 +355,7 @@ describe('DELETE /api/teams/:id/leave', () => {
 
     expect(res.status).toBe(200);
     expect(mockNotifyTeamLeave).toHaveBeenCalledWith(
+      'team-1',
       ['admin1', 'admin2'],
       'Alpha',
       'owner@test.com',
@@ -462,8 +468,13 @@ describe('POST /api/teams/:id/miners', () => {
     const res = await request(app).post('/api/teams/team-1/miners').send({ minerId: 'm1' });
 
     expect(res.status).toBe(201);
-    expect(mockNotifyTeamMinerShared).toHaveBeenCalledWith(['u2', 'u3'], 'Alpha', 'Worker');
-    expect(mockNotifyOwnerMinerShared).toHaveBeenCalledWith('u1', 'Alpha', 'Worker');
+    expect(mockNotifyTeamMinerShared).toHaveBeenCalledWith(
+      'team-1',
+      ['u2', 'u3'],
+      'Alpha',
+      'Worker',
+    );
+    expect(mockNotifyOwnerMinerShared).toHaveBeenCalledWith('team-1', 'u1', 'Alpha', 'Worker');
   });
 });
 
@@ -512,7 +523,12 @@ describe('DELETE /api/teams/:id/miners/:minerId', () => {
     const res = await request(app).delete('/api/teams/team-1/miners/m1');
 
     expect(res.status).toBe(200);
-    expect(mockNotifyTeamMinerUnshared).toHaveBeenCalledWith(['u2', 'u3'], 'Alpha', 'Worker');
-    expect(mockNotifyOwnerMinerUnshared).toHaveBeenCalledWith('u1', 'Alpha', 'Worker');
+    expect(mockNotifyTeamMinerUnshared).toHaveBeenCalledWith(
+      'team-1',
+      ['u2', 'u3'],
+      'Alpha',
+      'Worker',
+    );
+    expect(mockNotifyOwnerMinerUnshared).toHaveBeenCalledWith('team-1', 'u1', 'Alpha', 'Worker');
   });
 });

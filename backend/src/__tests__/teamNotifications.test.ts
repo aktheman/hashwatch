@@ -4,6 +4,9 @@ jest.mock('../db', () => ({ query: mockQuery }));
 const mockSendPush = jest.fn();
 jest.mock('../services/pushNotifications', () => ({ sendPushNotification: mockSendPush }));
 
+const mockSendTeamWebhooks = jest.fn();
+jest.mock('../services/teamWebhooks', () => ({ sendTeamWebhooks: mockSendTeamWebhooks }));
+
 import {
   sendTeamNotification,
   notifyTeamInvite,
@@ -57,17 +60,22 @@ describe('sendTeamNotification', () => {
 
 describe('team event notifiers', () => {
   it('notifies an invitee', async () => {
-    await notifyTeamInvite('u2', 'Alpha', 'owner@test.com');
+    await notifyTeamInvite('team-1', 'u2', 'Alpha', 'owner@test.com');
     expect(mockSendPush).toHaveBeenCalledWith(
       'u2',
       'team_invite',
       'Team Invitation',
       'owner@test.com invited you to join Alpha',
     );
+    expect(mockSendTeamWebhooks).toHaveBeenCalledWith(
+      'team-1',
+      'team_invite',
+      expect.objectContaining({ event: 'team_invite', title: 'Team Invitation' }),
+    );
   });
 
   it('notifies admins of a new member', async () => {
-    await notifyTeamJoin(['admin1', 'admin2'], 'Alpha', 'bob@test.com');
+    await notifyTeamJoin('team-1', ['admin1', 'admin2'], 'Alpha', 'bob@test.com');
     expect(mockSendPush).toHaveBeenCalledWith(
       'admin1',
       'team_join',
@@ -83,7 +91,7 @@ describe('team event notifiers', () => {
   });
 
   it('notifies admins when a member leaves', async () => {
-    await notifyTeamLeave(['admin1'], 'Alpha', 'bob@test.com');
+    await notifyTeamLeave('team-1', ['admin1'], 'Alpha', 'bob@test.com');
     expect(mockSendPush).toHaveBeenCalledWith(
       'admin1',
       'team_leave',
@@ -93,7 +101,7 @@ describe('team event notifiers', () => {
   });
 
   it('skips empty ids when notifying a list', async () => {
-    await notifyTeamJoin(['', 'admin1'], 'Alpha', 'bob@test.com');
+    await notifyTeamJoin('team-1', ['', 'admin1'], 'Alpha', 'bob@test.com');
     expect(mockSendPush).toHaveBeenCalledTimes(1);
     expect(mockSendPush).toHaveBeenCalledWith(
       'admin1',
@@ -104,7 +112,7 @@ describe('team event notifiers', () => {
   });
 
   it('notifies team members about a shared miner', async () => {
-    await notifyTeamMinerShared(['m1', 'm2'], 'Alpha', 'Worker');
+    await notifyTeamMinerShared('team-1', ['m1', 'm2'], 'Alpha', 'Worker');
     expect(mockSendPush).toHaveBeenCalledWith(
       'm1',
       'miner_shared',
@@ -120,7 +128,7 @@ describe('team event notifiers', () => {
   });
 
   it('notifies team members when a miner is removed', async () => {
-    await notifyTeamMinerUnshared(['m1'], 'Alpha', 'Worker');
+    await notifyTeamMinerUnshared('team-1', ['m1'], 'Alpha', 'Worker');
     expect(mockSendPush).toHaveBeenCalledWith(
       'm1',
       'miner_unshared',
@@ -130,7 +138,7 @@ describe('team event notifiers', () => {
   });
 
   it('notifies the owner when their miner is shared', async () => {
-    await notifyOwnerMinerShared('owner1', 'Alpha', 'Worker');
+    await notifyOwnerMinerShared('team-1', 'owner1', 'Alpha', 'Worker');
     expect(mockSendPush).toHaveBeenCalledWith(
       'owner1',
       'miner_shared',
@@ -140,7 +148,7 @@ describe('team event notifiers', () => {
   });
 
   it('notifies the owner when their miner is removed', async () => {
-    await notifyOwnerMinerUnshared('owner1', 'Alpha', 'Worker');
+    await notifyOwnerMinerUnshared('team-1', 'owner1', 'Alpha', 'Worker');
     expect(mockSendPush).toHaveBeenCalledWith(
       'owner1',
       'miner_unshared',

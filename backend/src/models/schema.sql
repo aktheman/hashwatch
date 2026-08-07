@@ -134,15 +134,22 @@ CREATE TABLE IF NOT EXISTS miner_alert_rules (
 
 CREATE TABLE IF NOT EXISTS webhook_logs (
   id BIGSERIAL PRIMARY KEY,
-  userId UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  userId UUID REFERENCES users(id) ON DELETE CASCADE,
   event TEXT NOT NULL DEFAULT '',
   url TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
   responseCode INTEGER NOT NULL DEFAULT 0,
-  sentAt BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)
+  sentAt BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000),
+  teamId UUID,
+  webhookId UUID,
+  payload JSONB NOT NULL DEFAULT '{}',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  nextRetryAt BIGINT
 );
 
 CREATE INDEX IF NOT EXISTS idx_webhook_logs_user ON webhook_logs(userId, sentAt DESC);
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_team ON webhook_logs(teamId, sentAt DESC);
+CREATE INDEX IF NOT EXISTS idx_webhook_logs_retry ON webhook_logs(webhookId, status, nextRetryAt);
 
 CREATE TABLE IF NOT EXISTS pool_configs (
   id BIGSERIAL PRIMARY KEY,
@@ -272,6 +279,20 @@ CREATE TABLE IF NOT EXISTS team_miners (
 
 CREATE INDEX IF NOT EXISTS idx_team_miners_team ON team_miners(teamId);
 CREATE INDEX IF NOT EXISTS idx_team_miners_miner ON team_miners(minerId);
+
+CREATE TABLE IF NOT EXISTS team_webhooks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  teamId UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  name TEXT NOT NULL DEFAULT 'Webhook',
+  url TEXT NOT NULL,
+  secret TEXT NOT NULL,
+  eventTypes TEXT[] NOT NULL DEFAULT '{}',
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_team_webhooks_team ON team_webhooks(teamId);
 
 CREATE TABLE IF NOT EXISTS activity_events (
   id BIGSERIAL PRIMARY KEY,

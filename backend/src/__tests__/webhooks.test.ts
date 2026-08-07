@@ -75,3 +75,47 @@ describe('DELETE /api/webhooks/logs', () => {
     ]);
   });
 });
+
+describe('GET /api/webhooks/settings', () => {
+  it('returns stored webhook url and secret', async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        { key: 'webhook_url', value: 'https://hooks.example.com/alert' },
+        { key: 'webhook_secret', value: 'abc123' },
+      ],
+    });
+
+    const res = await request(app).get('/api/webhooks/settings');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      url: 'https://hooks.example.com/alert',
+      secret: 'abc123',
+    });
+  });
+
+  it('returns empty strings when nothing is set', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).get('/api/webhooks/settings');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ url: '', secret: '' });
+  });
+});
+
+describe('POST /api/webhooks/rotate-secret', () => {
+  it('stores and returns a new secret', async () => {
+    mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+
+    const res = await request(app).post('/api/webhooks/rotate-secret');
+
+    expect(res.status).toBe(200);
+    expect(res.body.secret).toMatch(/^[0-9a-f]{64}$/);
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('ON CONFLICT'), [
+      'test-user-id',
+      'webhook_secret',
+      expect.stringMatching(/^[0-9a-f]{64}$/),
+    ]);
+  });
+});

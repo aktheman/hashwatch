@@ -71,7 +71,10 @@ function mapInvitation(row: InvitationRow) {
   };
 }
 
-async function getMembership(teamId: string, userId: string): Promise<MembershipRow | undefined> {
+export async function getMembership(
+  teamId: string,
+  userId: string,
+): Promise<MembershipRow | undefined> {
   const result = await query(
     'SELECT teamId, userId, role, joinedAt FROM team_members WHERE teamId = $1 AND userId = $2',
     [teamId, userId],
@@ -267,7 +270,7 @@ teamRouter.post('/:id/invite', async (req: AuthRequest, res) => {
     const invitee = await query('SELECT id FROM users WHERE email = $1', [email]);
     if (invitee.rows.length > 0) {
       const inviteeId = (invitee.rows[0] as { id: string }).id;
-      await notifyTeamInvite(inviteeId, teamName, req.userEmail as string);
+      await notifyTeamInvite(teamId, inviteeId, teamName, req.userEmail as string);
       recordActivity(inviteeId, {
         type: 'team_invite',
         title: `You were invited to join ${teamName}`,
@@ -344,7 +347,7 @@ teamRouter.post('/:id/accept', async (req: AuthRequest, res) => {
     });
     if (team?.name) {
       const adminIds = await getTeamAdmins(teamId, userId);
-      await notifyTeamJoin(adminIds, team.name, req.userEmail as string);
+      await notifyTeamJoin(teamId, adminIds, team.name, req.userEmail as string);
       for (const adminId of adminIds) {
         recordActivity(adminId, {
           type: 'team_member_joined',
@@ -442,7 +445,7 @@ teamRouter.post('/:id/miners', async (req: AuthRequest, res) => {
     const teamName = await getTeamName(teamId);
     const minerName = await getMinerName(minerId);
     const memberIds = await getTeamMemberIds(teamId, userId);
-    await notifyTeamMinerShared(memberIds, teamName, minerName);
+    await notifyTeamMinerShared(teamId, memberIds, teamName, minerName);
     for (const memberId of memberIds) {
       recordActivity(memberId, {
         type: 'miner_shared',
@@ -452,7 +455,7 @@ teamRouter.post('/:id/miners', async (req: AuthRequest, res) => {
         metadata: { teamId },
       });
     }
-    await notifyOwnerMinerShared(userId, teamName, minerName);
+    await notifyOwnerMinerShared(teamId, userId, teamName, minerName);
     res.status(201).json({ ok: true });
   } catch (err: unknown) {
     log.error('Error sharing miner with team:', err instanceof Error ? err.message : err);
@@ -499,7 +502,7 @@ teamRouter.delete('/:id/miners/:minerId', async (req: AuthRequest, res) => {
       [teamId, userId, ownerId ?? ''],
     );
     const memberIds = (memberResult.rows as Array<{ userid: string }>).map((r) => r.userid);
-    await notifyTeamMinerUnshared(memberIds, teamName, minerName);
+    await notifyTeamMinerUnshared(teamId, memberIds, teamName, minerName);
     for (const memberId of memberIds) {
       recordActivity(memberId, {
         type: 'miner_unshared',
@@ -510,7 +513,7 @@ teamRouter.delete('/:id/miners/:minerId', async (req: AuthRequest, res) => {
       });
     }
     if (ownerId) {
-      await notifyOwnerMinerUnshared(ownerId, teamName, minerName);
+      await notifyOwnerMinerUnshared(teamId, ownerId, teamName, minerName);
       recordActivity(ownerId, {
         type: 'miner_unshared',
         title: `Your miner ${minerName} was removed from ${teamName}`,
@@ -546,7 +549,7 @@ teamRouter.delete('/:id/leave', async (req: AuthRequest, res) => {
     const teamName = await getTeamName(teamId);
     const leaverEmail = req.userEmail as string;
     const adminIds = await getTeamAdmins(teamId);
-    await notifyTeamLeave(adminIds, teamName, leaverEmail);
+    await notifyTeamLeave(teamId, adminIds, teamName, leaverEmail);
     for (const adminId of adminIds) {
       recordActivity(adminId, {
         type: 'team_member_left',

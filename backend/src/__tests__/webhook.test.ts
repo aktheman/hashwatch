@@ -70,6 +70,7 @@ describe('sendWebhook', () => {
   it('sends POST to webhook URL and logs success', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ value: 'https://hooks.example.com/alert' }] })
+      .mockResolvedValueOnce({ rows: [{ value: 'secret123' }] })
       .mockResolvedValueOnce({ rowCount: 1 });
     mockPost.mockResolvedValueOnce({ status: 200 });
 
@@ -83,22 +84,34 @@ describe('sendWebhook', () => {
     };
     await sendWebhook('user-1', payload);
 
-    expect(mockPost).toHaveBeenCalledWith('https://hooks.example.com/alert', payload, {
-      timeout: 10_000,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    expect(mockPost).toHaveBeenCalledWith(
+      'https://hooks.example.com/alert',
+      JSON.stringify(payload),
+      {
+        timeout: 10_000,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-HashWatch-Signature': expect.stringMatching(/^t=\d+,v1=[0-9a-f]{64}$/),
+          'X-HashWatch-Event': 'offline',
+          'X-HashWatch-Timestamp': expect.any(String),
+          'X-HashWatch-Version': '1',
+        },
+      },
+    );
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO webhook_logs'), [
       'user-1',
       'offline',
       'https://hooks.example.com/alert',
       'delivered',
       200,
+      JSON.stringify(payload),
     ]);
   });
 
   it('logs failure when POST throws', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ value: 'https://hooks.example.com/alert' }] })
+      .mockResolvedValueOnce({ rows: [{ value: 'secret123' }] })
       .mockResolvedValueOnce({ rowCount: 1 });
     mockPost.mockRejectedValueOnce(new Error('Network error'));
 

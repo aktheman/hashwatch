@@ -36,8 +36,10 @@ import { rateLimit as customRateLimit } from './middleware/rateLimit';
 import { publicDashboardRouter } from './routes/publicDashboards';
 import { marketplaceRouter } from './routes/marketplace';
 import { teamRouter } from './routes/teams';
+import { teamWebhooksRouter } from './routes/teamWebhooks';
 import { alertChannelsRouter } from './routes/alertChannels';
 import { botChannelsRouter } from './routes/botChannels';
+import { startTeamWebhookRetrySweeper, stopTeamWebhookRetrySweeper } from './services/teamWebhooks';
 import { stripeRouter, stripeWebhookRouter } from './routes/stripe';
 import { groupsRouter } from './routes/groups';
 import { pushWebRouter } from './routes/pushWeb';
@@ -140,6 +142,7 @@ app.use('/api/errors', authMiddleware, errorsRouter);
 app.use('/api/public-dashboards', publicDashboardRouter);
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/teams', authMiddleware, teamRouter);
+app.use('/api/teams', authMiddleware, teamWebhooksRouter);
 app.use('/api/alert-channels', authMiddleware, alertChannelsRouter);
 app.use('/api/bot-channels', authMiddleware, botChannelsRouter);
 app.use('/api/stripe', authMiddleware, stripeRouter);
@@ -199,6 +202,7 @@ initSchema().then(() => {
   server.listen(PORT, () => {
     log.info(`HashWatch API running on :${PORT}`);
     startMinerPoller();
+    startTeamWebhookRetrySweeper();
   });
 });
 
@@ -209,6 +213,7 @@ process.on('unhandledRejection', (reason) => {
 function gracefulShutdown(signal: string) {
   log.info(`Received ${signal}, shutting down gracefully...`);
   stopMinerPoller();
+  stopTeamWebhookRetrySweeper();
   invalidateCache();
   server.close(() => {
     log.info('HTTP server closed');
