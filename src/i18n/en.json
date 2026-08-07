@@ -1409,7 +1409,10 @@
     "profitToggle": "Enable price alerts",
     "profitDrop": "Price Drop %",
     "permissionDenied": "Notifications Disabled",
-    "permissionDeniedBody": "Enable notifications in your device settings to receive alerts."
+    "permissionDeniedBody": "Enable notifications in your device settings to receive alerts.",
+    "quietHoursEnabled": "Enable Quiet Hours",
+    "allowCritical": "Allow Critical Alerts",
+    "allowCriticalDesc": "Offline and high-temperature alerts still come through"
   },
   "automatedActions": {
     "title": "Automated Actions",

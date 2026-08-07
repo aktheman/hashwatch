@@ -1205,5 +1205,10 @@
     "testSuccess": "Test notification sent successfully",
     "testFailed": "Test notification failed",
     "saved": "Channel saved"
+  },
+  "notificationSettings": {
+    "quietHoursEnabled": "Ruhezeiten aktivieren",
+    "allowCritical": "Kritische Alarme erlauben",
+    "allowCriticalDesc": "Offline- und Überhitzungsalarme kommen weiterhin durch"
   }
 }

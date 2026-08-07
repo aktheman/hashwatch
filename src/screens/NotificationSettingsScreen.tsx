@@ -84,11 +84,15 @@ export function NotificationSettingsScreen() {
     channels,
     quietHoursStart,
     quietHoursEnd,
+    quietHoursEnabled,
+    quietHoursAllowCritical,
     loaded,
     loadSettings,
     updateThresholds,
     toggleChannel,
     setQuietHours,
+    setQuietHoursEnabled,
+    setQuietHoursAllowCritical,
   } = useNotificationSettingsStore();
 
   const [profitEnabled, setProfitEnabled] = useState(false);
@@ -282,6 +286,22 @@ export function NotificationSettingsScreen() {
           {t('notificationSettings.quietHoursDesc')}
         </Text>
 
+        <View style={[styles.toggleRow, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.timeLabel, { color: theme.text }]}>
+            {t('notificationSettings.quietHoursEnabled')}
+          </Text>
+          <Switch
+            value={quietHoursEnabled}
+            onValueChange={(val) => {
+              haptic.selection();
+              setQuietHoursEnabled(val);
+            }}
+            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+            thumbColor={quietHoursEnabled ? theme.primary : theme.textMuted}
+            accessibilityLabel="Toggle quiet hours"
+          />
+        </View>
+
         <View style={styles.timeRow}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.timeLabel, { color: theme.textDim }]}>
@@ -357,6 +377,27 @@ export function NotificationSettingsScreen() {
             </View>
           </View>
         </View>
+
+        <View style={styles.toggleRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.timeLabel, { color: theme.text }]}>
+              {t('notificationSettings.allowCritical')}
+            </Text>
+            <Text style={[styles.quietDesc, { color: theme.textMuted }]}>
+              {t('notificationSettings.allowCriticalDesc')}
+            </Text>
+          </View>
+          <Switch
+            value={quietHoursAllowCritical}
+            onValueChange={(val) => {
+              haptic.selection();
+              setQuietHoursAllowCritical(val);
+            }}
+            trackColor={{ false: theme.surfaceLight, true: theme.primary + '60' }}
+            thumbColor={quietHoursAllowCritical ? theme.primary : theme.textMuted}
+            accessibilityLabel="Allow critical alerts during quiet hours"
+          />
+        </View>
       </View>
 
       <Pressable
@@ -428,6 +469,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
     borderBottomWidth: 1,
   },
   channelLabel: {

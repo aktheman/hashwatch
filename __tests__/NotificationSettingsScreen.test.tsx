@@ -65,6 +65,8 @@ const mockStoreState: any = {
   channels: { push: true, email: false, webhook: false },
   quietHoursStart: 22,
   quietHoursEnd: 7,
+  quietHoursEnabled: false,
+  quietHoursAllowCritical: true,
   loaded: true,
 };
 
@@ -79,6 +81,8 @@ jest.mock('../src/store/notificationSettings', () => {
         channels: mockStoreState.channels,
         quietHoursStart: mockStoreState.quietHoursStart,
         quietHoursEnd: mockStoreState.quietHoursEnd,
+        quietHoursEnabled: mockStoreState.quietHoursEnabled,
+        quietHoursAllowCritical: mockStoreState.quietHoursAllowCritical,
         loaded: mockStoreState.loaded,
         loadSettings: mockLoadSettings,
         updateThresholds: (patch: any) => {
@@ -95,6 +99,14 @@ jest.mock('../src/store/notificationSettings', () => {
         setQuietHours: (start: number, end: number) => {
           mockStoreState.quietHoursStart = start;
           mockStoreState.quietHoursEnd = end;
+          bump();
+        },
+        setQuietHoursEnabled: (enabled: boolean) => {
+          mockStoreState.quietHoursEnabled = enabled;
+          bump();
+        },
+        setQuietHoursAllowCritical: (allowCritical: boolean) => {
+          mockStoreState.quietHoursAllowCritical = allowCritical;
           bump();
         },
       };
@@ -118,6 +130,8 @@ beforeEach(() => {
   mockStoreState.channels = { push: true, email: false, webhook: false };
   mockStoreState.quietHoursStart = 22;
   mockStoreState.quietHoursEnd = 7;
+  mockStoreState.quietHoursEnabled = false;
+  mockStoreState.quietHoursAllowCritical = true;
   mockStoreState.loaded = true;
   mockRequestPermission.mockResolvedValue(true);
   mockProfitState.enabled = false;
@@ -256,6 +270,32 @@ it('sets the quiet hours end time', async () => {
   await fireEvent.press(screen.getByLabelText('Set quiet hours end to 6:00'));
   expect(mockStoreState.quietHoursEnd).toBe(6);
   expect(mockStoreState.quietHoursStart).toBe(22);
+});
+
+it('enables quiet hours via the toggle', async () => {
+  await render(<NotificationSettingsScreen />);
+  expect(screen.getByLabelText('Toggle quiet hours').props.value).toBe(false);
+  await fireEvent(screen.getByLabelText('Toggle quiet hours'), 'onValueChange', true);
+  await waitFor(() => {
+    expect(screen.getByLabelText('Toggle quiet hours').props.value).toBe(true);
+  });
+  expect(mockStoreState.quietHoursEnabled).toBe(true);
+});
+
+it('disables critical alert allowance via the toggle', async () => {
+  await render(<NotificationSettingsScreen />);
+  expect(screen.getByLabelText('Allow critical alerts during quiet hours').props.value).toBe(true);
+  await fireEvent(
+    screen.getByLabelText('Allow critical alerts during quiet hours'),
+    'onValueChange',
+    false,
+  );
+  await waitFor(() => {
+    expect(screen.getByLabelText('Allow critical alerts during quiet hours').props.value).toBe(
+      false,
+    );
+  });
+  expect(mockStoreState.quietHoursAllowCritical).toBe(false);
 });
 
 it('sends a test notification when permission is granted', async () => {

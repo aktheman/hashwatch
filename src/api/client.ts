@@ -173,6 +173,24 @@ export async function deleteSetting(key: string): Promise<DeleteResponse> {
   return res.data;
 }
 
+export interface QuietHoursSettings {
+  enabled: boolean;
+  start: string;
+  end: string;
+  utcOffsetMinutes: number;
+  allowCritical: boolean;
+}
+
+export async function getQuietHours(): Promise<QuietHoursSettings> {
+  const res = await client.get<QuietHoursSettings>('/api/settings/quiet-hours');
+  return res.data;
+}
+
+export async function putQuietHours(settings: QuietHoursSettings): Promise<QuietHoursSettings> {
+  const res = await client.put<QuietHoursSettings>('/api/settings/quiet-hours', settings);
+  return res.data;
+}
+
 export async function validateReceipt(
   receipt: string,
   productId: string,

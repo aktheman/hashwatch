@@ -11,6 +11,11 @@ jest.mock('../middleware/auth', () => ({
   },
 }));
 
+const mockIsQuietHoursActive = jest.fn().mockResolvedValue(false);
+jest.mock('../utils/quietHours', () => ({
+  isQuietHoursActive: (...args: unknown[]) => mockIsQuietHoursActive(...args),
+}));
+
 import { pushRouter } from '../routes/push';
 
 const app = express();

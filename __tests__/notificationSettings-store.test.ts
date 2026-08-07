@@ -19,6 +19,8 @@ beforeEach(() => {
     channels: { push: true, email: false, webhook: false },
     quietHoursStart: 22,
     quietHoursEnd: 7,
+    quietHoursEnabled: false,
+    quietHoursAllowCritical: true,
     loaded: false,
   });
   jest.clearAllMocks();
@@ -135,6 +137,45 @@ describe('setQuietHours', () => {
 
     expect(useNotificationSettingsStore.getState().quietHoursStart).toBe(0);
     expect(useNotificationSettingsStore.getState().quietHoursEnd).toBe(23);
+  });
+
+  it('persists HH:MM keys used by quiet hours enforcement', () => {
+    useNotificationSettingsStore.getState().setQuietHours(23, 6);
+
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_start', '23:00');
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_end', '06:00');
+  });
+});
+
+describe('setQuietHoursEnabled', () => {
+  it('enables quiet hours and persists', () => {
+    useNotificationSettingsStore.getState().setQuietHoursEnabled(true);
+
+    expect(useNotificationSettingsStore.getState().quietHoursEnabled).toBe(true);
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_enabled', 'true');
+  });
+
+  it('disables quiet hours and persists', () => {
+    useNotificationSettingsStore.getState().setQuietHoursEnabled(false);
+
+    expect(useNotificationSettingsStore.getState().quietHoursEnabled).toBe(false);
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_enabled', 'false');
+  });
+});
+
+describe('setQuietHoursAllowCritical', () => {
+  it('allows critical alerts and persists', () => {
+    useNotificationSettingsStore.getState().setQuietHoursAllowCritical(true);
+
+    expect(useNotificationSettingsStore.getState().quietHoursAllowCritical).toBe(true);
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_allow_critical', 'true');
+  });
+
+  it('suppresses critical alerts and persists', () => {
+    useNotificationSettingsStore.getState().setQuietHoursAllowCritical(false);
+
+    expect(useNotificationSettingsStore.getState().quietHoursAllowCritical).toBe(false);
+    expect(mockSetSetting).toHaveBeenCalledWith('quiet_hours_allow_critical', 'false');
   });
 });
 

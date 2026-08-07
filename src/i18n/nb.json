@@ -1414,7 +1414,10 @@
     "profitToggle": "Aktiver prisvarsler",
     "profitDrop": "Prisfall %",
     "permissionDenied": "Varsler Deaktivert",
-    "permissionDeniedBody": "Aktiver varsler i enhetsinnstillingene for å motta varsler."
+    "permissionDeniedBody": "Aktiver varsler i enhetsinnstillingene for å motta varsler.",
+    "quietHoursEnabled": "Aktiver stille-timer",
+    "allowCritical": "Tillat kritiske varsler",
+    "allowCriticalDesc": "Fra- og høytemperaturvarsler kommer fortsatt gjennom"
   },
   "automatedActions": {
     "title": "Automatiserte Handlinger",

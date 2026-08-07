@@ -1,6 +1,7 @@
 import { query } from '../db';
 import { sendWebhook } from './webhook';
 import { log } from '../logger';
+import { isQuietHoursActive } from '../utils/quietHours';
 
 interface NotificationAction {
   action: string;
@@ -111,6 +112,7 @@ export async function sendPushNotification(
   title: string,
   body: string,
 ): Promise<void> {
+  if (await isQuietHoursActive(userId, { eventType: type })) return;
   const result = await query(
     'SELECT token, alert_types, token_type FROM push_tokens WHERE userId = $1',
     [userId],
@@ -137,6 +139,7 @@ export async function sendRichNotification(
     actions?: NotificationAction[];
   } = {},
 ): Promise<void> {
+  if (await isQuietHoursActive(userId, { eventType: type })) return;
   const result = await query(
     'SELECT token, alert_types, token_type FROM push_tokens WHERE userId = $1',
     [userId],

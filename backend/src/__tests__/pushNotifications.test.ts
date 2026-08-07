@@ -1,8 +1,14 @@
 const mockQuery = jest.fn();
 jest.mock('../db', () => ({ query: mockQuery }));
 
+const mockIsQuietHoursActive = jest.fn().mockResolvedValue(false);
+jest.mock('../utils/quietHours', () => ({
+  isQuietHoursActive: (...args: unknown[]) => mockIsQuietHoursActive(...args),
+}));
+
 import {
   sendPushNotification,
+  sendRichNotification,
   sendMinerOfflineNotification,
   sendMinerOnlineNotification,
   sendMinerHotNotification,
@@ -158,5 +164,38 @@ describe('sendPoolChangeNotification', () => {
     await sendPoolChangeNotification('user-1', 'M1', 'miner-1', 'stratum+tcp://old', null);
 
     expect(mockSendPushNotificationsAsync).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('quiet hours gating', () => {
+  it('skips device pushes during quiet hours', async () => {
+    mockIsQuietHoursActive.mockResolvedValueOnce(true);
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'ExpoPushToken-abc' }] });
+
+    await sendPushNotification('user-1', 'online', 'Title', 'Body');
+
+    expect(mockQuery).not.toHaveBeenCalledWith(
+      'SELECT token, alert_types, token_type FROM push_tokens WHERE userId = $1',
+      ['user-1'],
+    );
+    expect(mockSendPushNotificationsAsync).not.toHaveBeenCalled();
+  });
+
+  it('passes the event type to the quiet hours check', async () => {
+    mockIsQuietHoursActive.mockResolvedValueOnce(false);
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'ExpoPushToken-abc' }] });
+
+    await sendPushNotification('user-1', 'offline', 'Title', 'Body');
+
+    expect(mockIsQuietHoursActive).toHaveBeenCalledWith('user-1', { eventType: 'offline' });
+  });
+
+  it('gates rich notifications during quiet hours', async () => {
+    mockIsQuietHoursActive.mockResolvedValueOnce(true);
+    mockQuery.mockResolvedValueOnce({ rows: [{ token: 'ExpoPushToken-abc' }] });
+
+    await sendRichNotification('user-1', 'hot', 'Title', 'Body');
+
+    expect(mockSendPushNotificationsAsync).not.toHaveBeenCalled();
   });
 });

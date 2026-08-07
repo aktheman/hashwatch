@@ -1195,5 +1195,10 @@
     "testSuccess": "Test notification sent successfully",
     "testFailed": "Test notification failed",
     "saved": "Channel saved"
+  },
+  "notificationSettings": {
+    "quietHoursEnabled": "おやすみ時間を有効にする",
+    "allowCritical": "重大アラートを許可",
+    "allowCriticalDesc": "オフラインと高温アラートは引き続き通知されます"
   }
 }

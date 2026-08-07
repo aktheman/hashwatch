@@ -1205,5 +1205,10 @@
     "testSuccess": "Test notification sent successfully",
     "testFailed": "Test notification failed",
     "saved": "Channel saved"
+  },
+  "notificationSettings": {
+    "quietHoursEnabled": "Activar horas de silencio",
+    "allowCritical": "Permitir alertas críticas",
+    "allowCriticalDesc": "Las alertas de desconexión y alta temperatura siguen llegando"
   }
 }

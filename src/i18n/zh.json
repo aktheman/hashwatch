@@ -1195,5 +1195,10 @@
     "testSuccess": "Test notification sent successfully",
     "testFailed": "Test notification failed",
     "saved": "Channel saved"
+  },
+  "notificationSettings": {
+    "quietHoursEnabled": "启用免打扰时段",
+    "allowCritical": "允许关键警报",
+    "allowCriticalDesc": "离线和高温警报仍会发送"
   }
 }
