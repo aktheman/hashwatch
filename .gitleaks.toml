@@ -1,0 +1,28 @@
+title = "HashWatch gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "railway-api-token"
+description = "Railway API token assignment"
+regex = '''(?i)RAILWAY_API_TOKEN\s*[=:]\s*["']?([A-Za-z0-9_\-\.]{16,})'''
+secretGroup = 1
+entropy = 3.0
+
+[[rules]]
+id = "expo-public-secret"
+description = "EXPO_PUBLIC_* env var assigned a secret-looking value"
+regex = '''EXPO_PUBLIC_[A-Z0-9_]+\s*[=:]\s*["']?([A-Za-z0-9_\-\.]{20,})'''
+secretGroup = 1
+entropy = 3.0
+
+[allowlist]
+description = "Env example files (placeholders only) and test fixtures"
+paths = [
+  "(\\.env\\.example)$",
+  "(\\.env\\.example\\.local)$",
+  "(^|/)__tests__/fixtures/",
+  "(^|/)backend/src/__tests__/fixtures/",
+  "(^|/)e2e/",
+]

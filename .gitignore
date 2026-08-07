@@ -62,3 +62,6 @@ electron-dist/
 *.txt
 full_project.txt
 analyse.txt
+
+# personal Continue.dev assistant config (leaked an API key; keep local only)
+.continue/
