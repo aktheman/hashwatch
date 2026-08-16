@@ -52,10 +52,10 @@ webhooksRouter.get('/logs', async (req: AuthRequest, res) => {
     const total = countResult.rows[0].total;
 
     const result = await query(
-      `SELECT id, event, url, status, "responseCode", "sentAt"
+      `SELECT id, event, url, status, responseCode AS "responseCode", sentAt AS "sentAt"
        FROM webhook_logs
        WHERE userId = $1
-       ORDER BY "sentAt" DESC
+       ORDER BY sentAt DESC
        LIMIT $2 OFFSET $3`,
       [req.userId, limit, offset],
     );

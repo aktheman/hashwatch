@@ -25,12 +25,19 @@ groupSharesRouter.post('/share', async (req: AuthRequest, res) => {
     if (sharedWithUserId === req.userId) {
       return res.status(400).json({ error: 'Cannot share with yourself' });
     }
+    const ownedGroup = await query('SELECT id FROM miner_groups WHERE id = $1 AND user_id = $2', [
+      groupId,
+      req.userId,
+    ]);
+    if (ownedGroup.rows.length === 0) {
+      return res.status(403).json({ error: 'Group not found or not owned by you' });
+    }
     const existing = await query(
-      'SELECT id FROM group_shares WHERE "ownerId" = $1 AND "groupId" = $2 AND "sharedWithUserId" = $3',
+      'SELECT id FROM group_shares WHERE ownerId = $1 AND groupId = $2 AND sharedWithUserId = $3',
       [req.userId, groupId, sharedWithUserId],
     );
     if (existing.rows.length > 0) {
-      await query('UPDATE group_shares SET "accessLevel" = $1 WHERE id = $2', [
+      await query('UPDATE group_shares SET accessLevel = $1 WHERE id = $2', [
         level,
         existing.rows[0].id,
       ]);
@@ -38,7 +45,7 @@ groupSharesRouter.post('/share', async (req: AuthRequest, res) => {
       return res.json({ id: existing.rows[0].id, accessLevel: level, updated: true });
     }
     const result = await query(
-      'INSERT INTO group_shares ("ownerId", "groupId", "sharedWithUserId", "sharedWithEmail", "accessLevel") VALUES ($1, $2, $3, $4, $5) RETURNING id, "accessLevel"',
+      'INSERT INTO group_shares (ownerId, groupId, sharedWithUserId, sharedWithEmail, accessLevel) VALUES ($1, $2, $3, $4, $5) RETURNING id, accesslevel AS "accessLevel"',
       [req.userId, groupId, sharedWithUserId, email, level],
     );
     invalidateCache('/api/groups');
@@ -52,12 +59,13 @@ groupSharesRouter.post('/share', async (req: AuthRequest, res) => {
 groupSharesRouter.get('/share', async (req: AuthRequest, res) => {
   try {
     const result = await query(
-      `SELECT gs.id, gs."groupId", gs."accessLevel", gs."sharedWithEmail", gs."createdAt",
+      `SELECT gs.id, gs.groupid AS "groupId", gs.accesslevel AS "accessLevel",
+              gs.sharedwithemail AS "sharedWithEmail", gs.createdat AS "createdAt",
               u.email as "ownerEmail"
        FROM group_shares gs
-       JOIN users u ON u.id = gs."ownerId"
-       WHERE gs."sharedWithUserId" = $1
-       ORDER BY gs."createdAt" DESC`,
+       JOIN users u ON u.id = gs.ownerid
+       WHERE gs.sharedwithuserid = $1
+       ORDER BY gs.createdat DESC`,
       [req.userId],
     );
     res.json(result.rows);
@@ -70,10 +78,11 @@ groupSharesRouter.get('/share', async (req: AuthRequest, res) => {
 groupSharesRouter.get('/shared-by-me', async (req: AuthRequest, res) => {
   try {
     const result = await query(
-      `SELECT gs.id, gs."groupId", gs."accessLevel", gs."sharedWithEmail", gs."createdAt"
+      `SELECT gs.id, gs.groupid AS "groupId", gs.accesslevel AS "accessLevel",
+              gs.sharedwithemail AS "sharedWithEmail", gs.createdat AS "createdAt"
        FROM group_shares gs
-       WHERE gs."ownerId" = $1
-       ORDER BY gs."createdAt" DESC`,
+       WHERE gs.ownerid = $1
+       ORDER BY gs.createdat DESC`,
       [req.userId],
     );
     res.json(result.rows);
@@ -89,7 +98,7 @@ groupSharesRouter.put('/share/:id', async (req: AuthRequest, res) => {
     const { accessLevel } = req.body;
     const level = accessLevel === 'edit' ? 'edit' : 'view';
     const result = await query(
-      'UPDATE group_shares SET "accessLevel" = $1 WHERE id = $2 AND "ownerId" = $3 RETURNING id, "accessLevel"',
+      'UPDATE group_shares SET accessLevel = $1 WHERE id = $2 AND ownerId = $3 RETURNING id, accesslevel AS "accessLevel"',
       [level, id, req.userId],
     );
     if (result.rows.length === 0) {
@@ -107,7 +116,7 @@ groupSharesRouter.delete('/share/:id', async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const result = await query(
-      'DELETE FROM group_shares WHERE id = $1 AND ("ownerId" = $2 OR "sharedWithUserId" = $2)',
+      'DELETE FROM group_shares WHERE id = $1 AND (ownerId = $2 OR sharedWithUserId = $2)',
       [id, req.userId],
     );
     if (result.rowCount === 0) {
@@ -125,17 +134,17 @@ groupSharesRouter.get('/shared-miners/:groupId', async (req: AuthRequest, res) =
   try {
     const { groupId } = req.params;
     const shareCheck = await query(
-      'SELECT "accessLevel" FROM group_shares WHERE "groupId" = $1 AND "sharedWithUserId" = $2',
+      'SELECT accesslevel AS "accessLevel" FROM group_shares WHERE groupid = $1 AND sharedwithuserid = $2',
       [groupId, req.userId],
     );
     if (shareCheck.rows.length === 0) {
       return res.status(403).json({ error: 'Access denied' });
     }
     const result = await query(
-      `SELECT m.id, m.name, m.ip, m.port, m."lastSeen"
+      `SELECT m.id, m.name, m.ip, m.port, m.lastseen AS "lastSeen"
        FROM miners m
-       WHERE m."userId" IN (
-         SELECT "ownerId" FROM group_shares WHERE "groupId" = $1 AND "sharedWithUserId" = $2
+       WHERE m.userid IN (
+         SELECT ownerid FROM group_shares WHERE groupid = $1 AND sharedwithuserid = $2
        )
        ORDER BY m.name`,
       [groupId, req.userId],

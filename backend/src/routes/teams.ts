@@ -378,11 +378,11 @@ teamRouter.get('/:id/miners', async (req: AuthRequest, res) => {
     const memberIds = (memberResult.rows as Array<{ userid: string }>).map((r) => r.userid);
 
     const minerResult = await query(
-      `SELECT m.id, m.name, m.ip, m."userId" AS "ownerId"
+      `SELECT m.id, m.name, m.ip, m.userId AS "ownerId"
        FROM team_miners tm
        JOIN miners m ON m.id = tm.minerId
        WHERE tm.teamId = $1
-       ORDER BY tm."addedAt" DESC`,
+       ORDER BY tm.addedAt DESC`,
       [teamId],
     );
     const miners = minerResult.rows.map((r: Record<string, unknown>) => ({
@@ -417,7 +417,7 @@ teamRouter.post('/:id/miners', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'minerId is required' });
     }
 
-    const owned = await query('SELECT id FROM miners WHERE id = $1 AND "userId" = $2', [
+    const owned = await query('SELECT id FROM miners WHERE id = $1 AND userId = $2', [
       minerId,
       userId,
     ]);
@@ -491,7 +491,7 @@ teamRouter.delete('/:id/miners/:minerId', async (req: AuthRequest, res) => {
 
     const teamName = await getTeamName(teamId);
     const minerName = await getMinerName(minerId);
-    const ownerResult = await query('SELECT "userId" AS "ownerId" FROM miners WHERE id = $1', [
+    const ownerResult = await query('SELECT userId AS "ownerId" FROM miners WHERE id = $1', [
       minerId,
     ]);
     const ownerId = (ownerResult.rows[0] as { ownerId?: string } | undefined)?.ownerId;

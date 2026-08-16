@@ -24,14 +24,47 @@ function notifyListeners() {
   _listeners.forEach((fn) => fn([..._pendingChanges]));
 }
 
+const NETWORK_POLL_INTERVAL_MS = 10000;
+
+let _isOnline = true;
+
+async function pollNetwork() {
+  try {
+    const state = await Network.getNetworkStateAsync();
+    _isOnline = state.isConnected ?? true;
+  } catch {
+    _isOnline = true;
+  }
+}
+
+let _networkInterval: ReturnType<typeof setInterval> | null = null;
+
+function startNetworkPolling() {
+  if (_networkInterval) return;
+  void pollNetwork();
+  _networkInterval = setInterval(() => {
+    void pollNetwork();
+  }, NETWORK_POLL_INTERVAL_MS);
+  if (_networkInterval && typeof _networkInterval === 'object' && 'unref' in _networkInterval) {
+    (_networkInterval as { unref: () => void }).unref();
+  }
+}
+
 export function getNetworkStatus(): boolean {
-  return true;
+  startNetworkPolling();
+  return _isOnline;
+}
+
+/** @internal only for testing */
+export function __setNetworkStatus(isOnline: boolean): void {
+  _isOnline = isOnline;
 }
 
 export async function getNetworkStatusAsync(): Promise<boolean> {
   try {
     const state = await Network.getNetworkStateAsync();
-    return state.isConnected ?? true;
+    _isOnline = state.isConnected ?? true;
+    return _isOnline;
   } catch {
     return getNetworkStatus();
   }

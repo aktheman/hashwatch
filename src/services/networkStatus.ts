@@ -10,7 +10,7 @@ const POLL_INTERVAL_MS = 10000;
 
 let _listeners: Array<(status: NetworkStatus) => void> = [];
 let _currentStatus: NetworkStatus = { isOnline: true, type: null };
-let _onReconnect: (() => void) | null = null;
+let _onReconnect: Array<() => void> = [];
 
 async function checkNetwork(): Promise<NetworkStatus> {
   try {
@@ -28,8 +28,8 @@ async function pollNetwork() {
   const prev = _currentStatus;
   _currentStatus = await checkNetwork();
 
-  if (!prev.isOnline && _currentStatus.isOnline && _onReconnect) {
-    _onReconnect();
+  if (!prev.isOnline && _currentStatus.isOnline) {
+    _onReconnect.forEach((fn) => fn());
   }
 
   _listeners.forEach((fn) => fn(_currentStatus));
@@ -71,11 +71,9 @@ export function useNetworkStatus(): NetworkStatus {
 }
 
 export function onNetworkReconnect(callback: () => void): () => void {
-  _onReconnect = callback;
+  _onReconnect.push(callback);
   return () => {
-    if (_onReconnect === callback) {
-      _onReconnect = null;
-    }
+    _onReconnect = _onReconnect.filter((fn) => fn !== callback);
   };
 }
 
@@ -83,6 +81,11 @@ export function onNetworkReconnect(callback: () => void): () => void {
 export function __resetNetworkStatus() {
   _listeners = [];
   _currentStatus = { isOnline: true, type: null };
-  _onReconnect = null;
+  _onReconnect = [];
   stopPolling();
+}
+
+/** @internal only for testing */
+export function __getReconnectCallbacksCount(): number {
+  return _onReconnect.length;
 }

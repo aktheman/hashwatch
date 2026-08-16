@@ -35,10 +35,10 @@ function generateId(): string {
   return `tw_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function loadFromStorage(): TeamWebhook[] {
+async function loadFromStorage(): Promise<TeamWebhook[]> {
   if (_webhookCache) return _webhookCache;
   try {
-    const raw = getSetting(STORAGE_KEY);
+    const raw = await getSetting(STORAGE_KEY);
     if (raw && typeof raw === 'string') {
       _webhookCache = JSON.parse(raw) as TeamWebhook[];
       return _webhookCache!;
@@ -196,7 +196,7 @@ export async function getTeamWebhooks(): Promise<TeamWebhook[]> {
 }
 
 export async function saveTeamWebhook(webhook: Omit<TeamWebhook, 'id'>): Promise<TeamWebhook> {
-  const webhooks = loadFromStorage();
+  const webhooks = await loadFromStorage();
   const existing = webhooks.find((w) => w.url === webhook.url && w.name === webhook.name);
 
   let saved: TeamWebhook;
@@ -214,7 +214,7 @@ export async function saveTeamWebhook(webhook: Omit<TeamWebhook, 'id'>): Promise
 }
 
 export async function deleteTeamWebhook(id: string): Promise<void> {
-  const webhooks = loadFromStorage().filter((w) => w.id !== id);
+  const webhooks = (await loadFromStorage()).filter((w) => w.id !== id);
   saveToStorage(webhooks);
 }
 

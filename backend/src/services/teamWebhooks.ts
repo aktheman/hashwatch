@@ -127,7 +127,7 @@ export async function sendTeamWebhooks(
 ): Promise<void> {
   try {
     const result = await query(
-      `SELECT id, teamId, url, secret, "eventTypes", active
+      `SELECT id, teamId, url, secret, eventTypes AS "eventTypes", active
        FROM team_webhooks
        WHERE teamId = $1 AND active = TRUE`,
       [teamId],
@@ -149,7 +149,7 @@ export async function testTeamWebhook(
 ): Promise<{ ok: boolean; status: number }> {
   try {
     const result = await query(
-      `SELECT id, teamId, url, secret, "eventTypes", active
+      `SELECT id, teamId, url, secret, eventTypes AS "eventTypes", active
        FROM team_webhooks
        WHERE id = $1 AND teamId = $2`,
       [webhookId, teamId],

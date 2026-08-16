@@ -75,13 +75,13 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
 
     if (
       tempThreshold !== undefined &&
-      (typeof tempThreshold !== 'number' || tempThreshold < 0 || tempThreshold > 200)
+      (!Number.isFinite(tempThreshold) || tempThreshold < 0 || tempThreshold > 200)
     ) {
       return res.status(400).json({ error: 'tempThreshold must be a number between 0 and 200' });
     }
     if (
       hashrateDropPercent !== undefined &&
-      (typeof hashrateDropPercent !== 'number' ||
+      (!Number.isFinite(hashrateDropPercent) ||
         hashrateDropPercent < 0 ||
         hashrateDropPercent > 100)
     ) {
@@ -91,7 +91,7 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
     }
     if (
       offlineReminderMinutes !== undefined &&
-      (typeof offlineReminderMinutes !== 'number' ||
+      (!Number.isFinite(offlineReminderMinutes) ||
         offlineReminderMinutes < 0 ||
         offlineReminderMinutes > 1440)
     ) {
@@ -101,7 +101,7 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
     }
     if (
       uptimeThresholdHours !== undefined &&
-      (typeof uptimeThresholdHours !== 'number' ||
+      (!Number.isFinite(uptimeThresholdHours) ||
         uptimeThresholdHours < 0 ||
         uptimeThresholdHours > 8760)
     ) {
@@ -111,7 +111,7 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
     }
     if (
       shareRejectionPercent !== undefined &&
-      (typeof shareRejectionPercent !== 'number' ||
+      (!Number.isFinite(shareRejectionPercent) ||
         shareRejectionPercent < 0 ||
         shareRejectionPercent > 100)
     ) {
@@ -119,6 +119,21 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
         .status(400)
         .json({ error: 'shareRejectionPercent must be a number between 0 and 100' });
     }
+
+    const existingResult = await query(
+      'SELECT tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent, enabled FROM miner_alert_rules WHERE userId = $1 AND minerId = $2',
+      [req.userId as string, minerId],
+    );
+    const existing = existingResult.rows[0] as Partial<MinerAlertRule> | undefined;
+
+    const merged = {
+      tempThreshold: tempThreshold ?? existing?.tempthreshold ?? 70,
+      hashrateDropPercent: hashrateDropPercent ?? existing?.hashratedroppercent ?? 50,
+      offlineReminderMinutes: offlineReminderMinutes ?? existing?.offlinereminderminutes ?? 5,
+      uptimeThresholdHours: uptimeThresholdHours ?? existing?.uptimethresholdhours ?? 24,
+      shareRejectionPercent: shareRejectionPercent ?? existing?.sharerejectionpercent ?? 10,
+      enabled: enabled ?? existing?.enabled ?? true,
+    };
 
     await query(
       `INSERT INTO miner_alert_rules (userId, minerId, tempThreshold, hashrateDropPercent, offlineReminderMinutes, uptimeThresholdHours, shareRejectionPercent, enabled)
@@ -133,12 +148,12 @@ alertRulesRouter.put('/:minerId', async (req: AuthRequest, res) => {
       [
         req.userId as string,
         minerId,
-        tempThreshold ?? 70,
-        hashrateDropPercent ?? 50,
-        offlineReminderMinutes ?? 5,
-        uptimeThresholdHours ?? 24,
-        shareRejectionPercent ?? 10,
-        enabled ?? true,
+        merged.tempThreshold,
+        merged.hashrateDropPercent,
+        merged.offlineReminderMinutes,
+        merged.uptimeThresholdHours,
+        merged.shareRejectionPercent,
+        merged.enabled,
       ],
     );
     res.json({ ok: true });

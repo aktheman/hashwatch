@@ -75,6 +75,60 @@ describe('stripeRouter', () => {
 
       expect(res.status).toBe(401);
     });
+
+    it('ignores client-controlled trialPeriodDays', async () => {
+      const origSecret = process.env.STRIPE_SECRET_KEY;
+      const origTrial = process.env.STRIPE_TRIAL_DAYS;
+      const origFetch = global.fetch;
+      process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+      delete process.env.STRIPE_TRIAL_DAYS;
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ url: 'https://checkout.stripe.com/c/pay/test' }),
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      await request(createStripeApp())
+        .post('/api/stripe/create-checkout-session')
+        .set('Authorization', authHeader())
+        .send({ priceId: 'price_123', trialPeriodDays: 365 });
+
+      const [, init] = fetchMock.mock.calls[0];
+      const body = new URLSearchParams(init.body);
+      expect(body.get('subscription_data[trial_period_days]')).toBeNull();
+
+      process.env.STRIPE_SECRET_KEY = origSecret;
+      if (origTrial === undefined) delete process.env.STRIPE_TRIAL_DAYS;
+      else process.env.STRIPE_TRIAL_DAYS = origTrial;
+      global.fetch = origFetch;
+    });
+
+    it('applies server-side STRIPE_TRIAL_DAYS when configured', async () => {
+      const origSecret = process.env.STRIPE_SECRET_KEY;
+      const origTrial = process.env.STRIPE_TRIAL_DAYS;
+      const origFetch = global.fetch;
+      process.env.STRIPE_SECRET_KEY = 'sk_test_123';
+      process.env.STRIPE_TRIAL_DAYS = '7';
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ url: 'https://checkout.stripe.com/c/pay/test' }),
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      await request(createStripeApp())
+        .post('/api/stripe/create-checkout-session')
+        .set('Authorization', authHeader())
+        .send({ priceId: 'price_123' });
+
+      const [, init] = fetchMock.mock.calls[0];
+      const body = new URLSearchParams(init.body);
+      expect(body.get('subscription_data[trial_period_days]')).toBe('7');
+
+      process.env.STRIPE_SECRET_KEY = origSecret;
+      if (origTrial === undefined) delete process.env.STRIPE_TRIAL_DAYS;
+      else process.env.STRIPE_TRIAL_DAYS = origTrial;
+      global.fetch = origFetch;
+    });
   });
 
   describe('GET /subscription', () => {
@@ -209,8 +263,15 @@ describe('stripeWebhookRouter', () => {
   it('accepts a validly signed checkout.session.completed webhook', async () => {
     const origSecret = process.env.STRIPE_SECRET_KEY;
     const origWebhook = process.env.STRIPE_WEBHOOK_SECRET;
+    const origFetch = global.fetch;
     process.env.STRIPE_SECRET_KEY = 'sk_test_123';
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+
+    const periodEnd = Math.floor(Date.now() / 1000) + 30 * 86400;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ current_period_end: periodEnd, trial_end: null }),
+    }) as unknown as typeof fetch;
 
     const t = String(Math.floor(Date.now() / 1000));
     const body = JSON.stringify({
@@ -236,8 +297,15 @@ describe('stripeWebhookRouter', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ received: true });
     expect(mockQuery).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.stripe.com/v1/subscriptions/sub_123',
+      expect.any(Object),
+    );
+    const [, , expiresAt] = mockQuery.mock.calls[0][1];
+    expect(expiresAt).toBe(new Date(periodEnd * 1000).toISOString());
     process.env.STRIPE_SECRET_KEY = origSecret;
     process.env.STRIPE_WEBHOOK_SECRET = origWebhook;
+    global.fetch = origFetch;
   });
 
   it('rejects a webhook with an invalid signature', async () => {

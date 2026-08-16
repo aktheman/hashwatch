@@ -13,6 +13,7 @@ function getWebhookSecret(): string {
 
 const WEBHOOK_EVENTS_HANDLED = [
   'checkout.session.completed',
+  'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
   'customer.subscription.trial_will_end',
@@ -87,9 +88,34 @@ stripeWebhookRouter.post(
         const subscriptionId = data.subscription;
         const customerId = data.customer;
         const priceId = data.line_items?.data?.[0]?.price?.id || null;
-        const expiresAt = new Date(data.expires_at * 1000).toISOString();
-        const trialEnd = data.subscription_details?.trial_end;
-        const trialEndsAt = trialEnd ? new Date(trialEnd * 1000).toISOString() : null;
+
+        // The checkout session's `expires_at` is the payment-link expiry
+        // (~24h), NOT the subscription period end. Fetch the subscription for
+        // accurate `current_period_end` / `trial_end`.
+        let expiresAt = new Date();
+        let trialEndsAt: string | null = null;
+        if (subscriptionId && getStripeKey()) {
+          try {
+            const subRes = await fetch(
+              `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+              { headers: { Authorization: `Bearer ${getStripeKey()}` } },
+            );
+            if (subRes.ok) {
+              const sub = await subRes.json();
+              if (sub.current_period_end) {
+                expiresAt = new Date(sub.current_period_end * 1000);
+              }
+              if (sub.trial_end) {
+                trialEndsAt = new Date(sub.trial_end * 1000).toISOString();
+              }
+            }
+          } catch (err: unknown) {
+            log.warn('Stripe: failed to fetch subscription period end', {
+              subscriptionId,
+              error: err instanceof Error ? err.message : err,
+            });
+          }
+        }
 
         await query(
           `INSERT INTO user_subscriptions (userId, platform, productId, expiresAt, "stripeSubscriptionId", "stripeCustomerId", "priceId", "trialEndsAt")
@@ -105,7 +131,7 @@ stripeWebhookRouter.post(
           [
             userId,
             subscriptionId || 'stripe_pro',
-            expiresAt,
+            expiresAt.toISOString(),
             subscriptionId,
             customerId,
             priceId,
@@ -114,7 +140,10 @@ stripeWebhookRouter.post(
         );
 
         log.info('Stripe checkout completed', { userId, subscriptionId });
-      } else if (eventType === 'customer.subscription.updated') {
+      } else if (
+        eventType === 'customer.subscription.created' ||
+        eventType === 'customer.subscription.updated'
+      ) {
         const status = data.status;
         const subscriptionId = data.id;
         const currentPeriodEnd = new Date(data.current_period_end * 1000).toISOString();
@@ -178,7 +207,6 @@ stripeRouter.post('/create-checkout-session', async (req: AuthRequest, res) => {
     }
 
     const origin = req.headers.origin || 'https://hashwatch2.vercel.app';
-    const trialPeriodDays = req.body.trialPeriodDays;
     const params: Record<string, string> = {
       mode: 'subscription',
       'line_items[0][price]': priceId,
@@ -188,8 +216,9 @@ stripeRouter.post('/create-checkout-session', async (req: AuthRequest, res) => {
       'metadata[userId]': userId,
       'subscription_data[metadata][userId]': userId,
     };
-    if (trialPeriodDays && typeof trialPeriodDays === 'number' && trialPeriodDays > 0) {
-      params['subscription_data[trial_period_days]'] = String(trialPeriodDays);
+    const trialDays = parseInt(process.env.STRIPE_TRIAL_DAYS || '', 10);
+    if (Number.isFinite(trialDays) && trialDays > 0) {
+      params['subscription_data[trial_period_days]'] = String(Math.min(trialDays, 30));
     }
 
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {

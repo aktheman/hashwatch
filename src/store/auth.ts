@@ -68,6 +68,7 @@ async function processQueue(): Promise<void> {
   await saveQueue();
 
   let delayMs = 500;
+  const remaining: QueuedSetting[] = [];
 
   for (const item of _settingsQueue) {
     await new Promise<void>((resolve) => {
@@ -81,12 +82,13 @@ async function processQueue(): Promise<void> {
       delayMs = 500;
     } catch {
       item.retries += 1;
+      remaining.push(item);
       delayMs = Math.min(delayMs * 2, 5000);
     }
   }
 
   // Keep items that failed for retry on next reconnect
-  _settingsQueue = _settingsQueue.filter((item) => item.retries > 0);
+  _settingsQueue = remaining;
   await saveQueue();
 }
 

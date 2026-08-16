@@ -114,16 +114,25 @@ describe('onNetworkReconnect', () => {
     expect(onReconnect).not.toHaveBeenCalled();
   });
 
-  it('overrides previous callback on new registration', async () => {
-    const { onNetworkReconnect: onReconn, __resetNetworkStatus } =
-      await import('../src/services/networkStatus');
+  it('keeps all registered callbacks and cleanup removes only its own', async () => {
+    const {
+      onNetworkReconnect: onReconn,
+      __resetNetworkStatus,
+      __getReconnectCallbacksCount,
+    } = await import('../src/services/networkStatus');
     __resetNetworkStatus();
+
     const cb1 = jest.fn();
     const cb2 = jest.fn();
-    onReconn(cb1);
+    const cleanup1 = onReconn(cb1);
     onReconn(cb2);
 
-    // Last registered callback overrides previous
+    // Both callbacks stay registered (no single-slot overwrite).
+    expect(__getReconnectCallbacksCount()).toBe(2);
+
+    cleanup1();
+    expect(__getReconnectCallbacksCount()).toBe(1);
+    expect(cb1).not.toHaveBeenCalled();
   });
 
   // offline→online transition test not included: fake timer + async pollNetwork

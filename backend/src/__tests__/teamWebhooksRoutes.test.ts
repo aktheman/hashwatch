@@ -80,6 +80,15 @@ describe('GET /api/teams/:teamId/webhooks', () => {
 
     expect(res.status).toBe(404);
   });
+
+  it('rejects a viewer (webhook URLs are sensitive)', async () => {
+    mockGetMembership.mockResolvedValueOnce({ teamId: 'team-1', userId: 'u1', role: 'viewer' });
+
+    const res = await request(app).get('/api/teams/team-1/webhooks');
+
+    expect(res.status).toBe(403);
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
 });
 
 describe('POST /api/teams/:teamId/webhooks', () => {
@@ -297,5 +306,14 @@ describe('GET /api/teams/:teamId/webhooks/logs', () => {
     const res = await request(app).get('/api/teams/team-1/webhooks/logs');
 
     expect(res.status).toBe(404);
+  });
+
+  it('rejects a viewer (logs expose webhook URLs)', async () => {
+    mockGetMembership.mockResolvedValueOnce({ teamId: 'team-1', userId: 'u1', role: 'viewer' });
+
+    const res = await request(app).get('/api/teams/team-1/webhooks/logs');
+
+    expect(res.status).toBe(403);
+    expect(mockQuery).not.toHaveBeenCalled();
   });
 });

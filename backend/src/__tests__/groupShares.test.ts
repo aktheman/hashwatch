@@ -28,6 +28,7 @@ describe('POST /api/groups/share', () => {
   it('shares a group with another user', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ id: 'target-user-id' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'g1' }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 1, accessLevel: 'view' }] });
 
@@ -71,6 +72,7 @@ describe('POST /api/groups/share', () => {
   it('updates existing share if already shared', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [{ id: 'target-user-id' }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'g1' }] })
       .mockResolvedValueOnce({ rows: [{ id: 42 }] })
       .mockResolvedValueOnce({ rows: [{ id: 42, accessLevel: 'edit' }] });
 
@@ -80,6 +82,19 @@ describe('POST /api/groups/share', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ id: 42, accessLevel: 'edit', updated: true });
+  });
+
+  it('returns 403 if group is not owned by the caller', async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ id: 'target-user-id' }] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app)
+      .post('/api/groups/share')
+      .send({ groupId: 'OtherUsersGroup', email: 'friend@example.com', accessLevel: 'view' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('Group not found or not owned by you');
   });
 });
 

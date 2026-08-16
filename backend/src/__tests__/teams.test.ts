@@ -513,7 +513,7 @@ describe('DELETE /api/teams/:id/miners/:minerId', () => {
       }
       if (sql.includes('SELECT name FROM teams WHERE id = $1')) return row({ name: 'Alpha' });
       if (sql.includes('SELECT name FROM miners WHERE id = $1')) return row({ name: 'Worker' });
-      if (sql.includes('SELECT "userId" AS "ownerId" FROM miners')) return row({ ownerId: 'u1' });
+      if (sql.includes('SELECT userId AS "ownerId" FROM miners')) return row({ ownerId: 'u1' });
       if (sql.includes('SELECT userId FROM team_members')) {
         return { rows: [{ userid: 'u2' }, { userid: 'u3' }] };
       }

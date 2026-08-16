@@ -77,7 +77,7 @@ describe('GET /api/alert-rules/:minerId', () => {
 
 describe('PUT /api/alert-rules/:minerId', () => {
   it('upserts alert rules', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] });
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] }).mockResolvedValueOnce({ rows: [] });
 
     const res = await request(app).put('/api/alert-rules/m1').send({
       tempThreshold: 80,
@@ -96,8 +96,8 @@ describe('PUT /api/alert-rules/:minerId', () => {
     );
   });
 
-  it('uses defaults for missing fields', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] });
+  it('uses defaults for missing fields when no row exists', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] }).mockResolvedValueOnce({ rows: [] });
 
     const res = await request(app).put('/api/alert-rules/m1').send({});
 
@@ -106,6 +106,29 @@ describe('PUT /api/alert-rules/:minerId', () => {
     expect(mockQuery).toHaveBeenLastCalledWith(
       expect.stringContaining('INSERT INTO miner_alert_rules'),
       ['test-user-id', 'm1', 70, 50, 5, 24, 10, true],
+    );
+  });
+
+  it('preserves existing values on partial update', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'm1' }] }).mockResolvedValueOnce({
+      rows: [
+        {
+          enabled: true,
+          tempthreshold: 99,
+          hashratedroppercent: 60,
+          offlinereminderminutes: 10,
+          uptimethresholdhours: 48,
+          sharerejectionpercent: 15,
+        },
+      ],
+    });
+
+    const res = await request(app).put('/api/alert-rules/m1').send({ enabled: false });
+
+    expect(res.status).toBe(200);
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      expect.stringContaining('INSERT INTO miner_alert_rules'),
+      ['test-user-id', 'm1', 99, 60, 10, 48, 15, false],
     );
   });
 

@@ -39,7 +39,7 @@ publicDashboardRouter.post('/', authMiddleware, async (req: AuthRequest, res) =>
 
     const userId = req.userId as string;
 
-    const ownerCheck = await query('SELECT id FROM miners WHERE id = $1 AND "userId" = $2', [
+    const ownerCheck = await query('SELECT id FROM miners WHERE id = $1 AND userId = $2', [
       minerId,
       userId,
     ]);
@@ -96,7 +96,7 @@ publicDashboardRouter.get('/:token', async (req, res) => {
       return res.status(404).json({ error: 'Share not found' });
     }
 
-    const minerResult = await query('SELECT name FROM miners WHERE id = $1 AND "userId" = $2', [
+    const minerResult = await query('SELECT name FROM miners WHERE id = $1 AND userId = $2', [
       entry.minerId,
       entry.userId,
     ]);
@@ -104,12 +104,12 @@ publicDashboardRouter.get('/:token', async (req, res) => {
     const minerName = minerResult.rows.length > 0 ? minerResult.rows[0].name : 'Unknown Miner';
 
     const snapshotResult = await query(
-      `SELECT "minerId", "timestamp", "hashRate", "hashRateUnit", "temperature",
-              "voltage", "current", "power", "sharesAccepted", "sharesRejected",
-              "uptimeSeconds", "frequency", "fanSpeed", "fanRpm", "coreVoltage"
+      `SELECT minerid AS "minerId", timestamp, hashrate AS "hashRate", temperature,
+              voltage, current, power, sharesaccepted AS "sharesAccepted",
+              sharesrejected AS "sharesRejected", uptimeseconds AS "uptimeSeconds", frequency
        FROM miner_snapshots
-       WHERE "minerId" = $1
-       ORDER BY "timestamp" DESC
+       WHERE minerid = $1
+       ORDER BY timestamp DESC
        LIMIT 1`,
       [entry.minerId],
     );

@@ -19,8 +19,11 @@ poolAnalyticsRouter.get('/config', async (req: AuthRequest, res) => {
       [req.userId],
     );
     const masked = result.rows.map((row: Record<string, unknown>) => ({
-      ...row,
-      apiKey: maskApiKey(row.apiKey as string),
+      id: row.id,
+      provider: row.provider,
+      poolUser: row.pooluser,
+      enabled: row.enabled,
+      apiKey: maskApiKey(row.apikey as string),
     }));
     res.json(masked);
   } catch (err: unknown) {
@@ -42,7 +45,13 @@ poolAnalyticsRouter.post('/config', async (req: AuthRequest, res) => {
       [req.userId, provider, apiKey || '', poolUser || ''],
     );
     const row = result.rows[0] as Record<string, unknown>;
-    res.json({ ...row, apiKey: maskApiKey(row.apiKey as string) });
+    res.json({
+      id: row.id,
+      provider: row.provider,
+      poolUser: row.pooluser,
+      enabled: row.enabled,
+      apiKey: maskApiKey(row.apikey as string),
+    });
   } catch (err: unknown) {
     log.error('Error saving pool config:', err instanceof Error ? err.message : err);
     res.status(500).json({ error: 'Internal server error' });
@@ -76,7 +85,13 @@ poolAnalyticsRouter.get('/', async (req: AuthRequest, res) => {
       }),
     );
 
-    const maskedConfigs = configs.map((c) => ({ ...c, apiKey: maskApiKey(c.apikey) }));
+    const maskedConfigs = configs.map((c) => ({
+      id: c.id,
+      provider: c.provider,
+      poolUser: c.pooluser,
+      enabled: c.enabled,
+      apiKey: maskApiKey(c.apikey),
+    }));
     res.json({ stats: stats.filter(Boolean), configs: maskedConfigs });
   } catch (err: unknown) {
     log.error('Error fetching pool analytics:', err instanceof Error ? err.message : err);

@@ -55,7 +55,7 @@ function mapWebhook(row: Record<string, unknown>, includeSecret = false) {
 
 async function getTeamWebhook(teamId: string, webhookId: string) {
   const result = await query(
-    `SELECT id, teamId, name, url, secret, "eventTypes", active, createdAt, updatedAt
+    `SELECT id, teamId, name, url, secret, eventTypes AS "eventTypes", active, createdAt, updatedAt
      FROM team_webhooks
      WHERE id = $1 AND teamId = $2`,
     [webhookId, teamId],
@@ -80,13 +80,13 @@ async function requireAdmin(
 teamWebhooksRouter.get('/:teamId/webhooks', async (req: AuthRequest, res) => {
   try {
     const teamId = req.params.teamId as string;
-    const membership = await getMembership(teamId, req.userId as string);
-    if (!membership) {
-      return res.status(404).json({ error: 'Team not found' });
+    const adminCheck = await requireAdmin(teamId, req.userId as string);
+    if (!adminCheck.ok) {
+      return res.status(adminCheck.status).json({ error: adminCheck.message });
     }
 
     const result = await query(
-      `SELECT id, teamId, name, url, "eventTypes", active, createdAt, updatedAt
+      `SELECT id, teamId, name, url, eventTypes AS "eventTypes", active, createdAt, updatedAt
        FROM team_webhooks
        WHERE teamId = $1
        ORDER BY createdAt ASC`,
@@ -123,9 +123,9 @@ teamWebhooksRouter.post('/:teamId/webhooks', async (req: AuthRequest, res) => {
 
     const secret = generateWebhookSecret();
     const result = await query(
-      `INSERT INTO team_webhooks (teamId, name, url, secret, "eventTypes", active)
+      `INSERT INTO team_webhooks (teamId, name, url, secret, eventTypes, active)
        VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, teamId, name, url, secret, "eventTypes", active, createdAt, updatedAt`,
+       RETURNING id, teamId, name, url, secret, eventTypes AS "eventTypes", active, createdAt, updatedAt`,
       [
         teamId,
         parsed.data.name?.trim() || 'Webhook',
@@ -174,7 +174,7 @@ teamWebhooksRouter.patch('/:teamId/webhooks/:webhookId', async (req: AuthRequest
     }
     if (parsed.data.eventTypes !== undefined) {
       params.push(parsed.data.eventTypes);
-      updates.push(`"eventTypes" = $${params.length}`);
+      updates.push(`eventTypes = $${params.length}`);
     }
     if (parsed.data.active !== undefined) {
       params.push(parsed.data.active);
@@ -187,9 +187,9 @@ teamWebhooksRouter.patch('/:teamId/webhooks/:webhookId', async (req: AuthRequest
     params.push(webhookId, teamId);
     const result = await query(
       `UPDATE team_webhooks
-       SET ${updates.join(', ')}, "updatedAt" = NOW()
+       SET ${updates.join(', ')}, updatedAt = NOW()
        WHERE id = $${params.length - 1} AND teamId = $${params.length}
-       RETURNING id, teamId, name, url, secret, "eventTypes", active, createdAt, updatedAt`,
+       RETURNING id, teamId, name, url, secret, eventTypes AS "eventTypes", active, createdAt, updatedAt`,
       params,
     );
     if (result.rows.length === 0) {
@@ -257,7 +257,7 @@ teamWebhooksRouter.post('/:teamId/webhooks/:webhookId/rotate', async (req: AuthR
     const secret = generateWebhookSecret();
     const result = await query(
       `UPDATE team_webhooks
-       SET secret = $1, "updatedAt" = NOW()
+       SET secret = $1, updatedAt = NOW()
        WHERE id = $2 AND teamId = $3
        RETURNING id, secret`,
       [secret, webhookId, teamId],
@@ -275,9 +275,9 @@ teamWebhooksRouter.post('/:teamId/webhooks/:webhookId/rotate', async (req: AuthR
 teamWebhooksRouter.get('/:teamId/webhooks/logs', async (req: AuthRequest, res) => {
   try {
     const teamId = req.params.teamId as string;
-    const membership = await getMembership(teamId, req.userId as string);
-    if (!membership) {
-      return res.status(404).json({ error: 'Team not found' });
+    const adminCheck = await requireAdmin(teamId, req.userId as string);
+    if (!adminCheck.ok) {
+      return res.status(adminCheck.status).json({ error: adminCheck.message });
     }
 
     const limit = Math.min(Math.max(parseInt(req.query.limit as string, 10) || 50, 1), 200);
@@ -290,10 +290,11 @@ teamWebhooksRouter.get('/:teamId/webhooks/logs', async (req: AuthRequest, res) =
     const total = (countResult.rows[0] as { total: number }).total;
 
     const result = await query(
-      `SELECT id, event, url, status, "responseCode", "sentAt", attempts, "nextRetryAt"
+      `SELECT id, event, url, status, responseCode AS "responseCode", sentAt AS "sentAt",
+              attempts, nextRetryAt AS "nextRetryAt"
        FROM webhook_logs
        WHERE teamId = $1
-       ORDER BY "sentAt" DESC
+       ORDER BY sentAt DESC
        LIMIT $2 OFFSET $3`,
       [teamId, limit, offset],
     );

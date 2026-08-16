@@ -39,6 +39,15 @@ describe('GET /api/pool-analytics/config', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
+    expect(res.body[0]).toMatchObject({
+      id: 1,
+      provider: 'braiins',
+      poolUser: 'user1',
+      enabled: true,
+      apiKey: '****',
+    });
+    expect(res.body[0]).not.toHaveProperty('apikey');
+    expect(res.body[0]).not.toHaveProperty('pooluser');
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('pool_configs'), [
       'test-user-id',
     ]);
@@ -66,6 +75,9 @@ describe('POST /api/pool-analytics/config', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.provider).toBe('braiins');
+    expect(res.body).toMatchObject({ poolUser: 'myuser', apiKey: '****ykey' });
+    expect(res.body).not.toHaveProperty('apikey');
+    expect(res.body).not.toHaveProperty('pooluser');
   });
 
   it('creates a luxor config', async () => {
@@ -79,6 +91,9 @@ describe('POST /api/pool-analytics/config', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.provider).toBe('luxor');
+    expect(res.body).toMatchObject({ poolUser: 'lu', apiKey: '****' });
+    expect(res.body).not.toHaveProperty('apikey');
+    expect(res.body).not.toHaveProperty('pooluser');
   });
 
   it('returns 400 for invalid provider', async () => {
@@ -130,6 +145,15 @@ describe('GET /api/pool-analytics', () => {
     expect(res.body.stats).toHaveLength(1);
     expect(res.body.stats[0].provider).toBe('braiins');
     expect(mockFetchBraiins).toHaveBeenCalledWith('key1');
+    expect(res.body.configs[0]).toMatchObject({
+      id: 1,
+      provider: 'braiins',
+      poolUser: 'user1',
+      enabled: true,
+      apiKey: '****',
+    });
+    expect(res.body.configs[0]).not.toHaveProperty('apikey');
+    expect(res.body.configs[0]).not.toHaveProperty('pooluser');
   });
 
   it('fetches stats for luxor config', async () => {

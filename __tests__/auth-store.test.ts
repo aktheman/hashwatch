@@ -516,6 +516,25 @@ describe('processQueue dedup and retry', () => {
     expect(lastSave).toHaveLength(1);
     expect(lastSave[0].retries).toBe(3);
   });
+
+  it('removes item from queue when a retry succeeds', async () => {
+    await queueSetting('theme_mode', 'dark');
+
+    mockPutSetting.mockRejectedValueOnce(new Error('network error'));
+    await useAuthStore.getState().syncNow();
+
+    let queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+    let lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
+    expect(lastSave).toHaveLength(1);
+    expect(lastSave[0].retries).toBe(1);
+
+    mockPutSetting.mockResolvedValue(undefined);
+    await useAuthStore.getState().syncNow();
+
+    queueCall = mockSetSetting.mock.calls.filter(([k]) => k === 'settings_queue');
+    lastSave = JSON.parse(queueCall[queueCall.length - 1][1] as string);
+    expect(lastSave).toHaveLength(0);
+  });
 });
 
 describe('module-level setup', () => {

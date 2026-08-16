@@ -92,7 +92,7 @@ darkPoolRouter.post('/contribute', async (req: AuthRequest, res) => {
     // Rate limit: max 1 contribution per user per 5 minutes
     const recent = await query(
       `SELECT id FROM darkpool_contributions
-       WHERE "userId" = $1 AND "contributedAt" > NOW() - INTERVAL '5 minutes'
+       WHERE userId = $1 AND contributedat > NOW() - INTERVAL '5 minutes'
        LIMIT 1`,
       [req.userId],
     );
@@ -103,7 +103,7 @@ darkPoolRouter.post('/contribute', async (req: AuthRequest, res) => {
     }
 
     const result = await query(
-      `INSERT INTO darkpool_contributions ("userId", "minerHashrate", "minerPower", "minerTemp", "poolName", "region")
+      `INSERT INTO darkpool_contributions (userId, minerhashrate, minerpower, minertemp, poolname, region)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [req.userId, Math.round(hashrate), power, temp ?? null, poolName ?? null, region ?? null],
@@ -128,11 +128,12 @@ darkPoolRouter.get('/aggregate', async (req: AuthRequest, res) => {
 
     // Try pre-computed aggregates first
     const cached = await query(
-      `SELECT "totalHashrate", "avgPower", "avgTemp", "contributorCount",
-              "poolBreakdown", "regionBreakdown"
+      `SELECT totalhashrate AS "totalHashrate", avgpower AS "avgPower", avgtemp AS "avgTemp",
+              contributorcount AS "contributorCount", poolbreakdown AS "poolBreakdown",
+              regionbreakdown AS "regionBreakdown"
        FROM darkpool_aggregates
-       WHERE "periodEnd" > NOW() AND "periodEnd" - "periodStart" = INTERVAL '${interval}'
-       ORDER BY "computedAt" DESC
+       WHERE periodend > NOW() AND periodend - periodstart = INTERVAL '${interval}'
+       ORDER BY computedat DESC
        LIMIT 1`,
     );
 
@@ -152,30 +153,30 @@ darkPoolRouter.get('/aggregate', async (req: AuthRequest, res) => {
     // Compute on-the-fly from contributions
     const stats = await query(
       `SELECT
-         COALESCE(SUM("minerHashrate"), 0) AS "totalHashrate",
-         COALESCE(AVG("minerPower"), 0) AS "avgPower",
-         COALESCE(AVG("minerTemp"), 0) AS "avgTemp",
-         COUNT(DISTINCT "userId") AS "contributorCount"
+         COALESCE(SUM(minerhashrate), 0) AS "totalHashrate",
+         COALESCE(AVG(minerpower), 0) AS "avgPower",
+         COALESCE(AVG(minertemp), 0) AS "avgTemp",
+         COUNT(DISTINCT userId) AS "contributorCount"
        FROM darkpool_contributions
-       WHERE "contributedAt" > NOW() - INTERVAL '${interval}'`,
+       WHERE contributedat > NOW() - INTERVAL '${interval}'`,
     );
 
     const poolRows = await query(
       `SELECT
-         COALESCE("poolName", 'other') AS "poolName",
-         SUM("minerHashrate") AS "total"
+         COALESCE(poolname, 'other') AS "poolName",
+         SUM(minerhashrate) AS "total"
        FROM darkpool_contributions
-       WHERE "contributedAt" > NOW() - INTERVAL '${interval}'
-       GROUP BY "poolName"`,
+       WHERE contributedat > NOW() - INTERVAL '${interval}'
+       GROUP BY poolname`,
     );
 
     const regionRows = await query(
       `SELECT
-         COALESCE("region", 'unknown') AS "region",
-         SUM("minerHashrate") AS "total"
+         COALESCE(region, 'unknown') AS "region",
+         SUM(minerhashrate) AS "total"
        FROM darkpool_contributions
-       WHERE "contributedAt" > NOW() - INTERVAL '${interval}'
-       GROUP BY "region"`,
+       WHERE contributedat > NOW() - INTERVAL '${interval}'
+       GROUP BY region`,
     );
 
     const poolBreakdown: Record<string, number> = {};
@@ -210,10 +211,12 @@ darkPoolRouter.get('/aggregate', async (req: AuthRequest, res) => {
 darkPoolRouter.get('/my-contributions', async (req: AuthRequest, res) => {
   try {
     const result = await query(
-      `SELECT id, "minerHashrate", "minerPower", "minerTemp", "poolName", "region", "contributedAt"
+      `SELECT id, minerhashrate AS "minerHashrate", minerpower AS "minerPower",
+              minertemp AS "minerTemp", poolname AS "poolName", region,
+              contributedat AS "contributedAt"
        FROM darkpool_contributions
-       WHERE "userId" = $1
-       ORDER BY "contributedAt" DESC
+       WHERE userId = $1
+       ORDER BY contributedat DESC
        LIMIT 100`,
       [req.userId],
     );
@@ -228,7 +231,7 @@ darkPoolRouter.get('/my-contributions', async (req: AuthRequest, res) => {
 // ── DELETE /api/darkpool/my-contributions ────────────────────────────────────
 darkPoolRouter.delete('/my-contributions', async (req: AuthRequest, res) => {
   try {
-    const result = await query(`DELETE FROM darkpool_contributions WHERE "userId" = $1`, [
+    const result = await query(`DELETE FROM darkpool_contributions WHERE userId = $1`, [
       req.userId,
     ]);
 
