@@ -11,6 +11,17 @@ function getWebhookSecret(): string {
   return process.env.STRIPE_WEBHOOK_SECRET || '';
 }
 
+function isAdminEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  const raw = process.env.ADMIN_USER_EMAILS || '';
+  const normalized = email.trim().toLowerCase();
+  return raw
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(normalized);
+}
+
 const WEBHOOK_EVENTS_HANDLED = [
   'checkout.session.completed',
   'customer.subscription.created',
@@ -251,8 +262,9 @@ stripeRouter.get('/subscription', async (req: AuthRequest, res) => {
     const result = await query(`SELECT * FROM user_subscriptions WHERE userId = $1`, [userId]);
 
     const sub = result.rows?.[0];
+    const isAdmin = isAdminEmail(req.userEmail);
     if (!sub) {
-      return res.json({ active: false, inTrial: false });
+      return res.json({ active: false, inTrial: false, isAdmin });
     }
 
     const now = new Date();
@@ -268,6 +280,7 @@ stripeRouter.get('/subscription', async (req: AuthRequest, res) => {
       platform: sub.platform,
       productId: sub.productId,
       expiresAt: sub.expiresAt,
+      isAdmin,
     });
   } catch (err: unknown) {
     log.error('Error checking subscription:', err instanceof Error ? err.message : err);

@@ -5,6 +5,7 @@ import { configureClient } from '../api/client';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import { setTokenGetter, notifyAuthLogin } from './authToken';
+import { setAuthEmail } from './authEmail';
 import { identifyUser, resetUser } from '../services/posthog';
 
 const SYNCED_SETTINGS = [
@@ -148,6 +149,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await API.login(email, password);
       set({ token: res.token, userId: res.userId, email });
+      setAuthEmail(email);
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
@@ -166,6 +168,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await API.register(email, password);
       set({ token: res.token, userId: res.userId, email });
+      setAuthEmail(email);
       await DB.setSetting('auth_token', res.token);
       await DB.setSetting('auth_email', email);
       connectWebSocket(res.token);
@@ -186,6 +189,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     disconnectWebSocket();
     resetUser();
     set({ token: null, userId: null, email: null, synced: false });
+    setAuthEmail(null);
     await DB.setSetting('auth_token', '');
     await DB.setSetting('auth_email', '');
   },
@@ -203,6 +207,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           if (payload.exp && Date.now() >= payload.exp * 1000) {
             await DB.setSetting('auth_token', '');
             set({ token: null, email: null, userId: null });
+            setAuthEmail(null);
             return;
           }
           set({ token, email, userId });
@@ -217,6 +222,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         registerPushToken(token);
         syncSettingsFromBackend();
       }
+      setAuthEmail(useAuthStore.getState().email);
+    } else {
+      setAuthEmail(null);
     }
   },
 

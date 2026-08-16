@@ -138,7 +138,7 @@ describe('stripeRouter', () => {
         .get('/api/stripe/subscription')
         .set('Authorization', authHeader());
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ active: false, inTrial: false });
+      expect(res.body).toEqual({ active: false, inTrial: false, isAdmin: false });
     });
 
     it('returns active: true for valid subscription', async () => {
@@ -159,6 +159,7 @@ describe('stripeRouter', () => {
         platform: 'stripe',
         productId: 'sub_123',
         expiresAt: futureDate,
+        isAdmin: false,
       });
     });
 
@@ -180,7 +181,27 @@ describe('stripeRouter', () => {
         platform: 'stripe',
         productId: 'sub_123',
         expiresAt: pastDate,
+        isAdmin: false,
       });
+    });
+
+    it('returns isAdmin: true for configured admin email', async () => {
+      const orig = process.env.ADMIN_USER_EMAILS;
+      process.env.ADMIN_USER_EMAILS = 'other@example.com, a_k86@hotmail.com';
+      try {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+        const token = jwt.sign({ userId: 'admin-1', email: 'a_k86@hotmail.com' }, JWT_SECRET, {
+          expiresIn: '1h',
+        });
+        const res = await request(createStripeApp())
+          .get('/api/stripe/subscription')
+          .set('Authorization', `Bearer ${token}`);
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ active: false, inTrial: false, isAdmin: true });
+      } finally {
+        if (orig === undefined) delete process.env.ADMIN_USER_EMAILS;
+        else process.env.ADMIN_USER_EMAILS = orig;
+      }
     });
 
     it('returns inTrial: true when trial is active', async () => {

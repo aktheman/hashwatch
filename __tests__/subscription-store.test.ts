@@ -1,4 +1,5 @@
 import { useSubscriptionStore } from '../src/store/subscription';
+import { setAuthEmail } from '../src/store/authEmail';
 
 let mockToken: string | null = null;
 
@@ -27,19 +28,20 @@ beforeEach(() => {
   useSubscriptionStore.setState({
     tier: 'free',
     isPro: false,
-    maxMiners: 999,
+    maxMiners: 3,
     initialized: false,
     loading: false,
   });
+  setAuthEmail(null);
   jest.clearAllMocks();
   mockToken = null;
 });
 
-it('starts as free tier with 4 miners', () => {
+it('starts as free tier with 3 miners', () => {
   const state = useSubscriptionStore.getState();
   expect(state.tier).toBe('free');
   expect(state.isPro).toBe(false);
-  expect(state.maxMiners).toBe(999);
+  expect(state.maxMiners).toBe(3);
 });
 
 it('canAddMiner returns true when under limit', () => {
@@ -48,6 +50,7 @@ it('canAddMiner returns true when under limit', () => {
 });
 
 it('canAddMiner returns false when at or over limit', () => {
+  expect(useSubscriptionStore.getState().canAddMiner(3)).toBe(false);
   expect(useSubscriptionStore.getState().canAddMiner(999)).toBe(false);
   expect(useSubscriptionStore.getState().canAddMiner(1000)).toBe(false);
 });
@@ -60,13 +63,43 @@ it('setPro upgrades to unlimited miners', () => {
   expect(state.maxMiners).toBe(999);
 });
 
-it('setFree resets to 4 miners', () => {
+it('setFree resets to 3 miners', () => {
   useSubscriptionStore.getState().setPro();
   useSubscriptionStore.getState().setFree();
   const state = useSubscriptionStore.getState();
   expect(state.tier).toBe('free');
   expect(state.isPro).toBe(false);
-  expect(state.maxMiners).toBe(999);
+  expect(state.maxMiners).toBe(3);
+});
+
+describe('admin override', () => {
+  it('admin email gets unlimited miners on free tier', () => {
+    setAuthEmail('a_k86@hotmail.com');
+    useSubscriptionStore.getState().setFree();
+    const state = useSubscriptionStore.getState();
+    expect(state.tier).toBe('free');
+    expect(state.maxMiners).toBe(999);
+    expect(state.canAddMiner(1000)).toBe(true);
+  });
+
+  it('admin is case-insensitive and trims whitespace', () => {
+    setAuthEmail('  A_K86@HOTMAIL.COM ');
+    useSubscriptionStore.getState().setFree();
+    expect(useSubscriptionStore.getState().canAddMiner(1000)).toBe(true);
+  });
+
+  it('non-admin email respects the free limit', () => {
+    setAuthEmail('someone@example.com');
+    useSubscriptionStore.getState().setFree();
+    const state = useSubscriptionStore.getState();
+    expect(state.maxMiners).toBe(3);
+    expect(state.canAddMiner(3)).toBe(false);
+  });
+
+  it('no email is not treated as admin', () => {
+    useSubscriptionStore.getState().setFree();
+    expect(useSubscriptionStore.getState().canAddMiner(3)).toBe(false);
+  });
 });
 
 it('canAddMiner follows maxMiners limit for pro users', () => {
@@ -93,7 +126,7 @@ describe('initialize', () => {
     const state = useSubscriptionStore.getState();
     expect(state.isPro).toBe(false);
     expect(state.tier).toBe('free');
-    expect(state.maxMiners).toBe(999);
+    expect(state.maxMiners).toBe(3);
     expect(state.initialized).toBe(true);
   });
 
@@ -133,7 +166,7 @@ describe('initialize', () => {
     const state = useSubscriptionStore.getState();
     expect(state.isPro).toBe(false);
     expect(state.tier).toBe('free');
-    expect(state.maxMiners).toBe(999);
+    expect(state.maxMiners).toBe(3);
   });
 });
 

@@ -10,9 +10,24 @@ import {
 } from '../services/revenuecat';
 import { validateReceipt, apiClient } from '../api/client';
 import { getAuthToken } from './authToken';
+import { getAuthEmail } from './authEmail';
 
-const FREE_MAX_MINERS = 999;
+const FREE_MAX_MINERS = 3;
 const PRO_MAX_MINERS = 999;
+const ADMIN_USER_EMAILS = ['a_k86@hotmail.com'];
+
+function isAdminUser(override = false): boolean {
+  if (override) return true;
+  const email = getAuthEmail();
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return ADMIN_USER_EMAILS.some((admin) => admin.toLowerCase() === normalized);
+}
+
+function maxMinersFor(isPro: boolean, isAdminOverride = false): number {
+  if (isAdminUser(isAdminOverride)) return PRO_MAX_MINERS;
+  return isPro ? PRO_MAX_MINERS : FREE_MAX_MINERS;
+}
 
 interface StripeSubscriptionResponse {
   active: boolean;
@@ -21,6 +36,7 @@ interface StripeSubscriptionResponse {
   platform?: string;
   productId?: string;
   expiresAt?: string;
+  isAdmin?: boolean;
 }
 
 interface SubscriptionStore {
@@ -68,7 +84,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
           set({
             isPro: isProStatus,
             tier: isProStatus ? 'pro' : 'free',
-            maxMiners: isProStatus ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+            maxMiners: maxMinersFor(isProStatus, stripeSub.isAdmin === true),
             inTrial: stripeSub.inTrial,
             trialEndsAt: stripeSub.trialEndsAt,
             initialized: true,
@@ -82,14 +98,14 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       set({
         isPro: pro,
         tier: pro ? 'pro' : 'free',
-        maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+        maxMiners: maxMinersFor(pro),
         initialized: true,
       });
       await listenForProChanges((isPro) => {
         set({
           isPro,
           tier: isPro ? 'pro' : 'free',
-          maxMiners: isPro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+          maxMiners: maxMinersFor(isPro),
         });
       });
     } catch {
@@ -136,7 +152,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
           set({
             isPro: isProStatus,
             tier: isProStatus ? 'pro' : 'free',
-            maxMiners: isProStatus ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+            maxMiners: maxMinersFor(isProStatus, stripeSub.isAdmin === true),
             inTrial: stripeSub.inTrial,
             trialEndsAt: stripeSub.trialEndsAt,
             loading: false,
@@ -154,7 +170,7 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
       set({
         isPro: pro,
         tier: pro ? 'pro' : 'free',
-        maxMiners: pro ? PRO_MAX_MINERS : FREE_MAX_MINERS,
+        maxMiners: maxMinersFor(pro),
         loading: false,
       });
       if (pro && getAuthToken()) {
@@ -171,11 +187,12 @@ export const useSubscriptionStore = create<SubscriptionStore>((set, get) => ({
     }
   },
 
-  setPro: () => set({ tier: 'pro', isPro: true, maxMiners: PRO_MAX_MINERS, initialized: true }),
-  setFree: () => set({ tier: 'free', isPro: false, maxMiners: FREE_MAX_MINERS, initialized: true }),
+  setPro: () => set({ tier: 'pro', isPro: true, maxMiners: maxMinersFor(true), initialized: true }),
+  setFree: () =>
+    set({ tier: 'free', isPro: false, maxMiners: maxMinersFor(false), initialized: true }),
 
   canAddMiner: (currentCount: number) => {
     const state = get();
-    return currentCount < state.maxMiners;
+    return isAdminUser() || currentCount < state.maxMiners;
   },
 }));
