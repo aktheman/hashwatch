@@ -57,7 +57,7 @@ export default {
             compileSdkVersion: 35,
             targetSdkVersion: 35,
             buildToolsVersion: '35.0.0',
-            kotlinVersion: '2.0.21',
+            kotlinVersion: '2.1.20',
           },
           ios: {
             deploymentTarget: '16.4',
