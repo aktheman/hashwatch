@@ -112,12 +112,14 @@ stripeWebhookRouter.post(
               { headers: { Authorization: `Bearer ${getStripeKey()}` } },
             );
             if (subRes.ok) {
-              const sub = await subRes.json();
-              if (sub.current_period_end) {
-                expiresAt = new Date(sub.current_period_end * 1000);
+              const sub = (await subRes.json()) as Record<string, unknown>;
+              const periodEnd = sub.current_period_end as number | undefined;
+              if (periodEnd) {
+                expiresAt = new Date(periodEnd * 1000);
               }
-              if (sub.trial_end) {
-                trialEndsAt = new Date(sub.trial_end * 1000).toISOString();
+              const trialEnd = sub.trial_end as number | undefined;
+              if (trialEnd) {
+                trialEndsAt = new Date(trialEnd * 1000).toISOString();
               }
             }
           } catch (err: unknown) {
@@ -241,14 +243,15 @@ stripeRouter.post('/create-checkout-session', async (req: AuthRequest, res) => {
       body: new URLSearchParams(params).toString(),
     });
 
-    const session = await response.json();
+    const session = (await response.json()) as Record<string, unknown>;
 
     if (session.error) {
-      log.error('Stripe checkout error:', session.error.message);
-      return res.status(400).json({ error: session.error.message });
+      const err = session.error as Record<string, string>;
+      log.error('Stripe checkout error:', err.message);
+      return res.status(400).json({ error: err.message });
     }
 
-    log.info('Checkout session created', { userId, sessionId: session.id });
+    log.info('Checkout session created', { userId, sessionId: session.id as string });
     res.json({ url: session.url });
   } catch (err: unknown) {
     log.error('Error creating checkout session:', err instanceof Error ? err.message : err);
