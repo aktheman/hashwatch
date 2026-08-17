@@ -50,6 +50,9 @@ export default function App() {
           endpoint: __DEV__ ? '' : '/api/errors',
         });
         await initProxyUrl();
+        const { setBaseUrl } = await import('./src/api/client');
+        const { getProxyUrl } = await import('./src/constants');
+        setBaseUrl(getProxyUrl());
         const saved = await getSetting('theme_mode');
         if (
           saved === 'system' ||

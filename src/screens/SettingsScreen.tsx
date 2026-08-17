@@ -275,6 +275,8 @@ export function SettingsScreen({ navigation }: { navigation: NavigationProp }) {
 
   const saveProxyUrl = async () => {
     await setProxyUrl(proxyUrl);
+    const { setBaseUrl } = await import('../api/client');
+    setBaseUrl(proxyUrl);
     Alert.alert(t('settings.proxyUrlUpdated'), `Proxy URL set to ${proxyUrl}`);
   };
   const loadMiners = useMinerStore((s) => s.loadMiners);

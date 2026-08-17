@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as DB from '../db/database';
 import * as API from '../api/client';
 import { configureClient } from '../api/client';
+import { getProxyUrl } from '../constants';
 import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 import { registerPushToken, unregisterPushToken } from '../services/pushRegistration';
 import { setTokenGetter, notifyAuthLogin } from './authToken';
@@ -241,6 +242,7 @@ configureClient({
   onUnauthorized: () => {
     useAuthStore.getState().logout();
   },
+  baseUrl: getProxyUrl(),
 });
 
 setTokenGetter(() => useAuthStore.getState().token);
