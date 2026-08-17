@@ -153,7 +153,7 @@ app.use('/api/push', pushWebRouter);
 app.use('/api/activity', activityRouter);
 
 app.get('/api/health', async (_req, res) => {
-  const commitSha = process.env.COMMIT_SHA || null;
+  const commitSha = process.env.COMMIT_SHA || process.env.RENDER_GIT_COMMIT || null;
   try {
     await query('SELECT 1');
     res.json({ status: 'ok', timestamp: Date.now(), db: 'connected', commitSha });
