@@ -16,14 +16,14 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api-staging.hashwatch.app"
+        "EXPO_PUBLIC_API_URL": "https://hashwatch-backend.onrender.com"
       }
     },
     "production": {
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.hashwatch.app"
+        "EXPO_PUBLIC_API_URL": "https://hashwatch-backend.onrender.com"
       }
     }
   },
