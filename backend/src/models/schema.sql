@@ -199,8 +199,8 @@ CREATE TABLE IF NOT EXISTS darkpool_contributions (
   contributedAt TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_user ON darkpool_contributions("userId", "contributedAt" DESC);
-CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_time ON darkpool_contributions("contributedAt");
+CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_user ON darkpool_contributions(userId, contributedAt DESC);
+CREATE INDEX IF NOT EXISTS idx_darkpool_contributions_time ON darkpool_contributions(contributedAt);
 
 CREATE TABLE IF NOT EXISTS darkpool_aggregates (
   id BIGSERIAL PRIMARY KEY,
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS darkpool_aggregates (
   computedAt TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_darkpool_aggregates_time ON darkpool_aggregates("periodEnd", "computedAt" DESC);
+CREATE INDEX IF NOT EXISTS idx_darkpool_aggregates_time ON darkpool_aggregates(periodEnd, computedAt DESC);
 
 CREATE TABLE IF NOT EXISTS miner_groups (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
