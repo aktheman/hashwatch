@@ -1903,290 +1903,298 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   };
 
   return (
-    <Outer {...outerProps}>
-      {kioskMode ? (
-        <KioskScreen miners={miners} onExit={() => handleToggleKiosk(false)} />
-      ) : (
-        <View style={styles.headerBar}>
-          {selectionMode ? (
-            <>
-              <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cancel selection"
-                style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
-                onPress={() => {
-                  setSelectionMode(false);
-                  setSelectedIds(new Set());
-                }}
-              >
-                <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
-              </Pressable>
-            </>
-          ) : (
-            <>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Compare miners"
-                style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
-                onPress={() => setSelectionMode(true)}
-              >
-                <Text style={styles.settingsIcon}>⇄</Text>
-              </Pressable>
-              <View style={{ alignItems: 'center' }}>
-                <Text
-                  style={[styles.headerTitle, { textAlign: 'center' }]}
-                  accessibilityRole="header"
-                  accessibilityLabel="HashWatch"
-                >
-                  HashWatch
-                </Text>
-                <Text style={styles.headerSub} accessibilityLabel={wsStatus.label}>
-                  <Text style={[styles.liveDot, { color: wsStatus.color }]}>●</Text>{' '}
-                  {t('dashboard.subtitle')}
-                </Text>
-              </View>
-              <View
-                style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: spacing.xs }}
-              >
+    <View style={styles.container}>
+      <Outer {...outerProps}>
+        {kioskMode ? (
+          <KioskScreen miners={miners} onExit={() => handleToggleKiosk(false)} />
+        ) : (
+          <View style={styles.headerBar}>
+            {selectionMode ? (
+              <>
+                <Text style={[styles.headerTitle, { textAlign: 'center' }]}>HashWatch</Text>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Customize dashboard"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => setShowCustomizer(true)}
-                >
-                  <Text style={styles.settingsIcon}>✎</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Export data"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => exportAllData()}
-                >
-                  <Text style={styles.settingsIcon}>↓</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Switch theme"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                  accessibilityLabel="Cancel selection"
+                  style={[styles.settingsBtn, { position: 'absolute', right: 20 }]}
                   onPress={() => {
-                    const modes = [
-                      'dark',
-                      'light',
-                      'neon',
-                      'matrix',
-                      '5tratum',
-                      'crimson',
-                      'ocean',
-                      'lavender',
-                      'midnight',
-                      'nord',
-                      'dracula',
-                      'catppuccin',
-                      'rosepine',
-                    ] as const;
-                    const current = getThemeMode();
-                    const idx = modes.indexOf(current as (typeof modes)[number]);
-                    const next = modes[(idx + 1) % modes.length];
-                    switchThemeWithTransition(() => setThemeMode(next));
+                    setSelectionMode(false);
+                    setSelectedIds(new Set());
                   }}
                 >
-                  <Text style={styles.settingsIcon}>🎨</Text>
+                  <Text style={styles.settingsIcon}>{t('common.cancel')}</Text>
                 </Pressable>
+              </>
+            ) : (
+              <>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Settings"
-                  style={[styles.settingsBtn, { width: 36, height: 36 }]}
-                  onPress={() => navigation.navigate('Settings')}
+                  accessibilityLabel="Compare miners"
+                  style={[styles.settingsBtn, { position: 'absolute', left: 20 }]}
+                  onPress={() => setSelectionMode(true)}
                 >
-                  <Text style={styles.settingsIcon}>⚙</Text>
+                  <Text style={styles.settingsIcon}>⇄</Text>
                 </Pressable>
-              </View>
-            </>
-          )}
-        </View>
-      )}
+                <View style={{ alignItems: 'center' }}>
+                  <Text
+                    style={[styles.headerTitle, { textAlign: 'center' }]}
+                    accessibilityRole="header"
+                    accessibilityLabel="HashWatch"
+                  >
+                    HashWatch
+                  </Text>
+                  <Text style={styles.headerSub} accessibilityLabel={wsStatus.label}>
+                    <Text style={[styles.liveDot, { color: wsStatus.color }]}>●</Text>{' '}
+                    {t('dashboard.subtitle')}
+                  </Text>
+                </View>
+                <View
+                  style={{ position: 'absolute', right: 20, flexDirection: 'row', gap: spacing.xs }}
+                >
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Customize dashboard"
+                    style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                    onPress={() => setShowCustomizer(true)}
+                  >
+                    <Text style={styles.settingsIcon}>✎</Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Export data"
+                    style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                    onPress={() => exportAllData()}
+                  >
+                    <Text style={styles.settingsIcon}>↓</Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Switch theme"
+                    style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                    onPress={() => {
+                      const modes = [
+                        'dark',
+                        'light',
+                        'neon',
+                        'matrix',
+                        '5tratum',
+                        'crimson',
+                        'ocean',
+                        'lavender',
+                        'midnight',
+                        'nord',
+                        'dracula',
+                        'catppuccin',
+                        'rosepine',
+                      ] as const;
+                      const current = getThemeMode();
+                      const idx = modes.indexOf(current as (typeof modes)[number]);
+                      const next = modes[(idx + 1) % modes.length];
+                      switchThemeWithTransition(() => setThemeMode(next));
+                    }}
+                  >
+                    <Text style={styles.settingsIcon}>🎨</Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Settings"
+                    style={[styles.settingsBtn, { width: 36, height: 36 }]}
+                    onPress={() => navigation.navigate('Settings')}
+                  >
+                    <Text style={styles.settingsIcon}>⚙</Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
+          </View>
+        )}
 
-      {sectionOrder.map((key) =>
-        visibleSections[key] ? <Fragment key={key}>{renderSection(key)}</Fragment> : null,
-      )}
+        {sectionOrder.map((key) =>
+          visibleSections[key] ? <Fragment key={key}>{renderSection(key)}</Fragment> : null,
+        )}
 
-      {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
-        <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
-          <Text
-            accessibilityRole="text"
-            accessibilityLabel={t('dashboard.staleData') || 'Data may be stale'}
-            style={{ color: theme.warning, fontSize: fontSize.sm, fontWeight: fontWeight.semibold }}
-          >
-            {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
-            {t('dashboard.staleData') || 'stale'}
-          </Text>
-        </View>
-      )}
-
-      {!canAdd && miners.length > 0 && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Upgrade to Pro"
-          style={styles.upgradeBanner}
-          onPress={() => navigation.navigate('Subscription')}
-        >
-          <Text style={styles.upgradeBannerText}>🔒 {t('dashboard.upgradePro')}</Text>
-        </Pressable>
-      )}
-
-      <ErrorBanner message={error} onDismiss={clearError} onRetry={loadMiners} />
-
-      {miners.length > 0 && (
-        <Suspense fallback={null}>
-          <LazyFirmwareUpdateBanner />
-        </Suspense>
-      )}
-
-      {Object.keys(minerErrors).length > 0 && (
-        <ErrorBanner
-          message={t('dashboard.minerErrors', {
-            count: Object.keys(minerErrors).length,
-            defaultValue: '{{count}} miner(s) unreachable',
-          })}
-          onDismiss={clearMinerErrors}
-          onRetry={loadMiners}
-        />
-      )}
-
-      {scanning && (
-        <View style={styles.scanningBanner}>
-          <ActivityIndicator size="small" color={theme.primary} />
-          <Text style={styles.scanningText}>
-            {t('dashboard.scanning', {
-              scanned: scanProgress?.scanned || 0,
-              total: scanProgress?.total || 254,
-            })}
-          </Text>
-        </View>
-      )}
-
-      {aaEnabled && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Automated actions"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginHorizontal: spacing.md,
-            marginBottom: spacing.xs,
-            backgroundColor: theme.surface,
-            borderRadius: radius.md,
-            paddingHorizontal: spacing.sm,
-            paddingVertical: spacing.xs,
-            borderWidth: 1,
-            borderColor: theme.border,
-            gap: spacing.sm,
-          }}
-          onPress={() => navigation.navigate('AutomatedActions')}
-        >
-          <Text style={{ fontSize: fontSize.md }}>⚡</Text>
-          <View style={{ flex: 1 }}>
+        {lastRefreshTimestamp > 0 && Date.now() - lastRefreshTimestamp > 120000 && (
+          <View style={{ paddingHorizontal: spacing.md, marginBottom: 6 }}>
             <Text
+              accessibilityRole="text"
+              accessibilityLabel={t('dashboard.staleData') || 'Data may be stale'}
               style={{
-                color: theme.text,
+                color: theme.warning,
                 fontSize: fontSize.sm,
-                fontWeight: fontWeight.bold,
+                fontWeight: fontWeight.semibold,
               }}
             >
-              Automated Actions
+              {'\u26A0'} Data from {new Date(lastRefreshTimestamp).toLocaleTimeString()} —{' '}
+              {t('dashboard.staleData') || 'stale'}
             </Text>
-            <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{aaStatusText}</Text>
           </View>
-          <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>{'>'}</Text>
-        </Pressable>
-      )}
+        )}
 
-      {!kioskMode && miners.length > 0 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.xs,
-            paddingHorizontal: spacing.md,
-            marginBottom: 6,
-          }}
-        >
-          <Text style={{ color: theme.textMuted, fontSize: fontSize.md }}>🔍</Text>
-          <TextInput
+        {!canAdd && miners.length > 0 && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Upgrade to Pro"
+            style={styles.upgradeBanner}
+            onPress={() => navigation.navigate('Subscription')}
+          >
+            <Text style={styles.upgradeBannerText}>🔒 {t('dashboard.upgradePro')}</Text>
+          </Pressable>
+        )}
+
+        <ErrorBanner message={error} onDismiss={clearError} onRetry={loadMiners} />
+
+        {miners.length > 0 && (
+          <Suspense fallback={null}>
+            <LazyFirmwareUpdateBanner />
+          </Suspense>
+        )}
+
+        {Object.keys(minerErrors).length > 0 && (
+          <ErrorBanner
+            message={t('dashboard.minerErrors', {
+              count: Object.keys(minerErrors).length,
+              defaultValue: '{{count}} miner(s) unreachable',
+            })}
+            onDismiss={clearMinerErrors}
+            onRetry={loadMiners}
+          />
+        )}
+
+        {scanning && (
+          <View style={styles.scanningBanner}>
+            <ActivityIndicator size="small" color={theme.primary} />
+            <Text style={styles.scanningText}>
+              {t('dashboard.scanning', {
+                scanned: scanProgress?.scanned || 0,
+                total: scanProgress?.total || 254,
+              })}
+            </Text>
+          </View>
+        )}
+
+        {aaEnabled && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Automated actions"
             style={{
-              flex: 1,
-              borderWidth: 1,
-              borderColor: theme.border,
-              borderRadius: radius.sm,
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginHorizontal: spacing.md,
+              marginBottom: spacing.xs,
+              backgroundColor: theme.surface,
+              borderRadius: radius.md,
               paddingHorizontal: spacing.sm,
               paddingVertical: spacing.xs,
-              color: theme.text,
-              backgroundColor: theme.surface,
-              fontSize: fontSize.base,
+              borderWidth: 1,
+              borderColor: theme.border,
+              gap: spacing.sm,
             }}
-            placeholder={t('dashboard.searchPlaceholder', 'Search miners...')}
-            placeholderTextColor={theme.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            accessibilityLabel="Search miners"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Clear search"
-              onPress={() => setSearchQuery('')}
-            >
-              <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>✕</Text>
-            </Pressable>
-          )}
-        </View>
-      )}
-
-      {!initialized || (loading && miners.length === 0) ? (
-        <View style={{ paddingTop: 8 }}>
-          <SkeletonCard rows={4} />
-          <SkeletonCard rows={4} />
-          <SkeletonCard rows={4} />
-        </View>
-      ) : miners.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyIcon}>⬡</Text>
-          <Text style={styles.emptyTitle}>{t('dashboard.noMiners')}</Text>
-          <Text style={styles.emptyText}>{t('dashboard.noMinersBody')}</Text>
-          <View style={styles.emptySteps}>
-            <Text style={styles.stepText}>{t('dashboard.step1')}</Text>
-            <Text style={styles.stepText}>{t('dashboard.step2')}</Text>
-            <Text style={styles.stepText}>{t('dashboard.step3')}</Text>
-          </View>
-          <View style={styles.emptyActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Add Miner"
-              style={styles.primaryBtn}
-              onPress={handleAddMiner}
-            >
-              <Text style={styles.primaryBtnText}>{t('dashboard.addMiner')}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Scan Network"
-              style={styles.secondaryBtn}
-              onPress={scanNetwork}
-            >
-              <Text style={styles.secondaryBtnText}>{t('dashboard.scanNetwork')}</Text>
-            </Pressable>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {groupedMiners.map((item) => (
-            <View key={item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`}>
-              {renderGroupedItem({ item })}
+            onPress={() => navigation.navigate('AutomatedActions')}
+          >
+            <Text style={{ fontSize: fontSize.md }}>⚡</Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  color: theme.text,
+                  fontSize: fontSize.sm,
+                  fontWeight: fontWeight.bold,
+                }}
+              >
+                Automated Actions
+              </Text>
+              <Text style={{ color: theme.textDim, fontSize: fontSize.xs }}>{aaStatusText}</Text>
             </View>
-          ))}
-        </View>
-      )}
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.xs }}>{'>'}</Text>
+          </Pressable>
+        )}
+
+        {!kioskMode && miners.length > 0 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.xs,
+              paddingHorizontal: spacing.md,
+              marginBottom: 6,
+            }}
+          >
+            <Text style={{ color: theme.textMuted, fontSize: fontSize.md }}>🔍</Text>
+            <TextInput
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: theme.border,
+                borderRadius: radius.sm,
+                paddingHorizontal: spacing.sm,
+                paddingVertical: spacing.xs,
+                color: theme.text,
+                backgroundColor: theme.surface,
+                fontSize: fontSize.base,
+              }}
+              placeholder={t('dashboard.searchPlaceholder', 'Search miners...')}
+              placeholderTextColor={theme.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              accessibilityLabel="Search miners"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Clear search"
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={{ color: theme.textMuted, fontSize: fontSize.lg }}>✕</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {!initialized || (loading && miners.length === 0) ? (
+          <View style={{ paddingTop: 8 }}>
+            <SkeletonCard rows={4} />
+            <SkeletonCard rows={4} />
+            <SkeletonCard rows={4} />
+          </View>
+        ) : miners.length === 0 ? (
+          <View style={styles.center}>
+            <Text style={styles.emptyIcon}>⬡</Text>
+            <Text style={styles.emptyTitle}>{t('dashboard.noMiners')}</Text>
+            <Text style={styles.emptyText}>{t('dashboard.noMinersBody')}</Text>
+            <View style={styles.emptySteps}>
+              <Text style={styles.stepText}>{t('dashboard.step1')}</Text>
+              <Text style={styles.stepText}>{t('dashboard.step2')}</Text>
+              <Text style={styles.stepText}>{t('dashboard.step3')}</Text>
+            </View>
+            <View style={styles.emptyActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add Miner"
+                style={styles.primaryBtn}
+                onPress={handleAddMiner}
+              >
+                <Text style={styles.primaryBtnText}>{t('dashboard.addMiner')}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Scan Network"
+                style={styles.secondaryBtn}
+                onPress={scanNetwork}
+              >
+                <Text style={styles.secondaryBtnText}>{t('dashboard.scanNetwork')}</Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {groupedMiners.map((item) => (
+              <View
+                key={item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`}
+              >
+                {renderGroupedItem({ item })}
+              </View>
+            ))}
+          </View>
+        )}
+      </Outer>
 
       {!kioskMode && selectionMode && (
         <View style={styles.selectionBar}>
@@ -2422,6 +2430,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
           <Text style={styles.fabText}>+</Text>
         </Pressable>
       )}
-    </Outer>
+    </View>
   );
 }
