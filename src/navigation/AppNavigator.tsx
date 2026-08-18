@@ -368,214 +368,216 @@ export function AppNavigator() {
   }, []);
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <View style={{ flex: 1 }}>
       <OfflineBanner />
       <UpdateBanner />
       <UndoToast />
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: theme.bg },
-          headerTintColor: theme.text,
-          headerTitleStyle: { fontWeight: '700', fontSize: 17 },
-          contentStyle: { backgroundColor: theme.bg },
-          animation: 'none',
-        }}
-      >
-        <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-        <Stack.Screen
-          name="MinerDetail"
-          component={WrappedMinerDetail}
-          options={{ title: t('navigator.minerDetail') }}
-        />
-        <Stack.Screen
-          name="AddMiner"
-          component={WrappedAddMiner}
-          options={{ title: t('navigator.addMiner') }}
-        />
-        <Stack.Screen
-          name="Subscription"
-          component={WrappedSubscription}
-          options={{ title: t('navigator.subscription') }}
-        />
-        <Stack.Screen
-          name="Wallets"
-          component={WrappedWallets}
-          options={{ title: t('navigator.wallets') }}
-        />
-        <Stack.Screen
-          name="Groups"
-          component={WrappedGroups}
-          options={{ title: t('navigator.groups') }}
-        />
-        <Stack.Screen
-          name="ImportData"
-          component={WrappedImportData}
-          options={{ title: t('navigator.importData') }}
-        />
-        <Stack.Screen
-          name="MinerComparison"
-          component={WrappedMinerComparison}
-          options={{ title: t('navigator.minerComparison') }}
-        />
-        <Stack.Screen
-          name="AlertHistory"
-          component={WrappedAlertHistory}
-          options={{ title: t('alertHistory.title', 'Alert History') }}
-        />
-        <Stack.Screen
-          name="NotificationHistory"
-          component={WrappedNotificationHistory}
-          options={{ title: t('notificationHistory.title', 'Notification History') }}
-        />
-        <Stack.Screen
-          name="PoolAnalytics"
-          component={WrappedPoolAnalytics}
-          options={{ title: t('poolAnalytics.title', 'Pool Analytics') }}
-        />
-        <Stack.Screen
-          name="ExportReport"
-          component={WrappedExportReport}
-          options={{ title: t('exportReport.title', 'Export Report') }}
-        />
-        <Stack.Screen
-          name="SharedGroups"
-          component={WrappedSharedGroups}
-          options={{ title: t('groupSharing.title', 'Shared Groups') }}
-        />
-        <Stack.Screen
-          name="CustomThemeEditor"
-          component={WrappedCustomThemeEditor}
-          options={{ title: t('themes.customEditor', 'Theme Editor') }}
-        />
-        <Stack.Screen
-          name="Firmware"
-          component={WrappedFirmware}
-          options={{ title: t('navigator.firmware', 'Firmware') }}
-        />
-        <Stack.Screen
-          name="DarkPool"
-          component={WrappedDarkPool}
-          options={{ title: t('darkPool.title', 'Dark Pool') }}
-        />
-        <Stack.Screen
-          name="ThemeMarketplace"
-          component={WrappedThemeMarketplace}
-          options={{ title: t('marketplace.themeTitle', 'Theme Marketplace') }}
-        />
-        <Stack.Screen
-          name="PublicDashboard"
-          component={WrappedPublicDashboard}
-          options={{
-            title: t('publicDashboard.shareMiner', 'Share Live Status'),
-            headerShown: false,
+      <NavigationContainer ref={navigationRef}>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: { backgroundColor: theme.bg },
+            headerTintColor: theme.text,
+            headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+            contentStyle: { backgroundColor: theme.bg },
+            animation: 'none',
           }}
-        />
-        <Stack.Screen
-          name="MinerMarketplace"
-          component={WrappedMinerMarketplace}
-          options={{ title: t('marketplace.title', 'Miner Marketplace') }}
-        />
-        <Stack.Screen
-          name="Teams"
-          component={WrappedTeams}
-          options={{ title: t('teams.title', 'Teams') }}
-        />
-        <Stack.Screen
-          name="AlertChannels"
-          component={WrappedAlertChannels}
-          options={{ title: t('alertChannels.title', 'Alert Channels') }}
-        />
-        <Stack.Screen
-          name="BotChannels"
-          component={WrappedBotChannels}
-          options={{ title: t('botChannels.title', 'Bot Channels') }}
-        />
-        <Stack.Screen
-          name="PoolCompare"
-          component={WrappedPoolCompare}
-          options={{ title: t('poolCompare.title', 'Pool Comparison') }}
-        />
-        <Stack.Screen
-          name="Contributors"
-          component={WrappedContributors}
-          options={{ title: t('contributors.title', 'Contributors') }}
-        />
-        <Stack.Screen
-          name="AnomalyDetection"
-          component={WrappedAnomaly}
-          options={{ title: t('anomalyDetection.title', 'Anomaly Detection') }}
-        />
-        <Stack.Screen
-          name="Energy"
-          component={WrappedEnergy}
-          options={{ title: t('energy.title', 'Energy Tracking') }}
-        />
-        <Stack.Screen
-          name="ProfitabilitySwitch"
-          component={WrappedProfitabilitySwitch}
-          options={{ title: t('profitabilitySwitch.title', 'Profitability Switching') }}
-        />
-        <Stack.Screen
-          name="FleetHealth"
-          component={WrappedFleetHealth}
-          options={{ title: t('fleetHealth.title', 'Fleet Health') }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={WrappedProfile}
-          options={{ title: t('profile.title', 'Profile') }}
-        />
-        <Stack.Screen
-          name="PredictiveMaintenance"
-          component={WrappedPredictiveMaintenance}
-          options={{ title: t('predictiveMaintenance.title', 'Predictive Maintenance') }}
-        />
-        <Stack.Screen
-          name="ActivityFeed"
-          component={WrappedActivityFeed}
-          options={{ title: t('activityFeed.title', 'Activity Feed') }}
-        />
-        <Stack.Screen
-          name="WorldMap"
-          component={WrappedWorldMap}
-          options={{ title: t('worldMap.title', 'World Map') }}
-        />
-        <Stack.Screen
-          name="DashboardBuilder"
-          component={WrappedDashboardBuilder}
-          options={{ title: t('dashboardBuilder.title', 'Dashboard Builder') }}
-        />
-        <Stack.Screen
-          name="WidgetConfig"
-          component={WrappedWidgetConfig}
-          options={{ title: t('widgetConfig.title', 'Widget Configuration') }}
-        />
-        <Stack.Screen
-          name="Realtime"
-          component={WrappedRealtime}
-          options={{ title: t('realtime.title', 'Real-Time Monitor') }}
-        />
-        <Stack.Screen
-          name="NotificationSettings"
-          component={WrappedNotificationSettings}
-          options={{ title: t('notificationSettings.title', 'Notification Settings') }}
-        />
-        <Stack.Screen
-          name="AutomatedActions"
-          component={WrappedAutomatedActions}
-          options={{ title: t('automatedActions.title', 'Automated Actions') }}
-        />
-        <Stack.Screen
-          name="PoolProviders"
-          component={WrappedPoolProviders}
-          options={{ title: t('poolProviders.title', 'Pool Providers') }}
-        />
-        <Stack.Screen
-          name="NotificationChannels"
-          component={WrappedNotificationChannels}
-          options={{ title: t('notificationChannels.title', 'Notification Channels') }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+        >
+          <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="MinerDetail"
+            component={WrappedMinerDetail}
+            options={{ title: t('navigator.minerDetail') }}
+          />
+          <Stack.Screen
+            name="AddMiner"
+            component={WrappedAddMiner}
+            options={{ title: t('navigator.addMiner') }}
+          />
+          <Stack.Screen
+            name="Subscription"
+            component={WrappedSubscription}
+            options={{ title: t('navigator.subscription') }}
+          />
+          <Stack.Screen
+            name="Wallets"
+            component={WrappedWallets}
+            options={{ title: t('navigator.wallets') }}
+          />
+          <Stack.Screen
+            name="Groups"
+            component={WrappedGroups}
+            options={{ title: t('navigator.groups') }}
+          />
+          <Stack.Screen
+            name="ImportData"
+            component={WrappedImportData}
+            options={{ title: t('navigator.importData') }}
+          />
+          <Stack.Screen
+            name="MinerComparison"
+            component={WrappedMinerComparison}
+            options={{ title: t('navigator.minerComparison') }}
+          />
+          <Stack.Screen
+            name="AlertHistory"
+            component={WrappedAlertHistory}
+            options={{ title: t('alertHistory.title', 'Alert History') }}
+          />
+          <Stack.Screen
+            name="NotificationHistory"
+            component={WrappedNotificationHistory}
+            options={{ title: t('notificationHistory.title', 'Notification History') }}
+          />
+          <Stack.Screen
+            name="PoolAnalytics"
+            component={WrappedPoolAnalytics}
+            options={{ title: t('poolAnalytics.title', 'Pool Analytics') }}
+          />
+          <Stack.Screen
+            name="ExportReport"
+            component={WrappedExportReport}
+            options={{ title: t('exportReport.title', 'Export Report') }}
+          />
+          <Stack.Screen
+            name="SharedGroups"
+            component={WrappedSharedGroups}
+            options={{ title: t('groupSharing.title', 'Shared Groups') }}
+          />
+          <Stack.Screen
+            name="CustomThemeEditor"
+            component={WrappedCustomThemeEditor}
+            options={{ title: t('themes.customEditor', 'Theme Editor') }}
+          />
+          <Stack.Screen
+            name="Firmware"
+            component={WrappedFirmware}
+            options={{ title: t('navigator.firmware', 'Firmware') }}
+          />
+          <Stack.Screen
+            name="DarkPool"
+            component={WrappedDarkPool}
+            options={{ title: t('darkPool.title', 'Dark Pool') }}
+          />
+          <Stack.Screen
+            name="ThemeMarketplace"
+            component={WrappedThemeMarketplace}
+            options={{ title: t('marketplace.themeTitle', 'Theme Marketplace') }}
+          />
+          <Stack.Screen
+            name="PublicDashboard"
+            component={WrappedPublicDashboard}
+            options={{
+              title: t('publicDashboard.shareMiner', 'Share Live Status'),
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="MinerMarketplace"
+            component={WrappedMinerMarketplace}
+            options={{ title: t('marketplace.title', 'Miner Marketplace') }}
+          />
+          <Stack.Screen
+            name="Teams"
+            component={WrappedTeams}
+            options={{ title: t('teams.title', 'Teams') }}
+          />
+          <Stack.Screen
+            name="AlertChannels"
+            component={WrappedAlertChannels}
+            options={{ title: t('alertChannels.title', 'Alert Channels') }}
+          />
+          <Stack.Screen
+            name="BotChannels"
+            component={WrappedBotChannels}
+            options={{ title: t('botChannels.title', 'Bot Channels') }}
+          />
+          <Stack.Screen
+            name="PoolCompare"
+            component={WrappedPoolCompare}
+            options={{ title: t('poolCompare.title', 'Pool Comparison') }}
+          />
+          <Stack.Screen
+            name="Contributors"
+            component={WrappedContributors}
+            options={{ title: t('contributors.title', 'Contributors') }}
+          />
+          <Stack.Screen
+            name="AnomalyDetection"
+            component={WrappedAnomaly}
+            options={{ title: t('anomalyDetection.title', 'Anomaly Detection') }}
+          />
+          <Stack.Screen
+            name="Energy"
+            component={WrappedEnergy}
+            options={{ title: t('energy.title', 'Energy Tracking') }}
+          />
+          <Stack.Screen
+            name="ProfitabilitySwitch"
+            component={WrappedProfitabilitySwitch}
+            options={{ title: t('profitabilitySwitch.title', 'Profitability Switching') }}
+          />
+          <Stack.Screen
+            name="FleetHealth"
+            component={WrappedFleetHealth}
+            options={{ title: t('fleetHealth.title', 'Fleet Health') }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={WrappedProfile}
+            options={{ title: t('profile.title', 'Profile') }}
+          />
+          <Stack.Screen
+            name="PredictiveMaintenance"
+            component={WrappedPredictiveMaintenance}
+            options={{ title: t('predictiveMaintenance.title', 'Predictive Maintenance') }}
+          />
+          <Stack.Screen
+            name="ActivityFeed"
+            component={WrappedActivityFeed}
+            options={{ title: t('activityFeed.title', 'Activity Feed') }}
+          />
+          <Stack.Screen
+            name="WorldMap"
+            component={WrappedWorldMap}
+            options={{ title: t('worldMap.title', 'World Map') }}
+          />
+          <Stack.Screen
+            name="DashboardBuilder"
+            component={WrappedDashboardBuilder}
+            options={{ title: t('dashboardBuilder.title', 'Dashboard Builder') }}
+          />
+          <Stack.Screen
+            name="WidgetConfig"
+            component={WrappedWidgetConfig}
+            options={{ title: t('widgetConfig.title', 'Widget Configuration') }}
+          />
+          <Stack.Screen
+            name="Realtime"
+            component={WrappedRealtime}
+            options={{ title: t('realtime.title', 'Real-Time Monitor') }}
+          />
+          <Stack.Screen
+            name="NotificationSettings"
+            component={WrappedNotificationSettings}
+            options={{ title: t('notificationSettings.title', 'Notification Settings') }}
+          />
+          <Stack.Screen
+            name="AutomatedActions"
+            component={WrappedAutomatedActions}
+            options={{ title: t('automatedActions.title', 'Automated Actions') }}
+          />
+          <Stack.Screen
+            name="PoolProviders"
+            component={WrappedPoolProviders}
+            options={{ title: t('poolProviders.title', 'Pool Providers') }}
+          />
+          <Stack.Screen
+            name="NotificationChannels"
+            component={WrappedNotificationChannels}
+            options={{ title: t('notificationChannels.title', 'Notification Channels') }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </View>
   );
 }

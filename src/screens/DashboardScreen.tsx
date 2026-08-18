@@ -2,10 +2,8 @@ import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense, Frag
 import {
   View,
   Text,
-  FlatList,
   Pressable,
   ActivityIndicator,
-  RefreshControl,
   Alert,
   Modal,
   StyleSheet,
@@ -524,8 +522,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   }, []);
 
   type GroupedItem =
-    | { type: 'header'; group: string; miners: Miner[] }
-    | { type: 'miner'; miner: Miner };
+    { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner };
 
   const handleRename = useCallback((id: string, name: string) => {
     useMinerStore.getState().setMinerName(id, name);
@@ -717,8 +714,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
       groups.get(key)!.push(m);
     }
     const items: (
-      | { type: 'header'; group: string; miners: Miner[] }
-      | { type: 'miner'; miner: Miner }
+      { type: 'header'; group: string; miners: Miner[] } | { type: 'miner'; miner: Miner }
     )[] = [];
     const orderedGroups = groupOrder.filter((g) => groups.has(g));
     const remaining = Array.from(groups.keys())
@@ -1076,11 +1072,8 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
     [theme],
   );
 
-  const Outer = Platform.OS === 'web' ? ScrollView : View;
-  const outerProps =
-    Platform.OS === 'web'
-      ? { style: styles.container, contentContainerStyle: { paddingBottom: 80 } }
-      : { style: styles.container };
+  const Outer = ScrollView;
+  const outerProps = { style: styles.container, contentContainerStyle: { paddingBottom: 80 } };
 
   const renderSection = (key: SectionKey): React.ReactNode => {
     switch (key) {
@@ -2185,7 +2178,7 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             </Pressable>
           </View>
         </View>
-      ) : Platform.OS === 'web' ? (
+      ) : (
         <View style={styles.list}>
           {groupedMiners.map((item) => (
             <View key={item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`}>
@@ -2193,29 +2186,6 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
             </View>
           ))}
         </View>
-      ) : (
-        <FlatList
-          data={groupedMiners}
-          keyExtractor={(item) =>
-            item.type === 'header' ? `header-${item.group}` : `miner-${item.miner.id}`
-          }
-          renderItem={renderGroupedItem}
-          initialNumToRender={8}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
-              progressBackgroundColor={theme.surface}
-            />
-          }
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          windowSize={7}
-          maxToRenderPerBatch={10}
-          removeClippedSubviews
-        />
       )}
 
       {!kioskMode && selectionMode && (
