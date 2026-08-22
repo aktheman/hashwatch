@@ -50,38 +50,19 @@ statsRouter.get('/:minerId', async (req: AuthRequest, res) => {
 });
 
 statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
-  const minerId = req.params.minerId as string;
-  const miner = await verifyMinerOwnership(minerId, req.userId as string);
-  if (!miner) {
-    return res.status(404).json({ error: 'miner not found' });
-  }
+  try {
+    const minerId = req.params.minerId as string;
+    const miner = await verifyMinerOwnership(minerId, req.userId as string);
+    if (!miner) {
+      return res.status(404).json({ error: 'miner not found' });
+    }
 
-  const parsed = snapshotSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: 'invalid snapshot data', details: parsed.error.errors });
-  }
+    const parsed = snapshotSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'invalid snapshot data', details: parsed.error.errors });
+    }
 
-  const {
-    hashRate,
-    temperature,
-    voltage,
-    current,
-    power,
-    sharesAccepted,
-    sharesRejected,
-    uptimeSeconds,
-    frequency,
-  } = parsed.data;
-
-  const result = await query(
-    `INSERT INTO miner_snapshots
-     (minerId, timestamp, hashRate, temperature, voltage, current, power,
-      sharesAccepted, sharesRejected, uptimeSeconds, frequency)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     RETURNING *`,
-    [
-      minerId,
-      Date.now(),
+    const {
       hashRate,
       temperature,
       voltage,
@@ -91,11 +72,35 @@ statsRouter.post('/:minerId', async (req: AuthRequest, res) => {
       sharesRejected,
       uptimeSeconds,
       frequency,
-    ],
-  );
+    } = parsed.data;
 
-  checkMinerStatus(req.userId as string, minerId, miner.name, miner.ip, true, temperature);
+    const result = await query(
+      `INSERT INTO miner_snapshots
+       (minerId, timestamp, hashRate, temperature, voltage, current, power,
+        sharesAccepted, sharesRejected, uptimeSeconds, frequency)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       RETURNING *`,
+      [
+        minerId,
+        Date.now(),
+        hashRate,
+        temperature,
+        voltage,
+        current,
+        power,
+        sharesAccepted,
+        sharesRejected,
+        uptimeSeconds,
+        frequency,
+      ],
+    );
 
-  broadcast(req.userId as string, { type: 'snapshot', snapshot: result.rows[0] });
-  res.status(201).json(result.rows[0]);
+    checkMinerStatus(req.userId as string, minerId, miner.name, miner.ip, true, temperature);
+
+    broadcast(req.userId as string, { type: 'snapshot', snapshot: result.rows[0] });
+    res.status(201).json(result.rows[0]);
+  } catch (err: unknown) {
+    log.error('Error ingesting snapshot:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });

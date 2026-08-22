@@ -231,9 +231,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   syncNow: async () => {
     set({ syncing: true });
-    await pushSettingsToBackend();
-    await syncSettingsFromBackend();
-    set({ syncing: false, synced: true, lastSyncTimestamp: Date.now() });
+    try {
+      await pushSettingsToBackend();
+      await syncSettingsFromBackend();
+      set({ syncing: false, synced: true, lastSyncTimestamp: Date.now() });
+    } catch {
+      set({ syncing: false });
+    }
   },
 }));
 

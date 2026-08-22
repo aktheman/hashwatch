@@ -84,10 +84,8 @@ function sunTimesForDate(lat: number, lng: number, date: Date): { sunrise: Date;
   const jd = toJulianDay(date);
   const T = julianCentury(jd);
 
-  const dec = sunDeclination(
-    eclipticLongitude(solarMeanAnomaly(T), equationOfCenter(T, T)),
-    obliquityOfEcliptic(T),
-  );
+  const M = solarMeanAnomaly(T);
+  const dec = sunDeclination(eclipticLongitude(M, equationOfCenter(T, M)), obliquityOfEcliptic(T));
   const eot = equationOfTime(T);
 
   const solarNoon = 720 - 4 * lng - eot;

@@ -21,7 +21,7 @@ import { alertHistoryRouter } from './routes/alertHistory';
 import { alertRulesRouter } from './routes/alertRules';
 import { notificationHistoryRouter } from './routes/notificationHistory';
 import { createWebSocketServer } from './ws';
-import { query } from './db';
+import { query, pool } from './db';
 import { startMinerPoller, stopMinerPoller } from './services/minerPoller';
 import { cacheMiddleware, invalidateCache } from './middleware/cache';
 import { authMiddleware } from './middleware/auth';
@@ -219,7 +219,15 @@ function gracefulShutdown(signal: string) {
   invalidateCache();
   server.close(() => {
     log.info('HTTP server closed');
-    process.exit(0);
+    pool
+      .end()
+      .then(() => {
+        log.info('Database pool closed');
+        process.exit(0);
+      })
+      .catch(() => {
+        process.exit(0);
+      });
   });
   setTimeout(() => {
     log.error('Forced shutdown after timeout');

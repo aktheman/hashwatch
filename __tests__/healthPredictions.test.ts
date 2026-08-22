@@ -66,10 +66,10 @@ describe('analyzeMinerHealth', () => {
   it('detects fan failure risk when RPM trending down', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ fanRpm: 1000, fanSpeed: 95 }),
-      makeSnapshot({ fanRpm: 2000, fanSpeed: 80 }, 3600000),
-      makeSnapshot({ fanRpm: 3000, fanSpeed: 60 }, 7200000),
       makeSnapshot({ fanRpm: 3200, fanSpeed: 50 }, 10800000),
+      makeSnapshot({ fanRpm: 3000, fanSpeed: 60 }, 7200000),
+      makeSnapshot({ fanRpm: 2000, fanSpeed: 80 }, 3600000),
+      makeSnapshot({ fanRpm: 1000, fanSpeed: 95 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const fanPred = result.predictions.find((p) => p.type === 'fan_failure');
@@ -81,8 +81,8 @@ describe('analyzeMinerHealth', () => {
   it('detects fan failure when speed at 100% but RPM low', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ fanRpm: 500, fanSpeed: 100 }),
       makeSnapshot({ fanRpm: 2000, fanSpeed: 60 }, 3600000),
+      makeSnapshot({ fanRpm: 500, fanSpeed: 100 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const fanPred = result.predictions.find((p) => p.type === 'fan_failure');
@@ -93,9 +93,9 @@ describe('analyzeMinerHealth', () => {
   it('detects thermal throttle when temp > 80', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ temperature: 85 }),
-      makeSnapshot({ temperature: 80 }, 3600000),
       makeSnapshot({ temperature: 75 }, 7200000),
+      makeSnapshot({ temperature: 80 }, 3600000),
+      makeSnapshot({ temperature: 85 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const thermalPred = result.predictions.find((p) => p.type === 'thermal_throttle');
@@ -107,9 +107,9 @@ describe('analyzeMinerHealth', () => {
   it('detects thermal throttle when temp > 70 and rising', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ temperature: 72 }),
-      makeSnapshot({ temperature: 68 }, 3600000),
       makeSnapshot({ temperature: 64 }, 7200000),
+      makeSnapshot({ temperature: 68 }, 3600000),
+      makeSnapshot({ temperature: 72 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const thermalPred = result.predictions.find((p) => p.type === 'thermal_throttle');
@@ -120,10 +120,10 @@ describe('analyzeMinerHealth', () => {
   it('detects hashrate decline', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ hashRate: 300 }),
-      makeSnapshot({ hashRate: 400 }, 3600000),
-      makeSnapshot({ hashRate: 500 }, 7200000),
       makeSnapshot({ hashRate: 550 }, 10800000),
+      makeSnapshot({ hashRate: 500 }, 7200000),
+      makeSnapshot({ hashRate: 400 }, 3600000),
+      makeSnapshot({ hashRate: 300 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const hrPred = result.predictions.find((p) => p.type === 'hashrate_decline');
@@ -135,8 +135,8 @@ describe('analyzeMinerHealth', () => {
   it('detects share rejection spike', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ sharesAccepted: 1010, sharesRejected: 90 }),
       makeSnapshot({ sharesAccepted: 1000, sharesRejected: 10 }, 3600000),
+      makeSnapshot({ sharesAccepted: 1010, sharesRejected: 90 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const srPred = result.predictions.find((p) => p.type === 'share_rejection_spike');
@@ -147,10 +147,10 @@ describe('analyzeMinerHealth', () => {
   it('detects power anomaly when efficiency degrading', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ hashRate: 300, power: 20 }),
-      makeSnapshot({ hashRate: 400, power: 15 }, 3600000),
-      makeSnapshot({ hashRate: 500, power: 12 }, 7200000),
       makeSnapshot({ hashRate: 500, power: 12 }, 10800000),
+      makeSnapshot({ hashRate: 500, power: 12 }, 7200000),
+      makeSnapshot({ hashRate: 400, power: 15 }, 3600000),
+      makeSnapshot({ hashRate: 300, power: 20 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const pwrPred = result.predictions.find((p) => p.type === 'power_anomaly');
@@ -176,9 +176,9 @@ describe('analyzeMinerHealth', () => {
   it('generates recommended actions', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ fanRpm: 500, fanSpeed: 100, temperature: 85 }),
-      makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 3600000),
       makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 7200000),
+      makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 3600000),
+      makeSnapshot({ fanRpm: 500, fanSpeed: 100, temperature: 85 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     expect(result.recommendedActions.length).toBeGreaterThan(0);
@@ -187,9 +187,9 @@ describe('analyzeMinerHealth', () => {
   it('deduplicates recommended actions', () => {
     const miner = makeMiner();
     const snapshots = [
-      makeSnapshot({ fanRpm: 500, fanSpeed: 100, temperature: 85 }),
-      makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 3600000),
       makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 7200000),
+      makeSnapshot({ fanRpm: 3000, fanSpeed: 50, temperature: 60 }, 3600000),
+      makeSnapshot({ fanRpm: 500, fanSpeed: 100, temperature: 85 }),
     ];
     const result = analyzeMinerHealth(miner, snapshots);
     const unique = new Set(result.recommendedActions);

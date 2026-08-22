@@ -1,4 +1,5 @@
 import express, { Router, Request, Response } from 'express';
+import { timingSafeEqual } from 'crypto';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { log } from '../logger';
 import { query } from '../db';
@@ -74,7 +75,9 @@ stripeWebhookRouter.post(
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
 
-      if (expectedSig !== parts.v1) {
+      const sigBuf = Buffer.from(parts.v1, 'hex');
+      const expectedBuf = Buffer.from(expectedSig, 'hex');
+      if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
         log.warn('Stripe webhook signature mismatch');
         return res.status(401).json({ error: 'Invalid signature' });
       }

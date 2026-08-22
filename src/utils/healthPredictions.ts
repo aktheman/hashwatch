@@ -23,8 +23,10 @@ export interface Prediction {
 function trendDirection(values: number[]): 'up' | 'down' | 'stable' {
   if (values.length < 2) return 'stable';
   const n = Math.min(values.length, 10);
-  const recent = values.slice(0, Math.floor(n / 2));
-  const older = values.slice(Math.floor(n / 2));
+  const tail = values.slice(values.length - n);
+  const half = Math.floor(n / 2);
+  const recent = tail.slice(half);
+  const older = tail.slice(0, half);
   const avgRecent = recent.reduce((a, b) => a + b, 0) / recent.length;
   const avgOlder = older.reduce((a, b) => a + b, 0) / older.length;
   const pctChange = avgOlder > 0 ? (avgRecent - avgOlder) / avgOlder : 0;
@@ -45,8 +47,8 @@ function predictFanFailure(snapshots: MinerSnapshot[]): Prediction | null {
   if (rpms.length >= 2) {
     const trend = trendDirection(rpms);
     if (trend === 'down') {
-      const latest = rpms[0];
-      const oldest = rpms[rpms.length - 1];
+      const latest = rpms[rpms.length - 1];
+      const oldest = rpms[0];
       const dropPct = oldest > 0 ? (oldest - latest) / oldest : 0;
       probability = Math.min(0.95, dropPct * 1.2);
       evidence = `RPM trending down: ${oldest} → ${latest}`;
@@ -54,10 +56,10 @@ function predictFanFailure(snapshots: MinerSnapshot[]): Prediction | null {
   }
 
   if (speeds.length >= 2) {
-    const latestSpeed = speeds[0];
-    if (latestSpeed >= 95 && rpms.length > 0 && rpms[0] < 1000) {
+    const latestSpeed = speeds[speeds.length - 1];
+    if (latestSpeed >= 95 && rpms.length > 0 && rpms[rpms.length - 1] < 1000) {
       probability = Math.max(probability, 0.8);
-      evidence = evidence || `Fan speed ${latestSpeed}% but RPM only ${rpms[0]}`;
+      evidence = evidence || `Fan speed ${latestSpeed}% but RPM only ${rpms[rpms.length - 1]}`;
     }
   }
 
@@ -74,7 +76,7 @@ function predictFanFailure(snapshots: MinerSnapshot[]): Prediction | null {
 function predictThermalThrottle(snapshots: MinerSnapshot[]): Prediction | null {
   if (snapshots.length < 2) return null;
   const temps = snapshots.map((s) => s.temperature);
-  const latest = temps[0];
+  const latest = temps[temps.length - 1];
 
   let probability = 0;
   let evidence = '';
@@ -117,8 +119,8 @@ function predictHashrateDecline(snapshots: MinerSnapshot[]): Prediction | null {
   const trend = trendDirection(rates);
   if (trend !== 'down') return null;
 
-  const latest = rates[0];
-  const oldest = rates[rates.length - 1];
+  const latest = rates[rates.length - 1];
+  const oldest = rates[0];
   const dropPct = oldest > 0 ? (oldest - latest) / oldest : 0;
   const probability = Math.min(0.95, dropPct * 1.5);
 
@@ -137,8 +139,10 @@ function predictShareRejection(snapshots: MinerSnapshot[]): Prediction | null {
   const accepted = snapshots.map((s) => s.sharesAccepted);
   const rejected = snapshots.map((s) => s.sharesRejected);
 
-  const recentAcceptedDelta = accepted[0] - (accepted[1] ?? 0);
-  const recentRejectedDelta = rejected[0] - (rejected[1] ?? 0);
+  const lastIdx = accepted.length - 1;
+  const prevIdx = lastIdx - 1;
+  const recentAcceptedDelta = accepted[lastIdx] - (accepted[prevIdx] ?? 0);
+  const recentRejectedDelta = rejected[lastIdx] - (rejected[prevIdx] ?? 0);
 
   if (recentAcceptedDelta <= 0 && recentRejectedDelta <= 0) return null;
 
@@ -168,8 +172,8 @@ function predictPowerAnomaly(snapshots: MinerSnapshot[]): Prediction | null {
   const trend = trendDirection(efficiencies);
   if (trend !== 'down') return null;
 
-  const latest = efficiencies[0];
-  const oldest = efficiencies[efficiencies.length - 1];
+  const latest = efficiencies[efficiencies.length - 1];
+  const oldest = efficiencies[0];
   const dropPct = oldest > 0 ? (oldest - latest) / oldest : 0;
   const probability = Math.min(0.9, dropPct * 1.3);
 

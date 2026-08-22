@@ -29,10 +29,10 @@ function generateId(): string {
   return `nc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function loadFromStorage(): NotificationChannel[] {
+async function loadFromStorage(): Promise<NotificationChannel[]> {
   if (_channelCache) return _channelCache;
   try {
-    const raw = getSetting(STORAGE_KEY);
+    const raw = await getSetting(STORAGE_KEY);
     if (raw && typeof raw === 'string') {
       _channelCache = JSON.parse(raw) as NotificationChannel[];
       return _channelCache!;
@@ -384,7 +384,7 @@ export async function getChannels(): Promise<NotificationChannel[]> {
 export async function saveChannel(
   channel: Omit<NotificationChannel, 'id'>,
 ): Promise<NotificationChannel> {
-  const channels = loadFromStorage();
+  const channels = await loadFromStorage();
   const existing = channels.find((c) => c.name === channel.name && c.type === channel.type);
 
   let saved: NotificationChannel;
@@ -402,7 +402,7 @@ export async function saveChannel(
 }
 
 export async function deleteChannel(id: string): Promise<void> {
-  const channels = loadFromStorage().filter((c) => c.id !== id);
+  const channels = (await loadFromStorage()).filter((c) => c.id !== id);
   saveToStorage(channels);
 }
 

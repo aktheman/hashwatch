@@ -10,6 +10,7 @@ import {
   AppState,
   Platform,
   ScrollView,
+  RefreshControl,
   TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -1073,7 +1074,13 @@ export function DashboardScreen({ navigation }: DashboardScreenProps) {
   );
 
   const Outer = ScrollView;
-  const outerProps = { style: styles.container, contentContainerStyle: { paddingBottom: 80 } };
+  const outerProps = {
+    style: styles.container,
+    contentContainerStyle: { paddingBottom: 80 },
+    refreshControl: (
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />
+    ),
+  };
 
   const renderSection = (key: SectionKey): React.ReactNode => {
     switch (key) {

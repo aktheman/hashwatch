@@ -22,8 +22,12 @@ const ALERT_LABELS_MAP: Record<string, string> = {
 };
 
 async function getLocalPrefs(minerId: string): Promise<Record<string, boolean>> {
-  const raw = await DB.getSetting(`notify_${minerId}`);
-  return raw ? JSON.parse(raw) : {};
+  try {
+    const raw = await DB.getSetting(`notify_${minerId}`);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
 }
 
 async function setLocalPref(minerId: string, alertType: string, enabled: boolean): Promise<void> {
