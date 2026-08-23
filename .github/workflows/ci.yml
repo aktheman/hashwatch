@@ -284,20 +284,34 @@ jobs:
 
   e2e-maestro:
     name: E2E (Maestro Cloud)
-    if: github.ref == 'refs/heads/master' && secrets.MAESTRO_CLOUD_API_KEY != ''
+    if: github.ref == 'refs/heads/master'
     needs: [android-build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check Maestro secret
+        id: check-secret
+        run: |
+          if [ -n "$MAESTRO_CLOUD_API_KEY" ]; then
+            echo "has_secret=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secret=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::MAESTRO_CLOUD_API_KEY not configured. Skipping Maestro E2E."
+          fi
+        env:
+          MAESTRO_CLOUD_API_KEY: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
       - uses: actions/setup-node@v4
+        if: steps.check-secret.outputs.has_secret == 'true'
         with:
           node-version: 22
           cache: npm
       - uses: actions/download-artifact@v4
+        if: steps.check-secret.outputs.has_secret == 'true'
         with:
           name: android-apk
           path: ./
       - uses: mobile-dev-inc/action-maestro-cloud@v1
+        if: steps.check-secret.outputs.has_secret == 'true'
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
           app-file: app-debug.apk
