@@ -170,14 +170,33 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 async function initSchema() {
+  const schemaPath = join(__dirname, 'models', 'schema.sql');
+  let sql: string;
   try {
-    const schemaPath = join(__dirname, 'models', 'schema.sql');
-    const sql = readFileSync(schemaPath, 'utf-8');
-    await query(sql);
-    log.info('DB schema initialized');
+    sql = readFileSync(schemaPath, 'utf-8');
   } catch (e) {
-    log.error('Schema init error:', e);
+    log.error('Schema file missing:', e);
+    process.exit(1);
   }
+
+  const statements = sql
+    .split(';')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const failures: string[] = [];
+  for (const stmt of statements) {
+    try {
+      await query(stmt);
+    } catch (e) {
+      failures.push(stmt.slice(0, 80));
+      log.error('Schema statement failed:', stmt.slice(0, 80), e);
+    }
+  }
+  if (failures.length > 0) {
+    log.error(`Schema init failed (${failures.length}/${statements.length} statements) — aborting`);
+    process.exit(1);
+  }
+  log.info('DB schema initialized');
 }
 
 const PORT = process.env.PORT || 4000;
