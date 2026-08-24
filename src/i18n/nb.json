@@ -664,7 +664,16 @@
     "worldMap": "Verdenskart",
     "dashboardBuilder": "Dashboard Bygger",
     "notificationSettings": "Varslingsinnstillinger",
-    "realtime": "Sanntids Overvåker"
+    "realtime": "Sanntids Overvåker",
+    "minerDetail": "Minerdetaljer",
+    "addMiner": "Legg til Miner",
+    "subscription": "HashWatch Pro",
+    "wallets": "Lommebøker",
+    "groups": "Gruppeadministrasjon",
+    "importData": "Importer Data",
+    "minerComparison": "Minersammenligning",
+    "firmware": "Fastvare",
+    "darkPool": "Dark Pool"
   },
   "minerCard": {
     "hashrate": "Hashrate",

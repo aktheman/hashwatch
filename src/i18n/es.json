@@ -585,7 +585,11 @@
     "minerComparison": "Comparación de mineros",
     "firmware": "Firmware",
     "darkPool": "Pool Oscuro",
-    "realtime": "Monitor en Tiempo Real"
+    "realtime": "Monitor en Tiempo Real",
+    "predictiveMaintenance": "Mantenimiento Predictivo",
+    "activityFeed": "Feed de Actividad",
+    "worldMap": "Mapa Mundial",
+    "dashboardBuilder": "Creador de Paneles"
   },
   "realtime": {
     "title": "Monitor en Tiempo Real",

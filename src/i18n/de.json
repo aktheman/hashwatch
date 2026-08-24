@@ -533,7 +533,11 @@
     "minerComparison": "Miner-Vergleich",
     "firmware": "Firmware",
     "darkPool": "Dunkler Pool",
-    "realtime": "Echtzeit-Monitor"
+    "realtime": "Echtzeit-Monitor",
+    "predictiveMaintenance": "Prädiktive Wartung",
+    "activityFeed": "Aktivitätsfeed",
+    "worldMap": "Weltkarte",
+    "dashboardBuilder": "Dashboard-Builder"
   },
   "realtime": {
     "title": "Echtzeit-Monitor",

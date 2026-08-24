@@ -659,7 +659,16 @@
     "worldMap": "World Map",
     "dashboardBuilder": "Dashboard Builder",
     "notificationSettings": "Notification Settings",
-    "realtime": "Real-Time Monitor"
+    "realtime": "Real-Time Monitor",
+    "minerDetail": "Miner Details",
+    "addMiner": "Add Miner",
+    "subscription": "HashWatch Pro",
+    "wallets": "Wallets",
+    "groups": "Group Management",
+    "importData": "Import Data",
+    "minerComparison": "Miner Comparison",
+    "firmware": "Firmware",
+    "darkPool": "Dark Pool"
   },
   "minerCard": {
     "hashrate": "Hashrate",

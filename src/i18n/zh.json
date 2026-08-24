@@ -523,7 +523,11 @@
     "minerComparison": "矿机比较",
     "firmware": "固件",
     "darkPool": "暗池",
-    "realtime": "实时监控"
+    "realtime": "实时监控",
+    "predictiveMaintenance": "预测性维护",
+    "activityFeed": "活动动态",
+    "worldMap": "世界地图",
+    "dashboardBuilder": "仪表板构建器"
   },
   "realtime": {
     "title": "实时监控",

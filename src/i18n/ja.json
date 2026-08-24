@@ -523,7 +523,11 @@
     "minerComparison": "マイナー比較",
     "firmware": "ファームウェア",
     "darkPool": "ダークプール",
-    "realtime": "リアルタイムモニター"
+    "realtime": "リアルタイムモニター",
+    "predictiveMaintenance": "予知メンテナンス",
+    "activityFeed": "アクティビティフィード",
+    "worldMap": "ワールドマップ",
+    "dashboardBuilder": "ダッシュボードビルダー"
   },
   "realtime": {
     "title": "リアルタイムモニター",

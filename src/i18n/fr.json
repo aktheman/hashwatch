@@ -533,7 +533,11 @@
     "minerComparison": "Comparaison de mineurs",
     "firmware": "Firmware",
     "darkPool": "Pool Noir",
-    "realtime": "Moniteur en Temps Réel"
+    "realtime": "Moniteur en Temps Réel",
+    "predictiveMaintenance": "Maintenance Prédictive",
+    "activityFeed": "Flux d'Activité",
+    "worldMap": "Carte du Monde",
+    "dashboardBuilder": "Créateur de Tableau de Bord"
   },
   "realtime": {
     "title": "Moniteur en Temps Réel",
