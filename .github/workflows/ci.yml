@@ -118,7 +118,7 @@ jobs:
         run: |
           npx serve dist -p 4173 &
           sleep 3
-          npx lighthouse-ci autorun --config=lighthouserc.json
+          npx @lhci/cli autorun --config=lighthouserc.json
 
   e2e-playwright:
     name: E2E (Playwright)

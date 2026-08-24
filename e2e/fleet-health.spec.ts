@@ -7,8 +7,10 @@ test('fleet health screen shows grade distribution', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Fleet Health').first().click({ force: true });
-  await expect(page.getByText('Grade Distribution').first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Fleet Health').filter({ visible: true }).first().click({ force: true });
+  await expect(page.getByText('Grade Distribution').filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('fleet health screen shows miner list', async ({ page }) => {
@@ -17,8 +19,10 @@ test('fleet health screen shows miner list', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Fleet Health').first().click({ force: true });
-  await expect(page.getByText('Miners by Health').first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Fleet Health').filter({ visible: true }).first().click({ force: true });
+  await expect(page.getByText('Miners by Health').filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('fleet health navigates to miner detail on tap', async ({ page }) => {
@@ -27,7 +31,8 @@ test('fleet health navigates to miner detail on tap', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Fleet Health').first().click({ force: true });
-  await page.getByText('Miner Alpha').first().click({ force: true });
-  await expect(page.getByText('Miner Alpha').first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Fleet Health').filter({ visible: true }).first().click({ force: true });
+  const minerRow = page.getByText('Miner Alpha').filter({ visible: true }).first();
+  await minerRow.click({ timeout: 15000 });
+  await expect(minerRow).toBeVisible({ timeout: 15000 });
 });

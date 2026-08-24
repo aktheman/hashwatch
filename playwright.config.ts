@@ -8,6 +8,7 @@ export default defineConfig({
   reporter: [['html', { outputFolder: 'playwright-report' }]],
   use: {
     baseURL: 'http://localhost:4173',
+    locale: 'en-US',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -18,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx serve dist -p 4173 --single',
+    command: 'npx serve dist -p 4173',
     port: 4173,
     timeout: 30000,
     reuseExistingServer: true,

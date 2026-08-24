@@ -7,8 +7,13 @@ test('page loads and shows title', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Pool Providers').first().click({ force: true });
-  await expect(page.getByText(/Pool Providers/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Pool Providers').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/Pool Providers/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('available providers list visible', async ({ page }) => {
@@ -17,8 +22,13 @@ test('available providers list visible', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Pool Providers').first().click({ force: true });
-  await expect(page.getByText(/Not Connected/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Pool Providers').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/Not Connected/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('connect input fields visible', async ({ page }) => {
@@ -27,9 +37,14 @@ test('connect input fields visible', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Pool Providers').first().click({ force: true });
+  await page.getByText('Pool Providers').filter({ visible: true }).first().click({ force: true });
   await expect(page.getByPlaceholder(/Enter API key/i).first()).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/Connect/i).first()).toBeVisible({ timeout: 15000 });
+  await expect(
+    page
+      .getByText(/Connect/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('multi-pool overview section visible when providers connected', async ({ page }) => {
@@ -47,8 +62,13 @@ test('multi-pool overview section visible when providers connected', async ({ pa
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Pool Providers').first().click({ force: true });
-  await expect(page.getByText(/Multi-Pool Overview/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Pool Providers').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/Multi-Pool Overview/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('can navigate to pool details', async ({ page }) => {
@@ -65,6 +85,8 @@ test('can navigate to pool details', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Pool Providers').first().click({ force: true });
-  await expect(page.getByText('Braiins').first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Pool Providers').filter({ visible: true }).first().click({ force: true });
+  await expect(page.getByText('Braiins').filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });

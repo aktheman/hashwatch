@@ -4,7 +4,7 @@ import { seedLocalStorage, clearLocalStorage, skipOnboarding } from './helpers';
 test.describe('Dashboard E2E', () => {
   test('page loads and shows the app title', async ({ page }) => {
     await skipOnboarding(page);
-    await expect(page.getByText('HashWatch')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('HashWatch').first()).toBeVisible({ timeout: 15000 });
   });
 
   test('dashboard renders with tabs', async ({ page }) => {

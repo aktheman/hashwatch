@@ -7,8 +7,13 @@ test('dark pool screen loads for pro users', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Dark Pool').first().click({ force: true });
-  await expect(page.getByText(/dark.?pool/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Dark Pool').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/dark.?pool/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('firmware screen loads', async ({ page }) => {
@@ -17,8 +22,13 @@ test('firmware screen loads', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Firmware').first().click({ force: true });
-  await expect(page.getByText(/firmware/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Firmware').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/firmware/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('teams screen loads', async ({ page }) => {
@@ -27,8 +37,10 @@ test('teams screen loads', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Teams').first().click({ force: true });
-  await expect(page.getByText(/teams/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Teams').filter({ visible: true }).first().click({ force: true });
+  await expect(page.getByText(/teams/i).filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('anomaly detection screen loads', async ({ page }) => {
@@ -37,8 +49,17 @@ test('anomaly detection screen loads', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Anomaly Detection').first().click({ force: true });
-  await expect(page.getByText(/anomaly/i).first()).toBeVisible({ timeout: 15000 });
+  await page
+    .getByText('Anomaly Detection')
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(
+    page
+      .getByText(/anomaly/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('energy tracking screen loads', async ({ page }) => {
@@ -47,6 +68,11 @@ test('energy tracking screen loads', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Energy Tracking').first().click({ force: true });
-  await expect(page.getByText(/energy/i).first()).toBeVisible({ timeout: 15000 });
+  await page.getByText('Energy Tracking').filter({ visible: true }).first().click({ force: true });
+  await expect(
+    page
+      .getByText(/energy/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });

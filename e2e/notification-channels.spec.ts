@@ -7,8 +7,17 @@ test('page loads and shows title', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Notification Channels').first().click({ force: true });
-  await expect(page.getByText(/Notification Channels/i).first()).toBeVisible({ timeout: 15000 });
+  await page
+    .getByText('Notification Channels')
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(
+    page
+      .getByText(/Notification Channels/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('add channel section visible', async ({ page }) => {
@@ -17,8 +26,17 @@ test('add channel section visible', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Notification Channels').first().click({ force: true });
-  await expect(page.getByText(/Add Channel/i).first()).toBeVisible({ timeout: 15000 });
+  await page
+    .getByText('Notification Channels')
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(
+    page
+      .getByText(/Add Channel/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('channel type picker visible', async ({ page }) => {
@@ -27,12 +45,22 @@ test('channel type picker visible', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Notification Channels').first().click({ force: true });
   await page
-    .getByText(/Add Channel/i)
+    .getByText('Notification Channels')
+    .filter({ visible: true })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/push|email|sms|telegram|slack|discord/i).first()).toBeVisible({
+  await page
+    .getByRole('button', { name: /add channel/i })
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(
+    page
+      .getByText(/push|email|sms|telegram|slack|discord/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({
     timeout: 15000,
   });
 });
@@ -43,40 +71,61 @@ test('empty state when no channels configured', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Notification Channels').first().click({ force: true });
-  await expect(page.getByText(/no notification channels configured/i).first()).toBeVisible({
+  await page
+    .getByText('Notification Channels')
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(
+    page
+      .getByText(/no notification channels configured/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({
     timeout: 15000,
   });
 });
 
 test('can toggle channel enabled/disabled', async ({ page }) => {
-  await skipOnboarding(page);
-  await page.evaluate(() => {
-    const stored = JSON.parse(localStorage.getItem('hashwatch_settings') || '{}');
-    stored.hashwatch_notification_channels = JSON.stringify([
-      {
-        id: 'ch-1',
-        name: 'Test Channel',
-        type: 'push',
-        enabled: true,
-        config: {},
-        events: [],
-      },
-    ]);
-    localStorage.setItem('hashwatch_settings', JSON.stringify(stored));
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'hashwatch_settings',
+      JSON.stringify({
+        onboarding_complete: 'true',
+        last_seen_version: '1.1.0',
+        hashwatch_notification_channels: JSON.stringify([
+          {
+            id: 'ch-1',
+            name: 'Test Channel',
+            type: 'push',
+            enabled: true,
+            config: {},
+            events: [],
+          },
+        ]),
+      }),
+    );
   });
-  await page.reload();
+  await page.goto('/');
   await page.waitForLoadState('networkidle');
   await page
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Notification Channels').first().click({ force: true });
-  await expect(page.getByText('Test Channel').first()).toBeVisible({ timeout: 15000 });
+  await page
+    .getByText('Notification Channels')
+    .filter({ visible: true })
+    .first()
+    .click({ force: true });
+  await expect(page.getByText('Test Channel').filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
   const toggle = page
     .getByRole('switch', { includeHiddenElements: true })
     .or(page.getByRole('checkbox', { includeHiddenElements: true }))
     .first();
   await toggle.click({ force: true });
-  await expect(page.getByText('Test Channel').first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('Test Channel').filter({ visible: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });

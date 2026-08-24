@@ -290,7 +290,8 @@ export const useMinerStore = create<MinersState>()(
               minerErrors: { ...s.minerErrors, [id]: msg },
             }));
 
-            const nav = navigator as Navigator & { onLine?: boolean };
+            const nav = (typeof navigator !== 'undefined' ? navigator : undefined) as
+              (Navigator & { onLine?: boolean }) | undefined;
             if (
               typeof nav?.onLine === 'boolean' &&
               !nav.onLine &&
@@ -311,7 +312,8 @@ export const useMinerStore = create<MinersState>()(
         try {
           const prev = get().miners;
           const now = Date.now();
-          const nav = navigator as Navigator & { onLine?: boolean };
+          const nav = (typeof navigator !== 'undefined' ? navigator : undefined) as
+            (Navigator & { onLine?: boolean }) | undefined;
           if (typeof nav?.onLine === 'boolean' && !nav.onLine) {
             const current = get().miners;
             const totalHash = current.reduce(

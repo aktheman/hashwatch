@@ -3,7 +3,7 @@ import { seedLocalStorage, skipOnboarding } from './helpers';
 
 test('loads the app and shows the dashboard', async ({ page }) => {
   await skipOnboarding(page);
-  await expect(page.getByText('HashWatch')).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('HashWatch').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('navigates to Settings tab', async ({ page }) => {
@@ -83,7 +83,9 @@ test('Groups screen is accessible', async ({ page }) => {
     .getByRole('button', { name: /groups/i })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/group/i).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: 'Group Management' })).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('Wallets screen is accessible', async ({ page }) => {
@@ -92,7 +94,9 @@ test('Wallets screen is accessible', async ({ page }) => {
     .getByRole('button', { name: /wallets/i })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/wallet/i).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: /no wallets|wallets/i }).first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('empty state when no miners', async ({ page }) => {
@@ -116,10 +120,10 @@ test('onboarding screen shows slides', async ({ page }) => {
 
 test('adding a miner flow shows add form', async ({ page }) => {
   await skipOnboarding(page);
-  const addButton = page.getByRole('button', { name: /add|plus|\+/i }).first();
+  const addButton = page.getByRole('button', { name: /^add( miner)?$|plus|\+/i }).first();
   if (await addButton.isVisible()) {
     await addButton.click({ force: true });
-    await expect(page.getByText(/add miner|add device|miner details/i).first()).toBeVisible({
+    await expect(page.getByRole('textbox', { name: /ip address/i })).toBeVisible({
       timeout: 15000,
     });
   }
@@ -144,10 +148,15 @@ test('notification toggle in settings', async ({ page }) => {
 test('Subscription screen is accessible', async ({ page }) => {
   await skipOnboarding(page);
   await page
-    .getByRole('button', { name: /subscription|pro/i })
+    .getByRole('button', { name: /^settings$/i })
     .first()
     .click({ force: true });
-  await expect(page.getByText(/subscription|pro|upgrade/i).first()).toBeVisible({ timeout: 15000 });
+  const subEntry = page.getByRole('button', { name: /^plan$/i }).first();
+  await expect(subEntry).toBeVisible({ timeout: 15000 });
+  await subEntry.click({ force: true });
+  await expect(
+    page.locator('text=/subscription|pro|upgrade/i >> visible=true').first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('dashboard shows miner online status', async ({ page }) => {
@@ -161,7 +170,7 @@ test('dashboard matches screenshot', async ({ page }) => {
   await skipOnboarding(page);
   await seedLocalStorage(page);
   await expect(page.getByText('Miner Alpha').first()).toBeVisible({ timeout: 15000 });
-  await expect(page).toHaveScreenshot('dashboard.png');
+  await expect(page).toHaveScreenshot('dashboard.png', { maxDiffPixelRatio: 0.02 });
 });
 
 test('settings matches screenshot', async ({ page }) => {

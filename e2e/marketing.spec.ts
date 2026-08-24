@@ -6,13 +6,15 @@ test('landing page loads with correct title', async ({ page }) => {
 });
 
 test('landing page has Launch Dashboard button', async ({ page }) => {
-  await page.goto('http://localhost:4173/');
+  await page.goto('http://localhost:4173/landing');
   await expect(page.getByText('Launch Dashboard').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('pricing page loads', async ({ page }) => {
   await page.goto('http://localhost:4173/pricing');
-  await expect(page.getByText('Simple Pricing').first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/simple,? transparent pricing/i).first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test('changelog page loads', async ({ page }) => {

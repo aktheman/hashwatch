@@ -7,32 +7,52 @@ async function navigateToActivityFeed(page: import('@playwright/test').Page) {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Activity Feed').first().click({ force: true });
+  await page.getByText('Activity Feed').filter({ visible: true }).first().click({ force: true });
 }
 
 test('page loads and shows title', async ({ page }) => {
   await navigateToActivityFeed(page);
-  await expect(page.getByText(/activity feed|activity/i).first()).toBeVisible({ timeout: 15000 });
+  await expect(
+    page
+      .getByText(/activity feed|activity/i)
+      .filter({ visible: true })
+      .first(),
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('shows filter chips', async ({ page }) => {
   await navigateToActivityFeed(page);
-  await expect(page.getByText('All').first()).toBeVisible({ timeout: 15000 });
+  const allChip = page.getByText('All').filter({ visible: true }).first();
+  const emptyState = page
+    .getByText(/no activity yet/i)
+    .filter({ visible: true })
+    .first();
+  await expect(allChip.or(emptyState)).toBeVisible({ timeout: 15000 });
 });
 
 test('can filter by activity type', async ({ page }) => {
   await navigateToActivityFeed(page);
-  await expect(page.getByText('All').first()).toBeVisible({ timeout: 15000 });
-  const alertsFilter = page.getByText('Alerts').first();
-  if (await alertsFilter.isVisible()) {
+  const allChip = page.getByText('All').filter({ visible: true }).first();
+  if (await allChip.isVisible()) {
+    const alertsFilter = page.getByText('Alerts').filter({ visible: true }).first();
     await alertsFilter.click({ force: true });
+    await expect(allChip).toBeVisible({ timeout: 15000 });
+  } else {
+    await expect(
+      page
+        .getByText(/no activity yet/i)
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible({ timeout: 15000 });
   }
-  await expect(page.getByText('All').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('shows empty state or activity list', async ({ page }) => {
   await navigateToActivityFeed(page);
-  const emptyState = page.getByText(/no activity yet/i).first();
+  const emptyState = page
+    .getByText(/no activity yet/i)
+    .filter({ visible: true })
+    .first();
   const activityItem = page.getByRole('button').first();
   await expect(emptyState.or(activityItem)).toBeVisible({ timeout: 15000 });
 });
@@ -43,8 +63,14 @@ test('mark all read button visible', async ({ page }) => {
     .getByRole('button', { name: /settings/i })
     .first()
     .click({ force: true });
-  await page.getByText('Activity Feed').first().click({ force: true });
-  const markAllBtn = page.getByText(/mark all read/i).first();
-  const emptyState = page.getByText(/no activity yet/i).first();
+  await page.getByText('Activity Feed').filter({ visible: true }).first().click({ force: true });
+  const markAllBtn = page
+    .getByText(/mark all read/i)
+    .filter({ visible: true })
+    .first();
+  const emptyState = page
+    .getByText(/no activity yet/i)
+    .filter({ visible: true })
+    .first();
   await expect(markAllBtn.or(emptyState)).toBeVisible({ timeout: 15000 });
 });

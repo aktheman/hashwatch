@@ -9,6 +9,15 @@ const mockSaveSnapshot = jest.fn();
 const mockProbe = jest.fn();
 const mockDeleteMiner = jest.fn();
 
+// Node < 21 has no global navigator; provide a stub so onLine tests work everywhere
+if (typeof globalThis.navigator === 'undefined') {
+  Object.defineProperty(globalThis, 'navigator', {
+    value: {} as Navigator,
+    configurable: true,
+    writable: true,
+  });
+}
+
 jest.mock('expo-network', () => ({
   getNetworkStateAsync: jest.fn().mockResolvedValue({ isConnected: true, type: 'wifi' }),
   getIpAddressAsync: jest.fn().mockResolvedValue('192.168.1.1'),
