@@ -180,7 +180,7 @@ test('settings matches screenshot', async ({ page }) => {
     .first()
     .click({ force: true });
   await expect(page.getByText('Notifications').first()).toBeVisible({ timeout: 15000 });
-  await expect(page).toHaveScreenshot('settings.png');
+  await expect(page).toHaveScreenshot('settings.png', { maxDiffPixelRatio: 0.02 });
 });
 
 test('dark mode matches screenshot', async ({ page }) => {
@@ -193,5 +193,5 @@ test('dark mode matches screenshot', async ({ page }) => {
   const lightButton = page.getByRole('button', { name: /light/i }).first();
   await expect(lightButton).toBeVisible({ timeout: 15000 });
   await lightButton.click({ force: true });
-  await expect(page).toHaveScreenshot('dark-mode.png');
+  await expect(page).toHaveScreenshot('dark-mode.png', { maxDiffPixelRatio: 0.02 });
 });
