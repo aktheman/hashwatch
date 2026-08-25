@@ -34,12 +34,16 @@ function startCleanup() {
 
 startCleanup();
 
+const RATE_LIMIT_DISABLED = process.env.DISABLE_RATE_LIMIT === '1';
+
 export function rateLimit({ windowMs, max }: RateLimitOptions) {
   const windows = new Map<string, number[]>();
   const id = Symbol();
   allWindows.set(id, { windowMs, windows });
 
   return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (RATE_LIMIT_DISABLED) return next();
+
     const key = req.userId || req.ip || 'unknown';
     const now = Date.now();
     const timestamps = windows.get(key) || [];

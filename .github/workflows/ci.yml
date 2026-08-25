@@ -160,6 +160,8 @@ jobs:
         run: npm run build
       - name: Start backend
         working-directory: backend
+        env:
+          DISABLE_RATE_LIMIT: '1'
         run: |
           node dist/index.js &
           sleep 3
