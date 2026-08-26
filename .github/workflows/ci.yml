@@ -225,19 +225,19 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
   verify-deploy:
-    name: Verify Railway Deploy
+    name: Verify Backend Deploy
     if: github.ref == 'refs/heads/master' && !cancelled()
     needs: [deploy-web]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Wait for Railway deploy to be ready
+      - name: Wait for backend deploy to be ready
         run: |
           COMMIT_SHA="${{ github.sha }}"
           BACKEND_URL="${{ secrets.BACKEND_HEALTH_URL }}"
           if [ -z "$BACKEND_URL" ]; then
-            echo "::warning::BACKEND_HEALTH_URL secret not set. Skipping verify."
-            exit 0
+            echo "::warning::BACKEND_HEALTH_URL not set — verifying known production backend instead"
+            BACKEND_URL="https://hashwatch-backend.onrender.com"
           fi
           for i in $(seq 1 20); do
             STATUS=$(curl -fsS "$BACKEND_URL/api/health" || true)
