@@ -152,15 +152,30 @@ app.use('/api/groups', groupsRouter);
 app.use('/api/push', pushWebRouter);
 app.use('/api/activity', activityRouter);
 
+function loadCommitSha(): string | null {
+  if (process.env.COMMIT_SHA) return process.env.COMMIT_SHA.trim() || null;
+  if (process.env.RENDER_GIT_COMMIT) return process.env.RENDER_GIT_COMMIT.trim() || null;
+  try {
+    return readFileSync(join(__dirname, 'models', 'commit_sha.txt'), 'utf-8').trim() || null;
+  } catch {
+    return null;
+  }
+}
+const COMMIT_SHA = loadCommitSha();
+
 app.get('/api/health', async (_req, res) => {
-  const commitSha = process.env.COMMIT_SHA || process.env.RENDER_GIT_COMMIT || null;
   try {
     await query('SELECT 1');
-    res.json({ status: 'ok', timestamp: Date.now(), db: 'connected', commitSha });
+    res.json({ status: 'ok', timestamp: Date.now(), db: 'connected', commitSha: COMMIT_SHA });
   } catch {
     res
       .status(503)
-      .json({ status: 'degraded', timestamp: Date.now(), db: 'disconnected', commitSha });
+      .json({
+        status: 'degraded',
+        timestamp: Date.now(),
+        db: 'disconnected',
+        commitSha: COMMIT_SHA,
+      });
   }
 });
 
